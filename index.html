@@ -4,10 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calendário & Gestão de Eventos</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
@@ -32,7 +34,6 @@
     }
   </script>
   <style>
-    /* Estilos para impressão de relatório */
     @media print {
       .no-print { display: none !important; }
       body { background: white !important; font-size: 11px; }
@@ -54,39 +55,64 @@
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+    .shake-animation {
+      animation: shake 0.35s ease-in-out;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen font-sans flex flex-col antialiased selection:bg-sky-100 selection:text-sky-900">
 
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <!-- Logo & Title -->
-        <div class="flex items-center">
-          <h1 class="font-bold text-slate-900 text-lg sm:text-xl tracking-tight">
-            Calendário Mensal
-          </h1>
+      <div class="flex items-center justify-between h-16 gap-3">
+        
+        <!-- Logo e Título -->
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-sm shrink-0">
+            <i data-lucide="calendar" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-slate-900 text-base sm:text-lg tracking-tight flex items-center gap-2">
+              Calendário Mensal
+            </h1>
+          </div>
         </div>
 
-        <!-- Tab Switching Controls -->
-        <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <!-- Abas de Navegação -->
+        <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
           <button id="tabBtnCalendar" onclick="switchTab('calendar')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all shadow-xs bg-white text-slate-900 font-semibold">
             <i data-lucide="layout-grid" class="w-4 h-4 text-sky-600"></i>
-            <span>Ver Calendário</span>
+            <span class="hidden sm:inline">Ver Calendário</span>
+            <span class="sm:hidden">Calendário</span>
           </button>
           <button id="tabBtnEvents" onclick="switchTab('events')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition-all">
             <i data-lucide="table-properties" class="w-4 h-4"></i>
-            <span>Cadastro & Tabela</span>
+            <span class="hidden sm:inline">Cadastro & Tabela</span>
+            <span class="sm:hidden">Tabela</span>
             <span id="eventsCountBadge" class="ml-1 bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded-full text-xs">0</span>
           </button>
         </div>
 
-        <!-- Action Buttons -->
+        <!-- Botões de Ação com Trava de Senha GGFST -->
         <div class="flex items-center gap-2">
-          <button onclick="openModal()" class="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm transition-all">
+          <!-- Botão de Status da Senha -->
+          <button id="btnHeaderAuth" onclick="toggleAuthModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100">
+            <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span id="authStatusText">Modo Leitura</span>
+          </button>
+
+          <!-- Botão Novo Evento (Exige Senha) -->
+          <button onclick="protectedAction(() => openModal())" class="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm transition-all">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
             <span class="hidden sm:inline">Novo Evento</span>
           </button>
+
+          <!-- Imprimir -->
           <button onclick="window.print()" title="Imprimir ou Salvar em PDF" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
             <i data-lucide="printer" class="w-4 h-4"></i>
           </button>
@@ -97,8 +123,8 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
     
-    <!-- Notification Toast Container -->
-    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700">
+    <!-- Toast de Notificações -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 max-w-md">
       <div id="toastIcon">
         <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
       </div>
@@ -106,19 +132,19 @@
     </div>
 
     <!-- ======================================================== -->
-    <!-- ABA 1: CALENDÁRIO VISUAL (ESTILO APRIMORADO DA SUA FOTO) -->
+    <!-- ABA 1: CALENDÁRIO VISUAL -->
     <!-- ======================================================== -->
     <section id="tabCalendar" class="space-y-4">
       
-      <!-- Top Bar: Month Navigator, Search, Stats -->
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <!-- Barra Superior: Navegação e Filtros -->
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4 no-print">
         
-        <!-- Navigation Buttons -->
+        <!-- Navegação do Mês -->
         <div class="flex items-center gap-2">
           <button onclick="prevMonth()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all" title="Mês anterior">
             <i data-lucide="chevron-left" class="w-5 h-5"></i>
           </button>
-          <div class="text-center min-w-[200px]">
+          <div class="text-center min-w-[190px]">
             <h2 id="currentMonthYearLabel" class="text-lg sm:text-xl font-bold text-slate-800 capitalize tracking-tight">Outubro 2024</h2>
           </div>
           <button onclick="nextMonth()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all" title="Próximo mês">
@@ -129,11 +155,11 @@
           </button>
         </div>
 
-        <!-- Filters and view toggles -->
+        <!-- Filtros e Busca -->
         <div class="flex items-center gap-3 flex-wrap">
           <div class="relative">
             <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="calendarSearchInput" oninput="filterCalendarEvents()" placeholder="Buscar evento..." class="pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 w-48 sm:w-60 transition-all">
+            <input type="text" id="calendarSearchInput" oninput="filterCalendarEvents()" placeholder="Buscar evento ou local..." class="pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 w-48 sm:w-60 transition-all">
           </div>
           <select id="calendarCategoryFilter" onchange="filterCalendarEvents()" class="px-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
             <option value="ALL">Todas as categorias</option>
@@ -149,7 +175,7 @@
       <!-- Calendário Visual Grid Container -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print-border">
         
-        <!-- Dias da Semana Header (Segunda a Domingo conforme imagem) -->
+        <!-- Cabeçalho dos Dias da Semana -->
         <div class="grid grid-cols-7 bg-slate-900 text-white text-xs font-semibold tracking-wider text-center border-b border-slate-800">
           <div class="py-2.5 px-2 bg-slate-900/90 border-r border-slate-800">Dom</div>
           <div class="py-2.5 px-2 border-r border-slate-800">Seg</div>
@@ -160,24 +186,25 @@
           <div class="py-2.5 px-2 bg-slate-900/90">Sáb</div>
         </div>
 
-        <!-- Dias do Mês (Renderizados via JS) -->
+        <!-- Grade dos Dias do Mês (Tarjas e dias injetados via JS) -->
         <div id="calendarDaysGrid" class="grid grid-cols-7 auto-rows-fr bg-slate-200 gap-px">
-          <!-- Os blocos dos dias serão injetados dinamicamente -->
+          <!-- Injetado dinamicamente -->
         </div>
       </div>
 
-      <!-- Legenda e Rodapé do Calendário -->
-      <div class="flex flex-wrap items-center justify-between text-xs text-slate-500 px-2 pt-2">
+      <!-- Legenda do Calendário e Banner de Segurança -->
+      <div class="flex flex-wrap items-center justify-between text-xs text-slate-500 px-2 pt-2 gap-2 no-print">
         <div class="flex items-center gap-4 flex-wrap">
-          <span class="font-medium text-slate-700">Legenda:</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Reunião</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Treinamento</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Consultoria</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-indigo-500 inline-block"></span> Liderança</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> Geral</span>
+          <span class="font-medium text-slate-700">Legenda de Tarjas:</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-500 inline-block"></span> Reunião</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span> Treinamento</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-amber-500 inline-block"></span> Consultoria</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-indigo-500 inline-block"></span> Liderança</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-purple-500 inline-block"></span> Geral</span>
         </div>
-        <div class="flex items-center gap-2">
-          <span>Clique em qualquer dia para adicionar um evento diretamente</span>
+        <div id="securityBannerInfo" class="flex items-center gap-2 text-slate-600 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
+          <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span>Trava ativa: Edição liberada exclusivamente com senha <strong>GGFST</strong></span>
         </div>
       </div>
     </section>
@@ -187,61 +214,77 @@
     <!-- ======================================================== -->
     <section id="tabEvents" class="hidden space-y-6">
       
-      <!-- Card Superior: Formulário de Alimentação Rápida -->
-      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+      <!-- Formulário de Cadastro com Validação e Bloqueio -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+        
+        <!-- Banner de bloqueio se não autenticado -->
+        <div id="formLockOverlay" class="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] z-10 flex items-center justify-center p-4">
+          <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200 max-w-sm text-center space-y-3">
+            <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+              <i data-lucide="lock" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-bold text-slate-900 text-sm">Formulário Protegido</h3>
+            <p class="text-xs text-slate-500">Para cadastrar ou editar compromissos na agenda corporativa, informe a senha de acesso.</p>
+            <button onclick="toggleAuthModal()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all shadow-sm">
+              Digitar Senha de Edição
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 flex-wrap gap-2">
           <div>
             <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
               <i data-lucide="calendar-plus" class="w-5 h-5 text-sky-600"></i>
-              Cadastrar Novo Evento
+              Cadastrar / Editar Evento
             </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Preencha os campos abaixo. A duração é calculada automaticamente a partir do início e fim.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Preencha os dados do evento. A trava de horários impede durações nulas ou negativas.</p>
           </div>
-          <span class="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 font-medium rounded-full border border-emerald-100 flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sincronizado com Calendário
-          </span>
+          <div class="flex items-center gap-2">
+            <span class="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 font-medium rounded-full border border-emerald-200 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Trava de Choque Ativa
+            </span>
+          </div>
         </div>
 
         <form id="quickEventForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
           <input type="hidden" id="formEventId" value="">
 
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            
             <!-- Data -->
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">Data *</label>
               <input type="date" id="inputDate" required class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
             </div>
 
-            <!-- Título do Evento -->
+            <!-- Título -->
             <div class="lg:col-span-2">
               <label class="block text-xs font-semibold text-slate-700 mb-1">Nome do Evento *</label>
               <input type="text" id="inputTitle" required placeholder="Ex: Reunião de Resultados" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
             </div>
 
-            <!-- Horário Início -->
+            <!-- Início -->
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">Horário Início *</label>
               <input type="time" id="inputStartTime" oninput="calculateDuration()" required value="08:00" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
             </div>
 
-            <!-- Horário Fim -->
+            <!-- Fim -->
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">Horário Fim *</label>
               <input type="time" id="inputEndTime" oninput="calculateDuration()" required value="09:30" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
             </div>
 
-            <!-- Duração Calculada (Readonly Automática) -->
+            <!-- Duração Automática Protegida -->
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Duração (Automática)</label>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Duração (Calculada)</label>
               <div class="relative">
-                <input type="text" id="inputDuration" readonly placeholder="1h 30min" class="w-full text-sm px-3 py-2 bg-slate-100 font-medium text-slate-700 border border-slate-200 rounded-xl cursor-not-allowed">
+                <input type="text" id="inputDuration" readonly placeholder="1h 30min" class="w-full text-sm px-3 py-2 bg-slate-100 font-semibold text-slate-700 border border-slate-200 rounded-xl cursor-not-allowed">
                 <i data-lucide="clock" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
               </div>
             </div>
           </div>
 
-          <!-- Segunda Linha: Categoria e Detalhes / Local -->
+          <!-- Categoria e Local -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">Categoria / Tipo</label>
@@ -255,32 +298,38 @@
             </div>
 
             <div class="sm:col-span-2">
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Local ou Observações Adicionais</label>
-              <input type="text" id="inputDescription" placeholder="Ex: Sala de Reunião 2 / Link Meet / Consultório Superior" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Local ou Detalhes</label>
+              <input type="text" id="inputDescription" placeholder="Ex: Consultoria Superior / Sala 2 / Link Teams" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
             </div>
           </div>
 
-          <!-- Botões de Ação do Form -->
-          <div class="flex items-center justify-end gap-2 pt-2">
-            <button type="button" id="btnCancelEdit" onclick="resetForm()" class="hidden px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">
-              Cancelar Edição
-            </button>
-            <button type="submit" id="btnSubmitForm" class="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-5 py-2 rounded-xl text-sm font-semibold shadow-sm transition-all">
-              <i data-lucide="plus" class="w-4 h-4"></i>
-              <span id="btnSubmitText">Adicionar à Tabela</span>
-            </button>
+          <!-- Validações e Botões -->
+          <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+            <div id="formValidationWarning" class="text-xs font-medium text-amber-600 hidden flex items-center gap-1.5">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              <span id="formValidationText">Aviso de validação</span>
+            </div>
+            <div class="flex items-center gap-2 ml-auto">
+              <button type="button" id="btnCancelEdit" onclick="resetForm()" class="hidden px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">
+                Cancelar Edição
+              </button>
+              <button type="submit" id="btnSubmitForm" class="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-5 py-2 rounded-xl text-sm font-semibold shadow-sm transition-all">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span id="btnSubmitText">Adicionar à Tabela</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>
 
-      <!-- Tabela de Gestão de Dados (Estilo Planilha de Dados) -->
+      <!-- Tabela de Registros com Filtros -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         
-        <!-- Header da Tabela com Filtro e Exportação -->
+        <!-- Header da Tabela -->
         <div class="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50/70">
           <div>
             <h3 class="font-bold text-slate-800 text-sm">Registros Alimentados</h3>
-            <p class="text-xs text-slate-500">Estes dados refletem diretamente na visualização do calendário</p>
+            <p class="text-xs text-slate-500">Dados 100% sincronizados com a grade visual do calendário</p>
           </div>
 
           <div class="flex items-center gap-2">
@@ -288,11 +337,11 @@
               <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
               <input type="text" id="tableFilterInput" oninput="renderEventsTable()" placeholder="Filtrar tabela..." class="pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-500 w-44">
             </div>
-            <button onclick="exportToCSV()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg shadow-2xs transition-colors" title="Exportar para Excel (CSV)">
+            <button onclick="exportToCSV()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg transition-colors" title="Exportar para Excel (CSV)">
               <i data-lucide="download" class="w-3.5 h-3.5 text-slate-600"></i>
               <span>Exportar CSV</span>
             </button>
-            <button onclick="clearAllEventsModal()" class="px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-200 transition-colors">
+            <button onclick="protectedAction(() => clearAllEventsModal())" class="px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-200 transition-colors">
               Limpar Tudo
             </button>
           </div>
@@ -314,24 +363,55 @@
               </tr>
             </thead>
             <tbody id="eventsTableBody" class="divide-y divide-slate-100">
-              <!-- Renderizado via JS -->
+              <!-- Registros da tabela injetados aqui -->
             </tbody>
           </table>
         </div>
 
-        <!-- Footer da Tabela com Totais -->
+        <!-- Rodapé da Tabela -->
         <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-600">
           <span id="totalEventsText">Carregando eventos...</span>
-          <span class="text-slate-400">Clique no ícone de calendário para ir ao dia visualmente</span>
+          <span class="text-slate-400">Edição e exclusão protegidas pela senha GGFST</span>
         </div>
       </div>
     </section>
 
   </main>
 
+  <!-- ======================================================== -->
+  <!-- MODAL OBRIGATÓRIO DE SENHA: GGFST -->
+  <!-- ======================================================== -->
+  <div id="passwordModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div id="passwordModalCard" class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all p-6 text-center space-y-4">
+      <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
+        <i data-lucide="shield-alert" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 text-base">Autenticação Necessária</h3>
+        <p class="text-xs text-slate-500 mt-1">Digite a senha de edição para liberar cadastros e alterações no calendário.</p>
+      </div>
+
+      <div class="space-y-2">
+        <div class="relative">
+          <input type="password" id="inputSecretPassword" placeholder="Digite a senha..." class="w-full text-center text-sm tracking-widest font-mono px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 focus:bg-white transition-all outline-none" onkeydown="if(event.key==='Enter') verifyEnteredPassword()">
+        </div>
+        <p id="passwordErrorMsg" class="text-xs text-red-600 font-semibold hidden">Senha incorreta! Tente novamente.</p>
+      </div>
+
+      <div class="flex items-center gap-2 pt-2">
+        <button type="button" onclick="closePasswordModal()" class="w-1/2 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
+          Cancelar
+        </button>
+        <button type="button" onclick="verifyEnteredPassword()" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: Adicionar / Editar Evento Rápido -->
   <div id="eventModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
       <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
         <h3 id="modalTitle" class="font-bold text-slate-900 text-base flex items-center gap-2">
           <i data-lucide="calendar" class="w-5 h-5 text-sky-600"></i>
@@ -348,7 +428,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div class="col-span-2">
             <label class="block text-xs font-semibold text-slate-700 mb-1">Título do Evento *</label>
-            <input type="text" id="mInputTitle" required placeholder="Ex: Jornada de Liderança" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+            <input type="text" id="mInputTitle" required placeholder="Ex: Treinamento ou Reunião" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
           </div>
 
           <div>
@@ -369,33 +449,36 @@
 
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Horário Início *</label>
-            <input type="time" id="mInputStartTime" oninput="calculateModalDuration()" required value="09:00" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+            <input type="time" id="mInputStartTime" oninput="calculateModalDuration()" required value="08:00" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Horário Fim *</label>
-            <input type="time" id="mInputEndTime" oninput="calculateModalDuration()" required value="10:30" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+            <input type="time" id="mInputEndTime" oninput="calculateModalDuration()" required value="09:30" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
           </div>
 
           <div class="col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Duração Estimada</label>
-            <input type="text" id="mInputDuration" readonly class="w-full text-sm px-3 py-2 bg-slate-100 text-slate-700 font-medium border border-slate-200 rounded-xl cursor-not-allowed">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Duração Estimada (Trava Automática)</label>
+            <input type="text" id="mInputDuration" readonly class="w-full text-sm px-3 py-2 bg-slate-100 text-slate-700 font-semibold border border-slate-200 rounded-xl cursor-not-allowed">
           </div>
 
           <div class="col-span-2">
             <label class="block text-xs font-semibold text-slate-700 mb-1">Local / Observações</label>
-            <input type="text" id="mInputDescription" placeholder="Ex: Auditório ou Link Teams" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+            <input type="text" id="mInputDescription" placeholder="Ex: Sala Principal ou Link" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
-            Cancelar
-          </button>
-          <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5">
-            <i data-lucide="check" class="w-4 h-4"></i>
-            Salvar Evento
-          </button>
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+          <div id="modalConflictWarning" class="text-xs text-amber-600 font-medium hidden"></div>
+          <div class="flex items-center gap-2 ml-auto">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+              Cancelar
+            </button>
+            <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              Salvar Evento
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -407,7 +490,7 @@
       <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
         <div>
           <h3 id="dayDetailsTitle" class="font-bold text-slate-900 text-base">Atividades do Dia</h3>
-          <p id="dayDetailsSubtitle" class="text-xs text-slate-500">01 de Outubro de 2024</p>
+          <p id="dayDetailsSubtitle" class="text-xs text-slate-500">Detalhamento de atividades</p>
         </div>
         <button onclick="closeDayDetailsModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -421,7 +504,7 @@
       <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
         <button id="btnAddNewEventToThisDay" class="text-xs font-semibold text-sky-600 hover:text-sky-700 flex items-center gap-1">
           <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-          Adicionar evento nesta data
+          Adicionar neste dia
         </button>
         <button onclick="closeDayDetailsModal()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-medium">
           Fechar
@@ -430,7 +513,7 @@
     </div>
   </div>
 
-  <!-- MODAL: Confirmação de exclusão / ação -->
+  <!-- MODAL: Confirmação Customizada -->
   <div id="confirmDialogModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-5 text-center space-y-4">
       <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
@@ -445,295 +528,211 @@
           Cancelar
         </button>
         <button id="btnConfirmAction" class="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs">
-          Confirmar Exclusão
+          Confirmar
         </button>
       </div>
     </div>
   </div>
 
+  <!-- ======================================================== -->
+  <!-- JAVASCRIPT DO SISTEMA COM SENHA GGFST -->
+  <!-- ======================================================== -->
   <script>
-    // ==========================================
-    // ESTADO E DADOS INICIAIS
-    // ==========================================
-    // Dados fiéis e complementares ao exemplo da imagem enviada pelo usuário (Outubro 2024)
-    let events = [
-      {
-        id: '1',
-        date: '2024-10-01',
-        title: 'Apresentação de Resultados',
-        startTime: '13:00',
-        endTime: '14:30',
-        duration: '1h 30min',
-        category: 'Reunião',
-        description: 'Consultoria Superior'
-      },
-      {
-        id: '2',
-        date: '2024-10-01',
-        title: 'Alinhamento Estratégico',
-        startTime: '14:30',
-        endTime: '15:00',
-        duration: '30min',
-        category: 'Reunião',
-        description: 'Sala de Conferência'
-      },
-      {
-        id: '3',
-        date: '2024-10-01',
-        title: 'Sessão Executiva Noturna',
-        startTime: '20:30',
-        endTime: '22:00',
-        duration: '1h 30min',
-        category: 'Consultoria',
-        description: 'Consultoria Superior'
-      },
-      {
-        id: '4',
-        date: '2024-10-02',
-        title: 'Reunião de Resultados',
-        startTime: '09:00',
-        endTime: '09:45',
-        duration: '45min',
-        category: 'Reunião',
-        description: 'Projeto Smart'
-      },
-      {
-        id: '5',
-        date: '2024-10-02',
-        title: 'Projeto Smart',
-        startTime: '14:00',
-        endTime: '15:00',
-        duration: '1h 00min',
-        category: 'Geral',
-        description: 'Desenvolvimento e Métricas'
-      },
-      {
-        id: '6',
-        date: '2024-10-02',
-        title: 'Treinamentos Portal RH (1º T)',
-        startTime: '13:00',
-        endTime: '14:30',
-        duration: '1h 30min',
-        category: 'Treinamento',
-        description: 'Treinamentos Portal RH - 1º T'
-      },
-      {
-        id: '7',
-        date: '2024-10-02',
-        title: 'Treinamentos Portal RH (2º T)',
-        startTime: '14:30',
-        endTime: '16:00',
-        duration: '1h 30min',
-        category: 'Treinamento',
-        description: 'Treinamentos Portal RH - 2º T'
-      },
-      {
-        id: '8',
-        date: '2024-10-02',
-        title: 'Treinamentos Portal RH (3º T)',
-        startTime: '20:30',
-        endTime: '22:00',
-        duration: '1h 30min',
-        category: 'Treinamento',
-        description: 'Consultoria Superior'
-      },
-      {
-        id: '9',
-        date: '2024-10-03',
-        title: 'Reunião de Alinhamento',
-        startTime: '13:30',
-        endTime: '15:00',
-        duration: '1h 30min',
-        category: 'Consultoria',
-        description: 'Consultoria Superior'
-      },
-      {
-        id: '10',
-        date: '2024-10-04',
-        title: 'Treinamento em MS-GL',
-        startTime: '08:00',
-        endTime: '09:30',
-        duration: '1h 30min',
-        category: 'Treinamento',
-        description: 'Treinamento em MS-GL - 1º T'
-      },
-      {
-        id: '11',
-        date: '2024-10-04',
-        title: 'Consultoria Superior',
-        startTime: '14:30',
-        endTime: '16:00',
-        duration: '1h 30min',
-        category: 'Consultoria',
-        description: 'Consultoria Superior - 2º T'
-      },
-      {
-        id: '12',
-        date: '2024-10-07',
-        title: 'Reunião de Expediente',
-        startTime: '08:00',
-        endTime: '09:00',
-        duration: '1h 00min',
-        category: 'Reunião',
-        description: 'Abertura semanal de pauta'
-      },
-      {
-        id: '13',
-        date: '2024-10-07',
-        title: 'Negociação Sindical',
-        startTime: '10:00',
-        endTime: '12:00',
-        duration: '2h 00min',
-        category: 'Geral',
-        description: 'Mesa diretora'
-      },
-      {
-        id: '14',
-        date: '2024-10-08',
-        title: 'Encontro Aprendizes',
-        startTime: '13:30',
-        endTime: '16:00',
-        duration: '2h 30min',
-        category: 'Treinamento',
-        description: 'Capacitação institucional'
-      },
-      {
-        id: '15',
-        date: '2024-10-09',
-        title: 'Comitê Executivo Local',
-        startTime: '10:00',
-        endTime: '12:00',
-        duration: '2h 00min',
-        category: 'Reunião',
-        description: 'Avaliação trimestral'
-      },
-      {
-        id: '16',
-        date: '2024-10-14',
-        title: 'Reunião de Expediente',
-        startTime: '08:00',
-        endTime: '09:00',
-        duration: '1h 00min',
-        category: 'Reunião',
-        description: 'Acompanhamento de metas'
-      },
-      {
-        id: '17',
-        date: '2024-10-16',
-        title: 'Reunião de ESG',
-        startTime: '14:30',
-        endTime: '16:00',
-        duration: '1h 30min',
-        category: 'Geral',
-        description: 'Sustentabilidade corporativa'
-      },
-      {
-        id: '18',
-        date: '2024-10-17',
-        title: 'Encontro Aprendizes',
-        startTime: '13:00',
-        endTime: '14:30',
-        duration: '1h 30min',
-        category: 'Treinamento',
-        description: 'Módulo 2'
-      },
-      {
-        id: '19',
-        date: '2024-10-21',
-        title: 'Reunião de Expediente',
-        startTime: '08:00',
-        endTime: '09:00',
-        duration: '1h 00min',
-        category: 'Reunião',
-        description: 'Expediente geral'
-      },
-      {
-        id: '20',
-        date: '2024-10-24',
-        title: 'Jornada de Lideranças',
-        startTime: '08:30',
-        endTime: '17:30',
-        duration: '9h 00min',
-        category: 'Liderança',
-        description: 'Dia 1 - Desenvolvimento de gestores'
-      },
-      {
-        id: '21',
-        date: '2024-10-25',
-        title: 'Jornada de Lideranças',
-        startTime: '08:30',
-        endTime: '17:30',
-        duration: '9h 00min',
-        category: 'Liderança',
-        description: 'Dia 2 - Workshops práticos'
-      },
-      {
-        id: '22',
-        date: '2024-10-28',
-        title: 'Reunião de Expediente',
-        startTime: '08:00',
-        endTime: '09:00',
-        duration: '1h 00min',
-        category: 'Reunião',
-        description: 'Fechamento do mês'
-      }
+    /* SENHA MESTRA DEFINIDA E OBRIGATÓRIA */
+    const SECRET_ADMIN_PASSWORD = "GGFST";
+    let isUserAuthenticated = false;
+    let pendingProtectedAction = null;
+
+    /* Banco inicial preservado com todos os registros */
+    const initialEvents = [
+      { id: '1', date: '2024-10-01', title: 'Apresentação de Resultados', startTime: '13:00', endTime: '14:30', duration: '1h 30min', category: 'Reunião', description: 'Consultoria Superior' },
+      { id: '2', date: '2024-10-01', title: 'Alinhamento Estratégico', startTime: '14:30', endTime: '15:00', duration: '30min', category: 'Reunião', description: 'Sala de Conferência' },
+      { id: '3', date: '2024-10-01', title: 'Sessão Executiva Noturna', startTime: '20:30', endTime: '22:00', duration: '1h 30min', category: 'Consultoria', description: 'Consultoria Superior' },
+      { id: '4', date: '2024-10-02', title: 'Reunião de Resultados', startTime: '09:00', endTime: '09:45', duration: '45min', category: 'Reunião', description: 'Projeto Smart' },
+      { id: '5', date: '2024-10-02', title: 'Projeto Smart', startTime: '14:00', endTime: '15:00', duration: '1h 00min', category: 'Geral', description: 'Desenvolvimento e Métricas' },
+      { id: '6', date: '2024-10-02', title: 'Treinamentos Portal RH (1º T)', startTime: '13:00', endTime: '14:30', duration: '1h 30min', category: 'Treinamento', description: 'Treinamentos Portal RH - 1º T' },
+      { id: '7', date: '2024-10-02', title: 'Treinamentos Portal RH (2º T)', startTime: '14:30', endTime: '16:00', duration: '1h 30min', category: 'Treinamento', description: 'Treinamentos Portal RH - 2º T' },
+      { id: '8', date: '2024-10-02', title: 'Treinamentos Portal RH (3º T)', startTime: '20:30', endTime: '22:00', duration: '1h 30min', category: 'Treinamento', description: 'Consultoria Superior' },
+      { id: '9', date: '2024-10-03', title: 'Reunião de Alinhamento', startTime: '13:30', endTime: '15:00', duration: '1h 30min', category: 'Consultoria', description: 'Consultoria Superior' },
+      { id: '10', date: '2024-10-04', title: 'Treinamento em MS-GL', startTime: '08:00', endTime: '09:30', duration: '1h 30min', category: 'Treinamento', description: 'Treinamento em MS-GL - 1º T' },
+      { id: '11', date: '2024-10-04', title: 'Consultoria Superior', startTime: '14:30', endTime: '16:00', duration: '1h 30min', category: 'Consultoria', description: 'Consultoria Superior - 2º T' },
+      { id: '12', date: '2024-10-07', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', description: 'Abertura semanal de pauta' },
+      { id: '13', date: '2024-10-07', title: 'Negociação Sindical', startTime: '10:00', endTime: '12:00', duration: '2h 00min', category: 'Geral', description: 'Mesa diretora' },
+      { id: '14', date: '2024-10-08', title: 'Encontro Aprendizes', startTime: '13:30', endTime: '16:00', duration: '2h 30min', category: 'Treinamento', description: 'Capacitação institucional' },
+      { id: '15', date: '2024-10-09', title: 'Comitê Executivo Local', startTime: '10:00', endTime: '12:00', duration: '2h 00min', category: 'Reunião', description: 'Avaliação trimestral' },
+      { id: '16', date: '2024-10-14', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', description: 'Acompanhamento de metas' },
+      { id: '17', date: '2024-10-16', title: 'Reunião de ESG', startTime: '14:30', endTime: '16:00', duration: '1h 30min', category: 'Geral', description: 'Sustentabilidade corporativa' },
+      { id: '18', date: '2024-10-17', title: 'Encontro Aprendizes', startTime: '13:00', endTime: '14:30', duration: '1h 30min', category: 'Treinamento', description: 'Módulo 2' },
+      { id: '19', date: '2024-10-21', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', description: 'Expediente geral' },
+      { id: '20', date: '2024-10-24', title: 'Jornada de Lideranças', startTime: '08:30', endTime: '17:30', duration: '9h 00min', category: 'Liderança', description: 'Dia 1 - Gestão de equipes' },
+      { id: '21', date: '2024-10-25', title: 'Jornada de Lideranças', startTime: '08:30', endTime: '17:30', duration: '9h 00min', category: 'Liderança', description: 'Dia 2 - Workshops práticos' },
+      { id: '22', date: '2024-10-28', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', description: 'Fechamento do mês' }
     ];
 
-    // Data padrão focada no mês do modelo (Outubro 2024)
+    let events = [];
+    try {
+      const stored = localStorage.getItem('app_calendar_events_v2');
+      events = stored ? JSON.parse(stored) : initialEvents;
+    } catch(e) {
+      events = initialEvents;
+    }
+
+    function saveEvents() {
+      try {
+        localStorage.setItem('app_calendar_events_v2', JSON.stringify(events));
+      } catch(e) {}
+    }
+
     let currentMonth = 9; // Outubro (0-indexed)
     let currentYear = 2024;
     let currentTab = 'calendar';
     let pendingConfirmCallback = null;
 
-    // Configuração de cores por categoria
+    /* TRAVA DE SEGURANÇA POR SENHA (GGFST) */
+    function protectedAction(actionCallback) {
+      if (isUserAuthenticated) {
+        actionCallback();
+      } else {
+        pendingProtectedAction = actionCallback;
+        toggleAuthModal(true);
+      }
+    }
+
+    function toggleAuthModal(open = true) {
+      const modal = document.getElementById('passwordModal');
+      const input = document.getElementById('inputSecretPassword');
+      const errorMsg = document.getElementById('passwordErrorMsg');
+
+      if (open) {
+        input.value = '';
+        errorMsg.classList.add('hidden');
+        modal.classList.remove('hidden');
+        input.focus();
+      } else {
+        modal.classList.add('hidden');
+        pendingProtectedAction = null;
+      }
+      lucide.createIcons();
+    }
+
+    function closePasswordModal() {
+      toggleAuthModal(false);
+    }
+
+    function verifyEnteredPassword() {
+      const input = document.getElementById('inputSecretPassword');
+      const errorMsg = document.getElementById('passwordErrorMsg');
+      const card = document.getElementById('passwordModalCard');
+      const entered = input.value.trim();
+
+      // Comparação estrita com a senha solicitada
+      if (entered === SECRET_ADMIN_PASSWORD) {
+        isUserAuthenticated = true;
+        closePasswordModal();
+        updateSecurityUI(true);
+        showToast('Senha GGFST confirmada! Modo Edição liberado.');
+
+        if (pendingProtectedAction) {
+          const action = pendingProtectedAction;
+          pendingProtectedAction = null;
+          action();
+        }
+      } else {
+        errorMsg.classList.remove('hidden');
+        card.classList.add('shake-animation');
+        input.value = '';
+        setTimeout(() => card.classList.remove('shake-animation'), 400);
+      }
+    }
+
+    function toggleAdminAuth() {
+      if (isUserAuthenticated) {
+        isUserAuthenticated = false;
+        updateSecurityUI(false);
+        showToast('Modo de Edição bloqueado com sucesso.');
+      } else {
+        toggleAuthModal(true);
+      }
+    }
+
+    function updateSecurityUI(authenticated) {
+      const btn = document.getElementById('btnHeaderAuth');
+      const text = document.getElementById('authStatusText');
+      const overlay = document.getElementById('formLockOverlay');
+      const banner = document.getElementById('securityBannerInfo');
+
+      if (authenticated) {
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100";
+        btn.innerHTML = `<i data-lucide="unlock" class="w-3.5 h-3.5 text-emerald-600"></i><span>Edição Liberada (Sair)</span>`;
+        btn.onclick = toggleAdminAuth;
+        if (overlay) overlay.classList.add('hidden');
+        if (banner) {
+          banner.innerHTML = `<i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i><span class="text-emerald-700 font-semibold">Autenticado com a senha GGFST</span>`;
+        }
+      } else {
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100";
+        btn.innerHTML = `<i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i><span>Modo Leitura</span>`;
+        btn.onclick = toggleAdminAuth;
+        if (overlay) overlay.classList.remove('hidden');
+        if (banner) {
+          banner.innerHTML = `<i data-lucide="shield" class="w-3.5 h-3.5 text-amber-500"></i><span>Trava ativa: Edição liberada exclusivamente com senha <strong>GGFST</strong></span>`;
+        }
+      }
+      lucide.createIcons();
+    }
+
     const categoryStyles = {
-      'Reunião': {
-        bg: 'bg-blue-50 border-blue-200 text-blue-900',
-        pill: 'bg-blue-100 text-blue-800',
-        dot: 'bg-blue-500',
-        hex: '#2563eb'
+      'Reunião': { 
+        bg: 'bg-blue-50 border-blue-200 text-blue-900', 
+        pill: 'bg-blue-100 text-blue-800', 
+        dot: 'bg-blue-600'
       },
-      'Treinamento': {
-        bg: 'bg-emerald-50 border-emerald-200 text-emerald-900',
-        pill: 'bg-emerald-100 text-emerald-800',
-        dot: 'bg-emerald-500',
-        hex: '#10b981'
+      'Treinamento': { 
+        bg: 'bg-emerald-50 border-emerald-200 text-emerald-900', 
+        pill: 'bg-emerald-100 text-emerald-800', 
+        dot: 'bg-emerald-600'
       },
-      'Consultoria': {
-        bg: 'bg-amber-50 border-amber-200 text-amber-900',
-        pill: 'bg-amber-100 text-amber-800',
-        dot: 'bg-amber-500',
-        hex: '#f59e0b'
+      'Consultoria': { 
+        bg: 'bg-amber-50 border-amber-200 text-amber-900', 
+        pill: 'bg-amber-100 text-amber-800', 
+        dot: 'bg-amber-600'
       },
-      'Liderança': {
-        bg: 'bg-indigo-50 border-indigo-200 text-indigo-900',
-        pill: 'bg-indigo-100 text-indigo-800',
-        dot: 'bg-indigo-500',
-        hex: '#6366f1'
+      'Liderança': { 
+        bg: 'bg-indigo-50 border-indigo-200 text-indigo-900', 
+        pill: 'bg-indigo-100 text-indigo-800', 
+        dot: 'bg-indigo-600'
       },
-      'Geral': {
-        bg: 'bg-purple-50 border-purple-200 text-purple-900',
-        pill: 'bg-purple-100 text-purple-800',
-        dot: 'bg-purple-500',
-        hex: '#a855f7'
+      'Geral': { 
+        bg: 'bg-purple-50 border-purple-200 text-purple-900', 
+        pill: 'bg-purple-100 text-purple-800', 
+        dot: 'bg-purple-600'
       }
     };
 
-    // Cálculo de Duração Automática
+    const monthNames = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    function computeMinutes(timeStr) {
+      if (!timeStr) return 0;
+      const [h, m] = timeStr.split(':').map(Number);
+      return (h * 60) + m;
+    }
+
     function computeDurationString(startTime, endTime) {
       if (!startTime || !endTime) return '';
-      const [startH, startM] = startTime.split(':').map(Number);
-      const [endH, endM] = endTime.split(':').map(Number);
+      const startMin = computeMinutes(startTime);
+      const endMin = computeMinutes(endTime);
 
-      let diffMinutes = (endH * 60 + endM) - (startH * 60 + startM);
-      if (diffMinutes < 0) {
-        diffMinutes += 24 * 60; // cruza a meia-noite
+      if (endMin <= startMin) {
+        return 'Inválido (Fim <= Início)';
       }
 
-      const hours = Math.floor(diffMinutes / 60);
-      const minutes = diffMinutes % 60;
+      const diff = endMin - startMin;
+      const hours = Math.floor(diff / 60);
+      const minutes = diff % 60;
 
-      if (hours === 0 && minutes === 0) return '0 min';
       if (hours === 0) return `${minutes}min`;
       if (minutes === 0) return `${hours}h 00min`;
       return `${hours}h ${String(minutes).padStart(2, '0')}min`;
@@ -742,13 +741,67 @@
     function calculateDuration() {
       const start = document.getElementById('inputStartTime').value;
       const end = document.getElementById('inputEndTime').value;
-      document.getElementById('inputDuration').value = computeDurationString(start, end);
+      const durationVal = computeDurationString(start, end);
+      const durationInput = document.getElementById('inputDuration');
+      durationInput.value = durationVal;
+      
+      const warning = document.getElementById('formValidationWarning');
+      if (durationVal.includes('Inválido')) {
+        durationInput.classList.add('text-red-600', 'bg-red-50');
+        warning.classList.remove('hidden');
+        document.getElementById('formValidationText').innerText = 'Trava ativa: O horário final deve ser posterior ao início!';
+      } else {
+        durationInput.classList.remove('text-red-600', 'bg-red-50');
+        warning.classList.add('hidden');
+      }
     }
 
     function calculateModalDuration() {
       const start = document.getElementById('mInputStartTime').value;
       const end = document.getElementById('mInputEndTime').value;
-      document.getElementById('mInputDuration').value = computeDurationString(start, end);
+      const durationVal = computeDurationString(start, end);
+      const durationInput = document.getElementById('mInputDuration');
+      durationInput.value = durationVal;
+
+      if (durationVal.includes('Inválido')) {
+        durationInput.classList.add('text-red-600', 'bg-red-50');
+      } else {
+        durationInput.classList.remove('text-red-600', 'bg-red-50');
+      }
+    }
+
+    function checkConflict(date, startTime, endTime, excludeId = null) {
+      const start = computeMinutes(startTime);
+      const end = computeMinutes(endTime);
+
+      return events.find(e => {
+        if (excludeId && e.id === excludeId) return false;
+        if (e.date !== date) return false;
+        const eStart = computeMinutes(e.startTime);
+        const eEnd = computeMinutes(e.endTime);
+        return (start < eEnd && end > eStart);
+      });
+    }
+
+    function showToast(message, isSuccess = true) {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toastMessage');
+      const icon = document.getElementById('toastIcon');
+
+      msg.innerText = message;
+      icon.innerHTML = isSuccess 
+        ? '<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>'
+        : '<i data-lucide="alert-circle" class="w-5 h-5 text-amber-400"></i>';
+
+      lucide.createIcons();
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3500);
     }
 
     function switchTab(tab) {
@@ -773,32 +826,6 @@
       }
       lucide.createIcons();
     }
-
-    function showToast(message, isSuccess = true) {
-      const toast = document.getElementById('toast');
-      const msg = document.getElementById('toastMessage');
-      const icon = document.getElementById('toastIcon');
-
-      msg.innerText = message;
-      icon.innerHTML = isSuccess 
-        ? '<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>'
-        : '<i data-lucide="alert-circle" class="w-5 h-5 text-amber-400"></i>';
-
-      lucide.createIcons();
-
-      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
-      toast.classList.add('translate-y-0', 'opacity-100');
-
-      setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
-        toast.classList.remove('translate-y-0', 'opacity-100');
-      }, 3000);
-    }
-
-    const monthNames = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-    ];
 
     function prevMonth() {
       currentMonth--;
@@ -837,29 +864,23 @@
       const searchVal = document.getElementById('calendarSearchInput')?.value.toLowerCase() || '';
       const catVal = document.getElementById('calendarCategoryFilter')?.value || 'ALL';
 
-      // Primeiro dia da semana (0=Dom, 1=Seg, ... 6=Sáb)
       const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
       const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
       const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
 
       const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7;
 
-      // Renderizar células
       for (let i = 0; i < totalCells; i++) {
         const cell = document.createElement('div');
         const dayNumber = i - firstDayOfMonth + 1;
         const isCurrentMonth = dayNumber > 0 && dayNumber <= daysInMonth;
 
-        // Estilos da célula
-        let baseCellClass = "min-h-[110px] sm:min-h-[125px] p-1.5 sm:p-2 bg-white flex flex-col justify-between transition-colors relative group ";
+        let baseCellClass = "min-h-[115px] sm:min-h-[135px] p-1.5 sm:p-2 bg-white flex flex-col justify-between transition-colors relative group ";
         
-        // Domingo (coluna 0) ou Sábado (coluna 6) - estilo visual acolhedor como na imagem
         const dayOfWeek = i % 7;
         if (dayOfWeek === 0) {
-          // Domingo com leve toque salmão/laranja acolhedor como no screenshot original
           baseCellClass += "bg-amber-50/40 ";
         } else if (dayOfWeek === 6) {
-          // Sábado com leve fundo bege
           baseCellClass += "bg-amber-50/30 ";
         }
 
@@ -871,31 +892,26 @@
 
         cell.className = baseCellClass;
 
-        // Calcular data ISO da célula
         let cellDateStr = '';
         let displayDayNumber = '';
 
         if (dayNumber <= 0) {
-          // Dias do mês anterior
           const d = prevMonthDays + dayNumber;
           displayDayNumber = d;
           const prevM = currentMonth === 0 ? 11 : currentMonth - 1;
           const prevY = currentMonth === 0 ? currentYear - 1 : currentYear;
           cellDateStr = `${prevY}-${String(prevM + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         } else if (dayNumber > daysInMonth) {
-          // Dias do próximo mês
           const d = dayNumber - daysInMonth;
           displayDayNumber = d;
           const nextM = currentMonth === 11 ? 0 : currentMonth + 1;
           const nextY = currentMonth === 11 ? currentYear + 1 : currentYear;
           cellDateStr = `${nextY}-${String(nextM + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         } else {
-          // Dias do mês atual
           displayDayNumber = dayNumber;
           cellDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
         }
 
-        // Eventos deste dia com filtro
         const dayEvents = events.filter(e => {
           if (e.date !== cellDateStr) return false;
           if (catVal !== 'ALL' && e.category !== catVal) return false;
@@ -903,14 +919,13 @@
           return true;
         }).sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-        // Check if cell is Today
         const today = new Date();
         const isToday = isCurrentMonth && 
           today.getDate() === dayNumber && 
           today.getMonth() === currentMonth && 
           today.getFullYear() === currentYear;
 
-        // Topo da Célula: Número do Dia + Botão '+' rápido
+        // Cabeçalho da célula
         const headerDiv = document.createElement('div');
         headerDiv.className = "flex items-center justify-between mb-1";
 
@@ -930,31 +945,29 @@
           addBtn.innerHTML = `<i data-lucide="plus" class="w-3.5 h-3.5"></i>`;
           addBtn.onclick = (e) => {
             e.stopPropagation();
-            openModal(cellDateStr);
+            protectedAction(() => openModal(cellDateStr));
           };
           headerDiv.appendChild(addBtn);
         }
 
         cell.appendChild(headerDiv);
 
-        // Container de Eventos dentro do Dia (formato de cards compactos e legíveis)
         const eventsContainer = document.createElement('div');
         eventsContainer.className = "space-y-1 overflow-hidden flex-1";
 
-        // Exibe até 3 eventos e o contador do restante se houver mais
         const maxDisplay = 3;
         dayEvents.slice(0, maxDisplay).forEach(evt => {
           const style = categoryStyles[evt.category] || categoryStyles['Geral'];
           const evtBadge = document.createElement('div');
-          evtBadge.className = `p-1 px-1.5 rounded-md text-[10px] leading-tight border transition-transform hover:scale-[1.02] ${style.bg}`;
-          
+          evtBadge.className = `p-1 px-1.5 rounded-md text-[10px] leading-tight border transition-transform hover:scale-[1.02] border-l-4 ${style.bg}`;
+          evtBadge.style.borderLeftColor = style.dot.replace('bg-', '');
+
           evtBadge.innerHTML = `
             <div class="font-semibold truncate flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full ${style.dot} shrink-0"></span>
-              <span class="text-slate-500 font-mono text-[9px]">${evt.startTime}</span>
+              <span class="text-slate-600 font-mono text-[9px] font-bold">${evt.startTime}</span>
               <span class="truncate">${evt.title}</span>
             </div>
-            ${evt.description ? `<div class="text-[9px] text-slate-500 truncate pl-2.5">${evt.description}</div>` : ''}
+            ${evt.description ? `<div class="text-[9px] text-slate-500 truncate">${evt.description}</div>` : ''}
           `;
 
           evtBadge.onclick = (e) => {
@@ -974,12 +987,11 @@
 
         cell.appendChild(eventsContainer);
 
-        // Clique na célula para ver ou criar
         cell.onclick = () => {
           if (dayEvents.length > 0) {
             openDayDetails(cellDateStr);
           } else if (isCurrentMonth) {
-            openModal(cellDateStr);
+            protectedAction(() => openModal(cellDateStr));
           }
         };
 
@@ -1061,10 +1073,10 @@
               <button onclick="viewInCalendar('${evt.date}')" class="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors" title="Ver no Calendário">
                 <i data-lucide="external-link" class="w-4 h-4"></i>
               </button>
-              <button onclick="editEvent('${evt.id}')" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Editar Evento">
+              <button onclick="protectedAction(() => editEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Editar Evento (Requer Senha)">
                 <i data-lucide="pencil" class="w-4 h-4"></i>
               </button>
-              <button onclick="confirmDeleteEvent('${evt.id}')" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir Evento">
+              <button onclick="protectedAction(() => confirmDeleteEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir Evento (Requer Senha)">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
@@ -1086,6 +1098,12 @@
 
     function handleFormSubmit(e) {
       e.preventDefault();
+
+      if (!isUserAuthenticated) {
+        protectedAction(() => handleFormSubmit(e));
+        return;
+      }
+
       const id = document.getElementById('formEventId').value;
       const date = document.getElementById('inputDate').value;
       const title = document.getElementById('inputTitle').value.trim();
@@ -1093,22 +1111,30 @@
       const endTime = document.getElementById('inputEndTime').value;
       const category = document.getElementById('inputCategory').value;
       const description = document.getElementById('inputDescription').value.trim();
-      const duration = computeDurationString(startTime, endTime);
 
       if (!title || !date || !startTime || !endTime) {
-        showToast('Por favor, preencha todos os campos obrigatórios.', false);
+        showToast('Preencha todos os campos obrigatórios!', false);
         return;
       }
 
+      const duration = computeDurationString(startTime, endTime);
+      if (duration.includes('Inválido')) {
+        showToast('Trava de Horário: O horário final deve ser posterior ao início!', false);
+        return;
+      }
+
+      const conflict = checkConflict(date, startTime, endTime, id || null);
+      if (conflict) {
+        showToast(`Atenção: Já existe "${conflict.title}" das ${conflict.startTime} às ${conflict.endTime}!`, false);
+      }
+
       if (id) {
-        // Atualização
         const index = events.findIndex(item => item.id === id);
         if (index !== -1) {
           events[index] = { ...events[index], date, title, startTime, endTime, duration, category, description };
-          showToast('Evento atualizado com sucesso!');
+          showToast('Evento atualizado e validado!');
         }
       } else {
-        // Criação
         const newEvt = {
           id: String(Date.now()),
           date,
@@ -1120,9 +1146,10 @@
           description
         };
         events.push(newEvt);
-        showToast('Evento adicionado e sincronizado!');
+        showToast('Evento adicionado e sincronizado com o calendário!');
       }
 
+      saveEvents();
       resetForm();
       renderEventsTable();
       renderCalendar();
@@ -1134,6 +1161,7 @@
       document.getElementById('inputDescription').value = '';
       document.getElementById('btnSubmitText').innerText = 'Adicionar à Tabela';
       document.getElementById('btnCancelEdit').classList.add('hidden');
+      document.getElementById('formValidationWarning').classList.add('hidden');
       calculateDuration();
     }
 
@@ -1163,6 +1191,7 @@
       document.getElementById('modalEventId').value = '';
       document.getElementById('mInputTitle').value = '';
       document.getElementById('mInputDescription').value = '';
+      document.getElementById('modalConflictWarning').classList.add('hidden');
       
       const dateInput = document.getElementById('mInputDate');
       if (defaultDate) {
@@ -1182,13 +1211,30 @@
 
     function handleModalSubmit(e) {
       e.preventDefault();
+
+      if (!isUserAuthenticated) {
+        closeModal();
+        protectedAction(() => openModal());
+        return;
+      }
+
       const title = document.getElementById('mInputTitle').value.trim();
       const date = document.getElementById('mInputDate').value;
       const category = document.getElementById('mInputCategory').value;
       const startTime = document.getElementById('mInputStartTime').value;
       const endTime = document.getElementById('mInputEndTime').value;
       const description = document.getElementById('mInputDescription').value.trim();
+
       const duration = computeDurationString(startTime, endTime);
+      if (duration.includes('Inválido')) {
+        showToast('Trava de Horário: Horário de término deve ser após o início!', false);
+        return;
+      }
+
+      const conflict = checkConflict(date, startTime, endTime);
+      if (conflict) {
+        showToast(`Aviso: Horário coincide com "${conflict.title}"!`, false);
+      }
 
       const newEvt = {
         id: String(Date.now()),
@@ -1202,19 +1248,19 @@
       };
 
       events.push(newEvt);
+      saveEvents();
       closeModal();
-      showToast('Novo evento adicionado com sucesso!');
+      showToast('Novo evento salvo com sucesso!');
       renderCalendar();
       renderEventsTable();
     }
 
-    // Modal de Detalhes do Dia
     function openDayDetails(dateStr) {
       const [y, m, d] = dateStr.split('-');
       const monthLabel = monthNames[parseInt(m, 10) - 1];
       
       document.getElementById('dayDetailsTitle').innerText = `Dia ${d} de ${monthLabel}`;
-      document.getElementById('dayDetailsSubtitle').innerText = `${dateStr} • Detalhamento de atividades`;
+      document.getElementById('dayDetailsSubtitle').innerText = `${dateStr} • Detalhamento de atividades cadastradas`;
 
       const listContainer = document.getElementById('dayEventsList');
       listContainer.innerHTML = '';
@@ -1227,7 +1273,9 @@
         dayEvts.forEach(evt => {
           const style = categoryStyles[evt.category] || categoryStyles['Geral'];
           const div = document.createElement('div');
-          div.className = `p-3 rounded-xl border flex items-start justify-between gap-3 ${style.bg}`;
+          div.className = `p-3 rounded-xl border border-l-4 flex items-start justify-between gap-3 ${style.bg}`;
+          div.style.borderLeftColor = style.dot.replace('bg-', '');
+
           div.innerHTML = `
             <div class="space-y-1">
               <div class="flex items-center gap-2">
@@ -1242,10 +1290,10 @@
               ${evt.description ? `<p class="text-xs text-slate-600 mt-1">${evt.description}</p>` : ''}
             </div>
             <div class="flex items-center gap-1">
-              <button onclick="closeDayDetailsModal(); editEvent('${evt.id}')" class="p-1 text-slate-500 hover:text-slate-800 hover:bg-white rounded-lg transition-all" title="Editar">
+              <button onclick="closeDayDetailsModal(); protectedAction(() => editEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-slate-800 hover:bg-white rounded-lg transition-all" title="Editar (Requer Senha)">
                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
               </button>
-              <button onclick="closeDayDetailsModal(); confirmDeleteEvent('${evt.id}')" class="p-1 text-slate-500 hover:text-red-600 hover:bg-white rounded-lg transition-all" title="Excluir">
+              <button onclick="closeDayDetailsModal(); protectedAction(() => confirmDeleteEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-red-600 hover:bg-white rounded-lg transition-all" title="Excluir (Requer Senha)">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
             </div>
@@ -1254,10 +1302,9 @@
         });
       }
 
-      // Configurar botão de adicionar neste dia
       document.getElementById('btnAddNewEventToThisDay').onclick = () => {
         closeDayDetailsModal();
-        openModal(dateStr);
+        protectedAction(() => openModal(dateStr));
       };
 
       document.getElementById('dayDetailsModal').classList.remove('hidden');
@@ -1280,10 +1327,11 @@
 
     function confirmDeleteEvent(id) {
       document.getElementById('confirmDialogTitle').innerText = 'Excluir Evento';
-      document.getElementById('confirmDialogText').innerText = 'Deseja realmente excluir este evento da sua agenda?';
+      document.getElementById('confirmDialogText').innerText = 'Deseja realmente remover este compromisso da sua agenda?';
       
       pendingConfirmCallback = () => {
         events = events.filter(e => e.id !== id);
+        saveEvents();
         showToast('Evento excluído com sucesso.');
         renderEventsTable();
         renderCalendar();
@@ -1294,10 +1342,11 @@
 
     function clearAllEventsModal() {
       document.getElementById('confirmDialogTitle').innerText = 'Limpar Todos os Eventos';
-      document.getElementById('confirmDialogText').innerText = 'Atenção: todos os registros da tabela e do calendário serão removidos!';
+      document.getElementById('confirmDialogText').innerText = 'Atenção: todos os registros da tabela e do calendário serão removidos permanentemente!';
       
       pendingConfirmCallback = () => {
         events = [];
+        saveEvents();
         showToast('Todos os registros foram removidos.');
         renderEventsTable();
         renderCalendar();
@@ -1316,7 +1365,6 @@
       closeConfirmDialog();
     });
 
-    // Exportação para Excel / CSV
     function exportToCSV() {
       if (events.length === 0) {
         showToast('Não há dados para exportar.', false);
@@ -1347,11 +1395,11 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      // Define a data inicial do formulário como a do primeiro dia do mês ativo
       document.getElementById('inputDate').value = '2024-10-01';
       calculateDuration();
       renderCalendar();
       renderEventsTable();
+      updateSecurityUI(false);
       lucide.createIcons();
     });
   </script>
