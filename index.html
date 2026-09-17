@@ -542,6 +542,7 @@
     const SECRET_ADMIN_PASSWORD = "GGFST";
     let isUserAuthenticated = false;
     let pendingProtectedAction = null;
+    let draggedEventId = null;
 
     /* Banco inicial preservado com todos os registros */
     const initialEvents = [
@@ -668,7 +669,7 @@
         btn.onclick = toggleAdminAuth;
         if (overlay) overlay.classList.add('hidden');
         if (banner) {
-          banner.innerHTML = `<i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i><span class="text-emerald-700 font-semibold">Autenticado com a senha GGFST</span>`;
+          banner.innerHTML = `<i data-lucide="move" class="w-3.5 h-3.5 text-emerald-600"></i><span class="text-emerald-700 font-semibold">Modo Edição Ativo: Arraste para mover data (segure Ctrl/Alt para copiar)</span>`;
         }
       } else {
         btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100";
@@ -679,6 +680,7 @@
           banner.innerHTML = `<i data-lucide="shield" class="w-3.5 h-3.5 text-amber-500"></i><span>Trava ativa: Edição liberada exclusivamente com senha <strong>GGFST</strong></span>`;
         }
       }
+      renderCalendar();
       lucide.createIcons();
     }
 
@@ -960,8 +962,25 @@
         dayEvents.slice(0, maxDisplay).forEach(evt => {
           const style = categoryStyles[evt.category] || categoryStyles['Geral'];
           const evtBadge = document.createElement('div');
-          evtBadge.className = `p-1 px-1.5 rounded-md text-[10px] leading-tight border transition-transform hover:scale-[1.02] border-l-4 ${style.bg}`;
+          evtBadge.className = `p-1 px-1.5 rounded-md text-[10px] leading-tight border transition-all border-l-4 ${style.bg} ${
+            isUserAuthenticated ? 'cursor-grab active:cursor-grabbing hover:shadow-sm select-none' : 'cursor-pointer hover:scale-[1.02]'
+          }`;
           evtBadge.style.borderLeftColor = style.dot.replace('bg-', '');
+
+          if (isUserAuthenticated) {
+            evtBadge.draggable = true;
+            evtBadge.title = "Arraste para outro dia (segure Ctrl ou Alt para duplicar)";
+            evtBadge.ondragstart = (e) => {
+              draggedEventId = evt.id;
+              e.dataTransfer.setData('text/plain', evt.id);
+              e.dataTransfer.effectAllowed = 'copyMove';
+              evtBadge.classList.add('opacity-40');
+            };
+            evtBadge.ondragend = () => {
+              draggedEventId = null;
+              evtBadge.classList.remove('opacity-40');
+            };
+          }
 
           evtBadge.innerHTML = `
             <div class="font-semibold truncate flex items-center gap-1">
@@ -987,6 +1006,51 @@
         }
 
         cell.appendChild(eventsContainer);
+
+        // Suporte para Soltar (Drop) ao arrastar evento no Modo Edição
+        cell.ondragover = (e) => {
+          if (!isUserAuthenticated || !draggedEventId) return;
+          e.preventDefault();
+          const isCopy = e.ctrlKey || e.altKey;
+          e.dataTransfer.dropEffect = isCopy ? 'copy' : 'move';
+          cell.classList.add('ring-2', 'ring-sky-500', 'bg-sky-50/70');
+        };
+
+        cell.ondragleave = () => {
+          cell.classList.remove('ring-2', 'ring-sky-500', 'bg-sky-50/70');
+        };
+
+        cell.ondrop = (e) => {
+          if (!isUserAuthenticated || !draggedEventId) return;
+          e.preventDefault();
+          cell.classList.remove('ring-2', 'ring-sky-500', 'bg-sky-50/70');
+          
+          const eventToHandle = events.find(ev => ev.id === draggedEventId);
+          if (!eventToHandle) return;
+
+          const isCopy = e.ctrlKey || e.altKey;
+          if (isCopy) {
+            // Duplica para o novo dia
+            const clonedEvt = {
+              ...eventToHandle,
+              id: String(Date.now()),
+              date: cellDateStr,
+              title: `${eventToHandle.title} (Cópia)`
+            };
+            events.push(clonedEvt);
+            saveEvents();
+            showToast(`Evento copiado para ${cellDateStr}!`);
+          } else {
+            // Move para o novo dia
+            eventToHandle.date = cellDateStr;
+            saveEvents();
+            showToast(`Evento movido para ${cellDateStr}!`);
+          }
+
+          draggedEventId = null;
+          renderCalendar();
+          renderEventsTable();
+        };
 
         cell.onclick = () => {
           if (dayEvents.length > 0) {
@@ -1074,6 +1138,9 @@
               <button onclick="viewInCalendar('${evt.date}')" class="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors" title="Ver no Calendário">
                 <i data-lucide="external-link" class="w-4 h-4"></i>
               </button>
+              <button onclick="protectedAction(() => duplicateEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Copiar / Duplicar Evento (Requer Senha)">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+              </button>
               <button onclick="protectedAction(() => editEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Editar Evento (Requer Senha)">
                 <i data-lucide="pencil" class="w-4 h-4"></i>
               </button>
@@ -1090,6 +1157,23 @@
       document.getElementById('totalEventsText').innerText = `Total: ${filtered.length} evento(s) exibido(s)`;
       updateEventCountBadge();
       lucide.createIcons();
+    }
+
+    function duplicateEvent(id) {
+      const source = events.find(e => e.id === id);
+      if (!source) return;
+
+      const duplicated = {
+        ...source,
+        id: String(Date.now()),
+        title: `${source.title} (Cópia)`
+      };
+
+      events.push(duplicated);
+      saveEvents();
+      showToast(`Evento "${source.title}" duplicado com sucesso!`);
+      renderCalendar();
+      renderEventsTable();
     }
 
     function updateEventCountBadge() {
@@ -1292,6 +1376,9 @@
               ${evt.description ? `<p class="text-xs text-slate-600 mt-1">${evt.description}</p>` : ''}
             </div>
             <div class="flex items-center gap-1">
+              <button onclick="closeDayDetailsModal(); protectedAction(() => duplicateEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-emerald-600 hover:bg-white rounded-lg transition-all" title="Copiar / Duplicar (Requer Senha)">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
               <button onclick="closeDayDetailsModal(); protectedAction(() => editEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-slate-800 hover:bg-white rounded-lg transition-all" title="Editar (Requer Senha)">
                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
               </button>
