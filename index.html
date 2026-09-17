@@ -106,6 +106,12 @@
             <span id="authStatusText">Modo Leitura</span>
           </button>
 
+          <!-- Botão Gerenciar Salas Pré-estabelecidas -->
+          <button onclick="protectedAction(() => openRoomsModal())" title="Gerenciar Salas e Locais" class="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all shadow-xs">
+            <i data-lucide="map-pin" class="w-4 h-4 text-sky-600"></i>
+            <span class="hidden md:inline">Salas / Locais</span>
+          </button>
+
           <!-- Botão Novo Evento (Exige Senha) -->
           <button onclick="protectedAction(() => openModal())" class="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm transition-all">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
@@ -284,9 +290,9 @@
             </div>
           </div>
 
-          <!-- Categoria e Local -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
+          <!-- Categoria, Local/Sala Pré-estabelecida com Digitação Manual e Detalhes -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+            <div class="sm:col-span-3">
               <label class="block text-xs font-semibold text-slate-700 mb-1">Categoria / Tipo</label>
               <select id="inputCategory" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
                 <option value="Reunião">Reunião</option>
@@ -297,9 +303,28 @@
               </select>
             </div>
 
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Local ou Detalhes</label>
-              <input type="text" id="inputDescription" placeholder="Ex: Consultoria Superior / Sala 2 / Link Teams" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
+            <!-- Campo Local / Sala com Datalist e Chips de Atalho -->
+            <div class="sm:col-span-5">
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-600"></i>
+                  Local / Sala (Manual ou Pré-estabelecida)
+                </label>
+                <button type="button" onclick="protectedAction(() => openRoomsModal())" class="text-[11px] text-sky-600 hover:text-sky-800 font-medium hover:underline flex items-center gap-0.5">
+                  <i data-lucide="settings-2" class="w-3 h-3"></i> Editar Salas
+                </button>
+              </div>
+              <input type="text" id="inputLocation" list="roomsDataList" placeholder="Selecione ou digite qualquer local..." class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
+              
+              <!-- Chips rápidos de salas predefinidas -->
+              <div id="quickRoomChipsForm" class="flex items-center gap-1.5 flex-wrap mt-1.5">
+                <!-- Injetado via JavaScript -->
+              </div>
+            </div>
+
+            <div class="sm:col-span-4">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Observações / Detalhes Adicionais</label>
+              <input type="text" id="inputDescription" placeholder="Ex: Link Teams, pauta, responsável" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
             </div>
           </div>
 
@@ -358,7 +383,8 @@
                 <th class="py-3 px-4">Início</th>
                 <th class="py-3 px-4">Fim</th>
                 <th class="py-3 px-4">Duração</th>
-                <th class="py-3 px-4">Local / Detalhes</th>
+                <th class="py-3 px-4">Local / Sala</th>
+                <th class="py-3 px-4">Observações</th>
                 <th class="py-3 px-4 text-right">Ações</th>
               </tr>
             </thead>
@@ -462,27 +488,105 @@
             <input type="text" id="mInputDuration" readonly class="w-full text-sm px-3 py-2 bg-slate-100 text-slate-700 font-semibold border border-slate-200 rounded-xl cursor-not-allowed">
           </div>
 
+          <!-- Local / Sala no Modal com Datalist e Chips Rápidos -->
           <div class="col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Local / Observações</label>
-            <input type="text" id="mInputDescription" placeholder="Ex: Sala Principal ou Link" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-600"></i>
+                Local / Sala (Pré-definida ou Digitação Manual)
+              </label>
+              <button type="button" onclick="protectedAction(() => openRoomsModal())" class="text-[11px] text-sky-600 hover:text-sky-800 font-medium hover:underline flex items-center gap-0.5">
+                <i data-lucide="settings-2" class="w-3 h-3"></i> Gerenciar Salas
+              </button>
+            </div>
+            <input type="text" id="mInputLocation" list="roomsDataList" placeholder="Ex: Aroeira, Bambuzal, Obeia ou digite manual..." class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+            
+            <div id="quickRoomChipsModal" class="flex items-center gap-1.5 flex-wrap mt-1.5">
+              <!-- Injetado dinamicamente -->
+            </div>
+          </div>
+
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Observações / Detalhes</label>
+            <input type="text" id="mInputDescription" placeholder="Ex: Sala Principal, Link Teams ou detalhes" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
           </div>
         </div>
 
-        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-          <div id="modalConflictWarning" class="text-xs text-amber-600 font-medium hidden"></div>
-          <div class="flex items-center gap-2 ml-auto">
-            <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
-              Cancelar
-            </button>
-            <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5">
-              <i data-lucide="check" class="w-4 h-4"></i>
-              <span id="mBtnSubmitText">Salvar Evento</span>
-            </button>
-          </div>
+        <!-- Warning de Conflito de Horário no Modal -->
+        <div id="modalConflictWarning" class="hidden text-xs text-amber-600 font-medium flex items-center gap-1.5 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+          <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i>
+          <span id="modalConflictText">Aviso de conflito de horário</span>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span id="mBtnSubmitText">Salvar Evento</span>
+          </button>
         </div>
       </form>
     </div>
   </div>
+
+  <!-- MODAL: Gerenciar Salas e Locais Pré-estabelecidos -->
+  <div id="roomsManagementModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm">Gerenciamento de Salas & Locais</h3>
+            <p class="text-[11px] text-slate-500">Edite, adicione ou remova as salas pré-definidas</p>
+          </div>
+        </div>
+        <button onclick="closeRoomsModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 space-y-4">
+        <!-- Adicionar Nova Sala -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold text-slate-700">Nova Sala / Local</label>
+          <div class="flex items-center gap-2">
+            <input type="text" id="inputNewRoomName" placeholder="Ex: Sala de Reunião 2" class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addNewRoom(); }">
+            <button type="button" onclick="addNewRoom()" class="bg-sky-600 hover:bg-sky-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 shrink-0 shadow-xs transition-colors">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              Adicionar
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de Salas Atuais -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-700">Salas Pré-estabelecidas (<span id="roomsCountText">0</span>)</span>
+            <button type="button" onclick="resetRoomsToDefault()" class="text-[10px] text-slate-400 hover:text-sky-600 underline">Restaurar padrões</button>
+          </div>
+          <div id="roomsListContainer" class="space-y-1.5 max-h-60 overflow-y-auto custom-scrollbar border border-slate-100 rounded-xl p-2 bg-slate-50/50">
+            <!-- Injetado dinamicamente -->
+          </div>
+        </div>
+      </div>
+
+      <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <span class="text-[11px] text-slate-400">Locais disponíveis nos atalhos e sugestões</span>
+        <button type="button" onclick="closeRoomsModal()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition-colors">
+          Concluir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Datalist global para auto-completar salas em inputs de texto -->
+  <datalist id="roomsDataList">
+    <!-- Injetado dinamicamente -->
+  </datalist>
 
   <!-- MODAL: Detalhes do Dia -->
   <div id="dayDetailsModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
@@ -544,30 +648,47 @@
     let pendingProtectedAction = null;
     let draggedEventId = null;
 
-    /* Banco inicial preservado com todos os registros */
+    /* GESTÃO DE SALAS / LOCAIS PRÉ-ESTABELECIDOS */
+    const defaultRooms = ["Aroeira", "Bambuzal", "Obeia", "Integração"];
+    let rooms = [];
+    try {
+      const storedRooms = localStorage.getItem('app_calendar_rooms_v1');
+      rooms = storedRooms ? JSON.parse(storedRooms) : defaultRooms;
+    } catch(e) {
+      rooms = defaultRooms;
+    }
+
+    function saveRooms() {
+      try {
+        localStorage.setItem('app_calendar_rooms_v1', JSON.stringify(rooms));
+      } catch(e) {}
+      renderRoomsData();
+    }
+
+    /* Banco inicial preservado com todos os registros e locais configurados */
     const initialEvents = [
-      { id: '1', date: '2024-10-01', title: 'Apresentação de Resultados', startTime: '13:00', endTime: '14:30', duration: '1h 30min', category: 'Reunião', description: 'Consultoria Superior' },
-      { id: '2', date: '2024-10-01', title: 'Alinhamento Estratégico', startTime: '14:30', endTime: '15:00', duration: '30min', category: 'Reunião', description: 'Sala de Conferência' },
-      { id: '3', date: '2024-10-01', title: 'Sessão Executiva Noturna', startTime: '20:30', endTime: '22:00', duration: '1h 30min', category: 'Consultoria', description: 'Consultoria Superior' },
-      { id: '4', date: '2024-10-02', title: 'Reunião de Resultados', startTime: '09:00', endTime: '09:45', duration: '45min', category: 'Reunião', description: 'Projeto Smart' },
-      { id: '5', date: '2024-10-02', title: 'Projeto Smart', startTime: '14:00', endTime: '15:00', duration: '1h 00min', category: 'Geral', description: 'Desenvolvimento e Métricas' },
-      { id: '6', date: '2024-10-02', title: 'Treinamentos Portal RH (1º T)', startTime: '13:00', endTime: '14:30', duration: '1h 30min', category: 'Treinamento', description: 'Treinamentos Portal RH - 1º T' },
-      { id: '7', date: '2024-10-02', title: 'Treinamentos Portal RH (2º T)', startTime: '14:30', endTime: '16:00', duration: '1h 30min', category: 'Treinamento', description: 'Treinamentos Portal RH - 2º T' },
-      { id: '8', date: '2024-10-02', title: 'Treinamentos Portal RH (3º T)', startTime: '20:30', endTime: '22:00', duration: '1h 30min', category: 'Treinamento', description: 'Consultoria Superior' },
-      { id: '9', date: '2024-10-03', title: 'Reunião de Alinhamento', startTime: '13:30', endTime: '15:00', duration: '1h 30min', category: 'Consultoria', description: 'Consultoria Superior' },
-      { id: '10', date: '2024-10-04', title: 'Treinamento em MS-GL', startTime: '08:00', endTime: '09:30', duration: '1h 30min', category: 'Treinamento', description: 'Treinamento em MS-GL - 1º T' },
-      { id: '11', date: '2024-10-04', title: 'Consultoria Superior', startTime: '14:30', endTime: '16:00', duration: '1h 30min', category: 'Consultoria', description: 'Consultoria Superior - 2º T' },
-      { id: '12', date: '2024-10-07', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', description: 'Abertura semanal de pauta' },
-      { id: '13', date: '2024-10-07', title: 'Negociação Sindical', startTime: '10:00', endTime: '12:00', duration: '2h 00min', category: 'Geral', description: 'Mesa diretora' },
-      { id: '14', date: '2024-10-08', title: 'Encontro Aprendizes', startTime: '13:30', endTime: '16:00', duration: '2h 30min', category: 'Treinamento', description: 'Capacitação institucional' },
-      { id: '15', date: '2024-10-09', title: 'Comitê Executivo Local', startTime: '10:00', endTime: '12:00', duration: '2h 00min', category: 'Reunião', description: 'Avaliação trimestral' },
-      { id: '16', date: '2024-10-14', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', description: 'Acompanhamento de metas' },
-      { id: '17', date: '2024-10-16', title: 'Reunião de ESG', startTime: '14:30', endTime: '16:00', duration: '1h 30min', category: 'Geral', description: 'Sustentabilidade corporativa' },
-      { id: '18', date: '2024-10-17', title: 'Encontro Aprendizes', startTime: '13:00', endTime: '14:30', duration: '1h 30min', category: 'Treinamento', description: 'Módulo 2' },
-      { id: '19', date: '2024-10-21', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', description: 'Expediente geral' },
-      { id: '20', date: '2024-10-24', title: 'Jornada de Lideranças', startTime: '08:30', endTime: '17:30', duration: '9h 00min', category: 'Liderança', description: 'Dia 1 - Gestão de equipes' },
-      { id: '21', date: '2024-10-25', title: 'Jornada de Lideranças', startTime: '08:30', endTime: '17:30', duration: '9h 00min', category: 'Liderança', description: 'Dia 2 - Workshops práticos' },
-      { id: '22', date: '2024-10-28', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', description: 'Fechamento do mês' }
+      { id: '1', date: '2024-10-01', title: 'Apresentação de Resultados', startTime: '13:00', endTime: '14:30', duration: '1h 30min', category: 'Reunião', location: 'Aroeira', description: 'Consultoria Superior' },
+      { id: '2', date: '2024-10-01', title: 'Alinhamento Estratégico', startTime: '14:30', endTime: '15:00', duration: '30min', category: 'Reunião', location: 'Bambuzal', description: 'Sala de Conferência' },
+      { id: '3', date: '2024-10-01', title: 'Sessão Executiva Noturna', startTime: '20:30', endTime: '22:00', duration: '1h 30min', category: 'Consultoria', location: 'Obeia', description: 'Consultoria Superior' },
+      { id: '4', date: '2024-10-02', title: 'Reunião de Resultados', startTime: '09:00', endTime: '09:45', duration: '45min', category: 'Reunião', location: 'Integração', description: 'Projeto Smart' },
+      { id: '5', date: '2024-10-02', title: 'Projeto Smart', startTime: '14:00', endTime: '15:00', duration: '1h 00min', category: 'Geral', location: 'Aroeira', description: 'Desenvolvimento e Métricas' },
+      { id: '6', date: '2024-10-02', title: 'Treinamentos Portal RH (1º T)', startTime: '13:00', endTime: '14:30', duration: '1h 30min', category: 'Treinamento', location: 'Bambuzal', description: 'Treinamentos Portal RH - 1º T' },
+      { id: '7', date: '2024-10-02', title: 'Treinamentos Portal RH (2º T)', startTime: '14:30', endTime: '16:00', duration: '1h 30min', category: 'Treinamento', location: 'Obeia', description: 'Treinamentos Portal RH - 2º T' },
+      { id: '8', date: '2024-10-02', title: 'Treinamentos Portal RH (3º T)', startTime: '20:30', endTime: '22:00', duration: '1h 30min', category: 'Treinamento', location: 'Integração', description: 'Consultoria Superior' },
+      { id: '9', date: '2024-10-03', title: 'Reunião de Alinhamento', startTime: '13:30', endTime: '15:00', duration: '1h 30min', category: 'Consultoria', location: 'Aroeira', description: 'Consultoria Superior' },
+      { id: '10', date: '2024-10-04', title: 'Treinamento em MS-GL', startTime: '08:00', endTime: '09:30', duration: '1h 30min', category: 'Treinamento', location: 'Bambuzal', description: 'Treinamento em MS-GL - 1º T' },
+      { id: '11', date: '2024-10-04', title: 'Consultoria Superior', startTime: '14:30', endTime: '16:00', duration: '1h 30min', category: 'Consultoria', location: 'Obeia', description: 'Consultoria Superior - 2º T' },
+      { id: '12', date: '2024-10-07', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', location: 'Integração', description: 'Abertura semanal de pauta' },
+      { id: '13', date: '2024-10-07', title: 'Negociação Sindical', startTime: '10:00', endTime: '12:00', duration: '2h 00min', category: 'Geral', location: 'Aroeira', description: 'Mesa diretora' },
+      { id: '14', date: '2024-10-08', title: 'Encontro Aprendizes', startTime: '13:30', endTime: '16:00', duration: '2h 30min', category: 'Treinamento', location: 'Bambuzal', description: 'Capacitação institucional' },
+      { id: '15', date: '2024-10-09', title: 'Comitê Executivo Local', startTime: '10:00', endTime: '12:00', duration: '2h 00min', category: 'Reunião', location: 'Obeia', description: 'Avaliação trimestral' },
+      { id: '16', date: '2024-10-14', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', location: 'Integração', description: 'Acompanhamento de metas' },
+      { id: '17', date: '2024-10-16', title: 'Reunião de ESG', startTime: '14:30', endTime: '16:00', duration: '1h 30min', category: 'Geral', location: 'Aroeira', description: 'Sustentabilidade corporativa' },
+      { id: '18', date: '2024-10-17', title: 'Encontro Aprendizes', startTime: '13:00', endTime: '14:30', duration: '1h 30min', category: 'Treinamento', location: 'Bambuzal', description: 'Módulo 2' },
+      { id: '19', date: '2024-10-21', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', location: 'Obeia', description: 'Expediente geral' },
+      { id: '20', date: '2024-10-24', title: 'Jornada de Lideranças', startTime: '08:30', endTime: '17:30', duration: '9h 00min', category: 'Liderança', location: 'Integração', description: 'Dia 1 - Gestão de equipes' },
+      { id: '21', date: '2024-10-25', title: 'Jornada de Lideranças', startTime: '08:30', endTime: '17:30', duration: '9h 00min', category: 'Liderança', location: 'Aroeira', description: 'Dia 2 - Workshops práticos' },
+      { id: '22', date: '2024-10-28', title: 'Reunião de Expediente', startTime: '08:00', endTime: '09:00', duration: '1h 00min', category: 'Reunião', location: 'Bambuzal', description: 'Fechamento do mês' }
     ];
 
     let events = [];
@@ -582,6 +703,135 @@
       try {
         localStorage.setItem('app_calendar_events_v2', JSON.stringify(events));
       } catch(e) {}
+    }
+
+    /* RENDERIZAÇÃO DE SALAS NOS CAMPOS E MODAIS */
+    function renderRoomsData() {
+      // 1. Atualiza Datalist global
+      const dataList = document.getElementById('roomsDataList');
+      if (dataList) {
+        dataList.innerHTML = rooms.map(r => `<option value="${r}"></option>`).join('');
+      }
+
+      // 2. Atualiza chips de atalho no formulário principal
+      const quickChipsForm = document.getElementById('quickRoomChipsForm');
+      if (quickChipsForm) {
+        quickChipsForm.innerHTML = `
+          <span class="text-[10px] text-slate-400 font-semibold uppercase">Salas:</span>
+          ${rooms.map(r => `
+            <button type="button" onclick="selectRoom('form', '${r}')" class="px-2 py-0.5 text-[11px] font-medium bg-white hover:bg-sky-50 text-slate-700 hover:text-sky-700 border border-slate-200 rounded-lg shadow-2xs transition-all">
+              ${r}
+            </button>
+          `).join('')}
+        `;
+      }
+
+      // 3. Atualiza chips de atalho no modal
+      const quickChipsModal = document.getElementById('quickRoomChipsModal');
+      if (quickChipsModal) {
+        quickChipsModal.innerHTML = `
+          <span class="text-[10px] text-slate-400 font-semibold uppercase">Salas:</span>
+          ${rooms.map(r => `
+            <button type="button" onclick="selectRoom('modal', '${r}')" class="px-2 py-0.5 text-[11px] font-medium bg-white hover:bg-sky-50 text-slate-700 hover:text-sky-700 border border-slate-200 rounded-lg shadow-2xs transition-all">
+              ${r}
+            </button>
+          `).join('')}
+        `;
+      }
+
+      // 4. Atualiza a lista dentro do modal de gerenciamento
+      const listCont = document.getElementById('roomsListContainer');
+      const countText = document.getElementById('roomsCountText');
+      if (countText) countText.innerText = rooms.length;
+
+      if (listCont) {
+        if (rooms.length === 0) {
+          listCont.innerHTML = `<div class="p-3 text-center text-xs text-slate-400">Nenhuma sala cadastrada. Digite acima para adicionar.</div>`;
+        } else {
+          listCont.innerHTML = rooms.map((room, idx) => `
+            <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200 shadow-2xs">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                <span class="text-xs font-semibold text-slate-800">${room}</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="editRoom(${idx})" class="p-1 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Renomear sala">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button type="button" onclick="deleteRoom(${idx})" class="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir sala">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+      lucide.createIcons();
+    }
+
+    function selectRoom(target, roomName) {
+      if (target === 'form') {
+        const input = document.getElementById('inputLocation');
+        if (input) input.value = roomName;
+      } else {
+        const input = document.getElementById('mInputLocation');
+        if (input) input.value = roomName;
+      }
+    }
+
+    function openRoomsModal() {
+      renderRoomsData();
+      document.getElementById('inputNewRoomName').value = '';
+      document.getElementById('roomsManagementModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeRoomsModal() {
+      document.getElementById('roomsManagementModal').classList.add('hidden');
+    }
+
+    function addNewRoom() {
+      const input = document.getElementById('inputNewRoomName');
+      const name = input.value.trim();
+      if (!name) {
+        showToast('Digite o nome da sala para adicionar!', false);
+        return;
+      }
+      if (rooms.some(r => r.toLowerCase() === name.toLowerCase())) {
+        showToast('Esta sala já está cadastrada!', false);
+        return;
+      }
+      rooms.push(name);
+      saveRooms();
+      input.value = '';
+      showToast(`Sala "${name}" adicionada com sucesso!`);
+    }
+
+    function editRoom(idx) {
+      const current = rooms[idx];
+      const newName = prompt('Novo nome para a sala:', current);
+      if (newName === null) return;
+      const trimmed = newName.trim();
+      if (!trimmed) {
+        showToast('O nome da sala não pode ficar vazio!', false);
+        return;
+      }
+      rooms[idx] = trimmed;
+      saveRooms();
+      showToast(`Sala renomeada para "${trimmed}"!`);
+    }
+
+    function deleteRoom(idx) {
+      const removed = rooms[idx];
+      rooms.splice(idx, 1);
+      saveRooms();
+      showToast(`Sala "${removed}" removida.`);
+    }
+
+    function resetRoomsToDefault() {
+      rooms = [...defaultRooms];
+      saveRooms();
+      showToast('Salas restauradas para as pré-definidas (Aroeira, Bambuzal, Obeia, Integração)!');
     }
 
     const initialToday = new Date();
@@ -918,7 +1168,10 @@
         const dayEvents = events.filter(e => {
           if (e.date !== cellDateStr) return false;
           if (catVal !== 'ALL' && e.category !== catVal) return false;
-          if (searchVal && !e.title.toLowerCase().includes(searchVal) && !(e.description || '').toLowerCase().includes(searchVal)) return false;
+          if (searchVal && 
+              !e.title.toLowerCase().includes(searchVal) && 
+              !(e.location || '').toLowerCase().includes(searchVal) && 
+              !(e.description || '').toLowerCase().includes(searchVal)) return false;
           return true;
         }).sort((a, b) => a.startTime.localeCompare(b.startTime));
 
@@ -987,7 +1240,10 @@
               <span class="text-slate-600 font-mono text-[9px] font-bold">${evt.startTime}</span>
               <span class="truncate">${evt.title}</span>
             </div>
-            ${evt.description ? `<div class="text-[9px] text-slate-500 truncate">${evt.description}</div>` : ''}
+            <div class="text-[9px] text-slate-500 truncate flex items-center gap-1 mt-0.5">
+              ${evt.location ? `<span class="font-semibold text-slate-700 bg-white/80 px-1 rounded">${evt.location}</span>` : ''}
+              ${evt.description ? `<span>${evt.description}</span>` : ''}
+            </div>
           `;
 
           evtBadge.onclick = (e) => {
@@ -1077,13 +1333,14 @@
         return e.title.toLowerCase().includes(filter) ||
                e.date.includes(filter) ||
                (e.category && e.category.toLowerCase().includes(filter)) ||
+               (e.location && e.location.toLowerCase().includes(filter)) ||
                (e.description && e.description.toLowerCase().includes(filter));
       }).sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" class="text-center py-8 text-slate-400">
+            <td colspan="9" class="text-center py-8 text-slate-400">
               <div class="flex flex-col items-center justify-center gap-2">
                 <i data-lucide="inbox" class="w-8 h-8 text-slate-300"></i>
                 <p class="text-xs">Nenhum evento registrado com os filtros atuais.</p>
@@ -1129,6 +1386,9 @@
             <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
               ${evt.duration || computeDurationString(evt.startTime, evt.endTime)}
             </span>
+          </td>
+          <td class="py-3 px-4 text-slate-800 whitespace-nowrap font-medium">
+            ${evt.location ? `<span class="inline-flex items-center gap-1 bg-sky-50 text-sky-700 px-2 py-0.5 rounded-md border border-sky-100"><i data-lucide="map-pin" class="w-3 h-3"></i>${evt.location}</span>` : '<span class="text-slate-300 italic">-</span>'}
           </td>
           <td class="py-3 px-4 text-slate-500 max-w-xs truncate">
             ${evt.description || '<span class="text-slate-300 italic">Sem observações</span>'}
@@ -1195,6 +1455,7 @@
       const startTime = document.getElementById('inputStartTime').value;
       const endTime = document.getElementById('inputEndTime').value;
       const category = document.getElementById('inputCategory').value;
+      const location = document.getElementById('inputLocation').value.trim();
       const description = document.getElementById('inputDescription').value.trim();
 
       if (!title || !date || !startTime || !endTime) {
@@ -1216,7 +1477,7 @@
       if (id) {
         const index = events.findIndex(item => String(item.id) === String(id));
         if (index !== -1) {
-          events[index] = { ...events[index], date, title, startTime, endTime, duration, category, description };
+          events[index] = { ...events[index], date, title, startTime, endTime, duration, category, location, description };
           showToast('Evento atualizado e validado!');
         }
       } else {
@@ -1228,6 +1489,7 @@
           endTime,
           duration,
           category,
+          location,
           description
         };
         events.push(newEvt);
@@ -1243,6 +1505,7 @@
     function resetForm() {
       document.getElementById('formEventId').value = '';
       document.getElementById('inputTitle').value = '';
+      document.getElementById('inputLocation').value = '';
       document.getElementById('inputDescription').value = '';
       document.getElementById('btnSubmitText').innerText = 'Adicionar à Tabela';
       document.getElementById('btnCancelEdit').classList.add('hidden');
@@ -1265,6 +1528,7 @@
       document.getElementById('mInputCategory').value = evt.category || 'Reunião';
       document.getElementById('mInputStartTime').value = evt.startTime;
       document.getElementById('mInputEndTime').value = evt.endTime;
+      document.getElementById('mInputLocation').value = evt.location || '';
       document.getElementById('mInputDescription').value = evt.description || '';
       document.getElementById('mBtnSubmitText').innerText = 'Salvar Alterações';
 
@@ -1281,6 +1545,7 @@
         Novo Evento
       `;
       document.getElementById('mInputTitle').value = '';
+      document.getElementById('mInputLocation').value = '';
       document.getElementById('mInputDescription').value = '';
       document.getElementById('mBtnSubmitText').innerText = 'Salvar Evento';
       document.getElementById('modalConflictWarning').classList.add('hidden');
@@ -1318,6 +1583,7 @@
       const category = document.getElementById('mInputCategory').value;
       const startTime = document.getElementById('mInputStartTime').value;
       const endTime = document.getElementById('mInputEndTime').value;
+      const location = document.getElementById('mInputLocation').value.trim();
       const description = document.getElementById('mInputDescription').value.trim();
 
       const duration = computeDurationString(startTime, endTime);
@@ -1343,6 +1609,7 @@
             startTime,
             endTime,
             duration,
+            location,
             description
           };
           showToast('Evento atualizado com sucesso!');
@@ -1357,6 +1624,7 @@
           endTime,
           duration,
           category,
+          location,
           description
         };
         events.push(newEvt);
@@ -1365,171 +1633,6 @@
 
       saveEvents();
       closeModal();
-      renderCalendar();
-      renderEventsTable();
-    }
-
-    function updateEventCountBadge() {
-      const badge = document.getElementById('eventsCountBadge');
-      if (badge) badge.innerText = events.length;
-    }
-
-    function handleFormSubmit(e) {
-      e.preventDefault();
-
-      if (!isUserAuthenticated) {
-        protectedAction(() => handleFormSubmit(e));
-        return;
-      }
-
-      const id = document.getElementById('formEventId').value;
-      const date = document.getElementById('inputDate').value;
-      const title = document.getElementById('inputTitle').value.trim();
-      const startTime = document.getElementById('inputStartTime').value;
-      const endTime = document.getElementById('inputEndTime').value;
-      const category = document.getElementById('inputCategory').value;
-      const description = document.getElementById('inputDescription').value.trim();
-
-      if (!title || !date || !startTime || !endTime) {
-        showToast('Preencha todos os campos obrigatórios!', false);
-        return;
-      }
-
-      const duration = computeDurationString(startTime, endTime);
-      if (duration.includes('Inválido')) {
-        showToast('Trava de Horário: O horário final deve ser posterior ao início!', false);
-        return;
-      }
-
-      const conflict = checkConflict(date, startTime, endTime, id || null);
-      if (conflict) {
-        showToast(`Atenção: Já existe "${conflict.title}" das ${conflict.startTime} às ${conflict.endTime}!`, false);
-      }
-
-      if (id) {
-        const index = events.findIndex(item => item.id === id);
-        if (index !== -1) {
-          events[index] = { ...events[index], date, title, startTime, endTime, duration, category, description };
-          showToast('Evento atualizado e validado!');
-        }
-      } else {
-        const newEvt = {
-          id: String(Date.now()),
-          date,
-          title,
-          startTime,
-          endTime,
-          duration,
-          category,
-          description
-        };
-        events.push(newEvt);
-        showToast('Evento adicionado e sincronizado com o calendário!');
-      }
-
-      saveEvents();
-      resetForm();
-      renderEventsTable();
-      renderCalendar();
-    }
-
-    function resetForm() {
-      document.getElementById('formEventId').value = '';
-      document.getElementById('inputTitle').value = '';
-      document.getElementById('inputDescription').value = '';
-      document.getElementById('btnSubmitText').innerText = 'Adicionar à Tabela';
-      document.getElementById('btnCancelEdit').classList.add('hidden');
-      document.getElementById('formValidationWarning').classList.add('hidden');
-      calculateDuration();
-    }
-
-    function editEvent(id) {
-      const evt = events.find(e => e.id === id);
-      if (!evt) return;
-
-      switchTab('events');
-
-      document.getElementById('formEventId').value = evt.id;
-      document.getElementById('inputDate').value = evt.date;
-      document.getElementById('inputTitle').value = evt.title;
-      document.getElementById('inputStartTime').value = evt.startTime;
-      document.getElementById('inputEndTime').value = evt.endTime;
-      document.getElementById('inputCategory').value = evt.category || 'Reunião';
-      document.getElementById('inputDescription').value = evt.description || '';
-      document.getElementById('inputDuration').value = evt.duration || computeDurationString(evt.startTime, evt.endTime);
-
-      document.getElementById('btnSubmitText').innerText = 'Salvar Alterações';
-      document.getElementById('btnCancelEdit').classList.remove('hidden');
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function openModal(defaultDate = null) {
-      const modal = document.getElementById('eventModal');
-      document.getElementById('modalEventId').value = '';
-      document.getElementById('mInputTitle').value = '';
-      document.getElementById('mInputDescription').value = '';
-      document.getElementById('modalConflictWarning').classList.add('hidden');
-      
-      const dateInput = document.getElementById('mInputDate');
-      if (defaultDate) {
-        dateInput.value = defaultDate;
-      } else if (!dateInput.value) {
-        const today = new Date();
-        dateInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      }
-
-      calculateModalDuration();
-      modal.classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeModal() {
-      document.getElementById('eventModal').classList.add('hidden');
-    }
-
-    function handleModalSubmit(e) {
-      e.preventDefault();
-
-      if (!isUserAuthenticated) {
-        closeModal();
-        protectedAction(() => openModal());
-        return;
-      }
-
-      const title = document.getElementById('mInputTitle').value.trim();
-      const date = document.getElementById('mInputDate').value;
-      const category = document.getElementById('mInputCategory').value;
-      const startTime = document.getElementById('mInputStartTime').value;
-      const endTime = document.getElementById('mInputEndTime').value;
-      const description = document.getElementById('mInputDescription').value.trim();
-
-      const duration = computeDurationString(startTime, endTime);
-      if (duration.includes('Inválido')) {
-        showToast('Trava de Horário: Horário de término deve ser após o início!', false);
-        return;
-      }
-
-      const conflict = checkConflict(date, startTime, endTime);
-      if (conflict) {
-        showToast(`Aviso: Horário coincide com "${conflict.title}"!`, false);
-      }
-
-      const newEvt = {
-        id: String(Date.now()),
-        date,
-        title,
-        startTime,
-        endTime,
-        duration,
-        category,
-        description
-      };
-
-      events.push(newEvt);
-      saveEvents();
-      closeModal();
-      showToast('Novo evento salvo com sucesso!');
       renderCalendar();
       renderEventsTable();
     }
@@ -1560,6 +1663,7 @@
               <div class="flex items-center gap-2">
                 <span class="text-xs font-bold text-slate-800">${evt.title}</span>
                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${style.pill}">${evt.category}</span>
+                ${evt.location ? `<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white text-slate-700 border border-slate-200 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-sky-600"></i>${evt.location}</span>` : ''}
               </div>
               <p class="text-xs font-mono text-slate-600 flex items-center gap-2">
                 <span><i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>${evt.startTime} às ${evt.endTime}</span>
@@ -1653,7 +1757,7 @@
         return;
       }
 
-      const headers = ['Data', 'Evento', 'Categoria', 'Inicio', 'Fim', 'Duracao', 'Local_Observacoes'];
+      const headers = ['Data', 'Evento', 'Categoria', 'Inicio', 'Fim', 'Duracao', 'Local_Sala', 'Observacoes'];
       const rows = events.map(e => [
         `"${e.date}"`,
         `"${e.title.replace(/"/g, '""')}"`,
@@ -1661,6 +1765,7 @@
         `"${e.startTime}"`,
         `"${e.endTime}"`,
         `"${e.duration || ''}"`,
+        `"${(e.location || '').replace(/"/g, '""')}"`,
         `"${(e.description || '').replace(/"/g, '""')}"`
       ]);
 
@@ -1680,6 +1785,7 @@
       const now = new Date();
       const todayISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       document.getElementById('inputDate').value = todayISO;
+      renderRoomsData();
       calculateDuration();
       renderCalendar();
       renderEventsTable();
