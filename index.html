@@ -476,7 +476,7 @@
             </button>
             <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5">
               <i data-lucide="check" class="w-4 h-4"></i>
-              Salvar Evento
+              <span id="mBtnSubmitText">Salvar Evento</span>
             </button>
           </div>
         </div>
@@ -778,7 +778,7 @@
       const end = computeMinutes(endTime);
 
       return events.find(e => {
-        if (excludeId && e.id === excludeId) return false;
+        if (excludeId && String(e.id) === String(excludeId)) return false;
         if (e.date !== date) return false;
         const eStart = computeMinutes(e.startTime);
         const eEnd = computeMinutes(e.endTime);
@@ -1160,7 +1160,7 @@
     }
 
     function duplicateEvent(id) {
-      const source = events.find(e => e.id === id);
+      const source = events.find(e => String(e.id) === String(id));
       if (!source) return;
 
       const duplicated = {
@@ -1172,6 +1172,199 @@
       events.push(duplicated);
       saveEvents();
       showToast(`Evento "${source.title}" duplicado com sucesso!`);
+      renderCalendar();
+      renderEventsTable();
+    }
+
+    function updateEventCountBadge() {
+      const badge = document.getElementById('eventsCountBadge');
+      if (badge) badge.innerText = events.length;
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+
+      if (!isUserAuthenticated) {
+        protectedAction(() => handleFormSubmit(e));
+        return;
+      }
+
+      const id = document.getElementById('formEventId').value;
+      const date = document.getElementById('inputDate').value;
+      const title = document.getElementById('inputTitle').value.trim();
+      const startTime = document.getElementById('inputStartTime').value;
+      const endTime = document.getElementById('inputEndTime').value;
+      const category = document.getElementById('inputCategory').value;
+      const description = document.getElementById('inputDescription').value.trim();
+
+      if (!title || !date || !startTime || !endTime) {
+        showToast('Preencha todos os campos obrigatórios!', false);
+        return;
+      }
+
+      const duration = computeDurationString(startTime, endTime);
+      if (duration.includes('Inválido')) {
+        showToast('Trava de Horário: O horário final deve ser posterior ao início!', false);
+        return;
+      }
+
+      const conflict = checkConflict(date, startTime, endTime, id || null);
+      if (conflict) {
+        showToast(`Atenção: Já existe "${conflict.title}" das ${conflict.startTime} às ${conflict.endTime}!`, false);
+      }
+
+      if (id) {
+        const index = events.findIndex(item => String(item.id) === String(id));
+        if (index !== -1) {
+          events[index] = { ...events[index], date, title, startTime, endTime, duration, category, description };
+          showToast('Evento atualizado e validado!');
+        }
+      } else {
+        const newEvt = {
+          id: String(Date.now()),
+          date,
+          title,
+          startTime,
+          endTime,
+          duration,
+          category,
+          description
+        };
+        events.push(newEvt);
+        showToast('Evento adicionado e sincronizado com o calendário!');
+      }
+
+      saveEvents();
+      resetForm();
+      renderEventsTable();
+      renderCalendar();
+    }
+
+    function resetForm() {
+      document.getElementById('formEventId').value = '';
+      document.getElementById('inputTitle').value = '';
+      document.getElementById('inputDescription').value = '';
+      document.getElementById('btnSubmitText').innerText = 'Adicionar à Tabela';
+      document.getElementById('btnCancelEdit').classList.add('hidden');
+      document.getElementById('formValidationWarning').classList.add('hidden');
+      calculateDuration();
+    }
+
+    function editEvent(id) {
+      const evt = events.find(e => String(e.id) === String(id));
+      if (!evt) return;
+
+      // Abre o modal de edição diretamente na tela com todos os dados preenchidos
+      document.getElementById('modalEventId').value = evt.id;
+      document.getElementById('modalTitle').innerHTML = `
+        <i data-lucide="pencil" class="w-5 h-5 text-amber-600"></i>
+        Editar Evento
+      `;
+      document.getElementById('mInputTitle').value = evt.title;
+      document.getElementById('mInputDate').value = evt.date;
+      document.getElementById('mInputCategory').value = evt.category || 'Reunião';
+      document.getElementById('mInputStartTime').value = evt.startTime;
+      document.getElementById('mInputEndTime').value = evt.endTime;
+      document.getElementById('mInputDescription').value = evt.description || '';
+      document.getElementById('mBtnSubmitText').innerText = 'Salvar Alterações';
+
+      calculateModalDuration();
+      document.getElementById('eventModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function openModal(defaultDate = null) {
+      const modal = document.getElementById('eventModal');
+      document.getElementById('modalEventId').value = '';
+      document.getElementById('modalTitle').innerHTML = `
+        <i data-lucide="calendar" class="w-5 h-5 text-sky-600"></i>
+        Novo Evento
+      `;
+      document.getElementById('mInputTitle').value = '';
+      document.getElementById('mInputDescription').value = '';
+      document.getElementById('mBtnSubmitText').innerText = 'Salvar Evento';
+      document.getElementById('modalConflictWarning').classList.add('hidden');
+      
+      const dateInput = document.getElementById('mInputDate');
+      if (defaultDate) {
+        dateInput.value = defaultDate;
+      } else if (!dateInput.value) {
+        const today = new Date();
+        dateInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      }
+
+      calculateModalDuration();
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      document.getElementById('eventModal').classList.add('hidden');
+      document.getElementById('modalEventId').value = '';
+    }
+
+    function handleModalSubmit(e) {
+      e.preventDefault();
+
+      if (!isUserAuthenticated) {
+        closeModal();
+        protectedAction(() => openModal());
+        return;
+      }
+
+      const id = document.getElementById('modalEventId').value;
+      const title = document.getElementById('mInputTitle').value.trim();
+      const date = document.getElementById('mInputDate').value;
+      const category = document.getElementById('mInputCategory').value;
+      const startTime = document.getElementById('mInputStartTime').value;
+      const endTime = document.getElementById('mInputEndTime').value;
+      const description = document.getElementById('mInputDescription').value.trim();
+
+      const duration = computeDurationString(startTime, endTime);
+      if (duration.includes('Inválido')) {
+        showToast('Trava de Horário: Horário de término deve ser após o início!', false);
+        return;
+      }
+
+      const conflict = checkConflict(date, startTime, endTime, id || null);
+      if (conflict) {
+        showToast(`Aviso: Horário coincide com "${conflict.title}"!`, false);
+      }
+
+      if (id) {
+        // Modo Edição: atualiza o registro existente
+        const index = events.findIndex(ev => String(ev.id) === String(id));
+        if (index !== -1) {
+          events[index] = {
+            ...events[index],
+            title,
+            date,
+            category,
+            startTime,
+            endTime,
+            duration,
+            description
+          };
+          showToast('Evento atualizado com sucesso!');
+        }
+      } else {
+        // Modo Criação: adiciona novo registro
+        const newEvt = {
+          id: String(Date.now()),
+          date,
+          title,
+          startTime,
+          endTime,
+          duration,
+          category,
+          description
+        };
+        events.push(newEvt);
+        showToast('Novo evento salvo com sucesso!');
+      }
+
+      saveEvents();
+      closeModal();
       renderCalendar();
       renderEventsTable();
     }
@@ -1419,7 +1612,7 @@
       document.getElementById('confirmDialogText').innerText = 'Deseja realmente remover este compromisso da sua agenda?';
       
       pendingConfirmCallback = () => {
-        events = events.filter(e => e.id !== id);
+        events = events.filter(e => String(e.id) !== String(id));
         saveEvents();
         showToast('Evento excluído com sucesso.');
         renderEventsTable();
