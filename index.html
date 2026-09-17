@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calendário & Gestão de Eventos</title>
+  <title>Calendário & Gestão de Eventos Corporativos</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -101,27 +101,27 @@
           </button>
         </div>
 
-        <!-- Botões de Ação com Trava de Senha GGFST e Conexão de Nuvem -->
+        <!-- Ações do Cabeçalho -->
         <div class="flex items-center gap-2">
           <!-- Status da Conexão em Nuvem (Supabase) -->
-          <button id="btnCloudStatus" onclick="openCloudModal()" title="Configurar conexão de nuvem para compartilhar com todos" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200">
+          <button id="btnCloudStatus" onclick="openCloudModal()" title="Status da Nuvem Supabase" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200">
             <i id="cloudStatusIcon" data-lucide="cloud-off" class="w-3.5 h-3.5 text-slate-400"></i>
-            <span id="cloudStatusText" class="hidden md:inline">Nuvem Desconectada</span>
+            <span id="cloudStatusText" class="hidden md:inline">Verificando Nuvem...</span>
           </button>
 
-          <!-- Botão de Status da Senha -->
+          <!-- Botão de Trava com Senha GGFST -->
           <button id="btnHeaderAuth" onclick="toggleAuthModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100">
             <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i>
             <span id="authStatusText">Modo Leitura</span>
           </button>
 
-          <!-- Botão Gerenciar Salas Pré-estabelecidas -->
+          <!-- Gerenciar Salas -->
           <button onclick="protectedAction(() => openRoomsModal())" title="Gerenciar Salas e Locais" class="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all shadow-xs">
             <i data-lucide="map-pin" class="w-4 h-4 text-sky-600"></i>
-            <span class="hidden md:inline">Salas / Locais</span>
+            <span class="hidden md:inline">Salas</span>
           </button>
 
-          <!-- Botão Novo Evento (Exige Senha) -->
+          <!-- Botão Novo Evento (Requer Senha) -->
           <button onclick="protectedAction(() => openModal())" class="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm transition-all">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
             <span class="hidden sm:inline">Novo Evento</span>
@@ -138,17 +138,28 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
     
-    <!-- Banner de Nuvem Conectada / Desconectada -->
-    <div id="cloudBannerNotice" class="mb-4 bg-sky-50 border border-sky-200 p-3 rounded-2xl flex items-center justify-between gap-3 text-xs text-sky-900 no-print">
-      <div class="flex items-center gap-2">
-        <i data-lucide="info" class="w-4 h-4 text-sky-600 shrink-0"></i>
-        <span id="cloudBannerMsg">
-          Para que todos da empresa vejam os mesmos eventos em tempo real, conecte seu projeto Supabase no botão acima.
-        </span>
+    <!-- Banner de Diagnóstico e Forçar Envio para o Supabase -->
+    <div id="cloudBannerNotice" class="mb-4 bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-200 p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-slate-800 no-print shadow-xs">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center shrink-0">
+          <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <p class="font-semibold text-slate-900" id="cloudBannerTitle">Conexão Supabase Configurada</p>
+          <p class="text-slate-600 text-[11px]" id="cloudBannerMsg">
+            Clique no botão ao lado para enviar todos os eventos da sua lista diretamente para a nuvem agora.
+          </p>
+        </div>
       </div>
-      <button onclick="openCloudModal()" class="shrink-0 px-3 py-1 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl text-xs transition-colors">
-        Conectar Agora
-      </button>
+      <div class="flex items-center gap-2">
+        <button onclick="forceSyncAllEventsToCloud()" id="btnForceSync" class="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl text-xs transition-all shadow-xs flex items-center gap-1.5">
+          <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+          <span>Subir Dados para Nuvem</span>
+        </button>
+        <button onclick="openCloudModal()" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 font-semibold rounded-xl text-xs border border-slate-200 transition-all">
+          Diagnóstico
+        </button>
+      </div>
     </div>
 
     <!-- Toast de Notificações -->
@@ -159,13 +170,10 @@
       <p id="toastMessage" class="text-sm font-medium">Operação realizada com sucesso!</p>
     </div>
 
-    <!-- ======================================================== -->
     <!-- ABA 1: CALENDÁRIO VISUAL -->
-    <!-- ======================================================== -->
     <section id="tabCalendar" class="space-y-4">
       
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4 no-print">
-        
         <!-- Navegação do Mês -->
         <div class="flex items-center gap-2">
           <button onclick="prevMonth()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all" title="Mês anterior">
@@ -199,9 +207,8 @@
         </div>
       </div>
 
+      <!-- Grade dos Dias do Calendário -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print-border">
-        
-        <!-- Cabeçalho dos Dias da Semana -->
         <div class="grid grid-cols-7 bg-slate-900 text-white text-xs font-semibold tracking-wider text-center border-b border-slate-800">
           <div class="py-2.5 px-2 bg-slate-900/90 border-r border-slate-800">Dom</div>
           <div class="py-2.5 px-2 border-r border-slate-800">Seg</div>
@@ -212,7 +219,6 @@
           <div class="py-2.5 px-2 bg-slate-900/90">Sáb</div>
         </div>
 
-        <!-- Grade dos Dias do Mês (Injetados via JS) -->
         <div id="calendarDaysGrid" class="grid grid-cols-7 auto-rows-fr bg-slate-200 gap-px">
           <!-- Injetado dinamicamente -->
         </div>
@@ -221,7 +227,7 @@
       <!-- Legenda do Calendário e Banner de Segurança -->
       <div class="flex flex-wrap items-center justify-between text-xs text-slate-500 px-2 pt-2 gap-2 no-print">
         <div class="flex items-center gap-4 flex-wrap">
-          <span class="font-medium text-slate-700">Legenda de Tarjas:</span>
+          <span class="font-medium text-slate-700">Categorias:</span>
           <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-500 inline-block"></span> Reunião</span>
           <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span> Treinamento</span>
           <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-amber-500 inline-block"></span> Consultoria</span>
@@ -235,21 +241,19 @@
       </div>
     </section>
 
-    <!-- ======================================================== -->
-    <!-- ABA 2: CADASTRO E TABELA DE ALIMENTAÇÃO -->
-    <!-- ======================================================== -->
+    <!-- ABA 2: CADASTRO E TABELA DE DADOS -->
     <section id="tabEvents" class="hidden space-y-6">
       
       <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
         
-        <!-- Banner de bloqueio se não autenticado -->
+        <!-- Bloqueio para usuários sem senha -->
         <div id="formLockOverlay" class="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] z-10 flex items-center justify-center p-4">
           <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200 max-w-sm text-center space-y-3">
             <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
               <i data-lucide="lock" class="w-6 h-6"></i>
             </div>
             <h3 class="font-bold text-slate-900 text-sm">Formulário Protegido</h3>
-            <p class="text-xs text-slate-500">Para cadastrar ou editar compromissos na agenda corporativa, informe a senha de acesso.</p>
+            <p class="text-xs text-slate-500">Digite a senha corporativa para liberar cadastros e alterações no calendário.</p>
             <button onclick="toggleAuthModal()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all shadow-sm">
               Digitar Senha de Edição
             </button>
@@ -262,11 +266,11 @@
               <i data-lucide="calendar-plus" class="w-5 h-5 text-sky-600"></i>
               Cadastrar / Editar Evento
             </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Preencha os dados do evento. A trava de horários impede durações nulas ou negativas.</p>
+            <p class="text-xs text-slate-500 mt-0.5">A gravação replica automaticamente no Supabase para todos os usuários.</p>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 font-medium rounded-full border border-emerald-200 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Trava de Choque Ativa
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sincronização em Nuvem Ativa
             </span>
           </div>
         </div>
@@ -299,7 +303,7 @@
               <input type="time" id="inputEndTime" oninput="calculateDuration()" required value="09:30" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
             </div>
 
-            <!-- Duração Automática Protegida -->
+            <!-- Duração Automática -->
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1">Duração (Calculada)</label>
               <div class="relative">
@@ -321,36 +325,32 @@
               </select>
             </div>
 
-            <!-- Campo Local / Sala com Datalist e Chips de Atalho -->
+            <!-- Local / Sala com Atalhos -->
             <div class="sm:col-span-5">
               <div class="flex items-center justify-between mb-1">
                 <label class="text-xs font-semibold text-slate-700 flex items-center gap-1">
                   <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-600"></i>
-                  Local / Sala (Manual ou Pré-estabelecida)
+                  Local / Sala
                 </label>
                 <button type="button" onclick="protectedAction(() => openRoomsModal())" class="text-[11px] text-sky-600 hover:text-sky-800 font-medium hover:underline flex items-center gap-0.5">
                   <i data-lucide="settings-2" class="w-3 h-3"></i> Editar Salas
                 </button>
               </div>
-              <input type="text" id="inputLocation" list="roomsDataList" placeholder="Selecione ou digite qualquer local..." class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
+              <input type="text" id="inputLocation" list="roomsDataList" placeholder="Selecione abaixo ou digite qualquer local..." class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
               
-              <!-- Chips rápidos de salas predefinidas -->
-              <div id="quickRoomChipsForm" class="flex items-center gap-1.5 flex-wrap mt-1.5">
-                <!-- Injetado via JavaScript -->
-              </div>
+              <div id="quickRoomChipsForm" class="flex items-center gap-1.5 flex-wrap mt-1.5"></div>
             </div>
 
             <div class="sm:col-span-4">
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Observações / Detalhes Adicionais</label>
-              <input type="text" id="inputDescription" placeholder="Ex: Link Teams, pauta, responsável" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Observações / Detalhes</label>
+              <input type="text" id="inputDescription" placeholder="Ex: Link Teams, responsável, pauta" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
             </div>
           </div>
 
-          <!-- Validações e Botões -->
           <div class="flex items-center justify-between pt-2 border-t border-slate-100">
             <div id="formValidationWarning" class="text-xs font-medium text-amber-600 hidden flex items-center gap-1.5">
               <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-              <span id="formValidationText">Aviso de validação</span>
+              <span id="formValidationText">Aviso</span>
             </div>
             <div class="flex items-center gap-2 ml-auto">
               <button type="button" id="btnCancelEdit" onclick="resetForm()" class="hidden px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">
@@ -358,20 +358,19 @@
               </button>
               <button type="submit" id="btnSubmitForm" class="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-5 py-2 rounded-xl text-sm font-semibold shadow-sm transition-all">
                 <i data-lucide="check" class="w-4 h-4"></i>
-                <span id="btnSubmitText">Adicionar à Tabela</span>
+                <span id="btnSubmitText">Adicionar e Salvar na Nuvem</span>
               </button>
             </div>
           </div>
         </form>
       </div>
 
+      <!-- Tabela com Ações -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        
-        <!-- Header da Tabela -->
         <div class="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50/70">
           <div>
             <h3 class="font-bold text-slate-800 text-sm">Registros Alimentados</h3>
-            <p class="text-xs text-slate-500">Dados 100% sincronizados com a grade visual do calendário e nuvem</p>
+            <p class="text-xs text-slate-500">Dados integrados com o calendário e o banco de dados Supabase</p>
           </div>
 
           <div class="flex items-center gap-2">
@@ -389,7 +388,6 @@
           </div>
         </div>
 
-        <!-- Tabela -->
         <div class="overflow-x-auto custom-scrollbar">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
@@ -405,13 +403,10 @@
                 <th class="py-3 px-4 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody id="eventsTableBody" class="divide-y divide-slate-100">
-              <!-- Registros da tabela injetados aqui -->
-            </tbody>
+            <tbody id="eventsTableBody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
 
-        <!-- Rodapé da Tabela -->
         <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-600">
           <span id="totalEventsText">Carregando eventos...</span>
           <span class="text-slate-400">Edição e exclusão protegidas pela senha GGFST</span>
@@ -421,16 +416,17 @@
 
   </main>
 
+  <!-- MODAL: Conexão e Diagnóstico do Supabase -->
   <div id="cloudModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+    <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
       <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-sky-50/60">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-xs">
             <i data-lucide="cloud" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="font-bold text-slate-900 text-base">Conexão em Nuvem (Supabase)</h3>
-            <p class="text-xs text-slate-500">Sincronize os compromissos em tempo real com todos os colaboradores</p>
+            <h3 class="font-bold text-slate-900 text-base">Painel de Diagnóstico do Supabase</h3>
+            <p class="text-xs text-slate-500">Verifique a conexão e garanta que os eventos estejam salvos na nuvem</p>
           </div>
         </div>
         <button onclick="closeCloudModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
@@ -438,69 +434,94 @@
         </button>
       </div>
 
-      <div class="p-5 space-y-4">
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1 text-xs text-slate-600">
-          <p class="font-semibold text-slate-800">Como conectar o seu Supabase gratuitamente:</p>
-          <ol class="list-decimal list-inside space-y-1 pt-1 text-[11px]">
-            <li>Acesse <strong>supabase.com</strong>, crie um projeto e copie o <strong>Project URL</strong> e a <strong>Anon Key</strong> (em <em>Project Settings &gt; API</em>).</li>
-            <li>No <strong>SQL Editor</strong> do Supabase, execute o código rápido disponível abaixo para criar a tabela.</li>
-            <li>Cole o URL e a Chave nos campos abaixo e clique em <strong>Salvar e Conectar</strong>.</li>
-          </ol>
-        </div>
-
-        <div class="space-y-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Supabase Project URL *</label>
-            <input type="text" id="inputSupabaseUrl" value="https://tgmjghxytbwafhrxdkyl.supabase.co" placeholder="https://seu-projeto.supabase.co" class="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none font-mono">
+      <div class="p-5 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
+        <!-- Diagnóstico em tempo real -->
+        <div class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono space-y-2">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-slate-400 font-sans font-semibold">Status do Banco de Dados:</span>
+            <span id="diagStatusBadge" class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              Verificando...
+            </span>
           </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Supabase Anon Public API Key *</label>
-            <input type="text" id="inputSupabaseKey" value="sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c" placeholder="sb_publishable_..." class="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none font-mono">
+          <div class="text-[11px] space-y-1 pt-1 text-slate-300 font-mono">
+            <p><strong>Projeto:</strong> tgmjghxytbwafhrxdkyl</p>
+            <p><strong>Registros na Nuvem:</strong> <span id="diagCloudRowsCount">Consultando...</span></p>
+            <p id="diagErrorMessage" class="text-red-400 hidden mt-1"></p>
           </div>
         </div>
 
-        <!-- Bloco para copiar código SQL da tabela -->
+        <!-- Botão de Ação Direta para Subir Tudo -->
+        <div class="bg-sky-50 border border-sky-200 p-3.5 rounded-xl flex items-center justify-between gap-3">
+          <div>
+            <h4 class="font-bold text-xs text-sky-950">Subir Todos os 22 Eventos</h4>
+            <p class="text-[11px] text-sky-800">Envia todos os compromissos cadastrados para a nuvem de uma só vez.</p>
+          </div>
+          <button type="button" onclick="forceSyncAllEventsToCloud()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs shadow-xs transition-colors shrink-0 flex items-center gap-1.5">
+            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+            Subir Agora
+          </button>
+        </div>
+
+        <!-- Script SQL Definitivo -->
         <div class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-semibold text-slate-700">Comando SQL para rodar no Supabase (clique para copiar):</span>
+            <span class="text-[11px] font-semibold text-slate-700">Comando SQL para liberar permissões no Supabase:</span>
             <button type="button" onclick="copySqlScript()" class="text-[10px] text-sky-600 hover:text-sky-800 font-semibold flex items-center gap-1">
               <i data-lucide="copy" class="w-3 h-3"></i> Copiar SQL
             </button>
           </div>
-          <pre id="sqlScriptText" class="p-2.5 bg-slate-900 text-slate-200 rounded-xl text-[10px] font-mono overflow-x-auto leading-relaxed max-h-28 custom-scrollbar select-all cursor-pointer" onclick="copySqlScript()">create table if not exists events (
+          <pre id="sqlScriptText" class="p-3 bg-slate-900 text-emerald-400 rounded-xl text-[10.5px] font-mono overflow-x-auto leading-relaxed max-h-36 custom-scrollbar select-all cursor-pointer" onclick="copySqlScript()">-- Execute no SQL Editor do Supabase para criar e liberar a tabela:
+create table if not exists public.events (
   id text primary key,
   date text,
   title text,
-  startTime text,
-  endTime text,
+  starttime text,
+  endtime text,
   duration text,
   category text,
   location text,
   description text
 );
-alter table events enable row level security;
-create policy "Public Access" on events for all using (true) with check (true);</pre>
+
+grant all on table public.events to anon, authenticated, service_role;
+alter table public.events disable row level security;</pre>
+          <p class="text-[10.5px] text-slate-500">
+            * O comando <code>disable row level security</code> garante que qualquer pessoa da empresa possa ler e gravar sem erros de bloqueio.
+          </p>
+        </div>
+
+        <!-- Campos de Configuração -->
+        <div class="space-y-2 pt-2 border-t border-slate-100">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Supabase Project URL</label>
+            <input type="text" id="inputSupabaseUrl" value="https://tgmjghxytbwafhrxdkyl.supabase.co" class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none font-mono">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Supabase Public Anon Key</label>
+            <input type="text" id="inputSupabaseKey" value="sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c" class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none font-mono">
+          </div>
         </div>
       </div>
 
       <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-        <button type="button" onclick="disconnectCloud()" class="text-xs text-red-600 hover:underline">
-          Desconectar Nuvem
+        <button type="button" onclick="testCloudConnection()" class="px-3.5 py-2 text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-xl transition-colors flex items-center gap-1.5">
+          <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+          Testar Gravação
         </button>
         <div class="flex items-center gap-2">
           <button type="button" onclick="closeCloudModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">
-            Cancelar
+            Fechar
           </button>
           <button type="button" onclick="saveCloudSettings()" class="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5">
             <i data-lucide="plug" class="w-3.5 h-3.5"></i>
-            Salvar e Conectar
+            Reconectar
           </button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- MODAL: Senha Mestra GGFST -->
   <div id="passwordModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div id="passwordModalCard" class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all p-6 text-center space-y-4">
       <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
@@ -529,6 +550,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
     </div>
   </div>
 
+  <!-- MODAL: Cadastro e Edição de Evento -->
   <div id="eventModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
       <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
@@ -547,7 +569,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
         <div class="grid grid-cols-2 gap-3">
           <div class="col-span-2">
             <label class="block text-xs font-semibold text-slate-700 mb-1">Título do Evento *</label>
-            <input type="text" id="mInputTitle" required placeholder="Ex: Treinamento ou Reunião" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+            <input type="text" id="mInputTitle" required placeholder="Ex: Treinamento de Novos Líderes" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
           </div>
 
           <div>
@@ -577,16 +599,16 @@ create policy "Public Access" on events for all using (true) with check (true);<
           </div>
 
           <div class="col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Duração Estimada (Trava Automática)</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Duração Estimada (Automática)</label>
             <input type="text" id="mInputDuration" readonly class="w-full text-sm px-3 py-2 bg-slate-100 text-slate-700 font-semibold border border-slate-200 rounded-xl cursor-not-allowed">
           </div>
 
-          <!-- Local / Sala no Modal com Datalist e Chips Rápidos -->
+          <!-- Local / Sala no Modal -->
           <div class="col-span-2">
             <div class="flex items-center justify-between mb-1">
               <label class="text-xs font-semibold text-slate-700 flex items-center gap-1">
                 <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-600"></i>
-                Local / Sala (Pré-definida ou Digitação Manual)
+                Local / Sala
               </label>
               <button type="button" onclick="protectedAction(() => openRoomsModal())" class="text-[11px] text-sky-600 hover:text-sky-800 font-medium hover:underline flex items-center gap-0.5">
                 <i data-lucide="settings-2" class="w-3 h-3"></i> Gerenciar Salas
@@ -594,21 +616,18 @@ create policy "Public Access" on events for all using (true) with check (true);<
             </div>
             <input type="text" id="mInputLocation" list="roomsDataList" placeholder="Ex: Aroeira, Bambuzal, Obeia ou digite manual..." class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
             
-            <div id="quickRoomChipsModal" class="flex items-center gap-1.5 flex-wrap mt-1.5">
-              <!-- Injetado dinamicamente -->
-            </div>
+            <div id="quickRoomChipsModal" class="flex items-center gap-1.5 flex-wrap mt-1.5"></div>
           </div>
 
           <div class="col-span-2">
             <label class="block text-xs font-semibold text-slate-700 mb-1">Observações / Detalhes</label>
-            <input type="text" id="mInputDescription" placeholder="Ex: Sala Principal, Link Teams ou detalhes" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+            <input type="text" id="mInputDescription" placeholder="Ex: Link Teams, pauta, responsável" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
           </div>
         </div>
 
-        <!-- Warning de Conflito de Horário no Modal -->
         <div id="modalConflictWarning" class="hidden text-xs text-amber-600 font-medium flex items-center gap-1.5 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
           <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i>
-          <span id="modalConflictText">Aviso de conflito de horário</span>
+          <span id="modalConflictText">Aviso de choque de horário</span>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
@@ -617,13 +636,14 @@ create policy "Public Access" on events for all using (true) with check (true);<
           </button>
           <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5">
             <i data-lucide="check" class="w-4 h-4"></i>
-            <span id="mBtnSubmitText">Salvar Evento</span>
+            <span id="mBtnSubmitText">Salvar na Nuvem</span>
           </button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- MODAL: Gerenciador de Salas -->
   <div id="roomsManagementModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
@@ -633,7 +653,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
           </div>
           <div>
             <h3 class="font-bold text-slate-900 text-sm">Gerenciamento de Salas & Locais</h3>
-            <p class="text-[11px] text-slate-500">Edite, adicione ou remova as salas pré-definidas</p>
+            <p class="text-[11px] text-slate-500">Adicione, edite ou remova as salas pré-definidas</p>
           </div>
         </div>
         <button onclick="closeRoomsModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
@@ -642,32 +662,27 @@ create policy "Public Access" on events for all using (true) with check (true);<
       </div>
 
       <div class="p-4 space-y-4">
-        <!-- Adicionar Nova Sala -->
         <div class="space-y-1.5">
           <label class="block text-xs font-semibold text-slate-700">Nova Sala / Local</label>
           <div class="flex items-center gap-2">
             <input type="text" id="inputNewRoomName" placeholder="Ex: Sala de Reunião 2" class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addNewRoom(); }">
             <button type="button" onclick="addNewRoom()" class="bg-sky-600 hover:bg-sky-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 shrink-0 shadow-xs transition-colors">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              Adicionar
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
             </button>
           </div>
         </div>
 
-        <!-- Lista de Salas Atuais -->
         <div>
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-slate-700">Salas Pré-estabelecidas (<span id="roomsCountText">0</span>)</span>
+            <span class="text-xs font-semibold text-slate-700">Salas Cadastradas (<span id="roomsCountText">0</span>)</span>
             <button type="button" onclick="resetRoomsToDefault()" class="text-[10px] text-slate-400 hover:text-sky-600 underline">Restaurar padrões</button>
           </div>
-          <div id="roomsListContainer" class="space-y-1.5 max-h-60 overflow-y-auto custom-scrollbar border border-slate-100 rounded-xl p-2 bg-slate-50/50">
-            <!-- Injetado dinamicamente -->
-          </div>
+          <div id="roomsListContainer" class="space-y-1.5 max-h-60 overflow-y-auto custom-scrollbar border border-slate-100 rounded-xl p-2 bg-slate-50/50"></div>
         </div>
       </div>
 
       <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-        <span class="text-[11px] text-slate-400">Locais disponíveis nos atalhos e sugestões</span>
+        <span class="text-[11px] text-slate-400">Salas salvas no sistema</span>
         <button type="button" onclick="closeRoomsModal()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition-colors">
           Concluir
         </button>
@@ -704,7 +719,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
     </div>
   </div>
 
-  <!-- MODAL: Confirmação Customizada -->
+  <!-- MODAL: Confirmação de Exclusão -->
   <div id="confirmDialogModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-5 text-center space-y-4">
       <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
@@ -712,7 +727,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
       </div>
       <div>
         <h4 id="confirmDialogTitle" class="text-base font-bold text-slate-900">Tem certeza?</h4>
-        <p id="confirmDialogText" class="text-xs text-slate-500 mt-1">Essa ação não poderá ser desfeita.</p>
+        <p id="confirmDialogText" class="text-xs text-slate-500 mt-1">Essa ação removerá o compromisso também da nuvem.</p>
       </div>
       <div class="flex items-center justify-center gap-2 pt-2">
         <button onclick="closeConfirmDialog()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200">
@@ -726,17 +741,19 @@ create policy "Public Access" on events for all using (true) with check (true);<
   </div>
 
   <script>
-    /* SENHA MESTRA DEFINIDA E OBRIGATÓRIA */
+    /* ======================================================== */
+    /* CONFIGURAÇÕES GERAIS E SEGURANÇA */
+    /* ======================================================== */
     const SECRET_ADMIN_PASSWORD = "GGFST";
     let isUserAuthenticated = false;
     let pendingProtectedAction = null;
     let draggedEventId = null;
 
-    /* SUPABASE CLIENT CONFIGURATION */
+    /* SUPABASE CONFIGURATION */
     let supabaseClient = null;
     let isCloudConnected = false;
 
-    // Configuração oficial embutida - conecta automaticamente para todos os usuários
+    // Conexão oficial do seu projeto Supabase
     let supabaseUrl = localStorage.getItem('app_supabase_url') || 'https://tgmjghxytbwafhrxdkyl.supabase.co';
     let supabaseKey = localStorage.getItem('app_supabase_key') || 'sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c';
 
@@ -757,7 +774,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
         } catch(e) {
           console.error("Erro ao inicializar Supabase:", e);
           isCloudConnected = false;
-          updateCloudUI(false);
+          updateCloudUI(false, e.message);
         }
       } else {
         isCloudConnected = false;
@@ -765,24 +782,38 @@ create policy "Public Access" on events for all using (true) with check (true);<
       }
     }
 
-    function updateCloudUI(connected) {
+    function updateCloudUI(connected, errorMsg = '') {
       const statusIcon = document.getElementById('cloudStatusIcon');
       const statusText = document.getElementById('cloudStatusText');
       const btn = document.getElementById('btnCloudStatus');
-      const banner = document.getElementById('cloudBannerNotice');
+      const diagBadge = document.getElementById('diagStatusBadge');
+      const diagErr = document.getElementById('diagErrorMessage');
 
       if (connected) {
         btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100";
         statusIcon.setAttribute('data-lucide', 'cloud');
         statusIcon.className = "w-3.5 h-3.5 text-emerald-600";
         statusText.innerText = "Nuvem Conectada";
-        if (banner) banner.classList.add('hidden');
+        
+        if (diagBadge) {
+          diagBadge.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+          diagBadge.innerText = "Conectado com Sucesso";
+        }
+        if (diagErr) diagErr.classList.add('hidden');
       } else {
-        btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200";
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100";
         statusIcon.setAttribute('data-lucide', 'cloud-off');
-        statusIcon.className = "w-3.5 h-3.5 text-slate-400";
-        statusText.innerText = "Nuvem Desconectada";
-        if (banner) banner.classList.remove('hidden');
+        statusIcon.className = "w-3.5 h-3.5 text-amber-600";
+        statusText.innerText = "Nuvem Pendente";
+        
+        if (diagBadge) {
+          diagBadge.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-red-500/20 text-red-300 border border-red-500/30";
+          diagBadge.innerText = "Falha na Conexão";
+        }
+        if (diagErr && errorMsg) {
+          diagErr.innerText = `Erro: ${errorMsg}`;
+          diagErr.classList.remove('hidden');
+        }
       }
       lucide.createIcons();
     }
@@ -791,6 +822,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
       document.getElementById('inputSupabaseUrl').value = supabaseUrl || 'https://tgmjghxytbwafhrxdkyl.supabase.co';
       document.getElementById('inputSupabaseKey').value = supabaseKey || 'sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c';
       document.getElementById('cloudModal').classList.remove('hidden');
+      testCloudConnection(false);
       lucide.createIcons();
     }
 
@@ -798,92 +830,137 @@ create policy "Public Access" on events for all using (true) with check (true);<
       document.getElementById('cloudModal').classList.add('hidden');
     }
 
-    async function saveCloudSettings() {
-      const url = document.getElementById('inputSupabaseUrl').value.trim();
-      const key = document.getElementById('inputSupabaseKey').value.trim();
+    /* Helper com tolerância para colunas em minúsculo (PostgreSQL nativo) e camelCase */
+    async function upsertEventToSupabase(evt) {
+      if (!supabaseClient) return { error: new Error('Cliente Supabase não configurado') };
 
-      if (!url || !key) {
-        showToast('Preencha o Project URL e a Anon API Key!', false);
+      // Formato nativo em minúsculo
+      const payloadLower = {
+        id: String(evt.id),
+        date: evt.date,
+        title: evt.title,
+        starttime: evt.startTime || evt.starttime || '08:00',
+        endtime: evt.endTime || evt.endtime || '09:00',
+        duration: evt.duration || '',
+        category: evt.category || 'Geral',
+        location: evt.location || '',
+        description: evt.description || ''
+      };
+
+      let res = await supabaseClient.from('events').upsert(payloadLower);
+
+      // Se a tabela tiver sido criada especificamente com aspas maiúsculas
+      if (res.error && (res.error.code === 'PGRST204' || (res.error.message && res.error.message.includes('column')))) {
+        const payloadCamel = {
+          id: String(evt.id),
+          date: evt.date,
+          title: evt.title,
+          startTime: evt.startTime || evt.starttime || '08:00',
+          endTime: evt.endTime || evt.endtime || '09:00',
+          duration: evt.duration || '',
+          category: evt.category || 'Geral',
+          location: evt.location || '',
+          description: evt.description || ''
+        };
+        res = await supabaseClient.from('events').upsert(payloadCamel);
+      }
+
+      return res;
+    }
+
+    /* Subir todos os eventos locais para o Supabase com feedback visual */
+    async function forceSyncAllEventsToCloud() {
+      if (!supabaseClient) {
+        showToast('Supabase não conectado!', false);
         return;
       }
 
-      try {
-        const testClient = window.supabase.createClient(url, key);
-        // Teste leve de leitura
-        const { data, error } = await testClient.from('events').select('id').limit(1);
+      const btn = document.getElementById('btnForceSync');
+      const originalText = btn ? btn.innerHTML : '';
+      if (btn) btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Subindo...</span>`;
+      lucide.createIcons();
 
-        if (error && error.code !== 'PGRST116') {
-          showToast('Conexão falhou: certifique-se de que rodou o script SQL no Supabase!', false);
-          console.error(error);
-          return;
+      showToast(`Iniciando envio de ${events.length} eventos para a nuvem...`);
+
+      let successCount = 0;
+      let lastError = null;
+
+      for (const evt of events) {
+        const res = await upsertEventToSupabase(evt);
+        if (res.error) {
+          lastError = res.error;
+          console.error("Falha ao subir evento:", evt.title, res.error);
+        } else {
+          successCount++;
         }
+      }
 
-        supabaseUrl = url;
-        supabaseKey = key;
-        localStorage.setItem('app_supabase_url', url);
-        localStorage.setItem('app_supabase_key', key);
+      if (btn) btn.innerHTML = originalText;
+      lucide.createIcons();
 
-        supabaseClient = testClient;
-        isCloudConnected = true;
+      if (lastError && successCount === 0) {
+        updateCloudUI(false, lastError.message);
+        showToast(`Erro ao gravar no Supabase: ${lastError.message}`, false);
+      } else {
         updateCloudUI(true);
-        closeCloudModal();
-        showToast('Supabase conectado com sucesso! Sincronizando dados...');
-
-        // Sobe os eventos atuais para a nuvem caso esteja vazia
-        await syncInitialEventsToCloud();
-        setupPollingSync();
+        showToast(`Sucesso! ${successCount} eventos enviados para a nuvem.`);
         await fetchEventsFromCloud();
-
-      } catch(err) {
-        showToast('Falha ao conectar com o Supabase. Verifique as credenciais.', false);
-        console.error(err);
       }
     }
 
-    function disconnectCloud() {
-      localStorage.removeItem('app_supabase_url');
-      localStorage.removeItem('app_supabase_key');
-      supabaseUrl = '';
-      supabaseKey = '';
-      supabaseClient = null;
-      isCloudConnected = false;
-      updateCloudUI(false);
-      closeCloudModal();
-      showToast('Nuvem desconectada. Operando em modo local.');
-    }
+    async function testCloudConnection(showToastAlert = true) {
+      if (!supabaseClient) {
+        if (showToastAlert) showToast('Supabase não configurado!', false);
+        return;
+      }
 
-    function copySqlScript() {
-      const text = document.getElementById('sqlScriptText').innerText;
-      const tempInput = document.createElement('textarea');
-      tempInput.value = text;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempInput);
-      showToast('Comando SQL copiado para a área de transferência!');
-    }
+      const diagRows = document.getElementById('diagCloudRowsCount');
+      const diagErr = document.getElementById('diagErrorMessage');
 
-    async function syncInitialEventsToCloud() {
-      if (!supabaseClient) return;
       try {
-        const { data } = await supabaseClient.from('events').select('id');
-        if (!data || data.length === 0) {
-          // A tabela está vazia, sobe a lista padrão
-          const payload = events.map(e => ({
-            id: String(e.id),
-            date: e.date,
-            title: e.title,
-            startTime: e.startTime,
-            endTime: e.endTime,
-            duration: e.duration,
-            category: e.category,
-            location: e.location || '',
-            description: e.description || ''
-          }));
-          await supabaseClient.from('events').upsert(payload);
+        const { data, error } = await supabaseClient.from('events').select('id');
+        
+        if (error) {
+          updateCloudUI(false, error.message);
+          if (diagRows) diagRows.innerText = `Erro de leitura (${error.message})`;
+          if (diagErr) {
+            diagErr.innerText = `Aviso: ${error.message}. Execute o script SQL no painel do Supabase.`;
+            diagErr.classList.remove('hidden');
+          }
+          if (showToastAlert) showToast(`Erro no Supabase: ${error.message}`, false);
+          return;
         }
+
+        const count = data ? data.length : 0;
+        if (diagRows) diagRows.innerText = `${count} evento(s) gravado(s) na tabela 'events'`;
+        if (diagErr) diagErr.classList.add('hidden');
+        updateCloudUI(true);
+
+        // Teste de gravação real
+        const testId = 'test_' + Date.now();
+        const testRes = await upsertEventToSupabase({
+          id: testId,
+          date: '2026-10-01',
+          title: 'Diagnóstico de Gravação',
+          startTime: '08:00',
+          endTime: '08:30',
+          duration: '30min',
+          category: 'Geral',
+          location: 'Teste',
+          description: 'Verificação em tempo real'
+        });
+
+        if (testRes.error) {
+          updateCloudUI(false, testRes.error.message);
+          if (showToastAlert) showToast(`Erro de gravação: ${testRes.error.message}`, false);
+        } else {
+          await supabaseClient.from('events').delete().eq('id', testId);
+          if (showToastAlert) showToast(`Conexão 100% ativa! Banco gravando com sucesso (${count} registros).`);
+        }
+
       } catch(e) {
-        console.warn("Aviso ao sincronizar iniciais:", e);
+        updateCloudUI(false, e.message);
+        if (showToastAlert) showToast(`Falha de rede: ${e.message}`, false);
       }
     }
 
@@ -891,16 +968,33 @@ create policy "Public Access" on events for all using (true) with check (true);<
       if (!supabaseClient) return;
       try {
         const { data, error } = await supabaseClient.from('events').select('*');
-        if (error) throw error;
+        if (error) {
+          console.error("Erro ao buscar eventos do Supabase:", error);
+          updateCloudUI(false, error.message);
+          return;
+        }
+
+        updateCloudUI(true);
+
+        const diagRows = document.getElementById('diagCloudRowsCount');
+        if (diagRows) diagRows.innerText = `${data.length} evento(s) gravado(s)`;
+
+        // Se o Supabase estiver vazio, sobe os eventos padrão automaticamente
+        if (data.length === 0 && events.length > 0) {
+          console.log("Supabase vazio. Enviando eventos locais automaticamente...");
+          await forceSyncAllEventsToCloud();
+          return;
+        }
+
         if (data && data.length > 0) {
           events = data.map(item => ({
             id: String(item.id),
             date: item.date,
             title: item.title,
-            startTime: item.startTime,
-            endTime: item.endTime,
-            duration: item.duration,
-            category: item.category,
+            startTime: item.startTime || item.starttime || item.start_time || '08:00',
+            endTime: item.endTime || item.endtime || item.end_time || '09:00',
+            duration: item.duration || computeDurationString(item.startTime || item.starttime, item.endTime || item.endtime),
+            category: item.category || 'Geral',
             location: item.location || '',
             description: item.description || ''
           }));
@@ -917,14 +1011,11 @@ create policy "Public Access" on events for all using (true) with check (true);<
     function setupPollingSync() {
       if (cloudPollingInterval) clearInterval(cloudPollingInterval);
 
-      // Sincronização via HTTP seguro (sem WebSockets, 100% compatível com Canvas e SharePoint)
+      // Sincronização periódica segura via HTTP (compatível com SharePoint e Canvas)
       cloudPollingInterval = setInterval(() => {
-        if (isCloudConnected) {
-          fetchEventsFromCloud();
-        }
-      }, 20000);
+        if (isCloudConnected) fetchEventsFromCloud();
+      }, 15000);
 
-      // Atualiza automaticamente quando o usuário voltar para a aba ou focar na janela
       window.addEventListener('focus', () => {
         if (isCloudConnected) fetchEventsFromCloud();
       });
@@ -933,41 +1024,34 @@ create policy "Public Access" on events for all using (true) with check (true);<
       });
     }
 
-    async function saveEventToCloud(evt) {
-      if (!supabaseClient) return;
-      try {
-        await supabaseClient.from('events').upsert({
-          id: String(evt.id),
-          date: evt.date,
-          title: evt.title,
-          startTime: evt.startTime,
-          endTime: evt.endTime,
-          duration: evt.duration,
-          category: evt.category,
-          location: evt.location || '',
-          description: evt.description || ''
-        });
-      } catch(err) {
-        console.error("Erro ao salvar no Supabase:", err);
+    async function saveCloudSettings() {
+      const url = document.getElementById('inputSupabaseUrl').value.trim();
+      const key = document.getElementById('inputSupabaseKey').value.trim();
+
+      if (!url || !key) {
+        showToast('Preencha o Project URL e a Anon API Key!', false);
+        return;
       }
+
+      supabaseUrl = url;
+      supabaseKey = key;
+      localStorage.setItem('app_supabase_url', url);
+      localStorage.setItem('app_supabase_key', key);
+
+      initSupabase();
+      await testCloudConnection(true);
+      closeCloudModal();
     }
 
-    async function deleteEventFromCloud(id) {
-      if (!supabaseClient) return;
-      try {
-        await supabaseClient.from('events').delete().eq('id', String(id));
-      } catch(err) {
-        console.error("Erro ao remover do Supabase:", err);
-      }
-    }
-
-    async function clearAllEventsFromCloud() {
-      if (!supabaseClient) return;
-      try {
-        await supabaseClient.from('events').delete().neq('id', '0');
-      } catch(err) {
-        console.error("Erro ao limpar Supabase:", err);
-      }
+    function copySqlScript() {
+      const text = document.getElementById('sqlScriptText').innerText;
+      const tempInput = document.createElement('textarea');
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      showToast('Código SQL copiado para a área de transferência!');
     }
 
     const defaultRooms = ["Aroeira", "Bambuzal", "Obeia", "Integração"];
@@ -1109,17 +1193,17 @@ create policy "Public Access" on events for all using (true) with check (true);<
       const input = document.getElementById('inputNewRoomName');
       const name = input.value.trim();
       if (!name) {
-        showToast('Digite o nome da sala para adicionar!', false);
+        showToast('Digite o nome da sala!', false);
         return;
       }
       if (rooms.some(r => r.toLowerCase() === name.toLowerCase())) {
-        showToast('Esta sala já está cadastrada!', false);
+        showToast('Esta sala já existe!', false);
         return;
       }
       rooms.push(name);
       saveRooms();
       input.value = '';
-      showToast(`Sala "${name}" adicionada com sucesso!`);
+      showToast(`Sala "${name}" adicionada!`);
     }
 
     function editRoom(idx) {
@@ -1128,7 +1212,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
       if (newName === null) return;
       const trimmed = newName.trim();
       if (!trimmed) {
-        showToast('O nome da sala não pode ficar vazio!', false);
+        showToast('O nome não pode ficar vazio!', false);
         return;
       }
       rooms[idx] = trimmed;
@@ -1140,13 +1224,13 @@ create policy "Public Access" on events for all using (true) with check (true);<
       const removed = rooms[idx];
       rooms.splice(idx, 1);
       saveRooms();
-      showToast(`Sala "${removed}" removida.`);
+      showToast(`Sala "${removed}" excluída.`);
     }
 
     function resetRoomsToDefault() {
       rooms = [...defaultRooms];
       saveRooms();
-      showToast('Salas restauradas para as pré-definidas (Aroeira, Bambuzal, Obeia, Integração)!');
+      showToast('Salas restauradas para as padrões!');
     }
 
     const initialToday = new Date();
@@ -1195,7 +1279,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
         isUserAuthenticated = true;
         closePasswordModal();
         updateSecurityUI(true);
-        showToast('Senha GGFST confirmada! Modo Edição liberado.');
+        showToast('Senha GGFST correta! Modo Edição liberado.');
 
         if (pendingProtectedAction) {
           const action = pendingProtectedAction;
@@ -1214,7 +1298,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
       if (isUserAuthenticated) {
         isUserAuthenticated = false;
         updateSecurityUI(false);
-        showToast('Modo de Edição bloqueado com sucesso.');
+        showToast('Modo de Edição bloqueado.');
       } else {
         toggleAuthModal(true);
       }
@@ -1231,7 +1315,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
         btn.onclick = toggleAdminAuth;
         if (overlay) overlay.classList.add('hidden');
         if (banner) {
-          banner.innerHTML = `<i data-lucide="move" class="w-3.5 h-3.5 text-emerald-600"></i><span class="text-emerald-700 font-semibold">Modo Edição Ativo: Arraste para mover data (segure Ctrl/Alt para copiar)</span>`;
+          banner.innerHTML = `<i data-lucide="move" class="w-3.5 h-3.5 text-emerald-600"></i><span class="text-emerald-700 font-semibold">Modo Edição Ativo: Arraste para mover (Ctrl/Alt para duplicar)</span>`;
         }
       } else {
         btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100";
@@ -1294,7 +1378,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
       if (durationVal.includes('Inválido')) {
         durationInput.classList.add('text-red-600', 'bg-red-50');
         warning.classList.remove('hidden');
-        document.getElementById('formValidationText').innerText = 'Trava ativa: O horário final deve ser posterior ao início!';
+        document.getElementById('formValidationText').innerText = 'Trava ativa: Horário de término deve ser posterior ao início!';
       } else {
         durationInput.classList.remove('text-red-600', 'bg-red-50');
         warning.classList.add('hidden');
@@ -1590,12 +1674,12 @@ create policy "Public Access" on events for all using (true) with check (true);<
             };
             events.push(clonedEvt);
             saveEventsLocally();
-            await saveEventToCloud(clonedEvt);
+            await upsertEventToSupabase(clonedEvt);
             showToast(`Evento copiado para ${cellDateStr}!`);
           } else {
             eventToHandle.date = cellDateStr;
             saveEventsLocally();
-            await saveEventToCloud(eventToHandle);
+            await upsertEventToSupabase(eventToHandle);
             showToast(`Evento movido para ${cellDateStr}!`);
           }
 
@@ -1694,13 +1778,13 @@ create policy "Public Access" on events for all using (true) with check (true);<
               <button onclick="viewInCalendar('${evt.date}')" class="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors" title="Ver no Calendário">
                 <i data-lucide="external-link" class="w-4 h-4"></i>
               </button>
-              <button onclick="protectedAction(() => duplicateEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Copiar / Duplicar Evento (Requer Senha)">
+              <button onclick="protectedAction(() => duplicateEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Copiar / Duplicar Evento">
                 <i data-lucide="copy" class="w-4 h-4"></i>
               </button>
-              <button onclick="protectedAction(() => editEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Editar Evento (Requer Senha)">
+              <button onclick="protectedAction(() => editEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Editar Evento">
                 <i data-lucide="pencil" class="w-4 h-4"></i>
               </button>
-              <button onclick="protectedAction(() => confirmDeleteEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir Evento (Requer Senha)">
+              <button onclick="protectedAction(() => confirmDeleteEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir Evento">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
@@ -1727,7 +1811,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
 
       events.push(duplicated);
       saveEventsLocally();
-      await saveEventToCloud(duplicated);
+      await upsertEventToSupabase(duplicated);
 
       showToast(`Evento "${source.title}" duplicado com sucesso!`);
       renderCalendar();
@@ -1763,13 +1847,13 @@ create policy "Public Access" on events for all using (true) with check (true);<
 
       const duration = computeDurationString(startTime, endTime);
       if (duration.includes('Inválido')) {
-        showToast('Trava de Horário: O horário final deve ser posterior ao início!', false);
+        showToast('Trava de Horário: Término deve ser após o início!', false);
         return;
       }
 
       const conflict = checkConflict(date, startTime, endTime, id || null);
       if (conflict) {
-        showToast(`Atenção: Já existe "${conflict.title}" das ${conflict.startTime} às ${conflict.endTime}!`, false);
+        showToast(`Atenção: Horário coincide com "${conflict.title}"!`, false);
       }
 
       let savedEvent = null;
@@ -1795,11 +1879,16 @@ create policy "Public Access" on events for all using (true) with check (true);<
         };
         events.push(newEvt);
         savedEvent = newEvt;
-        showToast('Evento adicionado e sincronizado com o calendário!');
+        showToast('Evento adicionado e sincronizado com a nuvem!');
       }
 
       saveEventsLocally();
-      if (savedEvent) await saveEventToCloud(savedEvent);
+      if (savedEvent) {
+        const res = await upsertEventToSupabase(savedEvent);
+        if (res.error) {
+          showToast(`Aviso Supabase: ${res.error.message}`, false);
+        }
+      }
 
       resetForm();
       renderEventsTable();
@@ -1811,7 +1900,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
       document.getElementById('inputTitle').value = '';
       document.getElementById('inputLocation').value = '';
       document.getElementById('inputDescription').value = '';
-      document.getElementById('btnSubmitText').innerText = 'Adicionar à Tabela';
+      document.getElementById('btnSubmitText').innerText = 'Adicionar e Salvar na Nuvem';
       document.getElementById('btnCancelEdit').classList.add('hidden');
       document.getElementById('formValidationWarning').classList.add('hidden');
       calculateDuration();
@@ -1833,7 +1922,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
       document.getElementById('mInputEndTime').value = evt.endTime;
       document.getElementById('mInputLocation').value = evt.location || '';
       document.getElementById('mInputDescription').value = evt.description || '';
-      document.getElementById('mBtnSubmitText').innerText = 'Salvar Alterações';
+      document.getElementById('mBtnSubmitText').innerText = 'Salvar Alterações na Nuvem';
 
       calculateModalDuration();
       document.getElementById('eventModal').classList.remove('hidden');
@@ -1850,7 +1939,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
       document.getElementById('mInputTitle').value = '';
       document.getElementById('mInputLocation').value = '';
       document.getElementById('mInputDescription').value = '';
-      document.getElementById('mBtnSubmitText').innerText = 'Salvar Evento';
+      document.getElementById('mBtnSubmitText').innerText = 'Salvar na Nuvem';
       document.getElementById('modalConflictWarning').classList.add('hidden');
       
       const dateInput = document.getElementById('mInputDate');
@@ -1891,7 +1980,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
 
       const duration = computeDurationString(startTime, endTime);
       if (duration.includes('Inválido')) {
-        showToast('Trava de Horário: Horário de término deve ser após o início!', false);
+        showToast('Trava de Horário: Término deve ser após o início!', false);
         return;
       }
 
@@ -1937,7 +2026,12 @@ create policy "Public Access" on events for all using (true) with check (true);<
       }
 
       saveEventsLocally();
-      if (savedEvent) await saveEventToCloud(savedEvent);
+      if (savedEvent) {
+        const res = await upsertEventToSupabase(savedEvent);
+        if (res.error) {
+          showToast(`Aviso Supabase: ${res.error.message}`, false);
+        }
+      }
 
       closeModal();
       renderCalendar();
@@ -1949,7 +2043,7 @@ create policy "Public Access" on events for all using (true) with check (true);<
       const monthLabel = monthNames[parseInt(m, 10) - 1];
       
       document.getElementById('dayDetailsTitle').innerText = `Dia ${d} de ${monthLabel}`;
-      document.getElementById('dayDetailsSubtitle').innerText = `${dateStr} • Detalhamento de atividades cadastradas`;
+      document.getElementById('dayDetailsSubtitle').innerText = `${dateStr} • Atividades cadastradas`;
 
       const listContainer = document.getElementById('dayEventsList');
       listContainer.innerHTML = '';
@@ -1980,13 +2074,13 @@ create policy "Public Access" on events for all using (true) with check (true);<
               ${evt.description ? `<p class="text-xs text-slate-600 mt-1">${evt.description}</p>` : ''}
             </div>
             <div class="flex items-center gap-1">
-              <button onclick="closeDayDetailsModal(); protectedAction(() => duplicateEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-emerald-600 hover:bg-white rounded-lg transition-all" title="Copiar / Duplicar (Requer Senha)">
+              <button onclick="closeDayDetailsModal(); protectedAction(() => duplicateEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-emerald-600 hover:bg-white rounded-lg transition-all" title="Copiar Evento">
                 <i data-lucide="copy" class="w-3.5 h-3.5"></i>
               </button>
-              <button onclick="closeDayDetailsModal(); protectedAction(() => editEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-slate-800 hover:bg-white rounded-lg transition-all" title="Editar (Requer Senha)">
+              <button onclick="closeDayDetailsModal(); protectedAction(() => editEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-slate-800 hover:bg-white rounded-lg transition-all" title="Editar Evento">
                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
               </button>
-              <button onclick="closeDayDetailsModal(); protectedAction(() => confirmDeleteEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-red-600 hover:bg-white rounded-lg transition-all" title="Excluir (Requer Senha)">
+              <button onclick="closeDayDetailsModal(); protectedAction(() => confirmDeleteEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-red-600 hover:bg-white rounded-lg transition-all" title="Excluir Evento">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
             </div>
@@ -2020,12 +2114,14 @@ create policy "Public Access" on events for all using (true) with check (true);<
 
     function confirmDeleteEvent(id) {
       document.getElementById('confirmDialogTitle').innerText = 'Excluir Evento';
-      document.getElementById('confirmDialogText').innerText = 'Deseja realmente remover este compromisso da agenda?';
+      document.getElementById('confirmDialogText').innerText = 'Deseja realmente remover este compromisso da nuvem e da agenda?';
       
       pendingConfirmCallback = async () => {
         events = events.filter(e => String(e.id) !== String(id));
         saveEventsLocally();
-        await deleteEventFromCloud(id);
+        if (supabaseClient) {
+          await supabaseClient.from('events').delete().eq('id', String(id));
+        }
         showToast('Evento excluído com sucesso.');
         renderEventsTable();
         renderCalendar();
@@ -2036,12 +2132,14 @@ create policy "Public Access" on events for all using (true) with check (true);<
 
     function clearAllEventsModal() {
       document.getElementById('confirmDialogTitle').innerText = 'Limpar Todos os Eventos';
-      document.getElementById('confirmDialogText').innerText = 'Atenção: todos os registros da tabela e do calendário serão removidos permanentemente!';
+      document.getElementById('confirmDialogText').innerText = 'Atenção: todos os registros locais e da nuvem serão removidos!';
       
       pendingConfirmCallback = async () => {
         events = [];
         saveEventsLocally();
-        await clearAllEventsFromCloud();
+        if (supabaseClient) {
+          await supabaseClient.from('events').delete().neq('id', '___none___');
+        }
         showToast('Todos os registros foram removidos.');
         renderEventsTable();
         renderCalendar();
