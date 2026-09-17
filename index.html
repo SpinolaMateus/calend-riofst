@@ -1236,14 +1236,20 @@
           }
 
           evtBadge.innerHTML = `
-            <div class="font-semibold truncate flex items-center gap-1">
-              <span class="text-slate-600 font-mono text-[9px] font-bold">${evt.startTime}</span>
-              <span class="truncate">${evt.title}</span>
+            <div class="flex items-center justify-between gap-1 text-[9px] font-mono font-bold text-slate-600 mb-1 leading-none">
+              <span class="bg-white/95 px-1 py-0.5 rounded shadow-2xs text-slate-800 whitespace-nowrap border border-black/5">
+                ${evt.startTime} - ${evt.endTime}
+              </span>
+              ${evt.location ? `
+                <span class="font-semibold text-sky-800 bg-sky-100/90 px-1.5 py-0.5 rounded-md truncate max-w-[85px] text-[8.5px] inline-flex items-center gap-0.5 border border-sky-200/60" title="Local: ${evt.location}">
+                  <i data-lucide="map-pin" class="w-2.5 h-2.5 shrink-0 text-sky-600"></i>
+                  <span class="truncate">${evt.location}</span>
+                </span>` : ''}
             </div>
-            <div class="text-[9px] text-slate-500 truncate flex items-center gap-1 mt-0.5">
-              ${evt.location ? `<span class="font-semibold text-slate-700 bg-white/80 px-1 rounded">${evt.location}</span>` : ''}
-              ${evt.description ? `<span>${evt.description}</span>` : ''}
+            <div class="font-semibold text-slate-900 truncate text-[10px] leading-snug">
+              ${evt.title}
             </div>
+            ${evt.description ? `<div class="text-[9px] text-slate-500 truncate mt-0.5 opacity-90">${evt.description}</div>` : ''}
           `;
 
           evtBadge.onclick = (e) => {
