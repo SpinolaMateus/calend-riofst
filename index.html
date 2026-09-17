@@ -12,6 +12,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -98,8 +101,14 @@
           </button>
         </div>
 
-        <!-- Botões de Ação com Trava de Senha GGFST -->
+        <!-- Botões de Ação com Trava de Senha GGFST e Conexão de Nuvem -->
         <div class="flex items-center gap-2">
+          <!-- Status da Conexão em Nuvem (Supabase) -->
+          <button id="btnCloudStatus" onclick="openCloudModal()" title="Configurar conexão de nuvem para compartilhar com todos" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200">
+            <i id="cloudStatusIcon" data-lucide="cloud-off" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span id="cloudStatusText" class="hidden md:inline">Nuvem Desconectada</span>
+          </button>
+
           <!-- Botão de Status da Senha -->
           <button id="btnHeaderAuth" onclick="toggleAuthModal()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100">
             <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i>
@@ -129,6 +138,19 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
     
+    <!-- Banner de Nuvem Conectada / Desconectada -->
+    <div id="cloudBannerNotice" class="mb-4 bg-sky-50 border border-sky-200 p-3 rounded-2xl flex items-center justify-between gap-3 text-xs text-sky-900 no-print">
+      <div class="flex items-center gap-2">
+        <i data-lucide="info" class="w-4 h-4 text-sky-600 shrink-0"></i>
+        <span id="cloudBannerMsg">
+          Para que todos da empresa vejam os mesmos eventos em tempo real, conecte seu projeto Supabase no botão acima.
+        </span>
+      </div>
+      <button onclick="openCloudModal()" class="shrink-0 px-3 py-1 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl text-xs transition-colors">
+        Conectar Agora
+      </button>
+    </div>
+
     <!-- Toast de Notificações -->
     <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 max-w-md">
       <div id="toastIcon">
@@ -142,7 +164,6 @@
     <!-- ======================================================== -->
     <section id="tabCalendar" class="space-y-4">
       
-      <!-- Barra Superior: Navegação e Filtros -->
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4 no-print">
         
         <!-- Navegação do Mês -->
@@ -151,7 +172,7 @@
             <i data-lucide="chevron-left" class="w-5 h-5"></i>
           </button>
           <div class="text-center min-w-[190px]">
-            <h2 id="currentMonthYearLabel" class="text-lg sm:text-xl font-bold text-slate-800 capitalize tracking-tight">Outubro 2024</h2>
+            <h2 id="currentMonthYearLabel" class="text-lg sm:text-xl font-bold text-slate-800 capitalize tracking-tight">Carregando...</h2>
           </div>
           <button onclick="nextMonth()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all" title="Próximo mês">
             <i data-lucide="chevron-right" class="w-5 h-5"></i>
@@ -178,7 +199,6 @@
         </div>
       </div>
 
-      <!-- Calendário Visual Grid Container -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print-border">
         
         <!-- Cabeçalho dos Dias da Semana -->
@@ -192,7 +212,7 @@
           <div class="py-2.5 px-2 bg-slate-900/90">Sáb</div>
         </div>
 
-        <!-- Grade dos Dias do Mês (Tarjas e dias injetados via JS) -->
+        <!-- Grade dos Dias do Mês (Injetados via JS) -->
         <div id="calendarDaysGrid" class="grid grid-cols-7 auto-rows-fr bg-slate-200 gap-px">
           <!-- Injetado dinamicamente -->
         </div>
@@ -220,7 +240,6 @@
     <!-- ======================================================== -->
     <section id="tabEvents" class="hidden space-y-6">
       
-      <!-- Formulário de Cadastro com Validação e Bloqueio -->
       <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
         
         <!-- Banner de bloqueio se não autenticado -->
@@ -290,7 +309,6 @@
             </div>
           </div>
 
-          <!-- Categoria, Local/Sala Pré-estabelecida com Digitação Manual e Detalhes -->
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
             <div class="sm:col-span-3">
               <label class="block text-xs font-semibold text-slate-700 mb-1">Categoria / Tipo</label>
@@ -347,14 +365,13 @@
         </form>
       </div>
 
-      <!-- Tabela de Registros com Filtros -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         
         <!-- Header da Tabela -->
         <div class="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50/70">
           <div>
             <h3 class="font-bold text-slate-800 text-sm">Registros Alimentados</h3>
-            <p class="text-xs text-slate-500">Dados 100% sincronizados com a grade visual do calendário</p>
+            <p class="text-xs text-slate-500">Dados 100% sincronizados com a grade visual do calendário e nuvem</p>
           </div>
 
           <div class="flex items-center gap-2">
@@ -404,9 +421,86 @@
 
   </main>
 
-  <!-- ======================================================== -->
-  <!-- MODAL OBRIGATÓRIO DE SENHA: GGFST -->
-  <!-- ======================================================== -->
+  <div id="cloudModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-sky-50/60">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-xs">
+            <i data-lucide="cloud" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Conexão em Nuvem (Supabase)</h3>
+            <p class="text-xs text-slate-500">Sincronize os compromissos em tempo real com todos os colaboradores</p>
+          </div>
+        </div>
+        <button onclick="closeCloudModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1 text-xs text-slate-600">
+          <p class="font-semibold text-slate-800">Como conectar o seu Supabase gratuitamente:</p>
+          <ol class="list-decimal list-inside space-y-1 pt-1 text-[11px]">
+            <li>Acesse <strong>supabase.com</strong>, crie um projeto e copie o <strong>Project URL</strong> e a <strong>Anon Key</strong> (em <em>Project Settings &gt; API</em>).</li>
+            <li>No <strong>SQL Editor</strong> do Supabase, execute o código rápido disponível abaixo para criar a tabela.</li>
+            <li>Cole o URL e a Chave nos campos abaixo e clique em <strong>Salvar e Conectar</strong>.</li>
+          </ol>
+        </div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Supabase Project URL *</label>
+            <input type="text" id="inputSupabaseUrl" value="https://tgmjghxytbwafhrxdkyl.supabase.co" placeholder="https://seu-projeto.supabase.co" class="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none font-mono">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Supabase Anon Public API Key *</label>
+            <input type="text" id="inputSupabaseKey" value="sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c" placeholder="sb_publishable_..." class="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none font-mono">
+          </div>
+        </div>
+
+        <!-- Bloco para copiar código SQL da tabela -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold text-slate-700">Comando SQL para rodar no Supabase (clique para copiar):</span>
+            <button type="button" onclick="copySqlScript()" class="text-[10px] text-sky-600 hover:text-sky-800 font-semibold flex items-center gap-1">
+              <i data-lucide="copy" class="w-3 h-3"></i> Copiar SQL
+            </button>
+          </div>
+          <pre id="sqlScriptText" class="p-2.5 bg-slate-900 text-slate-200 rounded-xl text-[10px] font-mono overflow-x-auto leading-relaxed max-h-28 custom-scrollbar select-all cursor-pointer" onclick="copySqlScript()">create table if not exists events (
+  id text primary key,
+  date text,
+  title text,
+  startTime text,
+  endTime text,
+  duration text,
+  category text,
+  location text,
+  description text
+);
+alter table events enable row level security;
+create policy "Public Access" on events for all using (true) with check (true);</pre>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <button type="button" onclick="disconnectCloud()" class="text-xs text-red-600 hover:underline">
+          Desconectar Nuvem
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeCloudModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">
+            Cancelar
+          </button>
+          <button type="button" onclick="saveCloudSettings()" class="bg-sky-600 hover:bg-sky-700 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5">
+            <i data-lucide="plug" class="w-3.5 h-3.5"></i>
+            Salvar e Conectar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="passwordModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div id="passwordModalCard" class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all p-6 text-center space-y-4">
       <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
@@ -435,7 +529,6 @@
     </div>
   </div>
 
-  <!-- MODAL: Adicionar / Editar Evento Rápido -->
   <div id="eventModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
       <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
@@ -531,7 +624,6 @@
     </div>
   </div>
 
-  <!-- MODAL: Gerenciar Salas e Locais Pré-estabelecidos -->
   <div id="roomsManagementModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
@@ -583,10 +675,7 @@
     </div>
   </div>
 
-  <!-- Datalist global para auto-completar salas em inputs de texto -->
-  <datalist id="roomsDataList">
-    <!-- Injetado dinamicamente -->
-  </datalist>
+  <datalist id="roomsDataList"></datalist>
 
   <!-- MODAL: Detalhes do Dia -->
   <div id="dayDetailsModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
@@ -601,9 +690,7 @@
         </button>
       </div>
 
-      <div id="dayEventsList" class="p-4 space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar">
-        <!-- Lista de cards do dia -->
-      </div>
+      <div id="dayEventsList" class="p-4 space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar"></div>
 
       <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
         <button id="btnAddNewEventToThisDay" class="text-xs font-semibold text-sky-600 hover:text-sky-700 flex items-center gap-1">
@@ -638,9 +725,6 @@
     </div>
   </div>
 
-  <!-- ======================================================== -->
-  <!-- JAVASCRIPT DO SISTEMA COM SENHA GGFST -->
-  <!-- ======================================================== -->
   <script>
     /* SENHA MESTRA DEFINIDA E OBRIGATÓRIA */
     const SECRET_ADMIN_PASSWORD = "GGFST";
@@ -648,7 +732,244 @@
     let pendingProtectedAction = null;
     let draggedEventId = null;
 
-    /* GESTÃO DE SALAS / LOCAIS PRÉ-ESTABELECIDOS */
+    /* SUPABASE CLIENT CONFIGURATION */
+    let supabaseClient = null;
+    let isCloudConnected = false;
+
+    // Configuração oficial embutida - conecta automaticamente para todos os usuários
+    let supabaseUrl = localStorage.getItem('app_supabase_url') || 'https://tgmjghxytbwafhrxdkyl.supabase.co';
+    let supabaseKey = localStorage.getItem('app_supabase_key') || 'sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c';
+
+    function initSupabase() {
+      if (supabaseUrl && supabaseKey && window.supabase) {
+        try {
+          supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
+            auth: {
+              persistSession: false,
+              autoRefreshToken: false,
+              detectSessionInUrl: false
+            }
+          });
+          isCloudConnected = true;
+          updateCloudUI(true);
+          setupPollingSync();
+          fetchEventsFromCloud();
+        } catch(e) {
+          console.error("Erro ao inicializar Supabase:", e);
+          isCloudConnected = false;
+          updateCloudUI(false);
+        }
+      } else {
+        isCloudConnected = false;
+        updateCloudUI(false);
+      }
+    }
+
+    function updateCloudUI(connected) {
+      const statusIcon = document.getElementById('cloudStatusIcon');
+      const statusText = document.getElementById('cloudStatusText');
+      const btn = document.getElementById('btnCloudStatus');
+      const banner = document.getElementById('cloudBannerNotice');
+
+      if (connected) {
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100";
+        statusIcon.setAttribute('data-lucide', 'cloud');
+        statusIcon.className = "w-3.5 h-3.5 text-emerald-600";
+        statusText.innerText = "Nuvem Conectada";
+        if (banner) banner.classList.add('hidden');
+      } else {
+        btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200";
+        statusIcon.setAttribute('data-lucide', 'cloud-off');
+        statusIcon.className = "w-3.5 h-3.5 text-slate-400";
+        statusText.innerText = "Nuvem Desconectada";
+        if (banner) banner.classList.remove('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    function openCloudModal() {
+      document.getElementById('inputSupabaseUrl').value = supabaseUrl || 'https://tgmjghxytbwafhrxdkyl.supabase.co';
+      document.getElementById('inputSupabaseKey').value = supabaseKey || 'sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c';
+      document.getElementById('cloudModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCloudModal() {
+      document.getElementById('cloudModal').classList.add('hidden');
+    }
+
+    async function saveCloudSettings() {
+      const url = document.getElementById('inputSupabaseUrl').value.trim();
+      const key = document.getElementById('inputSupabaseKey').value.trim();
+
+      if (!url || !key) {
+        showToast('Preencha o Project URL e a Anon API Key!', false);
+        return;
+      }
+
+      try {
+        const testClient = window.supabase.createClient(url, key);
+        // Teste leve de leitura
+        const { data, error } = await testClient.from('events').select('id').limit(1);
+
+        if (error && error.code !== 'PGRST116') {
+          showToast('Conexão falhou: certifique-se de que rodou o script SQL no Supabase!', false);
+          console.error(error);
+          return;
+        }
+
+        supabaseUrl = url;
+        supabaseKey = key;
+        localStorage.setItem('app_supabase_url', url);
+        localStorage.setItem('app_supabase_key', key);
+
+        supabaseClient = testClient;
+        isCloudConnected = true;
+        updateCloudUI(true);
+        closeCloudModal();
+        showToast('Supabase conectado com sucesso! Sincronizando dados...');
+
+        // Sobe os eventos atuais para a nuvem caso esteja vazia
+        await syncInitialEventsToCloud();
+        setupPollingSync();
+        await fetchEventsFromCloud();
+
+      } catch(err) {
+        showToast('Falha ao conectar com o Supabase. Verifique as credenciais.', false);
+        console.error(err);
+      }
+    }
+
+    function disconnectCloud() {
+      localStorage.removeItem('app_supabase_url');
+      localStorage.removeItem('app_supabase_key');
+      supabaseUrl = '';
+      supabaseKey = '';
+      supabaseClient = null;
+      isCloudConnected = false;
+      updateCloudUI(false);
+      closeCloudModal();
+      showToast('Nuvem desconectada. Operando em modo local.');
+    }
+
+    function copySqlScript() {
+      const text = document.getElementById('sqlScriptText').innerText;
+      const tempInput = document.createElement('textarea');
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      showToast('Comando SQL copiado para a área de transferência!');
+    }
+
+    async function syncInitialEventsToCloud() {
+      if (!supabaseClient) return;
+      try {
+        const { data } = await supabaseClient.from('events').select('id');
+        if (!data || data.length === 0) {
+          // A tabela está vazia, sobe a lista padrão
+          const payload = events.map(e => ({
+            id: String(e.id),
+            date: e.date,
+            title: e.title,
+            startTime: e.startTime,
+            endTime: e.endTime,
+            duration: e.duration,
+            category: e.category,
+            location: e.location || '',
+            description: e.description || ''
+          }));
+          await supabaseClient.from('events').upsert(payload);
+        }
+      } catch(e) {
+        console.warn("Aviso ao sincronizar iniciais:", e);
+      }
+    }
+
+    async function fetchEventsFromCloud() {
+      if (!supabaseClient) return;
+      try {
+        const { data, error } = await supabaseClient.from('events').select('*');
+        if (error) throw error;
+        if (data && data.length > 0) {
+          events = data.map(item => ({
+            id: String(item.id),
+            date: item.date,
+            title: item.title,
+            startTime: item.startTime,
+            endTime: item.endTime,
+            duration: item.duration,
+            category: item.category,
+            location: item.location || '',
+            description: item.description || ''
+          }));
+          saveEventsLocally();
+          renderCalendar();
+          renderEventsTable();
+        }
+      } catch(err) {
+        console.error("Erro ao buscar eventos do Supabase:", err);
+      }
+    }
+
+    let cloudPollingInterval = null;
+    function setupPollingSync() {
+      if (cloudPollingInterval) clearInterval(cloudPollingInterval);
+
+      // Sincronização via HTTP seguro (sem WebSockets, 100% compatível com Canvas e SharePoint)
+      cloudPollingInterval = setInterval(() => {
+        if (isCloudConnected) {
+          fetchEventsFromCloud();
+        }
+      }, 20000);
+
+      // Atualiza automaticamente quando o usuário voltar para a aba ou focar na janela
+      window.addEventListener('focus', () => {
+        if (isCloudConnected) fetchEventsFromCloud();
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && isCloudConnected) fetchEventsFromCloud();
+      });
+    }
+
+    async function saveEventToCloud(evt) {
+      if (!supabaseClient) return;
+      try {
+        await supabaseClient.from('events').upsert({
+          id: String(evt.id),
+          date: evt.date,
+          title: evt.title,
+          startTime: evt.startTime,
+          endTime: evt.endTime,
+          duration: evt.duration,
+          category: evt.category,
+          location: evt.location || '',
+          description: evt.description || ''
+        });
+      } catch(err) {
+        console.error("Erro ao salvar no Supabase:", err);
+      }
+    }
+
+    async function deleteEventFromCloud(id) {
+      if (!supabaseClient) return;
+      try {
+        await supabaseClient.from('events').delete().eq('id', String(id));
+      } catch(err) {
+        console.error("Erro ao remover do Supabase:", err);
+      }
+    }
+
+    async function clearAllEventsFromCloud() {
+      if (!supabaseClient) return;
+      try {
+        await supabaseClient.from('events').delete().neq('id', '0');
+      } catch(err) {
+        console.error("Erro ao limpar Supabase:", err);
+      }
+    }
+
     const defaultRooms = ["Aroeira", "Bambuzal", "Obeia", "Integração"];
     let rooms = [];
     try {
@@ -665,7 +986,6 @@
       renderRoomsData();
     }
 
-    /* Banco inicial preservado com todos os registros e locais configurados */
     const initialEvents = [
       { id: '1', date: '2024-10-01', title: 'Apresentação de Resultados', startTime: '13:00', endTime: '14:30', duration: '1h 30min', category: 'Reunião', location: 'Aroeira', description: 'Consultoria Superior' },
       { id: '2', date: '2024-10-01', title: 'Alinhamento Estratégico', startTime: '14:30', endTime: '15:00', duration: '30min', category: 'Reunião', location: 'Bambuzal', description: 'Sala de Conferência' },
@@ -699,21 +1019,18 @@
       events = initialEvents;
     }
 
-    function saveEvents() {
+    function saveEventsLocally() {
       try {
         localStorage.setItem('app_calendar_events_v2', JSON.stringify(events));
       } catch(e) {}
     }
 
-    /* RENDERIZAÇÃO DE SALAS NOS CAMPOS E MODAIS */
     function renderRoomsData() {
-      // 1. Atualiza Datalist global
       const dataList = document.getElementById('roomsDataList');
       if (dataList) {
         dataList.innerHTML = rooms.map(r => `<option value="${r}"></option>`).join('');
       }
 
-      // 2. Atualiza chips de atalho no formulário principal
       const quickChipsForm = document.getElementById('quickRoomChipsForm');
       if (quickChipsForm) {
         quickChipsForm.innerHTML = `
@@ -726,7 +1043,6 @@
         `;
       }
 
-      // 3. Atualiza chips de atalho no modal
       const quickChipsModal = document.getElementById('quickRoomChipsModal');
       if (quickChipsModal) {
         quickChipsModal.innerHTML = `
@@ -739,7 +1055,6 @@
         `;
       }
 
-      // 4. Atualiza a lista dentro do modal de gerenciamento
       const listCont = document.getElementById('roomsListContainer');
       const countText = document.getElementById('roomsCountText');
       if (countText) countText.innerText = rooms.length;
@@ -835,12 +1150,11 @@
     }
 
     const initialToday = new Date();
-    let currentMonth = initialToday.getMonth(); // Mês atual automático
-    let currentYear = initialToday.getFullYear(); // Ano atual automático
+    let currentMonth = initialToday.getMonth();
+    let currentYear = initialToday.getFullYear();
     let currentTab = 'calendar';
     let pendingConfirmCallback = null;
 
-    /* TRAVA DE SEGURANÇA POR SENHA (GGFST) */
     function protectedAction(actionCallback) {
       if (isUserAuthenticated) {
         actionCallback();
@@ -877,7 +1191,6 @@
       const card = document.getElementById('passwordModalCard');
       const entered = input.value.trim();
 
-      // Comparação estrita com a senha solicitada
       if (entered === SECRET_ADMIN_PASSWORD) {
         isUserAuthenticated = true;
         closePasswordModal();
@@ -909,7 +1222,6 @@
 
     function updateSecurityUI(authenticated) {
       const btn = document.getElementById('btnHeaderAuth');
-      const text = document.getElementById('authStatusText');
       const overlay = document.getElementById('formLockOverlay');
       const banner = document.getElementById('securityBannerInfo');
 
@@ -935,31 +1247,11 @@
     }
 
     const categoryStyles = {
-      'Reunião': { 
-        bg: 'bg-blue-50 border-blue-200 text-blue-900', 
-        pill: 'bg-blue-100 text-blue-800', 
-        dot: 'bg-blue-600'
-      },
-      'Treinamento': { 
-        bg: 'bg-emerald-50 border-emerald-200 text-emerald-900', 
-        pill: 'bg-emerald-100 text-emerald-800', 
-        dot: 'bg-emerald-600'
-      },
-      'Consultoria': { 
-        bg: 'bg-amber-50 border-amber-200 text-amber-900', 
-        pill: 'bg-amber-100 text-amber-800', 
-        dot: 'bg-amber-600'
-      },
-      'Liderança': { 
-        bg: 'bg-indigo-50 border-indigo-200 text-indigo-900', 
-        pill: 'bg-indigo-100 text-indigo-800', 
-        dot: 'bg-indigo-600'
-      },
-      'Geral': { 
-        bg: 'bg-purple-50 border-purple-200 text-purple-900', 
-        pill: 'bg-purple-100 text-purple-800', 
-        dot: 'bg-purple-600'
-      }
+      'Reunião': { bg: 'bg-blue-50 border-blue-200 text-blue-900', pill: 'bg-blue-100 text-blue-800', dot: 'bg-blue-600' },
+      'Treinamento': { bg: 'bg-emerald-50 border-emerald-200 text-emerald-900', pill: 'bg-emerald-100 text-emerald-800', dot: 'bg-emerald-600' },
+      'Consultoria': { bg: 'bg-amber-50 border-amber-200 text-amber-900', pill: 'bg-amber-100 text-amber-800', dot: 'bg-amber-600' },
+      'Liderança': { bg: 'bg-indigo-50 border-indigo-200 text-indigo-900', pill: 'bg-indigo-100 text-indigo-800', dot: 'bg-indigo-600' },
+      'Geral': { bg: 'bg-purple-50 border-purple-200 text-purple-900', pill: 'bg-purple-100 text-purple-800', dot: 'bg-purple-600' }
     };
 
     const monthNames = [
@@ -1181,7 +1473,6 @@
           today.getMonth() === currentMonth && 
           today.getFullYear() === currentYear;
 
-        // Cabeçalho da célula
         const headerDiv = document.createElement('div');
         headerDiv.className = "flex items-center justify-between mb-1";
 
@@ -1269,7 +1560,6 @@
 
         cell.appendChild(eventsContainer);
 
-        // Suporte para Soltar (Drop) ao arrastar evento no Modo Edição
         cell.ondragover = (e) => {
           if (!isUserAuthenticated || !draggedEventId) return;
           e.preventDefault();
@@ -1282,7 +1572,7 @@
           cell.classList.remove('ring-2', 'ring-sky-500', 'bg-sky-50/70');
         };
 
-        cell.ondrop = (e) => {
+        cell.ondrop = async (e) => {
           if (!isUserAuthenticated || !draggedEventId) return;
           e.preventDefault();
           cell.classList.remove('ring-2', 'ring-sky-500', 'bg-sky-50/70');
@@ -1292,7 +1582,6 @@
 
           const isCopy = e.ctrlKey || e.altKey;
           if (isCopy) {
-            // Duplica para o novo dia
             const clonedEvt = {
               ...eventToHandle,
               id: String(Date.now()),
@@ -1300,12 +1589,13 @@
               title: `${eventToHandle.title} (Cópia)`
             };
             events.push(clonedEvt);
-            saveEvents();
+            saveEventsLocally();
+            await saveEventToCloud(clonedEvt);
             showToast(`Evento copiado para ${cellDateStr}!`);
           } else {
-            // Move para o novo dia
             eventToHandle.date = cellDateStr;
-            saveEvents();
+            saveEventsLocally();
+            await saveEventToCloud(eventToHandle);
             showToast(`Evento movido para ${cellDateStr}!`);
           }
 
@@ -1425,7 +1715,7 @@
       lucide.createIcons();
     }
 
-    function duplicateEvent(id) {
+    async function duplicateEvent(id) {
       const source = events.find(e => String(e.id) === String(id));
       if (!source) return;
 
@@ -1436,7 +1726,9 @@
       };
 
       events.push(duplicated);
-      saveEvents();
+      saveEventsLocally();
+      await saveEventToCloud(duplicated);
+
       showToast(`Evento "${source.title}" duplicado com sucesso!`);
       renderCalendar();
       renderEventsTable();
@@ -1447,7 +1739,7 @@
       if (badge) badge.innerText = events.length;
     }
 
-    function handleFormSubmit(e) {
+    async function handleFormSubmit(e) {
       e.preventDefault();
 
       if (!isUserAuthenticated) {
@@ -1480,11 +1772,14 @@
         showToast(`Atenção: Já existe "${conflict.title}" das ${conflict.startTime} às ${conflict.endTime}!`, false);
       }
 
+      let savedEvent = null;
+
       if (id) {
         const index = events.findIndex(item => String(item.id) === String(id));
         if (index !== -1) {
           events[index] = { ...events[index], date, title, startTime, endTime, duration, category, location, description };
-          showToast('Evento atualizado e validado!');
+          savedEvent = events[index];
+          showToast('Evento atualizado e sincronizado!');
         }
       } else {
         const newEvt = {
@@ -1499,10 +1794,13 @@
           description
         };
         events.push(newEvt);
+        savedEvent = newEvt;
         showToast('Evento adicionado e sincronizado com o calendário!');
       }
 
-      saveEvents();
+      saveEventsLocally();
+      if (savedEvent) await saveEventToCloud(savedEvent);
+
       resetForm();
       renderEventsTable();
       renderCalendar();
@@ -1523,7 +1821,6 @@
       const evt = events.find(e => String(e.id) === String(id));
       if (!evt) return;
 
-      // Abre o modal de edição diretamente na tela com todos os dados preenchidos
       document.getElementById('modalEventId').value = evt.id;
       document.getElementById('modalTitle').innerHTML = `
         <i data-lucide="pencil" class="w-5 h-5 text-amber-600"></i>
@@ -1574,7 +1871,7 @@
       document.getElementById('modalEventId').value = '';
     }
 
-    function handleModalSubmit(e) {
+    async function handleModalSubmit(e) {
       e.preventDefault();
 
       if (!isUserAuthenticated) {
@@ -1603,8 +1900,9 @@
         showToast(`Aviso: Horário coincide com "${conflict.title}"!`, false);
       }
 
+      let savedEvent = null;
+
       if (id) {
-        // Modo Edição: atualiza o registro existente
         const index = events.findIndex(ev => String(ev.id) === String(id));
         if (index !== -1) {
           events[index] = {
@@ -1618,10 +1916,10 @@
             location,
             description
           };
+          savedEvent = events[index];
           showToast('Evento atualizado com sucesso!');
         }
       } else {
-        // Modo Criação: adiciona novo registro
         const newEvt = {
           id: String(Date.now()),
           date,
@@ -1634,10 +1932,13 @@
           description
         };
         events.push(newEvt);
+        savedEvent = newEvt;
         showToast('Novo evento salvo com sucesso!');
       }
 
-      saveEvents();
+      saveEventsLocally();
+      if (savedEvent) await saveEventToCloud(savedEvent);
+
       closeModal();
       renderCalendar();
       renderEventsTable();
@@ -1708,7 +2009,7 @@
     }
 
     function viewInCalendar(dateStr) {
-      const [y, m] = dateStr.split('-');
+      const [y, m, d] = dateStr.split('-');
       currentYear = parseInt(y, 10);
       currentMonth = parseInt(m, 10) - 1;
       switchTab('calendar');
@@ -1719,11 +2020,12 @@
 
     function confirmDeleteEvent(id) {
       document.getElementById('confirmDialogTitle').innerText = 'Excluir Evento';
-      document.getElementById('confirmDialogText').innerText = 'Deseja realmente remover este compromisso da sua agenda?';
+      document.getElementById('confirmDialogText').innerText = 'Deseja realmente remover este compromisso da agenda?';
       
-      pendingConfirmCallback = () => {
+      pendingConfirmCallback = async () => {
         events = events.filter(e => String(e.id) !== String(id));
-        saveEvents();
+        saveEventsLocally();
+        await deleteEventFromCloud(id);
         showToast('Evento excluído com sucesso.');
         renderEventsTable();
         renderCalendar();
@@ -1736,9 +2038,10 @@
       document.getElementById('confirmDialogTitle').innerText = 'Limpar Todos os Eventos';
       document.getElementById('confirmDialogText').innerText = 'Atenção: todos os registros da tabela e do calendário serão removidos permanentemente!';
       
-      pendingConfirmCallback = () => {
+      pendingConfirmCallback = async () => {
         events = [];
-        saveEvents();
+        saveEventsLocally();
+        await clearAllEventsFromCloud();
         showToast('Todos os registros foram removidos.');
         renderEventsTable();
         renderCalendar();
@@ -1796,6 +2099,7 @@
       renderCalendar();
       renderEventsTable();
       updateSecurityUI(false);
+      initSupabase();
       lucide.createIcons();
     });
   </script>
