@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendário & Gestão de Eventos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Estilos para impressão de relatório */
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; font-size: 11px; }
+      .print-border { border: 1px solid #cbd5e1 !important; }
+      .calendar-day-cell { min-height: 90px !important; }
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans flex flex-col antialiased selection:bg-sky-100 selection:text-sky-900">
+
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo & Title -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-700 to-sky-500 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+            <i data-lucide="calendar" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-slate-900 text-lg leading-tight flex items-center gap-2">
+              Planejador Corporativo
+              <span class="text-xs bg-sky-100 text-sky-800 font-semibold px-2 py-0.5 rounded-full">v2.0</span>
+            </h1>
+            <p class="text-xs text-slate-500 hidden sm:block">Alimentação tabular automática & Calendário mensal interativo</p>
+          </div>
+        </div>
+
+        <!-- Tab Switching Controls -->
+        <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <button id="tabBtnCalendar" onclick="switchTab('calendar')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all shadow-xs bg-white text-slate-900 font-semibold">
+            <i data-lucide="layout-grid" class="w-4 h-4 text-sky-600"></i>
+            <span>Ver Calendário</span>
+          </button>
+          <button id="tabBtnEvents" onclick="switchTab('events')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition-all">
+            <i data-lucide="table-properties" class="w-4 h-4"></i>
+            <span>Cadastro & Tabela</span>
+            <span id="eventsCountBadge" class="ml-1 bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded-full text-xs">0</span>
+          </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2">
+          <button onclick="openModal()" class="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm transition-all">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Novo Evento</span>
+          </button>
+          <button onclick="window.print()" title="Imprimir ou Salvar em PDF" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Notification Toast Container -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700">
+      <div id="toastIcon">
+        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+      </div>
+      <p id="toastMessage" class="text-sm font-medium">Operação realizada com sucesso!</p>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- ABA 1: CALENDÁRIO VISUAL (ESTILO APRIMORADO DA SUA FOTO) -->
+    <!-- ======================================================== -->
+    <section id="tabCalendar" class="space-y-4">
+      
+      <!-- Top Bar: Month Navigator, Search, Stats -->
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        
+        <!-- Navigation Buttons -->
+        <div class="flex items-center gap-2">
+          <button onclick="prevMonth()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all" title="Mês anterior">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+          </button>
+          <div class="text-center min-w-[200px]">
+            <h2 id="currentMonthYearLabel" class="text-lg sm:text-xl font-bold text-slate-800 capitalize tracking-tight">Outubro 2024</h2>
+          </div>
+          <button onclick="nextMonth()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all" title="Próximo mês">
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+          </button>
+          <button onclick="goToToday()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 transition-colors ml-2">
+            Hoje
+          </button>
+        </div>
+
+        <!-- Filters and view toggles -->
+        <div class="flex items-center gap-3 flex-wrap">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="calendarSearchInput" oninput="filterCalendarEvents()" placeholder="Buscar evento..." class="pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 w-48 sm:w-60 transition-all">
+          </div>
+          <select id="calendarCategoryFilter" onchange="filterCalendarEvents()" class="px-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+            <option value="ALL">Todas as categorias</option>
+            <option value="Reunião">Reuniões</option>
+            <option value="Treinamento">Treinamentos</option>
+            <option value="Consultoria">Consultorias</option>
+            <option value="Liderança">Liderança</option>
+            <option value="Geral">Outros</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Calendário Visual Grid Container -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print-border">
+        
+        <!-- Dias da Semana Header (Segunda a Domingo conforme imagem) -->
+        <div class="grid grid-cols-7 bg-slate-900 text-white text-xs font-semibold tracking-wider text-center border-b border-slate-800">
+          <div class="py-2.5 px-2 bg-slate-900/90 border-r border-slate-800">Dom</div>
+          <div class="py-2.5 px-2 border-r border-slate-800">Seg</div>
+          <div class="py-2.5 px-2 border-r border-slate-800">Ter</div>
+          <div class="py-2.5 px-2 border-r border-slate-800">Qua</div>
+          <div class="py-2.5 px-2 border-r border-slate-800">Qui</div>
+          <div class="py-2.5 px-2 border-r border-slate-800">Sex</div>
+          <div class="py-2.5 px-2 bg-slate-900/90">Sáb</div>
+        </div>
+
+        <!-- Dias do Mês (Renderizados via JS) -->
+        <div id="calendarDaysGrid" class="grid grid-cols-7 auto-rows-fr bg-slate-200 gap-px">
+          <!-- Os blocos dos dias serão injetados dinamicamente -->
+        </div>
+      </div>
+
+      <!-- Legenda e Rodapé do Calendário -->
+      <div class="flex flex-wrap items-center justify-between text-xs text-slate-500 px-2 pt-2">
+        <div class="flex items-center gap-4 flex-wrap">
+          <span class="font-medium text-slate-700">Legenda:</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Reunião</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Treinamento</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Consultoria</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-indigo-500 inline-block"></span> Liderança</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> Geral</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span>Clique em qualquer dia para adicionar um evento diretamente</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- ABA 2: CADASTRO E TABELA DE ALIMENTAÇÃO -->
+    <!-- ======================================================== -->
+    <section id="tabEvents" class="hidden space-y-6">
+      
+      <!-- Card Superior: Formulário de Alimentação Rápida -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <div>
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="calendar-plus" class="w-5 h-5 text-sky-600"></i>
+              Cadastrar Novo Evento
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Preencha os campos abaixo. A duração é calculada automaticamente a partir do início e fim.</p>
+          </div>
+          <span class="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 font-medium rounded-full border border-emerald-100 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sincronizado com Calendário
+          </span>
+        </div>
+
+        <form id="quickEventForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+          <input type="hidden" id="formEventId" value="">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            
+            <!-- Data -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Data *</label>
+              <input type="date" id="inputDate" required class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
+            </div>
+
+            <!-- Título do Evento -->
+            <div class="lg:col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Nome do Evento *</label>
+              <input type="text" id="inputTitle" required placeholder="Ex: Reunião de Resultados" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
+            </div>
+
+            <!-- Horário Início -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Horário Início *</label>
+              <input type="time" id="inputStartTime" oninput="calculateDuration()" required value="08:00" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
+            </div>
+
+            <!-- Horário Fim -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Horário Fim *</label>
+              <input type="time" id="inputEndTime" oninput="calculateDuration()" required value="09:30" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
+            </div>
+
+            <!-- Duração Calculada (Readonly Automática) -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Duração (Automática)</label>
+              <div class="relative">
+                <input type="text" id="inputDuration" readonly placeholder="1h 30min" class="w-full text-sm px-3 py-2 bg-slate-100 font-medium text-slate-700 border border-slate-200 rounded-xl cursor-not-allowed">
+                <i data-lucide="clock" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Segunda Linha: Categoria e Detalhes / Local -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Categoria / Tipo</label>
+              <select id="inputCategory" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
+                <option value="Reunião">Reunião</option>
+                <option value="Treinamento">Treinamento</option>
+                <option value="Consultoria">Consultoria</option>
+                <option value="Liderança">Liderança</option>
+                <option value="Geral">Geral / Administrativo</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Local ou Observações Adicionais</label>
+              <input type="text" id="inputDescription" placeholder="Ex: Sala de Reunião 2 / Link Meet / Consultório Superior" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-all">
+            </div>
+          </div>
+
+          <!-- Botões de Ação do Form -->
+          <div class="flex items-center justify-end gap-2 pt-2">
+            <button type="button" id="btnCancelEdit" onclick="resetForm()" class="hidden px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">
+              Cancelar Edição
+            </button>
+            <button type="submit" id="btnSubmitForm" class="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-5 py-2 rounded-xl text-sm font-semibold shadow-sm transition-all">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span id="btnSubmitText">Adicionar à Tabela</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tabela de Gestão de Dados (Estilo Planilha de Dados) -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        
+        <!-- Header da Tabela com Filtro e Exportação -->
+        <div class="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50/70">
+          <div>
+            <h3 class="font-bold text-slate-800 text-sm">Registros Alimentados</h3>
+            <p class="text-xs text-slate-500">Estes dados refletem diretamente na visualização do calendário</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="relative">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="tableFilterInput" oninput="renderEventsTable()" placeholder="Filtrar tabela..." class="pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-500 w-44">
+            </div>
+            <button onclick="exportToCSV()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg shadow-2xs transition-colors" title="Exportar para Excel (CSV)">
+              <i data-lucide="download" class="w-3.5 h-3.5 text-slate-600"></i>
+              <span>Exportar CSV</span>
+            </button>
+            <button onclick="clearAllEventsModal()" class="px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-200 transition-colors">
+              Limpar Tudo
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100/80 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-200">
+                <th class="py-3 px-4">Data</th>
+                <th class="py-3 px-4">Evento</th>
+                <th class="py-3 px-4">Categoria</th>
+                <th class="py-3 px-4">Início</th>
+                <th class="py-3 px-4">Fim</th>
+                <th class="py-3 px-4">Duração</th>
+                <th class="py-3 px-4">Local / Detalhes</th>
+                <th class="py-3 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="eventsTableBody" class="divide-y divide-slate-100">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer da Tabela com Totais -->
+        <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-600">
+          <span id="totalEventsText">Carregando eventos...</span>
+          <span class="text-slate-400">Clique no ícone de calendário para ir ao dia visualmente</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: Adicionar / Editar Evento Rápido -->
+  <div id="eventModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+        <h3 id="modalTitle" class="font-bold text-slate-900 text-base flex items-center gap-2">
+          <i data-lucide="calendar" class="w-5 h-5 text-sky-600"></i>
+          Novo Evento
+        </h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="modalForm" onsubmit="handleModalSubmit(event)" class="p-5 space-y-4">
+        <input type="hidden" id="modalEventId">
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Título do Evento *</label>
+            <input type="text" id="mInputTitle" required placeholder="Ex: Jornada de Liderança" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Data *</label>
+            <input type="date" id="mInputDate" required class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Categoria</label>
+            <select id="mInputCategory" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+              <option value="Reunião">Reunião</option>
+              <option value="Treinamento">Treinamento</option>
+              <option value="Consultoria">Consultoria</option>
+              <option value="Liderança">Liderança</option>
+              <option value="Geral">Geral</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Horário Início *</label>
+            <input type="time" id="mInputStartTime" oninput="calculateModalDuration()" required value="09:00" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Horário Fim *</label>
+            <input type="time" id="mInputEndTime" oninput="calculateModalDuration()" required value="10:30" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+          </div>
+
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Duração Estimada</label>
+            <input type="text" id="mInputDuration" readonly class="w-full text-sm px-3 py-2 bg-slate-100 text-slate-700 font-medium border border-slate-200 rounded-xl cursor-not-allowed">
+          </div>
+
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Local / Observações</label>
+            <input type="text" id="mInputDescription" placeholder="Ex: Auditório ou Link Teams" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            Salvar Evento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Detalhes do Dia -->
+  <div id="dayDetailsModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 id="dayDetailsTitle" class="font-bold text-slate-900 text-base">Atividades do Dia</h3>
+          <p id="dayDetailsSubtitle" class="text-xs text-slate-500">01 de Outubro de 2024</p>
+        </div>
+        <button onclick="closeDayDetailsModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="dayEventsList" class="p-4 space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar">
+        <!-- Lista de cards do dia -->
+      </div>
+
+      <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+        <button id="btnAddNewEventToThisDay" class="text-xs font-semibold text-sky-600 hover:text-sky-700 flex items-center gap-1">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          Adicionar evento nesta data
+        </button>
+        <button onclick="closeDayDetailsModal()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-medium">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Confirmação de exclusão / ação -->
+  <div id="confirmDialogModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-5 text-center space-y-4">
+      <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h4 id="confirmDialogTitle" class="text-base font-bold text-slate-900">Tem certeza?</h4>
+        <p id="confirmDialogText" class="text-xs text-slate-500 mt-1">Essa ação não poderá ser desfeita.</p>
+      </div>
+      <div class="flex items-center justify-center gap-2 pt-2">
+        <button onclick="closeConfirmDialog()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200">
+          Cancelar
+        </button>
+        <button id="btnConfirmAction" class="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs">
+          Confirmar Exclusão
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // ESTADO E DADOS INICIAIS
+    // ==========================================
+    // Dados fiéis e complementares ao exemplo da imagem enviada pelo usuário (Outubro 2024)
+    let events = [
+      {
+        id: '1',
+        date: '2024-10-01',
+        title: 'Apresentação de Resultados',
+        startTime: '13:00',
+        endTime: '14:30',
+        duration: '1h 30min',
+        category: 'Reunião',
+        description: 'Consultoria Superior'
+      },
+      {
+        id: '2',
+        date: '2024-10-01',
+        title: 'Alinhamento Estratégico',
+        startTime: '14:30',
+        endTime: '15:00',
+        duration: '30min',
+        category: 'Reunião',
+        description: 'Sala de Conferência'
+      },
+      {
+        id: '3',
+        date: '2024-10-01',
+        title: 'Sessão Executiva Noturna',
+        startTime: '20:30',
+        endTime: '22:00',
+        duration: '1h 30min',
+        category: 'Consultoria',
+        description: 'Consultoria Superior'
+      },
+      {
+        id: '4',
+        date: '2024-10-02',
+        title: 'Reunião de Resultados',
+        startTime: '09:00',
+        endTime: '09:45',
+        duration: '45min',
+        category: 'Reunião',
+        description: 'Projeto Smart'
+      },
+      {
+        id: '5',
+        date: '2024-10-02',
+        title: 'Projeto Smart',
+        startTime: '14:00',
+        endTime: '15:00',
+        duration: '1h 00min',
+        category: 'Geral',
+        description: 'Desenvolvimento e Métricas'
+      },
+      {
+        id: '6',
+        date: '2024-10-02',
+        title: 'Treinamentos Portal RH (1º T)',
+        startTime: '13:00',
+        endTime: '14:30',
+        duration: '1h 30min',
+        category: 'Treinamento',
+        description: 'Treinamentos Portal RH - 1º T'
+      },
+      {
+        id: '7',
+        date: '2024-10-02',
+        title: 'Treinamentos Portal RH (2º T)',
+        startTime: '14:30',
+        endTime: '16:00',
+        duration: '1h 30min',
+        category: 'Treinamento',
+        description: 'Treinamentos Portal RH - 2º T'
+      },
+      {
+        id: '8',
+        date: '2024-10-02',
+        title: 'Treinamentos Portal RH (3º T)',
+        startTime: '20:30',
+        endTime: '22:00',
+        duration: '1h 30min',
+        category: 'Treinamento',
+        description: 'Consultoria Superior'
+      },
+      {
+        id: '9',
+        date: '2024-10-03',
+        title: 'Reunião de Alinhamento',
+        startTime: '13:30',
+        endTime: '15:00',
+        duration: '1h 30min',
+        category: 'Consultoria',
+        description: 'Consultoria Superior'
+      },
+      {
+        id: '10',
+        date: '2024-10-04',
+        title: 'Treinamento em MS-GL',
+        startTime: '08:00',
+        endTime: '09:30',
+        duration: '1h 30min',
+        category: 'Treinamento',
+        description: 'Treinamento em MS-GL - 1º T'
+      },
+      {
+        id: '11',
+        date: '2024-10-04',
+        title: 'Consultoria Superior',
+        startTime: '14:30',
+        endTime: '16:00',
+        duration: '1h 30min',
+        category: 'Consultoria',
+        description: 'Consultoria Superior - 2º T'
+      },
+      {
+        id: '12',
+        date: '2024-10-07',
+        title: 'Reunião de Expediente',
+        startTime: '08:00',
+        endTime: '09:00',
+        duration: '1h 00min',
+        category: 'Reunião',
+        description: 'Abertura semanal de pauta'
+      },
+      {
+        id: '13',
+        date: '2024-10-07',
+        title: 'Negociação Sindical',
+        startTime: '10:00',
+        endTime: '12:00',
+        duration: '2h 00min',
+        category: 'Geral',
+        description: 'Mesa diretora'
+      },
+      {
+        id: '14',
+        date: '2024-10-08',
+        title: 'Encontro Aprendizes',
+        startTime: '13:30',
+        endTime: '16:00',
+        duration: '2h 30min',
+        category: 'Treinamento',
+        description: 'Capacitação institucional'
+      },
+      {
+        id: '15',
+        date: '2024-10-09',
+        title: 'Comitê Executivo Local',
+        startTime: '10:00',
+        endTime: '12:00',
+        duration: '2h 00min',
+        category: 'Reunião',
+        description: 'Avaliação trimestral'
+      },
+      {
+        id: '16',
+        date: '2024-10-14',
+        title: 'Reunião de Expediente',
+        startTime: '08:00',
+        endTime: '09:00',
+        duration: '1h 00min',
+        category: 'Reunião',
+        description: 'Acompanhamento de metas'
+      },
+      {
+        id: '17',
+        date: '2024-10-16',
+        title: 'Reunião de ESG',
+        startTime: '14:30',
+        endTime: '16:00',
+        duration: '1h 30min',
+        category: 'Geral',
+        description: 'Sustentabilidade corporativa'
+      },
+      {
+        id: '18',
+        date: '2024-10-17',
+        title: 'Encontro Aprendizes',
+        startTime: '13:00',
+        endTime: '14:30',
+        duration: '1h 30min',
+        category: 'Treinamento',
+        description: 'Módulo 2'
+      },
+      {
+        id: '19',
+        date: '2024-10-21',
+        title: 'Reunião de Expediente',
+        startTime: '08:00',
+        endTime: '09:00',
+        duration: '1h 00min',
+        category: 'Reunião',
+        description: 'Expediente geral'
+      },
+      {
+        id: '20',
+        date: '2024-10-24',
+        title: 'Jornada de Lideranças',
+        startTime: '08:30',
+        endTime: '17:30',
+        duration: '9h 00min',
+        category: 'Liderança',
+        description: 'Dia 1 - Desenvolvimento de gestores'
+      },
+      {
+        id: '21',
+        date: '2024-10-25',
+        title: 'Jornada de Lideranças',
+        startTime: '08:30',
+        endTime: '17:30',
+        duration: '9h 00min',
+        category: 'Liderança',
+        description: 'Dia 2 - Workshops práticos'
+      },
+      {
+        id: '22',
+        date: '2024-10-28',
+        title: 'Reunião de Expediente',
+        startTime: '08:00',
+        endTime: '09:00',
+        duration: '1h 00min',
+        category: 'Reunião',
+        description: 'Fechamento do mês'
+      }
+    ];
+
+    // Data padrão focada no mês do modelo (Outubro 2024)
+    let currentMonth = 9; // Outubro (0-indexed)
+    let currentYear = 2024;
+    let currentTab = 'calendar';
+    let pendingConfirmCallback = null;
+
+    // Configuração de cores por categoria
+    const categoryStyles = {
+      'Reunião': {
+        bg: 'bg-blue-50 border-blue-200 text-blue-900',
+        pill: 'bg-blue-100 text-blue-800',
+        dot: 'bg-blue-500',
+        hex: '#2563eb'
+      },
+      'Treinamento': {
+        bg: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+        pill: 'bg-emerald-100 text-emerald-800',
+        dot: 'bg-emerald-500',
+        hex: '#10b981'
+      },
+      'Consultoria': {
+        bg: 'bg-amber-50 border-amber-200 text-amber-900',
+        pill: 'bg-amber-100 text-amber-800',
+        dot: 'bg-amber-500',
+        hex: '#f59e0b'
+      },
+      'Liderança': {
+        bg: 'bg-indigo-50 border-indigo-200 text-indigo-900',
+        pill: 'bg-indigo-100 text-indigo-800',
+        dot: 'bg-indigo-500',
+        hex: '#6366f1'
+      },
+      'Geral': {
+        bg: 'bg-purple-50 border-purple-200 text-purple-900',
+        pill: 'bg-purple-100 text-purple-800',
+        dot: 'bg-purple-500',
+        hex: '#a855f7'
+      }
+    };
+
+    // Cálculo de Duração Automática
+    function computeDurationString(startTime, endTime) {
+      if (!startTime || !endTime) return '';
+      const [startH, startM] = startTime.split(':').map(Number);
+      const [endH, endM] = endTime.split(':').map(Number);
+
+      let diffMinutes = (endH * 60 + endM) - (startH * 60 + startM);
+      if (diffMinutes < 0) {
+        diffMinutes += 24 * 60; // cruza a meia-noite
+      }
+
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+
+      if (hours === 0 && minutes === 0) return '0 min';
+      if (hours === 0) return `${minutes}min`;
+      if (minutes === 0) return `${hours}h 00min`;
+      return `${hours}h ${String(minutes).padStart(2, '0')}min`;
+    }
+
+    function calculateDuration() {
+      const start = document.getElementById('inputStartTime').value;
+      const end = document.getElementById('inputEndTime').value;
+      document.getElementById('inputDuration').value = computeDurationString(start, end);
+    }
+
+    function calculateModalDuration() {
+      const start = document.getElementById('mInputStartTime').value;
+      const end = document.getElementById('mInputEndTime').value;
+      document.getElementById('mInputDuration').value = computeDurationString(start, end);
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const tabCal = document.getElementById('tabCalendar');
+      const tabEvt = document.getElementById('tabEvents');
+      const btnCal = document.getElementById('tabBtnCalendar');
+      const btnEvt = document.getElementById('tabBtnEvents');
+
+      if (tab === 'calendar') {
+        tabCal.classList.remove('hidden');
+        tabEvt.classList.add('hidden');
+        btnCal.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all shadow-xs bg-white text-slate-900 font-semibold";
+        btnEvt.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition-all";
+        renderCalendar();
+      } else {
+        tabCal.classList.add('hidden');
+        tabEvt.classList.remove('hidden');
+        btnEvt.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all shadow-xs bg-white text-slate-900 font-semibold";
+        btnCal.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition-all";
+        renderEventsTable();
+      }
+      lucide.createIcons();
+    }
+
+    function showToast(message, isSuccess = true) {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toastMessage');
+      const icon = document.getElementById('toastIcon');
+
+      msg.innerText = message;
+      icon.innerHTML = isSuccess 
+        ? '<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>'
+        : '<i data-lucide="alert-circle" class="w-5 h-5 text-amber-400"></i>';
+
+      lucide.createIcons();
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3000);
+    }
+
+    const monthNames = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    function prevMonth() {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    }
+
+    function goToToday() {
+      const now = new Date();
+      currentMonth = now.getMonth();
+      currentYear = now.getFullYear();
+      renderCalendar();
+    }
+
+    function filterCalendarEvents() {
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      document.getElementById('currentMonthYearLabel').innerText = `${monthNames[currentMonth]} ${currentYear}`;
+      const grid = document.getElementById('calendarDaysGrid');
+      grid.innerHTML = '';
+
+      const searchVal = document.getElementById('calendarSearchInput')?.value.toLowerCase() || '';
+      const catVal = document.getElementById('calendarCategoryFilter')?.value || 'ALL';
+
+      // Primeiro dia da semana (0=Dom, 1=Seg, ... 6=Sáb)
+      const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+
+      const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7;
+
+      // Renderizar células
+      for (let i = 0; i < totalCells; i++) {
+        const cell = document.createElement('div');
+        const dayNumber = i - firstDayOfMonth + 1;
+        const isCurrentMonth = dayNumber > 0 && dayNumber <= daysInMonth;
+
+        // Estilos da célula
+        let baseCellClass = "min-h-[110px] sm:min-h-[125px] p-1.5 sm:p-2 bg-white flex flex-col justify-between transition-colors relative group ";
+        
+        // Domingo (coluna 0) ou Sábado (coluna 6) - estilo visual acolhedor como na imagem
+        const dayOfWeek = i % 7;
+        if (dayOfWeek === 0) {
+          // Domingo com leve toque salmão/laranja acolhedor como no screenshot original
+          baseCellClass += "bg-amber-50/40 ";
+        } else if (dayOfWeek === 6) {
+          // Sábado com leve fundo bege
+          baseCellClass += "bg-amber-50/30 ";
+        }
+
+        if (!isCurrentMonth) {
+          baseCellClass += "bg-slate-100/70 text-slate-400 opacity-60 ";
+        } else {
+          baseCellClass += "hover:bg-sky-50/30 cursor-pointer ";
+        }
+
+        cell.className = baseCellClass;
+
+        // Calcular data ISO da célula
+        let cellDateStr = '';
+        let displayDayNumber = '';
+
+        if (dayNumber <= 0) {
+          // Dias do mês anterior
+          const d = prevMonthDays + dayNumber;
+          displayDayNumber = d;
+          const prevM = currentMonth === 0 ? 11 : currentMonth - 1;
+          const prevY = currentMonth === 0 ? currentYear - 1 : currentYear;
+          cellDateStr = `${prevY}-${String(prevM + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        } else if (dayNumber > daysInMonth) {
+          // Dias do próximo mês
+          const d = dayNumber - daysInMonth;
+          displayDayNumber = d;
+          const nextM = currentMonth === 11 ? 0 : currentMonth + 1;
+          const nextY = currentMonth === 11 ? currentYear + 1 : currentYear;
+          cellDateStr = `${nextY}-${String(nextM + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        } else {
+          // Dias do mês atual
+          displayDayNumber = dayNumber;
+          cellDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+        }
+
+        // Eventos deste dia com filtro
+        const dayEvents = events.filter(e => {
+          if (e.date !== cellDateStr) return false;
+          if (catVal !== 'ALL' && e.category !== catVal) return false;
+          if (searchVal && !e.title.toLowerCase().includes(searchVal) && !(e.description || '').toLowerCase().includes(searchVal)) return false;
+          return true;
+        }).sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+        // Check if cell is Today
+        const today = new Date();
+        const isToday = isCurrentMonth && 
+          today.getDate() === dayNumber && 
+          today.getMonth() === currentMonth && 
+          today.getFullYear() === currentYear;
+
+        // Topo da Célula: Número do Dia + Botão '+' rápido
+        const headerDiv = document.createElement('div');
+        headerDiv.className = "flex items-center justify-between mb-1";
+
+        const daySpan = document.createElement('span');
+        daySpan.className = `text-xs font-bold w-6 h-6 flex items-center justify-center rounded-lg ${
+          isToday 
+            ? 'bg-sky-600 text-white shadow-xs' 
+            : isCurrentMonth ? 'text-slate-800' : 'text-slate-400'
+        }`;
+        daySpan.innerText = String(displayDayNumber).padStart(2, '0');
+        headerDiv.appendChild(daySpan);
+
+        if (isCurrentMonth) {
+          const addBtn = document.createElement('button');
+          addBtn.className = "opacity-0 group-hover:opacity-100 text-slate-400 hover:text-sky-600 transition-opacity p-0.5 rounded";
+          addBtn.title = "Adicionar evento";
+          addBtn.innerHTML = `<i data-lucide="plus" class="w-3.5 h-3.5"></i>`;
+          addBtn.onclick = (e) => {
+            e.stopPropagation();
+            openModal(cellDateStr);
+          };
+          headerDiv.appendChild(addBtn);
+        }
+
+        cell.appendChild(headerDiv);
+
+        // Container de Eventos dentro do Dia (formato de cards compactos e legíveis)
+        const eventsContainer = document.createElement('div');
+        eventsContainer.className = "space-y-1 overflow-hidden flex-1";
+
+        // Exibe até 3 eventos e o contador do restante se houver mais
+        const maxDisplay = 3;
+        dayEvents.slice(0, maxDisplay).forEach(evt => {
+          const style = categoryStyles[evt.category] || categoryStyles['Geral'];
+          const evtBadge = document.createElement('div');
+          evtBadge.className = `p-1 px-1.5 rounded-md text-[10px] leading-tight border transition-transform hover:scale-[1.02] ${style.bg}`;
+          
+          evtBadge.innerHTML = `
+            <div class="font-semibold truncate flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full ${style.dot} shrink-0"></span>
+              <span class="text-slate-500 font-mono text-[9px]">${evt.startTime}</span>
+              <span class="truncate">${evt.title}</span>
+            </div>
+            ${evt.description ? `<div class="text-[9px] text-slate-500 truncate pl-2.5">${evt.description}</div>` : ''}
+          `;
+
+          evtBadge.onclick = (e) => {
+            e.stopPropagation();
+            openDayDetails(cellDateStr);
+          };
+
+          eventsContainer.appendChild(evtBadge);
+        });
+
+        if (dayEvents.length > maxDisplay) {
+          const moreBtn = document.createElement('div');
+          moreBtn.className = "text-[9px] font-semibold text-sky-700 bg-sky-50 px-1 py-0.5 rounded text-center";
+          moreBtn.innerText = `+${dayEvents.length - maxDisplay} mais`;
+          eventsContainer.appendChild(moreBtn);
+        }
+
+        cell.appendChild(eventsContainer);
+
+        // Clique na célula para ver ou criar
+        cell.onclick = () => {
+          if (dayEvents.length > 0) {
+            openDayDetails(cellDateStr);
+          } else if (isCurrentMonth) {
+            openModal(cellDateStr);
+          }
+        };
+
+        grid.appendChild(cell);
+      }
+
+      updateEventCountBadge();
+      lucide.createIcons();
+    }
+
+    function renderEventsTable() {
+      const tbody = document.getElementById('eventsTableBody');
+      const filter = document.getElementById('tableFilterInput')?.value.toLowerCase() || '';
+      tbody.innerHTML = '';
+
+      const filtered = events.filter(e => {
+        if (!filter) return true;
+        return e.title.toLowerCase().includes(filter) ||
+               e.date.includes(filter) ||
+               (e.category && e.category.toLowerCase().includes(filter)) ||
+               (e.description && e.description.toLowerCase().includes(filter));
+      }).sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-8 text-slate-400">
+              <div class="flex flex-col items-center justify-center gap-2">
+                <i data-lucide="inbox" class="w-8 h-8 text-slate-300"></i>
+                <p class="text-xs">Nenhum evento registrado com os filtros atuais.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        document.getElementById('totalEventsText').innerText = `Total: 0 eventos`;
+        lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(evt => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/80 transition-colors group";
+
+        const style = categoryStyles[evt.category] || categoryStyles['Geral'];
+        const [y, m, d] = evt.date.split('-');
+        const formattedDate = `${d}/${m}/${y}`;
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono font-medium text-slate-700 whitespace-nowrap">
+            <span class="inline-flex items-center gap-1.5">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+              ${formattedDate}
+            </span>
+          </td>
+          <td class="py-3 px-4 font-semibold text-slate-900">
+            ${evt.title}
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${style.pill}">
+              ${evt.category || 'Geral'}
+            </span>
+          </td>
+          <td class="py-3 px-4 font-mono text-slate-600 whitespace-nowrap">
+            ${evt.startTime}
+          </td>
+          <td class="py-3 px-4 font-mono text-slate-600 whitespace-nowrap">
+            ${evt.endTime}
+          </td>
+          <td class="py-3 px-4 font-mono font-semibold text-slate-800 whitespace-nowrap">
+            <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
+              ${evt.duration || computeDurationString(evt.startTime, evt.endTime)}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-slate-500 max-w-xs truncate">
+            ${evt.description || '<span class="text-slate-300 italic">Sem observações</span>'}
+          </td>
+          <td class="py-3 px-4 text-right whitespace-nowrap">
+            <div class="flex items-center justify-end gap-1">
+              <button onclick="viewInCalendar('${evt.date}')" class="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors" title="Ver no Calendário">
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+              </button>
+              <button onclick="editEvent('${evt.id}')" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Editar Evento">
+                <i data-lucide="pencil" class="w-4 h-4"></i>
+              </button>
+              <button onclick="confirmDeleteEvent('${evt.id}')" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir Evento">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('totalEventsText').innerText = `Total: ${filtered.length} evento(s) exibido(s)`;
+      updateEventCountBadge();
+      lucide.createIcons();
+    }
+
+    function updateEventCountBadge() {
+      const badge = document.getElementById('eventsCountBadge');
+      if (badge) badge.innerText = events.length;
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('formEventId').value;
+      const date = document.getElementById('inputDate').value;
+      const title = document.getElementById('inputTitle').value.trim();
+      const startTime = document.getElementById('inputStartTime').value;
+      const endTime = document.getElementById('inputEndTime').value;
+      const category = document.getElementById('inputCategory').value;
+      const description = document.getElementById('inputDescription').value.trim();
+      const duration = computeDurationString(startTime, endTime);
+
+      if (!title || !date || !startTime || !endTime) {
+        showToast('Por favor, preencha todos os campos obrigatórios.', false);
+        return;
+      }
+
+      if (id) {
+        // Atualização
+        const index = events.findIndex(item => item.id === id);
+        if (index !== -1) {
+          events[index] = { ...events[index], date, title, startTime, endTime, duration, category, description };
+          showToast('Evento atualizado com sucesso!');
+        }
+      } else {
+        // Criação
+        const newEvt = {
+          id: String(Date.now()),
+          date,
+          title,
+          startTime,
+          endTime,
+          duration,
+          category,
+          description
+        };
+        events.push(newEvt);
+        showToast('Evento adicionado e sincronizado!');
+      }
+
+      resetForm();
+      renderEventsTable();
+      renderCalendar();
+    }
+
+    function resetForm() {
+      document.getElementById('formEventId').value = '';
+      document.getElementById('inputTitle').value = '';
+      document.getElementById('inputDescription').value = '';
+      document.getElementById('btnSubmitText').innerText = 'Adicionar à Tabela';
+      document.getElementById('btnCancelEdit').classList.add('hidden');
+      calculateDuration();
+    }
+
+    function editEvent(id) {
+      const evt = events.find(e => e.id === id);
+      if (!evt) return;
+
+      switchTab('events');
+
+      document.getElementById('formEventId').value = evt.id;
+      document.getElementById('inputDate').value = evt.date;
+      document.getElementById('inputTitle').value = evt.title;
+      document.getElementById('inputStartTime').value = evt.startTime;
+      document.getElementById('inputEndTime').value = evt.endTime;
+      document.getElementById('inputCategory').value = evt.category || 'Reunião';
+      document.getElementById('inputDescription').value = evt.description || '';
+      document.getElementById('inputDuration').value = evt.duration || computeDurationString(evt.startTime, evt.endTime);
+
+      document.getElementById('btnSubmitText').innerText = 'Salvar Alterações';
+      document.getElementById('btnCancelEdit').classList.remove('hidden');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openModal(defaultDate = null) {
+      const modal = document.getElementById('eventModal');
+      document.getElementById('modalEventId').value = '';
+      document.getElementById('mInputTitle').value = '';
+      document.getElementById('mInputDescription').value = '';
+      
+      const dateInput = document.getElementById('mInputDate');
+      if (defaultDate) {
+        dateInput.value = defaultDate;
+      } else if (!dateInput.value) {
+        dateInput.value = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
+      }
+
+      calculateModalDuration();
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      document.getElementById('eventModal').classList.add('hidden');
+    }
+
+    function handleModalSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('mInputTitle').value.trim();
+      const date = document.getElementById('mInputDate').value;
+      const category = document.getElementById('mInputCategory').value;
+      const startTime = document.getElementById('mInputStartTime').value;
+      const endTime = document.getElementById('mInputEndTime').value;
+      const description = document.getElementById('mInputDescription').value.trim();
+      const duration = computeDurationString(startTime, endTime);
+
+      const newEvt = {
+        id: String(Date.now()),
+        date,
+        title,
+        startTime,
+        endTime,
+        duration,
+        category,
+        description
+      };
+
+      events.push(newEvt);
+      closeModal();
+      showToast('Novo evento adicionado com sucesso!');
+      renderCalendar();
+      renderEventsTable();
+    }
+
+    // Modal de Detalhes do Dia
+    function openDayDetails(dateStr) {
+      const [y, m, d] = dateStr.split('-');
+      const monthLabel = monthNames[parseInt(m, 10) - 1];
+      
+      document.getElementById('dayDetailsTitle').innerText = `Dia ${d} de ${monthLabel}`;
+      document.getElementById('dayDetailsSubtitle').innerText = `${dateStr} • Detalhamento de atividades`;
+
+      const listContainer = document.getElementById('dayEventsList');
+      listContainer.innerHTML = '';
+
+      const dayEvts = events.filter(e => e.date === dateStr).sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+      if (dayEvts.length === 0) {
+        listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhum evento registrado neste dia.</p>`;
+      } else {
+        dayEvts.forEach(evt => {
+          const style = categoryStyles[evt.category] || categoryStyles['Geral'];
+          const div = document.createElement('div');
+          div.className = `p-3 rounded-xl border flex items-start justify-between gap-3 ${style.bg}`;
+          div.innerHTML = `
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-800">${evt.title}</span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${style.pill}">${evt.category}</span>
+              </div>
+              <p class="text-xs font-mono text-slate-600 flex items-center gap-2">
+                <span><i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>${evt.startTime} às ${evt.endTime}</span>
+                <span class="text-slate-400">•</span>
+                <span>Duração: <strong>${evt.duration}</strong></span>
+              </p>
+              ${evt.description ? `<p class="text-xs text-slate-600 mt-1">${evt.description}</p>` : ''}
+            </div>
+            <div class="flex items-center gap-1">
+              <button onclick="closeDayDetailsModal(); editEvent('${evt.id}')" class="p-1 text-slate-500 hover:text-slate-800 hover:bg-white rounded-lg transition-all" title="Editar">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="closeDayDetailsModal(); confirmDeleteEvent('${evt.id}')" class="p-1 text-slate-500 hover:text-red-600 hover:bg-white rounded-lg transition-all" title="Excluir">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          `;
+          listContainer.appendChild(div);
+        });
+      }
+
+      // Configurar botão de adicionar neste dia
+      document.getElementById('btnAddNewEventToThisDay').onclick = () => {
+        closeDayDetailsModal();
+        openModal(dateStr);
+      };
+
+      document.getElementById('dayDetailsModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeDayDetailsModal() {
+      document.getElementById('dayDetailsModal').classList.add('hidden');
+    }
+
+    function viewInCalendar(dateStr) {
+      const [y, m] = dateStr.split('-');
+      currentYear = parseInt(y, 10);
+      currentMonth = parseInt(m, 10) - 1;
+      switchTab('calendar');
+      setTimeout(() => {
+        openDayDetails(dateStr);
+      }, 100);
+    }
+
+    function confirmDeleteEvent(id) {
+      document.getElementById('confirmDialogTitle').innerText = 'Excluir Evento';
+      document.getElementById('confirmDialogText').innerText = 'Deseja realmente excluir este evento da sua agenda?';
+      
+      pendingConfirmCallback = () => {
+        events = events.filter(e => e.id !== id);
+        showToast('Evento excluído com sucesso.');
+        renderEventsTable();
+        renderCalendar();
+      };
+
+      document.getElementById('confirmDialogModal').classList.remove('hidden');
+    }
+
+    function clearAllEventsModal() {
+      document.getElementById('confirmDialogTitle').innerText = 'Limpar Todos os Eventos';
+      document.getElementById('confirmDialogText').innerText = 'Atenção: todos os registros da tabela e do calendário serão removidos!';
+      
+      pendingConfirmCallback = () => {
+        events = [];
+        showToast('Todos os registros foram removidos.');
+        renderEventsTable();
+        renderCalendar();
+      };
+
+      document.getElementById('confirmDialogModal').classList.remove('hidden');
+    }
+
+    function closeConfirmDialog() {
+      document.getElementById('confirmDialogModal').classList.add('hidden');
+      pendingConfirmCallback = null;
+    }
+
+    document.getElementById('btnConfirmAction').addEventListener('click', () => {
+      if (pendingConfirmCallback) pendingConfirmCallback();
+      closeConfirmDialog();
+    });
+
+    // Exportação para Excel / CSV
+    function exportToCSV() {
+      if (events.length === 0) {
+        showToast('Não há dados para exportar.', false);
+        return;
+      }
+
+      const headers = ['Data', 'Evento', 'Categoria', 'Inicio', 'Fim', 'Duracao', 'Local_Observacoes'];
+      const rows = events.map(e => [
+        `"${e.date}"`,
+        `"${e.title.replace(/"/g, '""')}"`,
+        `"${(e.category || '').replace(/"/g, '""')}"`,
+        `"${e.startTime}"`,
+        `"${e.endTime}"`,
+        `"${e.duration || ''}"`,
+        `"${(e.description || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `calendario_eventos_${currentYear}_${currentMonth + 1}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Arquivo CSV baixado com sucesso!');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Define a data inicial do formulário como a do primeiro dia do mês ativo
+      document.getElementById('inputDate').value = '2024-10-01';
+      calculateDuration();
+      renderCalendar();
+      renderEventsTable();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
