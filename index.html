@@ -236,7 +236,7 @@
         </div>
         <div id="securityBannerInfo" class="flex items-center gap-2 text-slate-600 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
           <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-500"></i>
-          <span>Trava ativa: Edição liberada exclusivamente com senha <strong>GGFST</strong></span>
+          <span>Modo Leitura: Edição liberada exclusivamente mediante senha restrita</span>
         </div>
       </div>
     </section>
@@ -409,7 +409,7 @@
 
         <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-600">
           <span id="totalEventsText">Carregando eventos...</span>
-          <span class="text-slate-400">Edição e exclusão protegidas pela senha GGFST</span>
+          <span class="text-slate-400">Edição e exclusão protegidas por senha restrita</span>
         </div>
       </div>
     </section>
@@ -837,38 +837,44 @@ alter table public.events disable row level security;</pre>
       // Formato nativo em minúsculo
       const payloadLower = {
         id: String(evt.id),
-        date: evt.date,
-        title: evt.title,
-        starttime: evt.startTime || evt.starttime || '08:00',
-        endtime: evt.endTime || evt.endtime || '09:00',
-        duration: evt.duration || '',
-        category: evt.category || 'Geral',
-        location: evt.location || '',
-        description: evt.description || ''
+        date: String(evt.date || ''),
+        title: String(evt.title || ''),
+        starttime: String(evt.startTime || evt.starttime || '08:00'),
+        endtime: String(evt.endTime || evt.endtime || '09:00'),
+        duration: String(evt.duration || ''),
+        category: String(evt.category || 'Geral'),
+        location: String(evt.location || ''),
+        description: String(evt.description || '')
       };
 
       let res = await supabaseClient.from('events').upsert(payloadLower);
 
-      // Se a tabela tiver sido criada especificamente com aspas maiúsculas
-      if (res.error && (res.error.code === 'PGRST204' || (res.error.message && res.error.message.includes('column')))) {
+      // Se a tabela tiver colunas com camelCase ("startTime", "endTime")
+      if (res.error && (res.error.code === 'PGRST204' || (res.error.message && res.error.message.toLowerCase().includes('column')))) {
         const payloadCamel = {
           id: String(evt.id),
-          date: evt.date,
-          title: evt.title,
-          startTime: evt.startTime || evt.starttime || '08:00',
-          endTime: evt.endTime || evt.endtime || '09:00',
-          duration: evt.duration || '',
-          category: evt.category || 'Geral',
-          location: evt.location || '',
-          description: evt.description || ''
+          date: String(evt.date || ''),
+          title: String(evt.title || ''),
+          startTime: String(evt.startTime || evt.starttime || '08:00'),
+          endTime: String(evt.endTime || evt.endtime || '09:00'),
+          duration: String(evt.duration || ''),
+          category: String(evt.category || 'Geral'),
+          location: String(evt.location || ''),
+          description: String(evt.description || '')
         };
         res = await supabaseClient.from('events').upsert(payloadCamel);
+      }
+
+      // Se a tabela foi criada sem chave primária (erro ON CONFLICT)
+      if (res.error && res.error.message && res.error.message.includes('ON CONFLICT')) {
+        await supabaseClient.from('events').delete().eq('id', String(evt.id));
+        res = await supabaseClient.from('events').insert(payloadLower);
       }
 
       return res;
     }
 
-    /* Subir todos os eventos locais para o Supabase com feedback visual */
+    /* Subir todos os eventos locais para o Supabase com feedback visual detalhado */
     async function forceSyncAllEventsToCloud() {
       if (!supabaseClient) {
         showToast('Supabase não conectado!', false);
@@ -880,7 +886,7 @@ alter table public.events disable row level security;</pre>
       if (btn) btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Subindo...</span>`;
       lucide.createIcons();
 
-      showToast(`Iniciando envio de ${events.length} eventos para a nuvem...`);
+      showToast(`Tentando enviar ${events.length} eventos para a nuvem...`);
 
       let successCount = 0;
       let lastError = null;
@@ -900,9 +906,20 @@ alter table public.events disable row level security;</pre>
 
       if (lastError && successCount === 0) {
         updateCloudUI(false, lastError.message);
-        showToast(`Erro ao gravar no Supabase: ${lastError.message}`, false);
+        
+        // Exibe diagnóstico claro na tela
+        const bannerMsg = document.getElementById('cloudBannerMsg');
+        if (bannerMsg) {
+          bannerMsg.innerHTML = `<span class="text-red-600 font-bold">Bloqueio no Supabase:</span> ${lastError.message}. <br><strong>Solução rápida:</strong> Execute o comando SQL no painel do Supabase para liberar as permissões.`;
+        }
+        showToast(`Erro do Supabase: ${lastError.message}`, false);
+        openCloudModal();
       } else {
         updateCloudUI(true);
+        const bannerMsg = document.getElementById('cloudBannerMsg');
+        if (bannerMsg) {
+          bannerMsg.innerText = `Sincronização concluída! ${successCount} eventos salvos na nuvem com sucesso.`;
+        }
         showToast(`Sucesso! ${successCount} eventos enviados para a nuvem.`);
         await fetchEventsFromCloud();
       }
@@ -1279,7 +1296,7 @@ alter table public.events disable row level security;</pre>
         isUserAuthenticated = true;
         closePasswordModal();
         updateSecurityUI(true);
-        showToast('Senha GGFST correta! Modo Edição liberado.');
+        showToast('Senha correta! Modo Edição liberado.');
 
         if (pendingProtectedAction) {
           const action = pendingProtectedAction;
@@ -1323,7 +1340,7 @@ alter table public.events disable row level security;</pre>
         btn.onclick = toggleAdminAuth;
         if (overlay) overlay.classList.remove('hidden');
         if (banner) {
-          banner.innerHTML = `<i data-lucide="shield" class="w-3.5 h-3.5 text-amber-500"></i><span>Trava ativa: Edição liberada exclusivamente com senha <strong>GGFST</strong></span>`;
+          banner.innerHTML = `<i data-lucide="shield" class="w-3.5 h-3.5 text-amber-500"></i><span>Modo Leitura: Edição liberada exclusivamente mediante senha restrita</span>`;
         }
       }
       renderCalendar();
