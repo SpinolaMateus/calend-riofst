@@ -98,11 +98,13 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
     
+    <!-- Toast Message Container -->
     <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 max-w-md">
       <div id="toastIcon"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i></div>
       <p id="toastMessage" class="text-sm font-medium">Operação realizada com sucesso!</p>
     </div>
 
+    <!-- CALENDAR TAB -->
     <section id="tabCalendar" class="space-y-4">
       <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4 no-print">
         <div class="flex items-center gap-2">
@@ -156,13 +158,14 @@
           <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-indigo-500 inline-block"></span> Liderança</span>
           <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-purple-500 inline-block"></span> Geral</span>
         </div>
-        <div id="securityBannerInfo" class="flex items-center gap-2 text-slate-600 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
+        <div class="flex items-center gap-2 text-slate-600 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
           <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-500"></i>
           <span>Modo Leitura: Edição liberada exclusivamente mediante senha restrita</span>
         </div>
       </div>
     </section>
 
+    <!-- EVENTS & TABLE TAB -->
     <section id="tabEvents" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
         <div id="formLockOverlay" class="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] z-10 flex items-center justify-center p-4">
@@ -171,7 +174,7 @@
               <i data-lucide="lock" class="w-6 h-6"></i>
             </div>
             <h3 class="font-bold text-slate-900 text-sm">Formulário Protegido</h3>
-            <p class="text-xs text-slate-500">Digite a senha corporativa para liberar cadastros e alterações.</p>
+            <p class="text-xs text-slate-500">Digite a senha corporativa para liberar cadastros e alterações manuais.</p>
             <button onclick="toggleAuthModal()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all shadow-sm">
               Digitar Senha de Edição
             </button>
@@ -182,9 +185,9 @@
           <div>
             <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
               <i data-lucide="calendar-plus" class="w-5 h-5 text-sky-600"></i>
-              Cadastrar / Editar Evento (Salvamento Manual)
+              Cadastrar / Editar Evento (Salvamento Manual e Controlado)
             </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Preencha os campos com segurança e clique em Salvar para enviar para a nuvem.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Preencha os campos e clique no botão Salvar para enviar explicitamente para a nuvem.</p>
           </div>
         </div>
 
@@ -294,13 +297,14 @@
         </div>
         <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-600">
           <span id="totalEventsText">Carregando eventos...</span>
-          <span class="text-slate-400">Edição e exclusão protegidas por senha restrita</span>
+          <span class="text-slate-400">Modo Leitura: Edição liberada exclusivamente mediante senha restrita</span>
         </div>
       </div>
     </section>
 
   </main>
 
+  <!-- CLOUD DIAGNOSTIC MODAL -->
   <div id="cloudModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
       <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-sky-50/60">
@@ -310,7 +314,7 @@
           </div>
           <div>
             <h3 class="font-bold text-slate-900 text-base">Painel de Diagnóstico do Supabase</h3>
-            <p class="text-xs text-slate-500">Conexão e status da nuvem</p>
+            <p class="text-xs text-slate-500">Conexão e salvamento manual controlado</p>
           </div>
         </div>
         <button onclick="closeCloudModal()" class="text-slate-400 hover:text-slate-700 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -324,13 +328,12 @@
           <div class="text-[11px] space-y-1 pt-1 text-slate-300">
             <p><strong>Projeto:</strong> tgmjghxytbwafhrxdkyl</p>
             <p><strong>Registros na Nuvem:</strong> <span id="diagCloudRowsCount">Consultando...</span></p>
-            <p id="diagErrorMessage" class="text-red-400 hidden mt-1"></p>
           </div>
         </div>
         <div class="bg-sky-50 border border-sky-200 p-3.5 rounded-xl flex items-center justify-between gap-3">
           <div>
-            <h4 class="font-bold text-xs text-sky-950">Enviar Todos os Registros Locais</h4>
-            <p class="text-[11px] text-sky-800">Sincroniza a base inteira manualmente com a nuvem.</p>
+            <h4 class="font-bold text-xs text-sky-950">Enviar Dados Manualmente para a Nuvem</h4>
+            <p class="text-[11px] text-sky-800">Sincroniza todos os registros salvos localmente com o Supabase.</p>
           </div>
           <button type="button" onclick="manualSyncAllToCloud()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs transition-colors shrink-0 flex items-center gap-1.5 shadow-xs">
             <i data-lucide="upload-cloud" class="w-4 h-4"></i> Enviar Agora
@@ -343,6 +346,7 @@
     </div>
   </div>
 
+  <!-- PASSWORD MODAL -->
   <div id="passwordModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div id="passwordModalCard" class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-6 text-center space-y-4">
       <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
@@ -350,7 +354,7 @@
       </div>
       <div>
         <h3 class="font-bold text-slate-900 text-base">Autenticação Necessária</h3>
-        <p class="text-xs text-slate-500 mt-1">Digite a senha para liberar cadastros e alterações.</p>
+        <p class="text-xs text-slate-500 mt-1">Digite a senha corporativa para liberar cadastros e alterações.</p>
       </div>
       <div class="space-y-2">
         <input type="password" id="inputSecretPassword" placeholder="Digite a senha..." class="w-full text-center text-sm tracking-widest font-mono px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl outline-none" onkeydown="if(event.key==='Enter') verifyEnteredPassword()">
@@ -363,6 +367,7 @@
     </div>
   </div>
 
+  <!-- EVENT MODAL -->
   <div id="eventModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
       <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
@@ -429,6 +434,7 @@
     </div>
   </div>
 
+  <!-- ROOMS MANAGEMENT MODAL -->
   <div id="roomsManagementModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
@@ -465,6 +471,7 @@
 
   <datalist id="roomsDataList"></datalist>
 
+  <!-- DAY DETAILS MODAL -->
   <div id="dayDetailsModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
@@ -484,6 +491,7 @@
     </div>
   </div>
 
+  <!-- CONFIRM DIALOG MODAL -->
   <div id="confirmDialogModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-5 text-center space-y-4">
       <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
@@ -911,20 +919,24 @@
 
         cell.ondragover = (e) => { if (isUserAuthenticated && draggedEventId) { e.preventDefault(); cell.classList.add('ring-2', 'ring-sky-500'); } };
         cell.ondragleave = () => { cell.classList.remove('ring-2', 'ring-sky-500'); };
-        cell.ondrop = (e) => {
+        cell.ondrop = async (e) => {
           if (!isUserAuthenticated || !draggedEventId) return;
           e.preventDefault();
           cell.classList.remove('ring-2', 'ring-sky-500');
           const evt = events.find(x => String(x.id) === String(draggedEventId));
           if (evt) {
             if (e.ctrlKey || e.altKey) {
-              events.push({ ...evt, id: String(Date.now()), date: cellDateStr, title: `${evt.title} (Cópia)` });
+              const dup = { ...evt, id: String(Date.now()), date: cellDateStr, title: `${evt.title} (Cópia)` };
+              events.push(dup);
+              saveEventsLocally();
+              if (supabaseClient) await upsertEventToSupabase(dup);
               showToast(`Evento copiado para ${cellDateStr}!`);
             } else {
               evt.date = cellDateStr;
+              saveEventsLocally();
+              if (supabaseClient) await upsertEventToSupabase(evt);
               showToast(`Evento movido para ${cellDateStr}!`);
             }
-            saveEventsLocally();
             renderCalendar();
             renderEventsTable();
           }
@@ -1011,7 +1023,7 @@
       saveEventsLocally();
       if (evt && supabaseClient) {
         const res = await upsertEventToSupabase(evt);
-        if (res.error) showToast(`Erro ao enviar para nuvem: ${res.error.message}`, false); else showToast('Salvo e enviado para a nuvem!');
+        if (res.error) showToast(`Erro ao enviar para nuvem: ${res.error.message}`, false); else showToast('Salvo e enviado explicitamente para a nuvem!');
       } else {
         showToast('Salvo localmente!');
       }
@@ -1092,7 +1104,7 @@
       saveEventsLocally();
       if (evt && supabaseClient) {
         const res = await upsertEventToSupabase(evt);
-        if (res.error) showToast(`Erro nuvem: ${res.error.message}`, false); else showToast('Salvo com sucesso na nuvem!');
+        if (res.error) showToast(`Erro nuvem: ${res.error.message}`, false); else showToast('Salvo e enviado para a nuvem com sucesso!');
       } else {
         showToast('Salvo localmente!');
       }
@@ -1109,7 +1121,7 @@
       events.push(dup);
       saveEventsLocally();
       if (supabaseClient) await upsertEventToSupabase(dup);
-      showToast('Evento duplicado!');
+      showToast('Evento duplicado com sucesso!');
       renderCalendar();
       renderEventsTable();
     }
