@@ -1,0 +1,6 @@
+{
+  "name": "Cronograma de Integração da Unidade",
+  "description": "Painel interativo e editável de divulgação do cronograma de integração com linha do tempo arrastável por horários, gestão por cores, importação XLS e exportação rápida em PDF.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
