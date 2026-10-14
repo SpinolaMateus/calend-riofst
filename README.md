@@ -38,7 +38,7 @@ Para proteger as alterações compartilhadas:
 
 1. No Supabase, abra **SQL Editor** e execute o script exibido no painel **Vercel & Supabase** do aplicativo. Ele permite leitura pública e restringe gravações aos administradores.
 2. Mantenha o cadastro público desativado em **Authentication → Settings**.
-3. Em **Authentication → Users**, crie e confirme o usuário `ggfst@tgmjghxytbwafhrxdkyl.supabase.co`, definindo a senha diretamente no painel. Se usar outro e-mail interno, configure `VITE_SUPABASE_ADMIN_EMAIL` no Vercel para esse e-mail. Não grave a senha no código nem no repositório.
+3. Em **Authentication → Users**, crie e confirme o usuário `ggfst@tgmjghxytbwafhrxdkyl.supabase.co`, definindo diretamente no painel uma senha com pelo menos 6 caracteres. A senha `GGFST` sozinha é curta demais para o Supabase Auth. Se usar outro e-mail interno, configure `VITE_SUPABASE_ADMIN_EMAIL` no Vercel para esse e-mail. Não grave a senha no código nem no repositório.
 4. Copie o UUID do usuário administrador e, no SQL Editor, execute `INSERT INTO public.app_admins (user_id) VALUES ('UUID_DO_USUARIO');`.
 5. No aplicativo, use **Acesso admin** e entre com usuário `GGFST` e a senha definida no painel.
 

@@ -301,12 +301,10 @@ CREATE TABLE IF NOT EXISTS public.events (
   description TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
-GRANT SELECT ON public.events TO anon, authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.events TO authenticated;
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.events FROM anon, PUBLIC;
 
 -- Visitantes podem ler; somente administradores autenticados podem alterar
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public Access" ON public.events;
 DROP POLICY IF EXISTS "Acesso publico liberado para events" ON public.events;
 DROP POLICY IF EXISTS "Public can read events" ON public.events;
 DROP POLICY IF EXISTS "Admins manage events" ON public.events;
@@ -316,6 +314,9 @@ CREATE POLICY "Admins manage events" ON public.events
   FOR ALL TO authenticated
   USING (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())))
   WITH CHECK (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
+GRANT SELECT ON TABLE public.events TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON TABLE public.events TO authenticated;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.events FROM anon, PUBLIC;
 
 -- 2. TABELA DO CRONOGRAMA DE INTEGRAÇÃO DA UNIDADE
 CREATE TABLE IF NOT EXISTS public.integration_sessions (
@@ -338,12 +339,9 @@ CREATE TABLE IF NOT EXISTS public.integration_sessions (
 );
 ALTER TABLE public.integration_sessions
   ADD COLUMN IF NOT EXISTS audience TEXT NOT NULL DEFAULT 'geral';
-GRANT SELECT ON public.integration_sessions TO anon, authenticated;
-GRANT INSERT, UPDATE, DELETE ON public.integration_sessions TO authenticated;
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.integration_sessions FROM anon, PUBLIC;
-
 -- Visitantes podem ler; somente administradores autenticados podem alterar
 ALTER TABLE public.integration_sessions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public Access" ON public.integration_sessions;
 DROP POLICY IF EXISTS "Acesso publico liberado para integration_sessions" ON public.integration_sessions;
 DROP POLICY IF EXISTS "Public can read integration sessions" ON public.integration_sessions;
 DROP POLICY IF EXISTS "Admins manage integration sessions" ON public.integration_sessions;
@@ -353,6 +351,9 @@ CREATE POLICY "Admins manage integration sessions" ON public.integration_session
   FOR ALL TO authenticated
   USING (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())))
   WITH CHECK (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
+GRANT SELECT ON TABLE public.integration_sessions TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON TABLE public.integration_sessions TO authenticated;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.integration_sessions FROM anon, PUBLIC;
 
 -- Crie a conta em Authentication > Users; depois execute com o UUID do usuário:
 -- INSERT INTO public.app_admins (user_id) VALUES ('UUID_DO_USUARIO');
