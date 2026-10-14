@@ -1,1308 +1,296 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calendário & Gestão de Eventos Corporativos</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'] },
-          colors: {
-            brand: { 50: '#f0f7ff', 100: '#e0effe', 500: '#0284c7', 600: '#0369a1', 700: '#075985', 900: '#0c4a6e' }
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Cookie check</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+
+      body {
+        font-family: 'Inter', Helvetica, Arial, sans-serif;
+        background: light-dark(#F8F8F7, #191919);
+        color: light-dark(#1f1f1f, #e3e3e3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .container {
+        background: light-dark(#FFFFFF, #1F1F1F);
+        padding: 32px;
+        border-radius: 16px;
+        border: 1px solid light-dark(#E2E3E4, #3E3E3E);
+        max-width: min(80%, 500px);
+        width: 100%;
+        color: light-dark(#2B2D31, #D4D4D4);
+      }
+
+      h1 {
+        font-size: 20px;
+        font-weight: 500;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        color: light-dark(#2B2D31, #D4D4D4);
+      }
+
+      p {
+        font-size: 14px;
+        color: light-dark(#2B2D31, #D4D4D4);
+        line-height: 21px;
+        margin: 0 0 1.5rem 0;
+      }
+
+      .icon {
+        margin-bottom: 1rem;
+        line-height: 0;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 2rem;
+      }
+
+      button {
+        background-color: light-dark(#fff, #323232);
+        color: light-dark(#2B2D31, #FCFCFC);
+        border: 1px solid light-dark(#E2E3E4, #3E3E3E);
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 14px;
+        line-height: 21px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-weight: 400;
+        font-family: 'Inter', Helvetica, Arial, sans-serif;
+        width: 100%;
+      }
+
+      button:hover {
+        background-color: light-dark(#EAEAEB, #424242);
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      /* Loading Spinner Animation */
+      .spinner {
+        margin: 0 auto 1.5rem auto;
+        width: 40px;
+        height: 40px;
+        border: 4px solid light-dark(#f0f0f0, #262626);
+        border-top: 4px solid light-dark(#076eff, #87a9ff); /* Blue color */
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      .logo {
+        border-radius: 10px;
+        display: block;
+        margin: 0 auto 2rem auto;
+      }
+
+      .logo.hidden {
+        display: none;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img
+        class="logo"
+        src="https://www.gstatic.com/images/branding/productlogos/ai_studio/v1/web-512dp/logo_ai_studio_color_1x_web_512dp.png"
+        alt="AI Studio Logo"
+        width="256"
+        height="256"
+      />
+      <div class="spinner"></div>
+      <div id="error-ui" class="hidden">
+        <div class="icon">
+          <svg
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="48px"
+            height="48px"
+            fill="#D73A49"
+          >
+            <path
+              d="M12,2C6.486,2,2,6.486,2,12s4.486,10,10,10s10-4.486,10-10S17.514,2,12,2z M13,17h-2v-2h2V17z M13,13h-2V7h2V13z"
+            />
+          </svg>
+        </div>
+        <div id="stepOne" class="text-container">
+          <h1>Action required to load your app</h1>
+          <p>
+            It looks like your browser is blocking a required security cookie, which is common on
+            older versions of iOS and Safari.
+          </p>
+          <div class="button-container">
+            <button id="authInSeparateWindowButton" onclick="redirectToReturnUrl(true)">Authenticate in new window</button>
+          </div>
+        </div>
+        <div id="stepTwo" class="text-container hidden">
+          <h1>Action required to load your app</h1>
+          <p>
+            It looks like your browser is blocking a required security cookie, which is common on
+            older versions of iOS and Safari.
+          </p>
+          <div class="button-container">
+            <button id="interactButton" onclick="redirectToReturnUrl(false)">Close and continue</button>
+          </div>
+        </div>
+        <div id="stepThree" class="text-container hidden">
+          <h1>Almost there!</h1>
+          <p>
+            Grant permission for the required security cookie below.
+          </p>
+          <div class="button-container">
+            <button id="grantPermissionButton" onclick="grantStorageAccess()">Grant permission</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const AUTH_FLOW_TEST_COOKIE_NAME = '__SECURE-aistudio_auth_flow_may_set_cookies';
+      const COOKIE_VALUE = 'true';
+
+      function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          let cookie = cookies[i].trim();
+          if (cookie.startsWith(name + '=')) {
+            return cookie.substring(name.length + 1);
           }
         }
+        return null;
       }
-    }
-  </script>
-  <style>
-    @media print {
-      .no-print { display: none !important; }
-      body { background: white !important; font-size: 11px; }
-      .print-border { border: 1px solid #cbd5e1 !important; }
-    }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 9999px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    .shake-animation { animation: shake 0.35s ease-in-out; }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-6px); }
-      40%, 80% { transform: translateX(6px); }
-    }
-  </style>
-</head>
-<body class="bg-slate-50 text-slate-800 min-h-screen font-sans flex flex-col antialiased selection:bg-sky-100 selection:text-sky-900">
 
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16 gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-sm shrink-0">
-            <i data-lucide="calendar" class="w-5 h-5"></i>
-          </div>
-          <h1 class="font-bold text-slate-900 text-base sm:text-lg tracking-tight">Calendário Mensal</h1>
-        </div>
-
-        <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
-          <button id="tabBtnCalendar" onclick="switchTab('calendar')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all shadow-xs bg-white text-slate-900 font-semibold">
-            <i data-lucide="layout-grid" class="w-4 h-4 text-sky-600"></i>
-            <span class="hidden sm:inline">Ver Calendário</span>
-            <span class="sm:hidden">Calendário</span>
-          </button>
-          <button id="tabBtnEvents" onclick="switchTab('events')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition-all">
-            <i data-lucide="table-properties" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Cadastro & Tabela</span>
-            <span class="sm:hidden">Tabela</span>
-            <span id="eventsCountBadge" class="ml-1 bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded-full text-xs">0</span>
-          </button>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button id="btnCloudStatus" onclick="openCloudModal()" title="Status da Nuvem Supabase" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-emerald-50 text-emerald-800 border-emerald-300">
-            <i id="cloudStatusIcon" data-lucide="cloud" class="w-3.5 h-3.5 text-emerald-600"></i>
-            <span id="cloudStatusText" class="hidden md:inline">Nuvem Conectada</span>
-          </button>
-
-          <button id="btnHeaderAuth" onclick="requestToggleAuth()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100">
-            <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i>
-            <span id="authStatusText">Modo Leitura</span>
-          </button>
-
-          <button onclick="protectedAction(() => openRoomsModal())" title="Gerenciar Salas e Locais" class="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all shadow-xs">
-            <i data-lucide="map-pin" class="w-4 h-4 text-sky-600"></i>
-            <span class="hidden md:inline">Salas</span>
-          </button>
-
-          <button onclick="protectedAction(() => openModal())" class="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm transition-all">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Novo Evento</span>
-          </button>
-
-          <button onclick="window.print()" title="Imprimir" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors">
-            <i data-lucide="printer" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    
-    <!-- Toast Message Container -->
-    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 max-w-md">
-      <div id="toastIcon"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i></div>
-      <p id="toastMessage" class="text-sm font-medium">Operação realizada com sucesso!</p>
-    </div>
-
-    <!-- CALENDAR TAB -->
-    <section id="tabCalendar" class="space-y-4">
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4 no-print">
-        <div class="flex items-center gap-2">
-          <button onclick="prevMonth()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 transition-all" title="Mês anterior">
-            <i data-lucide="chevron-left" class="w-5 h-5"></i>
-          </button>
-          <div class="text-center min-w-[190px]">
-            <h2 id="currentMonthYearLabel" class="text-lg sm:text-xl font-bold text-slate-800 capitalize tracking-tight">Carregando...</h2>
-          </div>
-          <button onclick="nextMonth()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 transition-all" title="Próximo mês">
-            <i data-lucide="chevron-right" class="w-5 h-5"></i>
-          </button>
-          <button onclick="goToToday()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 transition-colors ml-2">Hoje</button>
-        </div>
-
-        <div class="flex items-center gap-3 flex-wrap">
-          <div class="relative">
-            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="calendarSearchInput" oninput="filterCalendarEvents()" placeholder="Buscar evento ou local..." class="pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 w-48 sm:w-60 transition-all">
-          </div>
-          <select id="calendarCategoryFilter" onchange="filterCalendarEvents()" class="px-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20">
-            <option value="ALL">Todas as categorias</option>
-            <option value="Reunião">Reuniões</option>
-            <option value="Treinamento">Treinamentos</option>
-            <option value="Consultoria">Consultorias</option>
-            <option value="Liderança">Liderança</option>
-            <option value="Geral">Outros</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print-border">
-        <div class="grid grid-cols-7 bg-slate-900 text-white text-xs font-semibold tracking-wider text-center border-b border-slate-800">
-          <div class="py-2.5 px-2 bg-slate-900/90 border-r border-slate-800">Dom</div>
-          <div class="py-2.5 px-2 border-r border-slate-800">Seg</div>
-          <div class="py-2.5 px-2 border-r border-slate-800">Ter</div>
-          <div class="py-2.5 px-2 border-r border-slate-800">Qua</div>
-          <div class="py-2.5 px-2 border-r border-slate-800">Qui</div>
-          <div class="py-2.5 px-2 border-r border-slate-800">Sex</div>
-          <div class="py-2.5 px-2 bg-slate-900/90">Sáb</div>
-        </div>
-        <div id="calendarDaysGrid" class="grid grid-cols-7 auto-rows-fr bg-slate-200 gap-px"></div>
-      </div>
-
-      <div class="flex flex-wrap items-center justify-between text-xs text-slate-500 px-2 pt-2 gap-2 no-print">
-        <div class="flex items-center gap-4 flex-wrap">
-          <span class="font-medium text-slate-700">Categorias:</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-500 inline-block"></span> Reunião</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span> Treinamento</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-amber-500 inline-block"></span> Consultoria</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-indigo-500 inline-block"></span> Liderança</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-purple-500 inline-block"></span> Geral</span>
-        </div>
-        <div class="flex items-center gap-2 text-slate-600 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
-          <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-500"></i>
-          <span id="footerSecurityModeLabel">Modo Leitura: Edição liberada exclusivamente mediante senha restrita</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- EVENTS & TABLE TAB -->
-    <section id="tabEvents" class="hidden space-y-6">
-      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-        <div id="formLockOverlay" class="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] z-10 flex items-center justify-center p-4">
-          <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200 max-w-sm text-center space-y-3">
-            <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
-              <i data-lucide="lock" class="w-6 h-6"></i>
-            </div>
-            <h3 class="font-bold text-slate-900 text-sm">Formulário Protegido</h3>
-            <p class="text-xs text-slate-500">Digite a senha corporativa para liberar cadastros e alterações manuais.</p>
-            <button onclick="requestToggleAuth()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all shadow-sm">
-              Digitar Senha de Edição
-            </button>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 flex-wrap gap-2">
-          <div>
-            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-              <i data-lucide="calendar-plus" class="w-5 h-5 text-sky-600"></i>
-              Cadastrar / Editar Evento (Salvamento Manual e Controlado)
-            </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Preencha os campos e clique no botão Salvar para enviar explicitamente para a nuvem.</p>
-          </div>
-        </div>
-
-        <form id="quickEventForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
-          <input type="hidden" id="formEventId" value="">
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Data *</label>
-              <input type="date" id="inputDate" required class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
-            </div>
-            <div class="lg:col-span-2">
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Nome do Evento *</label>
-              <input type="text" id="inputTitle" required placeholder="Ex: Reunião de Resultados" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Horário Início *</label>
-              <input type="time" id="inputStartTime" oninput="calculateDuration()" required value="08:00" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Horário Fim *</label>
-              <input type="time" id="inputEndTime" oninput="calculateDuration()" required value="09:30" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Duração</label>
-              <input type="text" id="inputDuration" readonly placeholder="1h 30min" class="w-full text-sm px-3 py-2 bg-slate-100 font-semibold text-slate-700 border border-slate-200 rounded-xl cursor-not-allowed">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
-            <div class="sm:col-span-3">
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Categoria</label>
-              <select id="inputCategory" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20">
-                <option value="Reunião">Reunião</option>
-                <option value="Treinamento">Treinamento</option>
-                <option value="Consultoria">Consultoria</option>
-                <option value="Liderança">Liderança</option>
-                <option value="Geral">Geral / Administrativo</option>
-              </select>
-            </div>
-            <div class="sm:col-span-5">
-              <div class="flex items-center justify-between mb-1">
-                <label class="text-xs font-semibold text-slate-700 flex items-center gap-1">
-                  <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-600"></i> Local / Sala
-                </label>
-                <button type="button" onclick="protectedAction(() => openRoomsModal())" class="text-[11px] text-sky-600 hover:underline">Gerenciar Salas</button>
-              </div>
-              <input type="text" id="inputLocation" list="roomsDataList" placeholder="Selecione abaixo ou digite..." class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20">
-              <div id="quickRoomChipsForm" class="flex items-center gap-1.5 flex-wrap mt-1.5"></div>
-            </div>
-            <div class="sm:col-span-4">
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Observações</label>
-              <input type="text" id="inputDescription" placeholder="Ex: Pauta, responsável, link" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-            <div id="formValidationWarning" class="text-xs font-medium text-amber-600 hidden flex items-center gap-1.5">
-              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-              <span id="formValidationText">Aviso</span>
-            </div>
-            <div class="flex items-center gap-2 ml-auto">
-              <button type="button" id="btnCancelEdit" onclick="resetForm()" class="hidden px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-xl">Cancelar</button>
-              <button type="submit" id="btnSubmitForm" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all">
-                <i data-lucide="save" class="w-4 h-4"></i>
-                <span id="btnSubmitText">Salvar e Enviar para Nuvem</span>
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50/70">
-          <div>
-            <h3 class="font-bold text-slate-800 text-sm">Registros Salvos</h3>
-            <p class="text-xs text-slate-500">Dados integrados com a nuvem Supabase</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="relative">
-              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-              <input type="text" id="tableFilterInput" oninput="renderEventsTable()" placeholder="Filtrar tabela..." class="pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-500 w-44">
-            </div>
-            <button onclick="exportToCSV()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg transition-colors">
-              <i data-lucide="download" class="w-3.5 h-3.5 text-slate-600"></i> Exportar CSV
-            </button>
-            <button onclick="protectedAction(() => clearAllEventsModal())" class="px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg border border-transparent">Limpar Tudo</button>
-          </div>
-        </div>
-        <div class="overflow-x-auto custom-scrollbar">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr class="bg-slate-100/80 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-200">
-                <th class="py-3 px-4">Data</th>
-                <th class="py-3 px-4">Evento</th>
-                <th class="py-3 px-4">Categoria</th>
-                <th class="py-3 px-4">Início</th>
-                <th class="py-3 px-4">Fim</th>
-                <th class="py-3 px-4">Duração</th>
-                <th class="py-3 px-4">Local / Sala</th>
-                <th class="py-3 px-4">Observações</th>
-                <th class="py-3 px-4 text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="eventsTableBody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-        <div class="p-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-600">
-          <span id="totalEventsText">Carregando eventos...</span>
-          <span id="footerSecurityModeLabelTable">Modo Leitura: Edição liberada exclusivamente mediante senha restrita</span>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <div id="cloudModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-sky-50/60">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-xs">
-            <i data-lucide="cloud" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h3 class="font-bold text-slate-900 text-base">Painel de Diagnóstico do Supabase</h3>
-            <p class="text-xs text-slate-500">Conexão e salvamento manual controlado</p>
-          </div>
-        </div>
-        <button onclick="closeCloudModal()" class="text-slate-400 hover:text-slate-700 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div class="p-5 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
-        <div class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono space-y-2">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span class="text-slate-400 font-sans font-semibold">Status do Banco de Dados:</span>
-            <span id="diagStatusBadge" class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Conectado</span>
-          </div>
-          <div class="text-[11px] space-y-1 pt-1 text-slate-300">
-            <p><strong>Projeto:</strong> tgmjghxytbwafhrxdkyl</p>
-            <p><strong>Registros na Nuvem:</strong> <span id="diagCloudRowsCount">Consultando...</span></p>
-          </div>
-        </div>
-
-        <div class="bg-sky-50 border border-sky-200 p-3.5 rounded-xl flex items-center justify-between gap-3">
-          <div>
-            <h4 class="font-bold text-xs text-sky-950">Enviar Dados Manualmente para a Nuvem</h4>
-            <p class="text-[11px] text-sky-800">Sincroniza todos os registros salvos localmente com o Supabase.</p>
-          </div>
-          <button type="button" onclick="manualSyncAllToCloud()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs transition-colors shrink-0 flex items-center gap-1.5 shadow-xs">
-            <i data-lucide="upload-cloud" class="w-4 h-4"></i> Subir Agora
-          </button>
-        </div>
-
-        <div class="space-y-1.5 pt-2 border-t border-slate-100">
-          <label class="block text-xs font-semibold text-slate-700">Supabase Project URL</label>
-          <input type="text" id="inputSupabaseUrl" class="w-full text-xs font-mono px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" placeholder="https://xyz.supabase.co">
-        </div>
-        <div class="space-y-1.5">
-          <label class="block text-xs font-semibold text-slate-700">Supabase Public Anon Key</label>
-          <input type="text" id="inputSupabaseKey" class="w-full text-xs font-mono px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl" placeholder="sb_publishable_...">
-        </div>
-      </div>
-      <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-        <button type="button" onclick="testCloudConnection()" class="px-3 py-2 text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200 rounded-xl flex items-center gap-1.5">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Testar Conexão
-        </button>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="closeCloudModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-200 rounded-xl">Fechar</button>
-          <button type="button" onclick="saveCloudConfig()" class="px-4 py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl">Reconectar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PASSWORD MODAL -->
-  <div id="passwordModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div id="passwordModalCard" class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-6 text-center space-y-4">
-      <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
-        <i data-lucide="shield-alert" class="w-6 h-6"></i>
-      </div>
-      <div>
-        <h3 id="passwordModalTitle" class="font-bold text-slate-900 text-base">Autenticação Necessária</h3>
-        <p id="passwordModalSubtitle" class="text-xs text-slate-500 mt-1">Digite a senha corporativa para liberar cadastros e alterações.</p>
-      </div>
-      <div class="space-y-2">
-        <input type="password" id="inputSecretPassword" placeholder="Digite a senha..." class="w-full text-center text-sm tracking-widest font-mono px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl outline-none" onkeydown="if(event.key==='Enter') verifyEnteredPassword()">
-        <p id="passwordErrorMsg" class="text-xs text-red-600 font-semibold hidden">Senha incorreta!</p>
-      </div>
-      <div class="flex items-center gap-2 pt-2">
-        <button type="button" onclick="closePasswordModal()" class="w-1/2 px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl">Cancelar</button>
-        <button type="button" onclick="verifyEnteredPassword()" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-semibold">Confirmar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- EVENT MODAL -->
-  <div id="eventModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
-        <h3 id="modalTitle" class="font-bold text-slate-900 text-base flex items-center gap-2">
-          <i data-lucide="calendar" class="w-5 h-5 text-sky-600"></i> Novo Evento
-        </h3>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <form id="modalForm" onsubmit="handleModalSubmit(event)" class="p-5 space-y-4">
-        <input type="hidden" id="modalEventId">
-        <div class="grid grid-cols-2 gap-3">
-          <div class="col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Título *</label>
-            <input type="text" id="mInputTitle" required placeholder="Ex: Reunião Executiva" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Data *</label>
-            <input type="date" id="mInputDate" required class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Categoria</label>
-            <select id="mInputCategory" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-              <option value="Reunião">Reunião</option>
-              <option value="Treinamento">Treinamento</option>
-              <option value="Consultoria">Consultoria</option>
-              <option value="Liderança">Liderança</option>
-              <option value="Geral">Geral</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Início *</label>
-            <input type="time" id="mInputStartTime" oninput="calculateModalDuration()" required value="08:00" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Fim *</label>
-            <input type="time" id="mInputEndTime" oninput="calculateModalDuration()" required value="09:30" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-          </div>
-          <div class="col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Duração</label>
-            <input type="text" id="mInputDuration" readonly class="w-full text-sm px-3 py-2 bg-slate-100 text-slate-700 font-semibold border border-slate-200 rounded-xl">
-          </div>
-          <div class="col-span-2">
-            <div class="flex items-center justify-between mb-1">
-              <label class="text-xs font-semibold text-slate-700 flex items-center gap-1">
-                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-600"></i> Local / Sala
-              </label>
-              <button type="button" onclick="protectedAction(() => openRoomsModal())" class="text-[11px] text-sky-600 hover:underline">Gerenciar Salas</button>
-            </div>
-            <input type="text" id="mInputLocation" list="roomsDataList" placeholder="Selecione ou digite..." class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-            <div id="quickRoomChipsModal" class="flex items-center gap-1.5 flex-wrap mt-1.5"></div>
-          </div>
-          <div class="col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Observações</label>
-            <input type="text" id="mInputDescription" placeholder="Detalhes" class="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-          </div>
-        </div>
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl">Cancelar</button>
-          <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5">
-            <i data-lucide="save" class="w-4 h-4"></i> Salvar e Enviar para Nuvem
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ROOMS MANAGEMENT MODAL -->
-  <div id="roomsManagementModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-      <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center"><i data-lucide="map-pin" class="w-4 h-4"></i></div>
-          <div>
-            <h3 class="font-bold text-slate-900 text-sm">Gerenciamento de Salas</h3>
-            <p class="text-[11px] text-slate-500">Salas e locais pré-estabelecidos</p>
-          </div>
-        </div>
-        <button onclick="closeRoomsModal()" class="text-slate-400 hover:text-slate-700 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div class="p-4 space-y-4">
-        <div class="space-y-1.5">
-          <label class="block text-xs font-semibold text-slate-700">Nova Sala / Local</label>
-          <div class="flex items-center gap-2">
-            <input type="text" id="inputNewRoomName" placeholder="Ex: Auditório B" class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none" onkeydown="if(event.key==='Enter'){ event.preventDefault(); addNewRoom(); }">
-            <button type="button" onclick="addNewRoom()" class="bg-sky-600 hover:bg-sky-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-xs">Adicionar</button>
-          </div>
-        </div>
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-slate-700">Salas Cadastradas (<span id="roomsCountText">0</span>)</span>
-            <button type="button" onclick="resetRoomsToDefault()" class="text-[10px] text-slate-400 hover:underline">Restaurar padrões</button>
-          </div>
-          <div id="roomsListContainer" class="space-y-1.5 max-h-60 overflow-y-auto custom-scrollbar border border-slate-100 rounded-xl p-2 bg-slate-50/50"></div>
-        </div>
-      </div>
-      <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
-        <button type="button" onclick="closeRoomsModal()" class="px-4 py-1.5 bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">Concluir</button>
-      </div>
-    </div>
-  </div>
-
-  <datalist id="roomsDataList"></datalist>
-
-  <!-- DAY DETAILS MODAL -->
-  <div id="dayDetailsModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-      <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-        <div>
-          <h3 id="dayDetailsTitle" class="font-bold text-slate-900 text-base">Atividades do Dia</h3>
-          <p id="dayDetailsSubtitle" class="text-xs text-slate-500">Detalhes</p>
-        </div>
-        <button onclick="closeDayDetailsModal()" class="text-slate-400 hover:text-slate-700 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div id="dayEventsList" class="p-4 space-y-2.5 max-h-96 overflow-y-auto custom-scrollbar"></div>
-      <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-        <button id="btnAddNewEventToThisDay" class="text-xs font-semibold text-sky-600 hover:text-sky-700 flex items-center gap-1">
-          <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar neste dia
-        </button>
-        <button onclick="closeDayDetailsModal()" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-xl text-xs font-medium">Fechar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- CONFIRM DIALOG MODAL -->
-  <div id="confirmDialogModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-5 text-center space-y-4">
-      <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
-        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-      </div>
-      <div>
-        <h4 id="confirmDialogTitle" class="text-base font-bold text-slate-900">Tem certeza?</h4>
-        <p id="confirmDialogText" class="text-xs text-slate-500 mt-1">Ação definitiva na nuvem.</p>
-      </div>
-      <div class="flex items-center justify-center gap-2 pt-2">
-        <button onclick="closeConfirmDialog()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl">Cancelar</button>
-        <button id="btnConfirmAction" class="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl">Confirmar</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const SECRET_ADMIN_PASSWORD = "GGFST";
-    let isUserAuthenticated = false;
-    let pendingProtectedAction = null;
-    let draggedEventId = null;
-
-    let supabaseClient = null;
-    let isCloudConnected = false;
-    let supabaseUrl = 'https://tgmjghxytbwafhrxdkyl.supabase.co';
-    let supabaseKey = 'sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c';
-
-    function initSupabase() {
-      const storedUrl = localStorage.getItem('app_supabase_url');
-      const storedKey = localStorage.getItem('app_supabase_key');
-      if (storedUrl) supabaseUrl = storedUrl;
-      if (storedKey) supabaseKey = storedKey;
-
-      if (supabaseUrl && supabaseKey && window.supabase) {
-        try {
-          supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
-            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
-          });
-          isCloudConnected = true;
-          updateCloudUI(true);
-          fetchEventsFromCloud();
-        } catch(e) {
-          isCloudConnected = false;
-          updateCloudUI(false);
-        }
+      function setAuthFlowTestCookie() {
+        // Set the cookie's TTL to 1 minute. This is a short lived cookie because it is only used
+        // when the user does not have an auth token or their auth token needs to be reset.
+        // Making this cookie too long-lived allows the user to get into a state where they can't
+        // mint a new auth token.
+        document.cookie = `${AUTH_FLOW_TEST_COOKIE_NAME}=${COOKIE_VALUE}; Path=/; Secure; SameSite=None; Domain=${window.location.hostname}; Partitioned; Max-Age=60;`;
       }
-    }
 
-    function updateCloudUI(connected) {
-      const statusIcon = document.getElementById('cloudStatusIcon');
-      const statusText = document.getElementById('cloudStatusText');
-      const btn = document.getElementById('btnCloudStatus');
-      const diagBadge = document.getElementById('diagStatusBadge');
-
-      if (connected) {
-        if (btn) btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-emerald-50 text-emerald-800 border-emerald-300";
-        if (statusIcon) { statusIcon.setAttribute('data-lucide', 'cloud'); statusIcon.className = "w-3.5 h-3.5 text-emerald-600"; }
-        if (statusText) statusText.innerText = "Nuvem Conectada";
-        if (diagBadge) {
-          diagBadge.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-          diagBadge.innerText = "Conectado com Sucesso";
-        }
-      } else {
-        if (btn) btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-amber-50 text-amber-800 border-amber-300";
-        if (statusIcon) { statusIcon.setAttribute('data-lucide', 'cloud-off'); statusIcon.className = "w-3.5 h-3.5 text-amber-600"; }
-        if (statusText) statusText.innerText = "Nuvem Offline";
-        if (diagBadge) {
-          diagBadge.className = "px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30";
-          diagBadge.innerText = "Desconectado";
-        }
+      /**
+       * Returns true if the test cookie is set, false otherwise.
+       */
+      function authFlowTestCookieIsSet() {
+        return getCookie(AUTH_FLOW_TEST_COOKIE_NAME) === COOKIE_VALUE;
       }
-      lucide.createIcons();
-    }
 
-    function openCloudModal() {
-      document.getElementById('inputSupabaseUrl').value = supabaseUrl;
-      document.getElementById('inputSupabaseKey').value = supabaseKey;
-      document.getElementById('cloudModal').classList.remove('hidden');
-      testCloudConnection();
-      lucide.createIcons();
-    }
+      /**
+       * Redirects to the return url. If autoClose is true, then the return url will be opened in a
+       * new window, and it will be closed automatically when the page loads.
+       * Options:
+       *   storageAccessGranted: if true, appends __storage_access_granted=1 to
+       *   the return url so the Lua auth script can set the test cookie
+       *   server-side (needed for Safari/iOS where document.cookie is blocked).
+       */
+      async function redirectToReturnUrl(autoClose, storageAccessGranted = false) {
+        const initialReturnUrlStr = new URLSearchParams(window.location.search).get('return_url');
+        const returnUrl = initialReturnUrlStr ? new URL(initialReturnUrlStr) : null;
 
-    function closeCloudModal() {
-      document.getElementById('cloudModal').classList.add('hidden');
-    }
-
-    function saveCloudConfig() {
-      supabaseUrl = document.getElementById('inputSupabaseUrl').value.trim();
-      supabaseKey = document.getElementById('inputSupabaseKey').value.trim();
-      localStorage.setItem('app_supabase_url', supabaseUrl);
-      localStorage.setItem('app_supabase_key', supabaseKey);
-      initSupabase();
-      testCloudConnection();
-      showToast('Configuração de nuvem atualizada!');
-    }
-
-    async function testCloudConnection() {
-      const diagRows = document.getElementById('diagCloudRowsCount');
-      if (!supabaseClient) {
-        if (diagRows) diagRows.innerText = 'Cliente Supabase não inicializado';
-        return;
-      }
-      try {
-        const { data, error } = await supabaseClient.from('events').select('id');
-        if (error) {
-          if (diagRows) diagRows.innerText = `Erro: ${error.message}`;
-          updateCloudUI(false);
+        // Prevent potentially malicious URLs from being used
+        if (returnUrl.protocol.toLowerCase() === 'javascript:') {
+          console.error('Potentially malicious return URL blocked');
           return;
         }
-        if (diagRows) diagRows.innerText = `${data ? data.length : 0} evento(s) gravado(s)`;
-        updateCloudUI(true);
-        showToast('Conexão com Supabase testada com sucesso!');
-      } catch(e) {
-        if (diagRows) diagRows.innerText = `Erro de conexão`;
-        updateCloudUI(false);
-      }
-    }
 
-    async function upsertEventToSupabase(evt) {
-      if (!supabaseClient) return { error: new Error('Sem cliente Supabase') };
-      const payload = {
-        id: String(evt.id),
-        date: String(evt.date || ''),
-        title: String(evt.title || ''),
-        starttime: String(evt.startTime || evt.starttime || '08:00'),
-        endtime: String(evt.endTime || evt.endtime || '09:00'),
-        duration: String(evt.duration || ''),
-        category: String(evt.category || 'Geral'),
-        location: String(evt.location || ''),
-        description: String(evt.description || '')
-      };
-      let res = await supabaseClient.from('events').upsert(payload);
-      if (res.error && res.error.message && res.error.message.includes('ON CONFLICT')) {
-        await supabaseClient.from('events').delete().eq('id', String(evt.id));
-        res = await supabaseClient.from('events').insert(payload);
-      }
-      return res;
-    }
-
-    async function manualSyncAllToCloud() {
-      if (!supabaseClient) { showToast('Nuvem não configurada', false); return; }
-      let count = 0;
-      for (const evt of events) {
-        const res = await upsertEventToSupabase(evt);
-        if (!res.error) count++;
-      }
-      showToast(`Sucesso! ${count} de ${events.length} registros enviados para a nuvem.`);
-      testCloudConnection();
-    }
-
-    async function fetchEventsFromCloud() {
-      if (!supabaseClient) return;
-      try {
-        const { data, error } = await supabaseClient.from('events').select('*');
-        if (!error && data && data.length > 0) {
-          events = data.map(item => ({
-            id: String(item.id),
-            date: item.date,
-            title: item.title,
-            startTime: item.startTime || item.starttime || '08:00',
-            endTime: item.endTime || item.endtime || '09:00',
-            duration: item.duration || '',
-            category: item.category || 'Geral',
-            location: item.location || '',
-            description: item.description || ''
-          }));
-          saveEventsLocally();
-          renderCalendar();
-          renderEventsTable();
-          const diagRows = document.getElementById('diagCloudRowsCount');
-          if (diagRows) diagRows.innerText = `${events.length} evento(s) gravado(s)`;
+        if (storageAccessGranted) {
+          returnUrl.searchParams.set('__storage_access_granted', '1');
         }
-      } catch(e) {}
-    }
 
-    const defaultRooms = ["Aroeira", "Bambuzal", "Obeia", "Integração"];
-    let rooms = [];
-    try {
-      const storedRooms = localStorage.getItem('app_calendar_rooms_v1');
-      rooms = storedRooms ? JSON.parse(storedRooms) : defaultRooms;
-    } catch(e) { rooms = defaultRooms; }
-
-    function saveRooms() {
-      try { localStorage.setItem('app_calendar_rooms_v1', JSON.stringify(rooms)); } catch(e) {}
-      renderRoomsData();
-    }
-
-    let events = [];
-    try {
-      const stored = localStorage.getItem('app_calendar_events_v3');
-      events = stored ? JSON.parse(stored) : [
-        { id: '1', date: '2026-10-01', title: 'Apresentação de Resultados', startTime: '13:00', endTime: '14:30', duration: '1h 30min', category: 'Reunião', location: 'Aroeira', description: 'Consultoria Superior' },
-        { id: '2', date: '2026-10-01', title: 'Alinhamento Estratégico', startTime: '14:30', endTime: '15:00', duration: '30min', category: 'Reunião', location: 'Bambuzal', description: 'Sala de Conferência' }
-      ];
-    } catch(e) { events = []; }
-
-    function saveEventsLocally() {
-      try { localStorage.setItem('app_calendar_events_v3', JSON.stringify(events)); } catch(e) {}
-    }
-
-    function renderRoomsData() {
-      const dataList = document.getElementById('roomsDataList');
-      if (dataList) dataList.innerHTML = rooms.map(r => `<option value="${r}"></option>`).join('');
-
-      ['quickRoomChipsForm', 'quickRoomChipsModal'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.innerHTML = `<span class="text-[10px] text-slate-400 font-semibold uppercase">Salas:</span>` +
-            rooms.map(r => `<button type="button" onclick="selectRoom('${id.includes('Form') ? 'form' : 'modal'}', '${r}')" class="px-2 py-0.5 text-[11px] font-medium bg-white hover:bg-sky-50 text-slate-700 border border-slate-200 rounded-lg shadow-2xs">${r}</button>`).join('');
-        }
-      });
-
-      const listCont = document.getElementById('roomsListContainer');
-      const countText = document.getElementById('roomsCountText');
-      if (countText) countText.innerText = rooms.length;
-      if (listCont) {
-        listCont.innerHTML = rooms.map((room, idx) => `
-          <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200">
-            <span class="text-xs font-semibold text-slate-800">${room}</span>
-            <div class="flex items-center gap-1">
-              <button type="button" onclick="editRoom(${idx})" class="p-1 text-slate-400 hover:text-amber-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-              <button type="button" onclick="deleteRoom(${idx})" class="p-1 text-slate-400 hover:text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-            </div>
-          </div>
-        `).join('');
-      }
-      lucide.createIcons();
-    }
-
-    function selectRoom(target, name) {
-      document.getElementById(target === 'form' ? 'inputLocation' : 'mInputLocation').value = name;
-    }
-
-    function openRoomsModal() { renderRoomsData(); document.getElementById('roomsManagementModal').classList.remove('hidden'); lucide.createIcons(); }
-    function closeRoomsModal() { document.getElementById('roomsManagementModal').classList.add('hidden'); }
-    function addNewRoom() {
-      const input = document.getElementById('inputNewRoomName');
-      const name = input.value.trim();
-      if (!name) return;
-      if (!rooms.some(r => r.toLowerCase() === name.toLowerCase())) { rooms.push(name); saveRooms(); input.value = ''; showToast(`Sala "${name}" adicionada!`); }
-    }
-    function editRoom(idx) {
-      const newName = prompt('Novo nome para a sala:', rooms[idx]);
-      if (newName && newName.trim()) { rooms[idx] = newName.trim(); saveRooms(); showToast('Sala renomeada!'); }
-    }
-    function deleteRoom(idx) { rooms.splice(idx, 1); saveRooms(); showToast('Sala excluída.'); }
-    function resetRoomsToDefault() { rooms = [...defaultRooms]; saveRooms(); showToast('Salas restauradas!'); }
-
-    const initialToday = new Date();
-    let currentMonth = initialToday.getMonth();
-    let currentYear = initialToday.getFullYear();
-    let currentTab = 'calendar';
-    let pendingConfirmCallback = null;
-
-    function protectedAction(actionCallback) {
-      if (isUserAuthenticated) {
-        actionCallback();
-      } else {
-        pendingProtectedAction = actionCallback;
-        openPasswordModal("Autenticação Necessária", "Digite a senha corporativa para liberar cadastros e alterações.");
-      }
-    }
-
-    function requestToggleAuth() {
-      if (isUserAuthenticated) {
-        isUserAuthenticated = false;
-        updateSecurityUI(false);
-        showToast('Retornado para o Modo Leitura.');
-      } else {
-        openPasswordModal("Desbloquear Modo Liberado", "Digite a senha corporativa para ativar a edição completa.");
-      }
-    }
-
-    function openPasswordModal(title, subtitle) {
-      const modal = document.getElementById('passwordModal');
-      document.getElementById('passwordModalTitle').innerText = title;
-      document.getElementById('passwordModalSubtitle').innerText = subtitle;
-      document.getElementById('inputSecretPassword').value = '';
-      document.getElementById('passwordErrorMsg').classList.add('hidden');
-      modal.classList.remove('hidden');
-      document.getElementById('inputSecretPassword').focus();
-      lucide.createIcons();
-    }
-    function closePasswordModal() {
-      document.getElementById('passwordModal').classList.add('hidden');
-      pendingProtectedAction = null;
-    }
-
-    function verifyEnteredPassword() {
-      const entered = document.getElementById('inputSecretPassword').value.trim();
-      if (entered === SECRET_ADMIN_PASSWORD) {
-        isUserAuthenticated = true;
-        closePasswordModal();
-        updateSecurityUI(true);
-        showToast('Modo de Edição Liberado com Sucesso!');
-        if (pendingProtectedAction) {
-          const act = pendingProtectedAction;
-          pendingProtectedAction = null;
-          act();
-        }
-      } else {
-        document.getElementById('passwordErrorMsg').classList.remove('hidden');
-        document.getElementById('passwordModalCard').classList.add('shake-animation');
-        setTimeout(() => document.getElementById('passwordModalCard').classList.remove('shake-animation'), 400);
-      }
-    }
-
-    function updateSecurityUI(authenticated) {
-      const btn = document.getElementById('btnHeaderAuth');
-      const overlay = document.getElementById('formLockOverlay');
-      const footerLabel = document.getElementById('footerSecurityModeLabel');
-      const footerLabelTable = document.getElementById('footerSecurityModeLabelTable');
-
-      if (authenticated) {
-        if (btn) {
-          btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-emerald-50 text-emerald-800 border-emerald-300";
-          btn.innerHTML = `<i data-lucide="unlock" class="w-3.5 h-3.5 text-emerald-600"></i><span>Modo Liberado (Sair)</span>`;
-        }
-        if (overlay) overlay.classList.add('hidden');
-        if (footerLabel) footerLabel.innerText = "Modo Liberado: Edição e criação ativas";
-        if (footerLabelTable) footerLabelTable.innerText = "Modo Liberado: Edição e criação ativas";
-      } else {
-        if (btn) {
-          btn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all bg-amber-50 text-amber-800 border-amber-300";
-          btn.innerHTML = `<i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i><span>Modo Leitura</span>`;
-        }
-        if (overlay) overlay.classList.remove('hidden');
-        if (footerLabel) footerLabel.innerText = "Modo Leitura: Edição liberada exclusivamente mediante senha restrita";
-        if (footerLabelTable) footerLabelTable.innerText = "Modo Leitura: Edição liberada exclusivamente mediante senha restrita";
-      }
-      renderCalendar();
-      renderEventsTable();
-      lucide.createIcons();
-    }
-
-    const categoryStyles = {
-      'Reunião': { bg: 'bg-blue-50 border-blue-200 text-blue-900', pill: 'bg-blue-100 text-blue-800', dot: 'bg-blue-600' },
-      'Treinamento': { bg: 'bg-emerald-50 border-emerald-200 text-emerald-900', pill: 'bg-emerald-100 text-emerald-800', dot: 'bg-emerald-600' },
-      'Consultoria': { bg: 'bg-amber-50 border-amber-200 text-amber-900', pill: 'bg-amber-100 text-amber-800', dot: 'bg-amber-600' },
-      'Liderança': { bg: 'bg-indigo-50 border-indigo-200 text-indigo-900', pill: 'bg-indigo-100 text-indigo-800', dot: 'bg-indigo-600' },
-      'Geral': { bg: 'bg-purple-50 border-purple-200 text-purple-900', pill: 'bg-purple-100 text-purple-800', dot: 'bg-purple-600' }
-    };
-    const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-
-    function computeMinutes(timeStr) {
-      if (!timeStr) return 0;
-      const [h, m] = timeStr.split(':').map(Number);
-      return (h * 60) + m;
-    }
-
-    function computeDurationString(start, end) {
-      if (!start || !end) return '';
-      const sm = computeMinutes(start), em = computeMinutes(end);
-      if (em <= sm) return 'Inválido';
-      const diff = em - sm;
-      const h = Math.floor(diff / 60), m = diff % 60;
-      return h === 0 ? `${m}min` : m === 0 ? `${h}h 00min` : `${h}h ${String(m).padStart(2, '0')}min`;
-    }
-
-    function calculateDuration() {
-      document.getElementById('inputDuration').value = computeDurationString(document.getElementById('inputStartTime').value, document.getElementById('inputEndTime').value);
-    }
-    function calculateModalDuration() {
-      document.getElementById('mInputDuration').value = computeDurationString(document.getElementById('mInputStartTime').value, document.getElementById('mInputEndTime').value);
-    }
-
-    function showToast(message, isSuccess = true) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toastMessage').innerText = message;
-      document.getElementById('toastIcon').innerHTML = isSuccess ? '<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>' : '<i data-lucide="alert-circle" class="w-5 h-5 text-amber-400"></i>';
-      lucide.createIcons();
-      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
-      setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none'), 3500);
-    }
-
-    function switchTab(tab) {
-      currentTab = tab;
-      document.getElementById('tabCalendar').classList.toggle('hidden', tab !== 'calendar');
-      document.getElementById('tabEvents').classList.toggle('hidden', tab !== 'events');
-      document.getElementById('tabBtnCalendar').className = tab === 'calendar' ? "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium shadow-xs bg-white text-slate-900 font-semibold" : "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900";
-      document.getElementById('tabBtnEvents').className = tab === 'events' ? "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium shadow-xs bg-white text-slate-900 font-semibold" : "flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900";
-      if (tab === 'calendar') renderCalendar(); else renderEventsTable();
-      lucide.createIcons();
-    }
-
-    function prevMonth() { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); }
-    function nextMonth() { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); }
-    function goToToday() { const n = new Date(); currentMonth = n.getMonth(); currentYear = n.getFullYear(); renderCalendar(); }
-    function filterCalendarEvents() { renderCalendar(); }
-
-    function renderCalendar() {
-      document.getElementById('currentMonthYearLabel').innerText = `${monthNames[currentMonth]} ${currentYear}`;
-      const grid = document.getElementById('calendarDaysGrid');
-      grid.innerHTML = '';
-
-      const searchVal = document.getElementById('calendarSearchInput')?.value.toLowerCase() || '';
-      const catVal = document.getElementById('calendarCategoryFilter')?.value || 'ALL';
-
-      const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-      const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
-      const totalCells = Math.ceil((firstDayOfMonth + daysInMonth) / 7) * 7;
-
-      for (let i = 0; i < totalCells; i++) {
-        const cell = document.createElement('div');
-        const dayNumber = i - firstDayOfMonth + 1;
-        const isCurrentMonth = dayNumber > 0 && dayNumber <= daysInMonth;
-
-        let baseClass = "min-h-[115px] sm:min-h-[135px] p-1.5 sm:p-2 bg-white flex flex-col justify-between transition-colors relative group ";
-        const dayOfWeek = i % 7;
-        if (dayOfWeek === 0 || dayOfWeek === 6) baseClass += "bg-amber-50/30 ";
-        if (!isCurrentMonth) baseClass += "bg-slate-100/70 text-slate-400 opacity-60 "; else baseClass += "hover:bg-sky-50/30 cursor-pointer ";
-        cell.className = baseClass;
-
-        let cellDateStr = '', displayDayNumber = '';
-        if (dayNumber <= 0) {
-          displayDayNumber = prevMonthDays + dayNumber;
-          const pm = currentMonth === 0 ? 11 : currentMonth - 1, py = currentMonth === 0 ? currentYear - 1 : currentYear;
-          cellDateStr = `${py}-${String(pm + 1).padStart(2, '0')}-${String(displayDayNumber).padStart(2, '0')}`;
-        } else if (dayNumber > daysInMonth) {
-          displayDayNumber = dayNumber - daysInMonth;
-          const nm = currentMonth === 11 ? 0 : currentMonth + 1, ny = currentMonth === 11 ? currentYear + 1 : currentYear;
-          cellDateStr = `${ny}-${String(nm + 1).padStart(2, '0')}-${String(displayDayNumber).padStart(2, '0')}`;
+        if (autoClose) {
+          returnUrl.searchParams.set('__auto_close', '1');
+          const url = new URL(window.location.href);
+          url.searchParams.set('return_url', returnUrl.toString());
+          // Land on the cookie check page first, so the user can interact with it before proceeding
+          // to the return url where cookies can be set.
+          window.open(url.toString(), '_blank');
+          const hasAccess = await document.hasStorageAccess();
+          document.querySelector('#stepOne').classList.add('hidden');
+          if (!hasAccess) {
+            document.querySelector('#stepThree').classList.remove('hidden');
+          } else {
+            window.location.reload();
+          }
         } else {
-          displayDayNumber = dayNumber;
-          cellDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+          window.location.href = returnUrl.toString();
         }
+      }
 
-        const dayEvents = events.filter(e => {
-          if (e.date !== cellDateStr) return false;
-          if (catVal !== 'ALL' && e.category !== catVal) return false;
-          if (searchVal && !e.title.toLowerCase().includes(searchVal) && !(e.location || '').toLowerCase().includes(searchVal)) return false;
-          return true;
-        }).sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-        const today = new Date();
-        const isToday = isCurrentMonth && today.getDate() === dayNumber && today.getMonth() === currentMonth && today.getFullYear() === currentYear;
-
-        const headerDiv = document.createElement('div');
-        headerDiv.className = "flex items-center justify-between mb-1";
-        headerDiv.innerHTML = `<span class="text-xs font-bold w-6 h-6 flex items-center justify-center rounded-lg ${isToday ? 'bg-sky-600 text-white shadow-xs' : isCurrentMonth ? 'text-slate-800' : 'text-slate-400'}">${String(displayDayNumber).padStart(2, '0')}</span>`;
-        if (isCurrentMonth) {
-          const addBtn = document.createElement('button');
-          addBtn.className = "opacity-0 group-hover:opacity-100 text-slate-400 hover:text-sky-600 p-0.5 rounded";
-          addBtn.innerHTML = `<i data-lucide="plus" class="w-3.5 h-3.5"></i>`;
-          addBtn.onclick = (e) => { e.stopPropagation(); protectedAction(() => openModal(cellDateStr)); };
-          headerDiv.appendChild(addBtn);
+      /**
+       * Grants the browser permission to set cookies. If successful, then it redirects to the
+       * return url.
+       */
+      async function grantStorageAccess() {
+        try {
+          await document.requestStorageAccess();
+          // Recent Safari/iOS versions block document.cookie entirely in
+          // cross-site iframes, even after requestStorageAccess(). Only
+          // server-side Set-Cookie headers work. Signal to the Lua auth script
+          // via query param so it can set the test cookie server-side.
+          redirectToReturnUrl(false, /* storageAccessGranted= */ true);
+        } catch (err) {
+          console.log('error after button click: ', err);
         }
-        cell.appendChild(headerDiv);
+      }
 
-        const eventsContainer = document.createElement('div');
-        eventsContainer.className = "space-y-1 overflow-hidden flex-1";
-        dayEvents.slice(0, 3).forEach(evt => {
-          const style = categoryStyles[evt.category] || categoryStyles['Geral'];
-          const badge = document.createElement('div');
-          badge.className = `p-1.5 rounded-md text-[10px] border border-l-4 ${style.bg} ${isUserAuthenticated ? 'cursor-grab select-none' : 'cursor-pointer'}`;
-          badge.style.borderLeftColor = style.dot.replace('bg-', '');
-
-          if (isUserAuthenticated) {
-            badge.draggable = true;
-            badge.ondragstart = (e) => { draggedEventId = evt.id; e.dataTransfer.setData('text/plain', evt.id); };
-            badge.ondragend = () => { draggedEventId = null; };
+      /**
+       * Verifies that the browser can set cookies. If it can, then it redirects to the return url.
+       * If it can't, then it shows the error UI.
+       */
+      function verifyCanSetCookies() {
+        setAuthFlowTestCookie();
+        if (authFlowTestCookieIsSet()) {
+          // Check if we are on the auto-close flow, and if so show the interact button.
+          const returnUrl = new URLSearchParams(window.location.search).get('return_url');
+          const autoClose = new URL(returnUrl).searchParams.has('__auto_close');
+          if (autoClose) {
+            document.querySelector('#stepOne').classList.add('hidden');
+            document.querySelector('#stepTwo').classList.remove('hidden');
+          } else {
+            redirectToReturnUrl(false);
+            return;
           }
-
-          badge.innerHTML = `
-            <div class="flex items-center justify-between gap-1 text-[9px] font-mono font-bold text-slate-600 mb-1 leading-none">
-              <span class="bg-white/95 px-1 py-0.5 rounded shadow-2xs text-slate-800 whitespace-nowrap border border-black/5">${evt.startTime} - ${evt.endTime}</span>
-              ${evt.location ? `<span class="font-semibold text-sky-800 bg-sky-100/90 px-1.5 py-0.5 rounded-md truncate max-w-[85px] text-[8.5px] inline-flex items-center gap-0.5"><i data-lucide="map-pin" class="w-2.5 h-2.5 shrink-0 text-sky-600"></i><span class="truncate">${evt.location}</span></span>` : ''}
-            </div>
-            <div class="font-semibold text-slate-900 truncate text-[10px]">${evt.title}</div>
-          `;
-          badge.onclick = (e) => { e.stopPropagation(); openDayDetails(cellDateStr); };
-          eventsContainer.appendChild(badge);
-        });
-
-        if (dayEvents.length > 3) {
-          eventsContainer.innerHTML += `<div class="text-[9px] font-semibold text-sky-700 bg-sky-50 px-1 py-0.5 rounded text-center">+${dayEvents.length - 3} mais</div>`;
         }
-        cell.appendChild(eventsContainer);
-
-        cell.ondragover = (e) => { if (isUserAuthenticated && draggedEventId) { e.preventDefault(); cell.classList.add('ring-2', 'ring-sky-500'); } };
-        cell.ondragleave = () => { cell.classList.remove('ring-2', 'ring-sky-500'); };
-        cell.ondrop = async (e) => {
-          if (!isUserAuthenticated || !draggedEventId) return;
-          e.preventDefault();
-          cell.classList.remove('ring-2', 'ring-sky-500');
-          const evt = events.find(x => String(x.id) === String(draggedEventId));
-          if (evt) {
-            if (e.ctrlKey || e.altKey) {
-              const dup = { ...evt, id: String(Date.now()), date: cellDateStr, title: `${evt.title} (Cópia)` };
-              events.push(dup);
-              saveEventsLocally();
-              if (supabaseClient) await upsertEventToSupabase(dup);
-              showToast(`Evento copiado para ${cellDateStr}!`);
-            } else {
-              evt.date = cellDateStr;
-              saveEventsLocally();
-              if (supabaseClient) await upsertEventToSupabase(evt);
-              showToast(`Evento movido para ${cellDateStr}!`);
-            }
-            renderCalendar();
-            renderEventsTable();
-          }
-        };
-
-        cell.onclick = () => {
-          if (dayEvents.length > 0) {
-            openDayDetails(cellDateStr);
-          } else if (isCurrentMonth) {
-            protectedAction(() => openModal(cellDateStr));
-          }
-        };
-        grid.appendChild(cell);
-      }
-      updateEventCountBadge();
-      lucide.createIcons();
-    }
-
-    function renderEventsTable() {
-      const tbody = document.getElementById('eventsTableBody');
-      const filter = document.getElementById('tableFilterInput')?.value.toLowerCase() || '';
-      tbody.innerHTML = '';
-      const filtered = events.filter(e => !filter || e.title.toLowerCase().includes(filter) || e.date.includes(filter) || (e.location || '').toLowerCase().includes(filter)).sort((a,b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">Nenhum evento registrado.</td></tr>`;
-        document.getElementById('totalEventsText').innerText = `Total: 0 eventos`;
-        lucide.createIcons();
-        return;
+        // The cookie could not be set, so initiate the recovery flow.
+        document.querySelector('.logo').classList.add('hidden');
+        document.querySelector('.spinner').classList.add('hidden');
+        document.querySelector('#error-ui').classList.remove('hidden');
       }
 
-      filtered.forEach(evt => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50/80 transition-colors";
-        const style = categoryStyles[evt.category] || categoryStyles['Geral'];
-        const [y, m, d] = evt.date.split('-');
-        tr.innerHTML = `
-          <td class="py-3 px-4 font-mono text-slate-700">${d}/${m}/${y}</td>
-          <td class="py-3 px-4 font-semibold text-slate-900">${evt.title}</td>
-          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${style.pill}">${evt.category || 'Geral'}</span></td>
-          <td class="py-3 px-4 font-mono text-slate-600">${evt.startTime}</td>
-          <td class="py-3 px-4 font-mono text-slate-600">${evt.endTime}</td>
-          <td class="py-3 px-4 font-mono font-semibold text-slate-800"><span class="bg-slate-100 px-2 py-0.5 rounded">${evt.duration}</span></td>
-          <td class="py-3 px-4 font-medium">${evt.location ? `<span class="bg-sky-50 text-sky-700 px-2 py-0.5 rounded border border-sky-100">${evt.location}</span>` : '-'}</td>
-          <td class="py-3 px-4 text-slate-500 truncate max-w-xs">${evt.description || '-'}</td>
-          <td class="py-3 px-4 text-right">
-            <div class="flex items-center justify-end gap-1">
-              <button onclick="viewInCalendar('${evt.date}')" class="p-1.5 text-slate-400 hover:text-sky-600 rounded" title="Ver"><i data-lucide="external-link" class="w-4 h-4"></i></button>
-              <button onclick="protectedAction(() => duplicateEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-emerald-600 rounded" title="Copiar"><i data-lucide="copy" class="w-4 h-4"></i></button>
-              <button onclick="protectedAction(() => editEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-amber-600 rounded" title="Editar"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-              <button onclick="protectedAction(() => confirmDeleteEvent('${evt.id}'))" class="p-1.5 text-slate-400 hover:text-red-600 rounded" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-            </div>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-      document.getElementById('totalEventsText').innerText = `Total: ${filtered.length} evento(s)`;
-      updateEventCountBadge();
-      lucide.createIcons();
-    }
-
-    async function handleFormSubmit(e) {
-      e.preventDefault();
-      if (!isUserAuthenticated) { protectedAction(() => handleFormSubmit(e)); return; }
-
-      const id = document.getElementById('formEventId').value;
-      const date = document.getElementById('inputDate').value;
-      const title = document.getElementById('inputTitle').value.trim();
-      const startTime = document.getElementById('inputStartTime').value;
-      const endTime = document.getElementById('inputEndTime').value;
-      const category = document.getElementById('inputCategory').value;
-      const location = document.getElementById('inputLocation').value.trim();
-      const description = document.getElementById('inputDescription').value.trim();
-      const duration = computeDurationString(startTime, endTime);
-
-      if (duration.includes('Inválido')) { showToast('Horário inválido!', false); return; }
-
-      let evt = null;
-      if (id) {
-        const idx = events.findIndex(x => String(x.id) === String(id));
-        if (idx !== -1) {
-          events[idx] = { ...events[idx], date, title, startTime, endTime, duration, category, location, description };
-          evt = events[idx];
-        }
-      } else {
-        evt = { id: String(Date.now()), date, title, startTime, endTime, duration, category, location, description };
-        events.push(evt);
-      }
-
-      saveEventsLocally();
-      if (evt && supabaseClient) {
-        const res = await upsertEventToSupabase(evt);
-        if (res.error) showToast(`Erro ao enviar para nuvem: ${res.error.message}`, false); else showToast('Salvo e enviado explicitamente para a nuvem!');
-      } else {
-        showToast('Salvo localmente!');
-      }
-
-      resetForm();
-      renderEventsTable();
-      renderCalendar();
-    }
-
-    function resetForm() {
-      document.getElementById('formEventId').value = '';
-      document.getElementById('inputTitle').value = '';
-      document.getElementById('inputLocation').value = '';
-      document.getElementById('inputDescription').value = '';
-      document.getElementById('btnCancelEdit').classList.add('hidden');
-      calculateDuration();
-    }
-
-    function editEvent(id) {
-      const evt = events.find(x => String(x.id) === String(id));
-      if (!evt) return;
-      switchTab('events');
-      document.getElementById('formEventId').value = evt.id;
-      document.getElementById('inputDate').value = evt.date;
-      document.getElementById('inputTitle').value = evt.title;
-      document.getElementById('inputStartTime').value = evt.startTime;
-      document.getElementById('inputEndTime').value = evt.endTime;
-      document.getElementById('inputCategory').value = evt.category || 'Reunião';
-      document.getElementById('inputLocation').value = evt.location || '';
-      document.getElementById('inputDescription').value = evt.description || '';
-      document.getElementById('btnCancelEdit').classList.remove('hidden');
-      calculateDuration();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function openModal(defaultDate = null) {
-      document.getElementById('modalEventId').value = '';
-      document.getElementById('mInputTitle').value = '';
-      document.getElementById('mInputLocation').value = '';
-      document.getElementById('mInputDescription').value = '';
-      const dIn = document.getElementById('mInputDate');
-      if (defaultDate) dIn.value = defaultDate; else if (!dIn.value) {
-        const n = new Date();
-        dIn.value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
-      }
-      calculateModalDuration();
-      document.getElementById('eventModal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-    function closeModal() { document.getElementById('eventModal').classList.add('hidden'); }
-
-    async function handleModalSubmit(e) {
-      e.preventDefault();
-      if (!isUserAuthenticated) { closeModal(); protectedAction(() => openModal()); return; }
-
-      const id = document.getElementById('modalEventId').value;
-      const title = document.getElementById('mInputTitle').value.trim();
-      const date = document.getElementById('mInputDate').value;
-      const category = document.getElementById('mInputCategory').value;
-      const startTime = document.getElementById('mInputStartTime').value;
-      const endTime = document.getElementById('mInputEndTime').value;
-      const location = document.getElementById('mInputLocation').value.trim();
-      const description = document.getElementById('mInputDescription').value.trim();
-      const duration = computeDurationString(startTime, endTime);
-
-      let evt = null;
-      if (id) {
-        const idx = events.findIndex(x => String(x.id) === String(id));
-        if (idx !== -1) {
-          events[idx] = { ...events[idx], title, date, category, startTime, endTime, duration, location, description };
-          evt = events[idx];
-        }
-      } else {
-        evt = { id: String(Date.now()), date, title, startTime, endTime, duration, category, location, description };
-        events.push(evt);
-      }
-
-      saveEventsLocally();
-      if (evt && supabaseClient) {
-        const res = await upsertEventToSupabase(evt);
-        if (res.error) showToast(`Erro nuvem: ${res.error.message}`, false); else showToast('Salvo e enviado para a nuvem com sucesso!');
-      } else {
-        showToast('Salvo localmente!');
-      }
-
-      closeModal();
-      renderCalendar();
-      renderEventsTable();
-    }
-
-    async function duplicateEvent(id) {
-      const src = events.find(x => String(x.id) === String(id));
-      if (!src) return;
-      const dup = { ...src, id: String(Date.now()), title: `${src.title} (Cópia)` };
-      events.push(dup);
-      saveEventsLocally();
-      if (supabaseClient) await upsertEventToSupabase(dup);
-      showToast('Evento duplicado com sucesso!');
-      renderCalendar();
-      renderEventsTable();
-    }
-
-    function openDayDetails(dateStr) {
-      const [y, m, d] = dateStr.split('-');
-      document.getElementById('dayDetailsTitle').innerText = `Dia ${d} de ${monthNames[parseInt(m, 10)-1]}`;
-      document.getElementById('dayDetailsSubtitle').innerText = dateStr;
-      const list = document.getElementById('dayEventsList');
-      list.innerHTML = '';
-      const dayEvts = events.filter(x => x.date === dateStr).sort((a,b) => a.startTime.localeCompare(b.startTime));
-
-      if (dayEvts.length === 0) { list.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhum evento.</p>`; } else {
-        dayEvts.forEach(evt => {
-          const style = categoryStyles[evt.category] || categoryStyles['Geral'];
-          const div = document.createElement('div');
-          div.className = `p-3 rounded-xl border border-l-4 flex items-start justify-between gap-3 ${style.bg}`;
-          div.style.borderLeftColor = style.dot.replace('bg-', '');
-          div.innerHTML = `
-            <div class="space-y-1">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold text-slate-800">${evt.title}</span>
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${style.pill}">${evt.category}</span>
-                ${evt.location ? `<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white text-slate-700 border border-slate-200">${evt.location}</span>` : ''}
-              </div>
-              <p class="text-xs font-mono text-slate-600">${evt.startTime} às ${evt.endTime} (Duração: ${evt.duration})</p>
-              ${evt.description ? `<p class="text-xs text-slate-600">${evt.description}</p>` : ''}
-            </div>
-            <div class="flex items-center gap-1">
-              <button onclick="closeDayDetailsModal(); protectedAction(() => duplicateEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-emerald-600"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
-              <button onclick="closeDayDetailsModal(); protectedAction(() => editEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-amber-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-              <button onclick="closeDayDetailsModal(); protectedAction(() => confirmDeleteEvent('${evt.id}'))" class="p-1 text-slate-500 hover:text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-            </div>
-          `;
-          list.appendChild(div);
-        });
-      }
-      document.getElementById('btnAddNewEventToThisDay').onclick = () => { closeDayDetailsModal(); protectedAction(() => openModal(dateStr)); };
-      document.getElementById('dayDetailsModal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-    function closeDayDetailsModal() { document.getElementById('dayDetailsModal').classList.add('hidden'); }
-    function viewInCalendar(date) {
-      const [y, m] = date.split('-');
-      currentYear = parseInt(y, 10); currentMonth = parseInt(m, 10) - 1;
-      switchTab('calendar'); setTimeout(() => openDayDetails(date), 100);
-    }
-
-    function confirmDeleteEvent(id) {
-      document.getElementById('confirmDialogTitle').innerText = 'Excluir Evento';
-      document.getElementById('confirmDialogText').innerText = 'Remover compromisso da nuvem e da agenda?';
-      pendingConfirmCallback = async () => {
-        events = events.filter(x => String(x.id) !== String(id));
-        saveEventsLocally();
-        if (supabaseClient) await supabaseClient.from('events').delete().eq('id', String(id));
-        showToast('Excluído com sucesso.');
-        renderEventsTable(); renderCalendar();
-      };
-      document.getElementById('confirmDialogModal').classList.remove('hidden');
-    }
-
-    function clearAllEventsModal() {
-      document.getElementById('confirmDialogTitle').innerText = 'Limpar Tudo';
-      document.getElementById('confirmDialogText').innerText = 'Atenção: todos os registros serão removidos!';
-      pendingConfirmCallback = async () => {
-        events = []; saveEventsLocally();
-        if (supabaseClient) await supabaseClient.from('events').delete().neq('id', '___none___');
-        showToast('Registros removidos.');
-        renderEventsTable(); renderCalendar();
-      };
-      document.getElementById('confirmDialogModal').classList.remove('hidden');
-    }
-
-    function closeConfirmDialog() { document.getElementById('confirmDialogModal').classList.add('hidden'); pendingConfirmCallback = null; }
-    document.getElementById('btnConfirmAction').addEventListener('click', () => { if (pendingConfirmCallback) pendingConfirmCallback(); closeConfirmDialog(); });
-
-    function updateEventCountBadge() {
-      const b = document.getElementById('eventsCountBadge');
-      if (b) b.innerText = events.length;
-    }
-
-    function exportToCSV() {
-      if (events.length === 0) { showToast('Sem dados.', false); return; }
-      const headers = ['Data', 'Evento', 'Categoria', 'Inicio', 'Fim', 'Duracao', 'Local', 'Observacoes'];
-      const rows = events.map(e => [`"${e.date}"`, `"${e.title}"`, `"${e.category}"`, `"${e.startTime}"`, `"${e.endTime}"`, `"${e.duration}"`, `"${e.location || ''}"`, `"${e.description || ''}"`]);
-      const csv = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = `calendario_${currentYear}_${currentMonth+1}.csv`;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      showToast('CSV exportado!');
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const n = new Date();
-      currentMonth = n.getMonth();
-      currentYear = n.getFullYear();
-      document.getElementById('inputDate').value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
-      renderRoomsData();
-      calculateDuration();
-      renderCalendar();
-      renderEventsTable();
-      updateSecurityUI(false);
-      initSupabase();
-      lucide.createIcons();
-    });
-  </script>
-</body>
+      // Start the cookie verification process.
+      verifyCanSetCookies();
+    </script>
+  </body>
 </html>
