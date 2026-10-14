@@ -27,7 +27,7 @@ import { UnitSettingsModal } from './components/UnitSettingsModal';
 import { HomeScreen } from './components/HomeScreen';
 import { CorporateCalendarView } from './components/CorporateCalendarView';
 import { ConnectivityModal } from './components/ConnectivityModal';
-import { exportElementToPDF, exportToExcel, parseExcelFile } from './utils/exportUtils';
+import { copyElementAsImage, exportElementToPDF, exportToExcel, parseExcelFile } from './utils/exportUtils';
 import { 
   CheckCircle2, AlertCircle, Info, Home, 
   Clock, Calendar as CalendarIcon, Shield, Cloud
@@ -88,6 +88,7 @@ export default function App() {
   const [isAreaManagerOpen, setIsAreaManagerOpen] = useState(false);
   const [isUnitSettingsOpen, setIsUnitSettingsOpen] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const [isCopyingImage, setIsCopyingImage] = useState(false);
   const [isConnectivityModalOpen, setIsConnectivityModalOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
@@ -259,6 +260,19 @@ export default function App() {
   // Browser Print trigger (ideal for vector printing/save as PDF)
   const handlePrintPDF = () => {
     window.print();
+  };
+
+  const handleCopyScheduleAsImage = async () => {
+    try {
+      setIsCopyingImage(true);
+      await copyElementAsImage('integration-capture-content');
+      showToast('Agenda copiada como imagem. Agora você pode colar onde quiser.');
+    } catch (error) {
+      console.error('Could not copy integration schedule as image', error);
+      showToast(error instanceof Error ? error.message : 'Não foi possível copiar a agenda como imagem.', 'error');
+    } finally {
+      setIsCopyingImage(false);
+    }
   };
 
   // Export to Excel (.xlsx)
@@ -443,7 +457,7 @@ export default function App() {
       {/* SCREEN 2: CRONOGRAMA DE INTEGRAÇÃO (MODULE 1) */}
       {/* ========================================================================= */}
       {activeApp === 'integration' && (
-        <>
+        <div id="integration-capture-content" className="bg-slate-100/70">
           <Header
             unitInfo={unitInfo}
             viewMode={viewMode}
@@ -460,6 +474,8 @@ export default function App() {
             onOpenNewSession={() => handleAddNewSession()}
             onExportPDF={handleExportPDF}
             onPrintPDF={handlePrintPDF}
+            onCopyAsImage={handleCopyScheduleAsImage}
+            isCopyingImage={isCopyingImage}
             onExportExcel={handleExportExcel}
             onImportExcel={handleImportExcel}
             onOpenAreaManager={() => {
@@ -523,7 +539,7 @@ export default function App() {
               )}
             </div>
           </main>
-        </>
+        </div>
       )}
 
       {/* ========================================================================= */}

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { CorporateEvent, EventCategory } from '../types/calendar';
 import { useAdminAuth } from '../services/AdminAuthContext';
+import { copyElementAsImage } from '../utils/exportUtils';
 import { 
   getSupabaseCredentials, 
   saveSupabaseCredentials, 
@@ -87,6 +88,7 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   const [isCloudConnected, setIsCloudConnected] = useState<boolean>(false);
   const [cloudRowCount, setCloudRowCount] = useState<number | null>(null);
   const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
+  const [isCopyingImage, setIsCopyingImage] = useState(false);
   const [supabaseUrlInput, setSupabaseUrlInput] = useState('');
   const [supabaseKeyInput, setSupabaseKeyInput] = useState('');
 
@@ -468,8 +470,21 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
     showToast('Sala removida.');
   };
 
+  const handleCopyCalendarAsImage = async () => {
+    try {
+      setIsCopyingImage(true);
+      await copyElementAsImage('calendar-capture-content');
+      showToast('Calendário copiado como imagem. Agora você pode colar onde quiser.');
+    } catch (error) {
+      console.error('Could not copy calendar as image', error);
+      showToast(error instanceof Error ? error.message : 'Não foi possível copiar o calendário como imagem.', false);
+    } finally {
+      setIsCopyingImage(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div id="calendar-capture-content" className="space-y-6 bg-slate-100/70">
       {/* Toast Notification */}
       {toast && (
         <div
@@ -612,8 +627,20 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
 
           {/* Print Button */}
           <button
+            type="button"
+            onClick={handleCopyCalendarAsImage}
+            disabled={isCopyingImage}
+            data-capture-ignore
+            title="Copiar o calendário completo como imagem"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-xl border border-slate-700 transition-colors disabled:opacity-50"
+          >
+            <Copy className="w-3.5 h-3.5" />
+            <span>{isCopyingImage ? 'Capturando...' : 'Copiar como imagem'}</span>
+          </button>
+          <button
             onClick={() => window.print()}
             title="Imprimir"
+            data-capture-ignore
             className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors"
           >
             <Printer className="w-4 h-4" />

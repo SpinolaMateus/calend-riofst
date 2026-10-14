@@ -4,6 +4,56 @@ import * as XLSX from 'xlsx';
 import { IntegrationAudience, INTEGRATION_AUDIENCES, IntegrationSession, UnitInfo } from '../types/schedule';
 import { formatTimeRange } from './timeUtils';
 
+export async function copyElementAsImage(elementId: string): Promise<void> {
+  const element = document.getElementById(elementId);
+  if (!element) throw new Error('Não foi possível localizar a tela para capturar.');
+
+  if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
+    throw new Error('Seu navegador não permite copiar imagens. Use o Chrome ou Edge atualizado em HTTPS.');
+  }
+
+  const width = Math.ceil(element.scrollWidth);
+  const height = Math.ceil(element.scrollHeight);
+  const canvas = await html2canvas(element, {
+    backgroundColor: '#ffffff',
+    scale: Math.min(window.devicePixelRatio || 1, 2),
+    useCORS: true,
+    logging: false,
+    width,
+    height,
+    windowWidth: Math.max(width, document.documentElement.clientWidth),
+    windowHeight: Math.max(height, document.documentElement.clientHeight),
+    onclone: (_document, clonedElement) => {
+      clonedElement.style.width = `${width}px`;
+      clonedElement.style.maxWidth = 'none';
+      clonedElement.style.height = `${height}px`;
+      clonedElement.style.overflow = 'visible';
+
+      clonedElement.querySelectorAll<HTMLElement>('*').forEach((child) => {
+        const styles = _document.defaultView?.getComputedStyle(child);
+        if (styles?.position === 'sticky') child.style.position = 'static';
+        if (styles && (styles.overflowY === 'auto' || styles.overflowY === 'scroll')) {
+          child.style.maxHeight = 'none';
+          child.style.height = 'auto';
+          child.style.overflow = 'visible';
+        }
+        if (child.hasAttribute('data-capture-ignore') || styles?.position === 'fixed') {
+          child.style.display = 'none';
+        }
+      });
+    },
+  });
+
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((image) => {
+      if (image) resolve(image);
+      else reject(new Error('O navegador não conseguiu gerar a imagem da tela.'));
+    }, 'image/png');
+  });
+
+  await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+}
+
 export async function exportElementToPDF(
   elementId: string,
   fileName: string = 'cronograma-integracao.pdf'

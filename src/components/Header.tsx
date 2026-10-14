@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { 
-  FileDown, Printer, FileSpreadsheet, Upload, 
+  FileDown, Printer, FileSpreadsheet, Upload, Copy,
   Palette, Settings, RotateCcw, Plus, Calendar, 
   Tv, Table as TableIcon, Clock, ChevronDown
 } from 'lucide-react';
@@ -19,6 +19,8 @@ interface HeaderProps {
   onOpenNewSession: () => void;
   onExportPDF: () => void;
   onPrintPDF: () => void;
+  onCopyAsImage: () => void;
+  isCopyingImage: boolean;
   onExportExcel: () => void;
   onImportExcel: (file: File) => void;
   onOpenAreaManager: () => void;
@@ -40,6 +42,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenNewSession,
   onExportPDF,
   onPrintPDF,
+  onCopyAsImage,
+  isCopyingImage,
   onExportExcel,
   onImportExcel,
   onOpenAreaManager,
@@ -83,6 +87,18 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Global Action Toolbar */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+          <button
+            type="button"
+            onClick={onCopyAsImage}
+            disabled={isCopyingImage}
+            data-capture-ignore
+            className="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-50"
+            title="Copiar a agenda completa como imagem"
+          >
+            <Copy className="w-4 h-4" />
+            {isCopyingImage ? 'Capturando...' : 'Copiar como imagem'}
+          </button>
+
           {/* New Activity Button */}
           <button
             onClick={onOpenNewSession}

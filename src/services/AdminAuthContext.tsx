@@ -124,12 +124,22 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
       if (username.trim().toUpperCase() !== 'GGFST') {
         throw new Error('Usuário ou senha inválidos.');
       }
+      if (password.length < 6) {
+        throw new Error('O Supabase exige senha com pelo menos 6 caracteres. A senha GGFST tem apenas 5.');
+      }
 
       const { data, error } = await client.auth.signInWithPassword({
         email: import.meta.env.VITE_SUPABASE_ADMIN_EMAIL || 'ggfst@tgmjghxytbwafhrxdkyl.supabase.co',
         password,
       });
-      if (error) throw new Error(error.message);
+      if (error) {
+        if (error.message === 'Invalid login credentials') {
+          throw new Error(
+            'Login não reconhecido. Confira se o usuário administrador foi criado e confirmado em Supabase > Authentication > Users, e se a senha tem pelo menos 6 caracteres.'
+          );
+        }
+        throw new Error(error.message);
+      }
       if (!data.user) throw new Error('O Supabase não retornou um usuário autenticado.');
 
       const { data: role, error: roleError } = await client
