@@ -1,5 +1,6 @@
 export interface IntegrationSession {
   id: string;
+  audience?: IntegrationAudience;
   dia: number;
   startTime: string; // "08:20" (HH:mm)
   endTime: string;   // "10:00" (HH:mm)
@@ -15,6 +16,15 @@ export interface IntegrationSession {
   observacoes?: string;
   customColor?: string; // override color if desired
 }
+
+export type IntegrationAudience = 'geral' | 'temporarios' | 'jovem-aprendiz' | 'estagiarios';
+
+export const INTEGRATION_AUDIENCES: { id: IntegrationAudience; label: string }[] = [
+  { id: 'geral', label: 'Geral' },
+  { id: 'temporarios', label: 'Temporários' },
+  { id: 'jovem-aprendiz', label: 'Jovem Aprendiz' },
+  { id: 'estagiarios', label: 'Estagiários' },
+];
 
 export interface AreaDefinition {
   id: string;

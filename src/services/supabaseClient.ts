@@ -1,11 +1,9 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { CorporateEvent } from '../types/calendar';
-import { IntegrationSession, UnitInfo } from '../types/schedule';
+import { IntegrationAudience, IntegrationSession, UnitInfo } from '../types/schedule';
 
 export const DEFAULT_SUPABASE_URL = 'https://tgmjghxytbwafhrxdkyl.supabase.co';
 export const DEFAULT_SUPABASE_KEY = 'sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c';
-
-export const SECRET_ADMIN_PASSWORD = 'GGFST';
 
 export function getSupabaseCredentials() {
   const envUrl = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_SUPABASE_URL : '';
@@ -36,7 +34,7 @@ export function getSupabaseClient(): SupabaseClient | null {
 
   try {
     cachedClient = createClient(url, key, {
-      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
     });
     currentClientKey = signature;
     return cachedClient;
@@ -64,6 +62,7 @@ export async function fetchEventsFromSupabase(): Promise<{ data: CorporateEvent[
 
     const mapped: CorporateEvent[] = (data || []).map((item: any) => ({
       id: String(item.id),
+      audience: item.audience || 'geral',
       date: item.date,
       title: item.title,
       startTime: item.startTime || item.starttime || '08:00',
@@ -167,9 +166,11 @@ export async function syncIntegrationToSupabase(sessions: IntegrationSession[]):
 
   try {
     let successCount = 0;
+    let firstError: Error | null = null;
     for (const s of sessions) {
       const payload = {
         id: String(s.id),
+        audience: s.audience || 'geral',
         dia: Number(s.dia),
         starttime: s.startTime,
         endtime: s.endTime,
@@ -188,9 +189,11 @@ export async function syncIntegrationToSupabase(sessions: IntegrationSession[]):
       const res = await client.from('integration_sessions').upsert(payload);
       if (!res.error) {
         successCount++;
+      } else if (!firstError) {
+        firstError = new Error(res.error.message);
       }
     }
-    return { count: successCount, error: null };
+    return { count: successCount, error: firstError };
   } catch (err: any) {
     return { count: 0, error: err };
   }
@@ -273,6 +276,18 @@ export function getSqlSetupScript(): string {
   return `-- SCRIPT SQL PARA O SUPABASE (Cole no SQL Editor do seu projeto Supabase)
 -- Projeto: tgmjghxytbwafhrxdkyl.supabase.co
 
+-- LISTA PRIVADA DE ADMINISTRADORES
+CREATE TABLE IF NOT EXISTS public.app_admins (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+ALTER TABLE public.app_admins ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.app_admins FROM anon, authenticated;
+GRANT SELECT ON public.app_admins TO authenticated;
+DROP POLICY IF EXISTS "Admins can read own role" ON public.app_admins;
+CREATE POLICY "Admins can read own role" ON public.app_admins
+  FOR SELECT TO authenticated USING (user_id = (SELECT auth.uid()));
+
 -- 1. TABELA DE EVENTOS DO CALENDÁRIO CORPORATIVO
 CREATE TABLE IF NOT EXISTS public.events (
   id TEXT PRIMARY KEY,
@@ -286,15 +301,26 @@ CREATE TABLE IF NOT EXISTS public.events (
   description TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+GRANT SELECT ON public.events TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.events TO authenticated;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.events FROM anon, PUBLIC;
 
--- Habilitar RLS e permitir leitura/escrita com a chave pública
+-- Visitantes podem ler; somente administradores autenticados podem alterar
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Acesso publico liberado para events" ON public.events
-  FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Acesso publico liberado para events" ON public.events;
+DROP POLICY IF EXISTS "Public can read events" ON public.events;
+DROP POLICY IF EXISTS "Admins manage events" ON public.events;
+CREATE POLICY "Public can read events" ON public.events
+  FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Admins manage events" ON public.events
+  FOR ALL TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())))
+  WITH CHECK (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
 
 -- 2. TABELA DO CRONOGRAMA DE INTEGRAÇÃO DA UNIDADE
 CREATE TABLE IF NOT EXISTS public.integration_sessions (
   id TEXT PRIMARY KEY,
+  audience TEXT NOT NULL DEFAULT 'geral',
   dia INTEGER NOT NULL DEFAULT 1,
   starttime TEXT,
   endtime TEXT,
@@ -310,10 +336,26 @@ CREATE TABLE IF NOT EXISTS public.integration_sessions (
   customcolor TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+ALTER TABLE public.integration_sessions
+  ADD COLUMN IF NOT EXISTS audience TEXT NOT NULL DEFAULT 'geral';
+GRANT SELECT ON public.integration_sessions TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.integration_sessions TO authenticated;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.integration_sessions FROM anon, PUBLIC;
 
--- Habilitar RLS e permitir leitura/escrita com a chave pública
+-- Visitantes podem ler; somente administradores autenticados podem alterar
 ALTER TABLE public.integration_sessions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Acesso publico liberado para integration_sessions" ON public.integration_sessions
-  FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Acesso publico liberado para integration_sessions" ON public.integration_sessions;
+DROP POLICY IF EXISTS "Public can read integration sessions" ON public.integration_sessions;
+DROP POLICY IF EXISTS "Admins manage integration sessions" ON public.integration_sessions;
+CREATE POLICY "Public can read integration sessions" ON public.integration_sessions
+  FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Admins manage integration sessions" ON public.integration_sessions
+  FOR ALL TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())))
+  WITH CHECK (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
+
+-- Crie a conta em Authentication > Users; depois execute com o UUID do usuário:
+-- INSERT INTO public.app_admins (user_id) VALUES ('UUID_DO_USUARIO');
+-- Desative o cadastro público em Authentication > Settings.
 `;
 }

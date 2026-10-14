@@ -4,7 +4,7 @@ import {
   Palette, Settings, RotateCcw, Plus, Calendar, 
   Tv, Table as TableIcon, Clock, ChevronDown
 } from 'lucide-react';
-import { UnitInfo, ViewMode } from '../types/schedule';
+import { INTEGRATION_AUDIENCES, IntegrationAudience, UnitInfo, ViewMode } from '../types/schedule';
 
 interface HeaderProps {
   unitInfo: UnitInfo;
@@ -13,6 +13,9 @@ interface HeaderProps {
   selectedDay: number | 'all';
   onSelectDay: (day: number | 'all') => void;
   availableDays: number[];
+  selectedAudience: IntegrationAudience;
+  audienceCounts: Record<IntegrationAudience, number>;
+  onSelectAudience: (audience: IntegrationAudience) => void;
   onOpenNewSession: () => void;
   onExportPDF: () => void;
   onPrintPDF: () => void;
@@ -31,6 +34,9 @@ export const Header: React.FC<HeaderProps> = ({
   selectedDay,
   onSelectDay,
   availableDays,
+  selectedAudience,
+  audienceCounts,
+  onSelectAudience,
   onOpenNewSession,
   onExportPDF,
   onPrintPDF,
@@ -185,6 +191,30 @@ export const Header: React.FC<HeaderProps> = ({
               <RotateCcw className="w-4 h-4" />
             </button>
           </div>
+        </div>
+      </div>
+
+      <div className="border-t border-slate-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-slate-500 mr-1">Agenda:</span>
+          {INTEGRATION_AUDIENCES.map((audience) => (
+            <button
+              key={audience.id}
+              type="button"
+              onClick={() => onSelectAudience(audience.id)}
+              aria-pressed={selectedAudience === audience.id}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                selectedAudience === audience.id
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700'
+              }`}
+            >
+              {audience.label}
+              <span className={`ml-1.5 ${selectedAudience === audience.id ? 'text-indigo-100' : 'text-slate-400'}`}>
+                {audienceCounts[audience.id]}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 

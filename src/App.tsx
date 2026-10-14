@@ -8,7 +8,9 @@ import {
   AreaDefinition, 
   IntegrationSession, 
   UnitInfo, 
-  ViewMode 
+  ViewMode,
+  INTEGRATION_AUDIENCES,
+  IntegrationAudience
 } from './types/schedule';
 import { 
   INITIAL_AREAS, 
@@ -31,12 +33,15 @@ import {
   Clock, Calendar as CalendarIcon, Shield, Cloud
 } from 'lucide-react';
 import { CorporateEvent } from './types/calendar';
+import { useAdminAuth } from './services/AdminAuthContext';
+import { fetchIntegrationFromSupabase } from './services/supabaseClient';
 
 const STORAGE_KEY_SESSIONS = 'cronograma_integracao_sessions_v2';
 const STORAGE_KEY_AREAS = 'cronograma_integracao_areas_v2';
 const STORAGE_KEY_UNIT = 'cronograma_integracao_unit_v2';
 
 export default function App() {
+  const { user, isAdmin, hasAdminAccess, requestAdminAccess, signOutAdmin } = useAdminAuth();
   // Navigation: 'home' | 'integration' | 'calendar'
   const [activeApp, setActiveApp] = useState<'home' | 'integration' | 'calendar'>('home');
 
@@ -44,9 +49,10 @@ export default function App() {
   const [sessions, setSessions] = useState<IntegrationSession[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_SESSIONS);
-      return saved ? JSON.parse(saved) : INITIAL_SESSIONS;
+      const initial = saved ? JSON.parse(saved) as IntegrationSession[] : INITIAL_SESSIONS;
+      return initial.map((session) => ({ ...session, audience: session.audience || 'geral' }));
     } catch {
-      return INITIAL_SESSIONS;
+      return INITIAL_SESSIONS.map((session) => ({ ...session, audience: session.audience || 'geral' }));
     }
   });
 
@@ -70,6 +76,10 @@ export default function App() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [selectedDay, setSelectedDay] = useState<number | 'all'>('all');
+  const [selectedAudience, setSelectedAudience] = useState<IntegrationAudience>(() => {
+    const saved = localStorage.getItem('cronograma_integracao_audience_v1');
+    return INTEGRATION_AUDIENCES.find((audience) => audience.id === saved)?.id || 'geral';
+  });
 
   // Modals & Popups
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
@@ -104,6 +114,33 @@ export default function App() {
   }, [sessions]);
 
   useEffect(() => {
+    let cancelled = false;
+    const loadCloudSessions = async () => {
+      const { data, error } = await fetchIntegrationFromSupabase();
+      if (cancelled) return;
+      if (error) {
+        console.error('Could not load integration schedule from Supabase', error);
+        return;
+      }
+      if (!data?.length) return;
+
+      setSessions((current) => {
+        const merged = new Map(current.map((session) => [session.id, session]));
+        for (const session of data) merged.set(session.id, { ...session, audience: session.audience || 'geral' });
+        return Array.from(merged.values());
+      });
+    };
+    void loadCloudSessions();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('cronograma_integracao_audience_v1', selectedAudience);
+  }, [selectedAudience]);
+
+  useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY_AREAS, JSON.stringify(areas));
     } catch (e) {
@@ -126,10 +163,20 @@ export default function App() {
   };
 
   // Available unique days in schedule
-  const availableDays = Array.from(new Set(sessions.map((s) => s.dia))).sort((a, b) => a - b);
+  const audienceSessions = sessions.filter((session) => (session.audience || 'geral') === selectedAudience);
+  const audienceCounts = sessions.reduce<Record<IntegrationAudience, number>>((counts, session) => {
+    counts[session.audience || 'geral'] += 1;
+    return counts;
+  }, { geral: 0, temporarios: 0, 'jovem-aprendiz': 0, estagiarios: 0 });
+  const availableDays = Array.from(new Set(audienceSessions.map((s) => s.dia))).sort((a, b) => a - b);
 
   // Handlers for session mutations
   const handleSaveSession = (savedSession: IntegrationSession) => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => handleSaveSession(savedSession));
+      return;
+    }
+    savedSession = { ...savedSession, audience: savedSession.audience || selectedAudience };
     if (sessionToEdit) {
       setSessions((prev) =>
         prev.map((s) => (s.id === savedSession.id ? savedSession : s))
@@ -143,15 +190,27 @@ export default function App() {
   };
 
   const handleUpdateSession = (updated: IntegrationSession) => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => handleUpdateSession(updated));
+      return;
+    }
     setSessions((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
   };
 
   const handleDeleteSession = (id: string) => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => handleDeleteSession(id));
+      return;
+    }
     setSessions((prev) => prev.filter((s) => s.id !== id));
     showToast('Atividade removida.', 'info');
   };
 
   const handleDuplicateSession = (session: IntegrationSession) => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => handleDuplicateSession(session));
+      return;
+    }
     const duplicated: IntegrationSession = {
       ...session,
       id: `session-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
@@ -162,12 +221,20 @@ export default function App() {
   };
 
   const handleEditSession = (session: IntegrationSession) => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => handleEditSession(session));
+      return;
+    }
     setSessionToEdit(session);
     setSessionModalDay(session.dia);
     setIsSessionModalOpen(true);
   };
 
   const handleAddNewSession = (dia?: number, startStr?: string, endStr?: string) => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => handleAddNewSession(dia, startStr, endStr));
+      return;
+    }
     const targetDay = dia || (selectedDay === 'all' ? 1 : Number(selectedDay));
     setSessionToEdit(null);
     setSessionModalDay(targetDay);
@@ -197,7 +264,7 @@ export default function App() {
   // Export to Excel (.xlsx)
   const handleExportExcel = () => {
     try {
-      exportToExcel(sessions, unitInfo);
+      exportToExcel(audienceSessions, unitInfo, selectedAudience);
       showToast('Planilha Excel (.xlsx) exportada com sucesso!');
     } catch (err) {
       console.error(err);
@@ -207,13 +274,24 @@ export default function App() {
 
   // Import from Excel file
   const handleImportExcel = async (file: File) => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => { void handleImportExcel(file); });
+      return;
+    }
     try {
       const parsed = await parseExcelFile(file);
       if (parsed.length === 0) {
         showToast('Nenhum dado encontrado na planilha importada.', 'error');
         return;
       }
-      setSessions(parsed as IntegrationSession[]);
+      const importedSessions = parsed.map((session) => ({
+        ...session,
+        audience: session.audience || selectedAudience,
+      }));
+      setSessions((previous) => [
+        ...previous.filter((session) => (session.audience || 'geral') !== selectedAudience),
+        ...importedSessions,
+      ]);
       showToast(`Importação concluída! ${parsed.length} atividades carregadas.`);
     } catch (err) {
       console.error(err);
@@ -223,11 +301,19 @@ export default function App() {
 
   // Reset to original dataset from user's image
   const handleResetDefault = () => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(handleResetDefault);
+      return;
+    }
     if (window.confirm('Deseja restaurar o cronograma padrão original da imagem? Suas alterações serão substituídas.')) {
-      setSessions(INITIAL_SESSIONS);
-      setAreas(INITIAL_AREAS);
-      setUnitInfo(INITIAL_UNIT_INFO);
-      showToast('Cronograma padrão restaurado!');
+      const defaultSessions = selectedAudience === 'geral'
+        ? INITIAL_SESSIONS.map((session) => ({ ...session, audience: 'geral' as const }))
+        : [];
+      setSessions((current) => [
+        ...current.filter((session) => (session.audience || 'geral') !== selectedAudience),
+        ...defaultSessions,
+      ]);
+      showToast(`Agenda ${selectedAudience} restaurada aos dados padrão.`);
     }
   };
 
@@ -319,9 +405,22 @@ export default function App() {
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           </button>
 
-          <span className="hidden md:inline-flex items-center gap-1.5 text-slate-400 font-medium pl-1">
-            <Shield className="w-3.5 h-3.5 text-amber-400" /> Senha: <strong className="font-mono text-amber-300">GGFST</strong>
-          </span>
+          <button
+            onClick={() => {
+              if (hasAdminAccess()) {
+                void signOutAdmin().catch((error: unknown) => {
+                  console.error('Could not sign out of Supabase', error);
+                  showToast('Não foi possível encerrar a sessão administrativa.', 'error');
+                });
+              }
+              else requestAdminAccess();
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs"
+            title={isAdmin ? `Sair da conta ${user?.email ?? ''}` : 'Entrar como administrador'}
+          >
+            <Shield className={`w-3.5 h-3.5 ${isAdmin ? 'text-emerald-400' : 'text-amber-400'}`} />
+            <span>{isAdmin ? 'Sair do admin' : 'Acesso admin'}</span>
+          </button>
         </div>
       </nav>
 
@@ -352,13 +451,25 @@ export default function App() {
             selectedDay={selectedDay}
             onSelectDay={setSelectedDay}
             availableDays={availableDays}
+            selectedAudience={selectedAudience}
+            audienceCounts={audienceCounts}
+            onSelectAudience={(audience) => {
+              setSelectedAudience(audience);
+              setSelectedDay('all');
+            }}
             onOpenNewSession={() => handleAddNewSession()}
             onExportPDF={handleExportPDF}
             onPrintPDF={handlePrintPDF}
             onExportExcel={handleExportExcel}
             onImportExcel={handleImportExcel}
-            onOpenAreaManager={() => setIsAreaManagerOpen(true)}
-            onOpenUnitSettings={() => setIsUnitSettingsOpen(true)}
+            onOpenAreaManager={() => {
+              if (isAdmin) setIsAreaManagerOpen(true);
+              else requestAdminAccess(() => setIsAreaManagerOpen(true));
+            }}
+            onOpenUnitSettings={() => {
+              if (isAdmin) setIsUnitSettingsOpen(true);
+              else requestAdminAccess(() => setIsUnitSettingsOpen(true));
+            }}
             onResetDefault={handleResetDefault}
             isExportingPDF={isExportingPDF}
           />
@@ -377,7 +488,7 @@ export default function App() {
 
               {viewMode === 'timeline' && (
                 <VisualTimelineView
-                  sessions={sessions}
+                  sessions={audienceSessions}
                   areas={areas}
                   selectedDay={selectedDay}
                   onUpdateSession={handleUpdateSession}
@@ -390,7 +501,7 @@ export default function App() {
 
               {viewMode === 'table' && (
                 <TableScheduleView
-                  sessions={sessions}
+                  sessions={audienceSessions}
                   areas={areas}
                   selectedDay={selectedDay}
                   onUpdateSession={handleUpdateSession}
@@ -403,7 +514,7 @@ export default function App() {
 
               {viewMode === 'display' && (
                 <PresentationView
-                  sessions={sessions}
+                  sessions={audienceSessions}
                   areas={areas}
                   unitInfo={unitInfo}
                   selectedDay={selectedDay}
@@ -416,7 +527,7 @@ export default function App() {
       )}
 
       {/* ========================================================================= */}
-      {/* SCREEN 3: CORPORATE CALENDAR (MODULE 2 - SUPABASE & GGFST) */}
+      {/* SCREEN 3: CORPORATE CALENDAR */}
       {/* ========================================================================= */}
       {activeApp === 'calendar' && (
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -441,7 +552,7 @@ export default function App() {
               Voltar ao Início
             </button>
             <span>•</span>
-            <span className="font-mono text-slate-400">Senha: GGFST</span>
+            <span>{isAdmin ? `Administrador: ${user?.email ?? ''}` : 'Modo de leitura pública'}</span>
           </div>
         </div>
       </footer>
@@ -458,6 +569,7 @@ export default function App() {
         sessionToEdit={sessionToEdit}
         areas={areas}
         defaultDia={sessionModalDay}
+        defaultAudience={selectedAudience}
         existingDays={availableDays}
       />
 
@@ -466,6 +578,13 @@ export default function App() {
         onClose={() => setIsAreaManagerOpen(false)}
         areas={areas}
         onSaveAreas={(updatedAreas) => {
+          if (!hasAdminAccess()) {
+            requestAdminAccess(() => {
+              setAreas(updatedAreas);
+              showToast('Paleta de cores e áreas atualizada com sucesso!');
+            });
+            return;
+          }
           setAreas(updatedAreas);
           showToast('Paleta de cores e áreas atualizada com sucesso!');
         }}
@@ -476,6 +595,13 @@ export default function App() {
         onClose={() => setIsUnitSettingsOpen(false)}
         unitInfo={unitInfo}
         onSaveUnitInfo={(updatedInfo) => {
+          if (!hasAdminAccess()) {
+            requestAdminAccess(() => {
+              setUnitInfo(updatedInfo);
+              showToast('Dados da unidade atualizados com sucesso!');
+            });
+            return;
+          }
           setUnitInfo(updatedInfo);
           showToast('Dados da unidade atualizados com sucesso!');
         }}
@@ -486,7 +612,7 @@ export default function App() {
         onClose={() => setIsConnectivityModalOpen(false)}
         integrationSessions={sessions}
         calendarEvents={calendarEvents}
-        onSyncCompleted={(msg) => showToast(msg, 'success')}
+        onSyncCompleted={(msg, type) => showToast(msg, type)}
       />
     </div>
   );

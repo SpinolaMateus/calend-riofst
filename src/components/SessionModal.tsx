@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, MapPin, User, Tag, FileText, Hash, Check, Trash2 } from 'lucide-react';
-import { AreaDefinition, IntegrationSession } from '../types/schedule';
+import { AreaDefinition, INTEGRATION_AUDIENCES, IntegrationAudience, IntegrationSession } from '../types/schedule';
 import { calculateCH, formatTimeRange } from '../utils/timeUtils';
 
 interface SessionModalProps {
@@ -11,6 +11,7 @@ interface SessionModalProps {
   sessionToEdit?: IntegrationSession | null;
   areas: AreaDefinition[];
   defaultDia?: number;
+  defaultAudience?: IntegrationAudience;
   existingDays: number[];
 }
 
@@ -22,9 +23,11 @@ export const SessionModal: React.FC<SessionModalProps> = ({
   sessionToEdit,
   areas,
   defaultDia = 1,
+  defaultAudience = 'geral',
   existingDays,
 }) => {
   const [dia, setDia] = useState<number>(defaultDia);
+  const [audience, setAudience] = useState<IntegrationAudience>(defaultAudience);
   const [startTime, setStartTime] = useState<string>('08:00');
   const [endTime, setEndTime] = useState<string>('09:00');
   const [ch, setCh] = useState<string>('1h');
@@ -41,6 +44,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
   useEffect(() => {
     if (sessionToEdit) {
       setDia(sessionToEdit.dia);
+      setAudience(sessionToEdit.audience || 'geral');
       setStartTime(sessionToEdit.startTime || '08:00');
       setEndTime(sessionToEdit.endTime || '09:00');
       setCh(sessionToEdit.ch || '1h');
@@ -55,6 +59,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
       setCustomColor(sessionToEdit.customColor || '');
     } else {
       setDia(defaultDia);
+      setAudience(defaultAudience);
       setStartTime('08:00');
       setEndTime('09:00');
       setCh('1h');
@@ -68,7 +73,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
       setEntregavel('Lançamento em aplicativo ou lista');
       setCustomColor('');
     }
-  }, [sessionToEdit, isOpen, defaultDia, areas]);
+  }, [sessionToEdit, isOpen, defaultDia, defaultAudience, areas]);
 
   // Recalculate CH when times change if autoCh is true
   useEffect(() => {
@@ -85,6 +90,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
 
     const newSession: IntegrationSession = {
       id: sessionToEdit ? sessionToEdit.id : `session-${Date.now()}`,
+      audience,
       dia,
       startTime,
       endTime,
@@ -135,8 +141,20 @@ export const SessionModal: React.FC<SessionModalProps> = ({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-          {/* Dia & Horários */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          {/* Público, dia e horários */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Público da agenda</label>
+              <select
+                value={audience}
+                onChange={(e) => setAudience(e.target.value as IntegrationAudience)}
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+              >
+                {INTEGRATION_AUDIENCES.map((option) => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">Dia do Cronograma</label>
               <select

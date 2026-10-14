@@ -13,13 +13,14 @@ import {
 } from '../services/supabaseClient';
 import { IntegrationSession } from '../types/schedule';
 import { CorporateEvent } from '../types/calendar';
+import { useAdminAuth } from '../services/AdminAuthContext';
 
 interface ConnectivityModalProps {
   isOpen: boolean;
   onClose: () => void;
   integrationSessions: IntegrationSession[];
   calendarEvents: CorporateEvent[];
-  onSyncCompleted?: (message: string) => void;
+  onSyncCompleted?: (message: string, type: 'success' | 'error') => void;
 }
 
 export const ConnectivityModal: React.FC<ConnectivityModalProps> = ({
@@ -29,6 +30,7 @@ export const ConnectivityModal: React.FC<ConnectivityModalProps> = ({
   calendarEvents,
   onSyncCompleted,
 }) => {
+  const { hasAdminAccess, requestAdminAccess } = useAdminAuth();
   const [diagnostics, setDiagnostics] = useState<CloudDiagnostics | null>(null);
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -75,15 +77,21 @@ export const ConnectivityModal: React.FC<ConnectivityModalProps> = ({
   };
 
   const handleSyncAllToSupabase = async () => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => { void handleSyncAllToSupabase(); });
+      return;
+    }
     setSyncing(true);
     let eventsSynced = 0;
     let integrationSynced = 0;
+    let eventsFailed = 0;
 
     try {
       // 1. Sync Calendar Events
       for (const ev of calendarEvents) {
         const res = await upsertEventToSupabase(ev);
         if (!res.error) eventsSynced++;
+        else eventsFailed++;
       }
 
       // 2. Sync Integration Sessions
@@ -91,11 +99,21 @@ export const ConnectivityModal: React.FC<ConnectivityModalProps> = ({
       integrationSynced = intRes.count;
 
       if (onSyncCompleted) {
-        onSyncCompleted(`Sincronização concluída! ${eventsSynced} eventos e ${integrationSynced} atividades de integração enviados.`);
+        const failures = eventsFailed + (intRes.error ? integrationSessions.length - integrationSynced : 0);
+        onSyncCompleted(
+          failures
+            ? `Sincronização parcial: ${eventsSynced} eventos e ${integrationSynced} atividades enviados; ${failures} falha(s). ${intRes.error?.message || ''}`
+            : `Sincronização concluída! ${eventsSynced} eventos e ${integrationSynced} atividades de integração enviados.`,
+          failures ? 'error' : 'success'
+        );
       }
       runTest();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      onSyncCompleted?.(
+        err instanceof Error ? `Falha ao sincronizar com o Supabase: ${err.message}` : 'Falha ao sincronizar com o Supabase.',
+        'error'
+      );
     } finally {
       setSyncing(false);
     }

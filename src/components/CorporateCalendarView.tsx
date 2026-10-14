@@ -6,8 +6,8 @@ import {
   ExternalLink, X, CheckCircle2, AlertCircle, RefreshCw, UploadCloud, Plus
 } from 'lucide-react';
 import { CorporateEvent, EventCategory } from '../types/calendar';
+import { useAdminAuth } from '../services/AdminAuthContext';
 import { 
-  SECRET_ADMIN_PASSWORD, 
   getSupabaseCredentials, 
   saveSupabaseCredentials, 
   getSupabaseClient, 
@@ -54,6 +54,7 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   onBackToHome,
   onGoToIntegration,
 }) => {
+  const { isAdmin, hasAdminAccess, requestAdminAccess, signOutAdmin } = useAdminAuth();
   // Calendar state
   const [events, setEvents] = useState<CorporateEvent[]>(() => {
     try {
@@ -81,13 +82,6 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [tableFilter, setTableFilter] = useState('');
-
-  // Authentication & Security
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [passwordError, setPasswordError] = useState(false);
-  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
   // Cloud & Supabase
   const [isCloudConnected, setIsCloudConnected] = useState<boolean>(false);
@@ -202,34 +196,21 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
 
   // Auth protection check
   const requireAuth = (callback: () => void) => {
-    if (isAuthenticated) {
+    if (hasAdminAccess()) {
       callback();
     } else {
-      setPendingAction(() => callback);
-      setPasswordInput('');
-      setPasswordError(false);
-      setIsPasswordModalOpen(true);
-    }
-  };
-
-  const handleVerifyPassword = () => {
-    if (passwordInput.trim() === SECRET_ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      setIsPasswordModalOpen(false);
-      showToast('Modo de Edição Liberado com Sucesso!');
-      if (pendingAction) {
-        pendingAction();
-        setPendingAction(null);
-      }
-    } else {
-      setPasswordError(true);
+      requestAdminAccess(callback);
     }
   };
 
   const handleToggleAuth = () => {
-    if (isAuthenticated) {
-      setIsAuthenticated(false);
-      showToast('Retornado para o Modo Leitura.');
+    if (isAdmin) {
+      void signOutAdmin()
+        .then(() => showToast('Sessão administrativa encerrada.'))
+        .catch((error: unknown) => {
+          console.error('Could not sign out of Supabase', error);
+          showToast('Não foi possível encerrar a sessão administrativa.', false);
+        });
     } else {
       requireAuth(() => {});
     }
@@ -251,7 +232,7 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   // Quick form submit
   const handleQuickFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAuthenticated) {
+    if (!hasAdminAccess()) {
       requireAuth(() => {});
       return;
     }
@@ -316,7 +297,7 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   // Modal form submit
   const handleModalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAuthenticated) {
+    if (!hasAdminAccess()) {
       setIsEventModalOpen(false);
       requireAuth(() => setIsEventModalOpen(true));
       return;
@@ -438,15 +419,30 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
 
   // Manual sync all to cloud
   const handleManualSyncAll = async () => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => { void handleManualSyncAll(); });
+      return;
+    }
     showToast('Enviando dados para a nuvem Supabase...', true);
     let count = 0;
+    let failed = 0;
+    let firstError = '';
     for (const evt of events) {
       const res = await upsertEventToSupabase(evt);
       if (!res.error) count++;
+      else {
+        failed++;
+        firstError ||= res.error.message;
+      }
     }
     setCloudRowCount(count);
-    setIsCloudConnected(true);
-    showToast(`Sucesso! ${count} de ${events.length} eventos sincronizados na nuvem.`);
+    setIsCloudConnected(failed === 0);
+    showToast(
+      failed
+        ? `Sincronização parcial: ${count} de ${events.length} eventos. ${failed} falha(s): ${firstError}`
+        : `Sucesso! ${count} de ${events.length} eventos sincronizados na nuvem.`,
+      failed === 0
+    );
   };
 
   // Calendar calculations
@@ -564,22 +560,22 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
             </span>
           </button>
 
-          {/* Auth Lock Button (GGFST password) */}
+          {/* Auth Lock Button */}
           <button
             onClick={handleToggleAuth}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all ${
-              isAuthenticated
+              isAdmin
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
                 : 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100'
             }`}
-            title={isAuthenticated ? 'Modo Liberado (Clique para bloquear)' : 'Modo Leitura (Clique para digitar a senha corporativa)'}
+            title={isAdmin ? 'Encerrar sessão administrativa' : 'Entrar como administrador'}
           >
-            {isAuthenticated ? (
+            {isAdmin ? (
               <Unlock className="w-3.5 h-3.5 text-emerald-600" />
             ) : (
               <Lock className="w-3.5 h-3.5 text-amber-600" />
             )}
-            <span>{isAuthenticated ? 'Modo Liberado' : 'Modo Leitura'}</span>
+            <span>{isAdmin ? 'Modo administrador' : 'Modo leitura'}</span>
           </button>
 
           {/* Rooms Modal Button */}
@@ -879,9 +875,9 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
             <div className="flex items-center gap-2 text-slate-600 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
               <Shield className="w-3.5 h-3.5 text-amber-500" />
               <span>
-                {isAuthenticated
-                  ? 'Modo Liberado: Edição ativa (Senha validada)'
-                  : 'Modo Leitura: Edição liberada exclusivamente com senha corporativa'}
+                {isAdmin
+                  ? 'Modo administrador: edição ativa'
+                  : 'Modo leitura: edição disponível para administradores autenticados'}
               </span>
             </div>
           </div>
@@ -896,7 +892,7 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
           {/* Quick Registration Form */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs relative overflow-hidden">
             {/* Lock overlay if not authenticated */}
-            {!isAuthenticated && (
+            {!isAdmin && (
               <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] z-10 flex items-center justify-center p-4">
                 <div className="bg-white p-6 rounded-2xl shadow-xl border border-slate-200 max-w-sm text-center space-y-3">
                   <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
@@ -904,13 +900,13 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
                   </div>
                   <h3 className="font-bold text-slate-900 text-sm">Formulário Protegido</h3>
                   <p className="text-xs text-slate-500">
-                    Digite a senha corporativa para liberar cadastros e alterações no banco Supabase.
+                    Entre com uma conta administradora para liberar cadastros e alterações no Supabase.
                   </p>
                   <button
                     onClick={() => requireAuth(() => {})}
                     className="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all shadow-xs"
                   >
-                    Digitar Senha de Edição
+                    Entrar como administrador
                   </button>
                 </div>
               </div>
@@ -1211,9 +1207,9 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
             <div className="p-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-600">
               <span>Total: <strong>{events.length}</strong> evento(s)</span>
               <span>
-                {isAuthenticated
-                  ? 'Modo Liberado: Edição e criação ativas'
-                  : 'Modo Leitura: Edição liberada exclusivamente mediante senha restrita'}
+                {isAdmin
+                  ? 'Modo administrador: edição e criação ativas'
+                  : 'Modo leitura: somente administradores autenticados podem editar'}
               </span>
             </div>
           </div>
@@ -1221,64 +1217,7 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 1: PASSWORD AUTH (GGFST) */}
-      {/* ========================================================================= */}
-      {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-6 text-center space-y-4 animate-in fade-in zoom-in-95">
-            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
-              <Shield className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 text-base">Autenticação Necessária</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Digite a senha corporativa para liberar cadastros e alterações no sistema.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <input
-                type="password"
-                autoFocus
-                value={passwordInput}
-                onChange={(e) => {
-                  setPasswordInput(e.target.value);
-                  setPasswordError(false);
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && handleVerifyPassword()}
-                placeholder="Digite a senha..."
-                className="w-full text-center text-sm tracking-widest font-mono px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl outline-hidden focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
-              />
-              {passwordError && (
-                <p className="text-xs text-red-600 font-semibold animate-shake">
-                  Senha incorreta! Tente novamente.
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsPasswordModalOpen(false);
-                  setPendingAction(null);
-                }}
-                className="w-1/2 px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleVerifyPassword}
-                className="w-1/2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs"
-              >
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* MODAL 2: CLOUD DIAGNOSTICS & SYNC */}
+      {/* MODAL: CLOUD DIAGNOSTICS & SYNC */}
       {/* ========================================================================= */}
       {isCloudModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">

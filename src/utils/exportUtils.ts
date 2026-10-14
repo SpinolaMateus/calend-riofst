@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import * as XLSX from 'xlsx';
-import { IntegrationSession, UnitInfo } from '../types/schedule';
+import { IntegrationAudience, INTEGRATION_AUDIENCES, IntegrationSession, UnitInfo } from '../types/schedule';
 import { formatTimeRange } from './timeUtils';
 
 export async function exportElementToPDF(
@@ -48,8 +48,9 @@ export async function exportElementToPDF(
   pdf.save(fileName);
 }
 
-export function exportToExcel(sessions: IntegrationSession[], unitInfo: UnitInfo) {
+export function exportToExcel(sessions: IntegrationSession[], unitInfo: UnitInfo, audience?: IntegrationAudience) {
   const rows = sessions.map((s) => ({
+    PÚBLICO: INTEGRATION_AUDIENCES.find((option) => option.id === (s.audience || 'geral'))?.label || 'Geral',
     DIA: s.dia,
     HORÁRIO: s.horarioText || formatTimeRange(s.startTime, s.endTime),
     CH: s.ch,
@@ -68,6 +69,7 @@ export function exportToExcel(sessions: IntegrationSession[], unitInfo: UnitInfo
 
   // Set column widths
   worksheet['!cols'] = [
+    { wch: 20 }, // PÚBLICO
     { wch: 6 },  // DIA
     { wch: 18 }, // HORÁRIO
     { wch: 10 }, // CH
@@ -80,12 +82,15 @@ export function exportToExcel(sessions: IntegrationSession[], unitInfo: UnitInfo
     { wch: 32 }, // ENTREGÁVEL
   ];
 
-  XLSX.writeFile(workbook, `cronograma_integracao_${unitInfo.unitName.replace(/\s+/g, '_')}.xlsx`);
+  const audienceName = audience
+    ? `_${INTEGRATION_AUDIENCES.find((option) => option.id === audience)?.id || audience}`
+    : '';
+  XLSX.writeFile(workbook, `cronograma_integracao${audienceName}_${unitInfo.unitName.replace(/\s+/g, '_')}.xlsx`);
 }
 
 export function parseExcelFile(
   file: File
-): Promise<Partial<IntegrationSession>[]> {
+): Promise<IntegrationSession[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -97,7 +102,7 @@ export function parseExcelFile(
         const worksheet = workbook.Sheets[firstSheetName];
         const rawJson: any[] = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
 
-        const sessions: Partial<IntegrationSession>[] = rawJson.map((row, idx) => {
+        const sessions: IntegrationSession[] = rawJson.map((row, idx) => {
           // Normalize keys
           const getVal = (possibleKeys: string[]) => {
             for (const key of possibleKeys) {
@@ -142,9 +147,14 @@ export function parseExcelFile(
           const local = getVal(['local', 'sala', 'ambiente']) || 'Sala de Integração';
           const codigo = getVal(['código', 'codigo', 'cod']);
           const entregavel = getVal(['entregável', 'entregavel', 'entrega']) || 'Lançamento em aplicativo ou lista';
+          const audienceValue = getVal(['público', 'publico', 'audience']).toLowerCase();
+          const audience = INTEGRATION_AUDIENCES.find(
+            (option) => option.id === audienceValue || option.label.toLowerCase() === audienceValue
+          )?.id;
 
           return {
             id: `imported-${Date.now()}-${idx}`,
+            audience,
             dia: diaVal,
             startTime,
             endTime,

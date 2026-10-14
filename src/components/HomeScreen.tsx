@@ -146,7 +146,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   Nuvem Supabase
                 </span>
                 <span className="text-[11px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 px-2 py-1 rounded-full border border-amber-200 flex items-center gap-1">
-                  <Lock className="w-3 h-3 text-amber-600" /> Senha (GGFST)
+                  <Lock className="w-3 h-3 text-amber-600" /> Acesso admin
                 </span>
               </div>
             </div>
@@ -157,7 +157,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 Calendário & Gestão de Eventos
               </h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Gestão mensal de eventos e reuniões corporativas integrado à nuvem Supabase. Controle de salas (Aroeira, Bambuzal, Obeia...), arrastar compromissos entre dias e controle por senha corporativa.
+                Gestão mensal de eventos e reuniões corporativas integrada à nuvem Supabase. Controle de salas (Aroeira, Bambuzal, Obeia...), arrastar compromissos entre dias e edição protegida por conta administradora.
               </p>
             </div>
 
