@@ -4,6 +4,68 @@ import * as XLSX from 'xlsx';
 import { IntegrationAudience, INTEGRATION_AUDIENCES, IntegrationSession, UnitInfo } from '../types/schedule';
 import { formatTimeRange } from './timeUtils';
 
+function colorChannelToSrgb(value: number) {
+  const channel = Math.min(1, Math.max(0, value));
+  return Math.round(255 * (channel <= 0.0031308
+    ? 12.92 * channel
+    : 1.055 * (channel ** (1 / 2.4)) - 0.055));
+}
+
+function oklabToRgba(lightness: string, first: string, second: string, alpha?: string) {
+  const parseCoordinate = (value: string, scale: number) => (
+    Number.parseFloat(value) * (value.endsWith('%') ? scale / 100 : 1)
+  );
+  const L = parseCoordinate(lightness, 1);
+  const a = parseCoordinate(first, 0.4);
+  const b = parseCoordinate(second, 0.4);
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  const red = colorChannelToSrgb(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s);
+  const green = colorChannelToSrgb(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s);
+  const blue = colorChannelToSrgb(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s);
+  const opacity = alpha ? Number.parseFloat(alpha) / (alpha.endsWith('%') ? 100 : 1) : 1;
+
+  return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
+}
+
+function oklchToRgba(lightness: string, chroma: string, hue: string, alpha?: string) {
+  const parsedChroma = Number.parseFloat(chroma) * (chroma.endsWith('%') ? 0.004 : 1);
+  const hueValue = Number.parseFloat(hue);
+  const hueInDegrees = hue.endsWith('turn')
+    ? hueValue * 360
+    : hue.endsWith('rad')
+      ? (hueValue * 180) / Math.PI
+      : hue.endsWith('grad')
+        ? hueValue * 0.9
+        : hueValue;
+  const hueInRadians = (hueInDegrees * Math.PI) / 180;
+
+  return oklabToRgba(
+    lightness,
+    String(parsedChroma * Math.cos(hueInRadians)),
+    String(parsedChroma * Math.sin(hueInRadians)),
+    alpha,
+  );
+}
+
+function replaceUnsupportedColorFunctions(value: string) {
+  return value
+    .replace(
+      /oklch\(\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?(?:deg|grad|rad|turn)?)\s*(?:\/\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?))?\s*\)/gi,
+      (_match, lightness: string, chroma: string, hue: string, alpha?: string) => (
+        oklchToRgba(lightness, chroma, hue, alpha)
+      ),
+    )
+    .replace(
+      /oklab\(\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)(?:\s*\/\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?))?\s*\)/gi,
+      (_match, lightness: string, first: string, second: string, alpha?: string) => (
+        oklabToRgba(lightness, first, second, alpha)
+      ),
+    )
+    .replace(/\bin\s+ok(?:lab|lch)\b/gi, '');
+}
+
 export async function copyElementAsImage(elementId: string): Promise<void> {
   const element = document.getElementById(elementId);
   if (!element) throw new Error('Não foi possível localizar a tela para capturar.');
@@ -14,7 +76,7 @@ export async function copyElementAsImage(elementId: string): Promise<void> {
 
   const width = Math.ceil(element.scrollWidth);
   const height = Math.ceil(element.scrollHeight);
-  const canvas = await html2canvas(element, {
+  const canvasPromise = html2canvas(element, {
     backgroundColor: '#ffffff',
     scale: Math.min(window.devicePixelRatio || 1, 2),
     useCORS: true,
@@ -24,12 +86,24 @@ export async function copyElementAsImage(elementId: string): Promise<void> {
     windowWidth: Math.max(width, document.documentElement.clientWidth),
     windowHeight: Math.max(height, document.documentElement.clientHeight),
     onclone: (_document, clonedElement) => {
+      const clonedElements = [clonedElement, ...clonedElement.querySelectorAll<HTMLElement>('*')];
+      clonedElements.forEach((child) => {
+        const styles = _document.defaultView?.getComputedStyle(child);
+        if (!styles) return;
+        for (let index = 0; index < styles.length; index += 1) {
+          const property = styles.item(index);
+          const value = styles.getPropertyValue(property);
+          if (/ok(?:lab|lch)\(/i.test(value)) {
+            child.style.setProperty(property, replaceUnsupportedColorFunctions(value));
+          }
+        }
+      });
       clonedElement.style.width = `${width}px`;
       clonedElement.style.maxWidth = 'none';
       clonedElement.style.height = `${height}px`;
       clonedElement.style.overflow = 'visible';
 
-      clonedElement.querySelectorAll<HTMLElement>('*').forEach((child) => {
+      clonedElements.slice(1).forEach((child) => {
         const styles = _document.defaultView?.getComputedStyle(child);
         if (styles?.position === 'sticky') child.style.position = 'static';
         if (styles && (styles.overflowY === 'auto' || styles.overflowY === 'scroll')) {
@@ -44,14 +118,16 @@ export async function copyElementAsImage(elementId: string): Promise<void> {
     },
   });
 
-  const blob = await new Promise<Blob>((resolve, reject) => {
+  const imagePromise = canvasPromise.then((canvas) => new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((image) => {
       if (image) resolve(image);
       else reject(new Error('O navegador não conseguiu gerar a imagem da tela.'));
     }, 'image/png');
-  });
+  }));
 
-  await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+  await navigator.clipboard.write([
+    new ClipboardItem({ 'image/png': imagePromise }),
+  ]);
 }
 
 export async function exportElementToPDF(
