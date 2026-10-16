@@ -199,6 +199,75 @@ export async function syncIntegrationToSupabase(sessions: IntegrationSession[]):
   }
 }
 
+export async function fetchIntegrationStatusesFromSupabase(): Promise<{
+  data: Record<string, boolean> | null;
+  error: Error | null;
+}> {
+  const client = getSupabaseClient();
+  if (!client) return { data: null, error: new Error('Cliente Supabase não inicializado') };
+
+  try {
+    const { data, error } = await client
+      .from('integration_session_status')
+      .select('session_id, is_completed');
+    if (error) return { data: null, error: new Error(error.message) };
+
+    return {
+      data: Object.fromEntries((data || []).map((item: any) => [
+        String(item.session_id),
+        Boolean(item.is_completed),
+      ])),
+      error: null,
+    };
+  } catch (err: unknown) {
+    return {
+      data: null,
+      error: err instanceof Error ? err : new Error('Não foi possível carregar os status das atividades.'),
+    };
+  }
+}
+
+export async function setIntegrationSessionStatus(
+  sessionId: string,
+  isCompleted: boolean,
+): Promise<{ error: Error | null }> {
+  const client = getSupabaseClient();
+  if (!client) return { error: new Error('Cliente Supabase não inicializado') };
+
+  try {
+    const { data, error } = await client.rpc('set_integration_session_status', {
+      p_session_id: sessionId,
+      p_is_completed: isCompleted,
+    });
+    if (error) return { error: new Error(error.message) };
+    if (!data) {
+      return { error: new Error('A atividade ainda não foi sincronizada com o cronograma na nuvem.') };
+    }
+    return { error: null };
+  } catch (err: unknown) {
+    return {
+      error: err instanceof Error ? err : new Error('Não foi possível salvar o status da atividade.'),
+    };
+  }
+}
+
+export function subscribeToIntegrationStatusChanges(onChange: () => void) {
+  const client = getSupabaseClient();
+  if (!client) return () => {};
+
+  const channel = client
+    .channel('integration-session-status-updates')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'integration_session_status' },
+      onChange,
+    )
+    .subscribe();
+  return () => {
+    void client.removeChannel(channel);
+  };
+}
+
 // =========================================================================
 // 3. DIAGNÓSTICO INTEGRADO (VERIFICAÇÃO SUPABASE + VERCEL)
 // =========================================================================
@@ -211,6 +280,8 @@ export interface CloudDiagnostics {
   eventsCount: number;
   integrationTableStatus: 'ok' | 'missing' | 'error';
   integrationCount: number;
+  integrationStatusTableStatus: 'ok' | 'missing' | 'error';
+  integrationStatusCount: number;
   errorMessage: string | null;
   vercelReady: boolean;
   sqlSnippet: string;
@@ -229,6 +300,8 @@ export async function testFullConnectivity(): Promise<CloudDiagnostics> {
     eventsCount: 0,
     integrationTableStatus: 'missing',
     integrationCount: 0,
+    integrationStatusTableStatus: 'missing',
+    integrationStatusCount: 0,
     errorMessage: null,
     vercelReady: true,
     sqlSnippet: getSqlSetupScript(),
@@ -259,7 +332,21 @@ export async function testFullConnectivity(): Promise<CloudDiagnostics> {
       diagnostics.integrationTableStatus = intErr.message.includes('does not exist') || intErr.message.includes('relation') ? 'missing' : 'error';
     }
 
-    if (diagnostics.eventsTableStatus === 'ok' || diagnostics.integrationTableStatus === 'ok') {
+    // Test 3: Shared completion status
+    const { data: statusData, error: statusError } = await client
+      .from('integration_session_status')
+      .select('session_id');
+    if (!statusError) {
+      diagnostics.integrationStatusTableStatus = 'ok';
+      diagnostics.integrationStatusCount = statusData?.length ?? 0;
+    } else {
+      diagnostics.integrationStatusTableStatus = /does not exist|relation|schema cache|could not find the table/i
+        .test(statusError.message) ? 'missing' : 'error';
+    }
+
+    if (diagnostics.eventsTableStatus === 'ok'
+      || diagnostics.integrationTableStatus === 'ok'
+      || diagnostics.integrationStatusTableStatus === 'ok') {
       diagnostics.status = 'connected';
     } else {
       diagnostics.status = 'disconnected';
@@ -354,6 +441,57 @@ CREATE POLICY "Admins manage integration sessions" ON public.integration_session
 GRANT SELECT ON TABLE public.integration_sessions TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON TABLE public.integration_sessions TO authenticated;
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.integration_sessions FROM anon, PUBLIC;
+
+-- 3. ACOMPANHAMENTO DE STATUS DAS ATIVIDADES
+CREATE TABLE IF NOT EXISTS public.integration_session_status (
+  session_id TEXT PRIMARY KEY REFERENCES public.integration_sessions(id) ON DELETE CASCADE,
+  is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+ALTER TABLE public.integration_session_status ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can read integration session status" ON public.integration_session_status;
+CREATE POLICY "Public can read integration session status" ON public.integration_session_status
+  FOR SELECT TO anon, authenticated USING (true);
+GRANT SELECT ON TABLE public.integration_session_status TO anon, authenticated;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.integration_session_status FROM anon, authenticated, PUBLIC;
+
+CREATE OR REPLACE FUNCTION public.set_integration_session_status(
+  p_session_id TEXT,
+  p_is_completed BOOLEAN
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM public.integration_sessions WHERE id = p_session_id) THEN
+    RETURN FALSE;
+  END IF;
+
+  INSERT INTO public.integration_session_status (session_id, is_completed, updated_at)
+  VALUES (p_session_id, COALESCE(p_is_completed, FALSE), timezone('utc'::text, now()))
+  ON CONFLICT (session_id) DO UPDATE
+  SET is_completed = EXCLUDED.is_completed, updated_at = EXCLUDED.updated_at;
+  RETURN TRUE;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.set_integration_session_status(TEXT, BOOLEAN) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.set_integration_session_status(TEXT, BOOLEAN) TO anon, authenticated;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime')
+     AND NOT EXISTS (
+       SELECT 1 FROM pg_publication_tables
+       WHERE pubname = 'supabase_realtime'
+         AND schemaname = 'public'
+         AND tablename = 'integration_session_status'
+     ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.integration_session_status;
+  END IF;
+END;
+$$;
 
 -- Crie a conta em Authentication > Users; depois execute com o UUID do usuário:
 -- INSERT INTO public.app_admins (user_id) VALUES ('UUID_DO_USUARIO');

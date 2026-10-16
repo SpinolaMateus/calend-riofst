@@ -15,6 +15,7 @@ export interface IntegrationSession {
   entregavel: string;
   observacoes?: string;
   customColor?: string; // override color if desired
+  isCompleted?: boolean;
 }
 
 export type IntegrationAudience = 'geral' | 'temporarios' | 'jovem-aprendiz' | 'estagiarios';
@@ -43,4 +44,4 @@ export interface UnitInfo {
   contactPerson: string;  // e.g. "Gente & Gestão: (41) 99999-0000"
 }
 
-export type ViewMode = 'table' | 'timeline' | 'display';
+export type ViewMode = 'table' | 'timeline' | 'status' | 'display';

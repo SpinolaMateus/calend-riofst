@@ -34,8 +34,14 @@ import {
 } from 'lucide-react';
 import { CorporateEvent } from './types/calendar';
 import { useAdminAuth } from './services/AdminAuthContext';
-import { fetchIntegrationFromSupabase } from './services/supabaseClient';
+import {
+  fetchIntegrationFromSupabase,
+  fetchIntegrationStatusesFromSupabase,
+  setIntegrationSessionStatus,
+  subscribeToIntegrationStatusChanges,
+} from './services/supabaseClient';
 import { FormationsDashboard } from './components/FormationsDashboard';
+import { StatusTrackingView } from './components/StatusTrackingView';
 
 const STORAGE_KEY_SESSIONS = 'cronograma_integracao_sessions_v2';
 const STORAGE_KEY_AREAS = 'cronograma_integracao_areas_v2';
@@ -91,6 +97,8 @@ export default function App() {
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isCopyingImage, setIsCopyingImage] = useState(false);
   const [isConnectivityModalOpen, setIsConnectivityModalOpen] = useState(false);
+  const [isStatusSyncReady, setIsStatusSyncReady] = useState(false);
+  const [statusSyncMessage, setStatusSyncMessage] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // Calendar events state for diagnostics sync
@@ -117,24 +125,82 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    const loadCloudSessions = async () => {
-      const { data, error } = await fetchIntegrationFromSupabase();
+    const applyCloudStatuses = async () => {
+      const { data, error } = await fetchIntegrationStatusesFromSupabase();
       if (cancelled) return;
       if (error) {
-        console.error('Could not load integration schedule from Supabase', error);
+        console.error('Could not load integration activity statuses from Supabase', error);
+        setIsStatusSyncReady(false);
+        setStatusSyncMessage(
+          /does not exist|schema cache|could not find the table/i.test(error.message)
+            ? 'Ative os status compartilhados: abra Vercel & Supabase, copie o SQL atualizado e execute-o no SQL Editor do Supabase.'
+            : 'Não foi possível conectar ao Supabase para carregar os status compartilhados.',
+        );
         return;
       }
-      if (!data?.length) return;
+      if (!data) return;
+      setIsStatusSyncReady(true);
+      setStatusSyncMessage('');
+
+      setSessions((current) => {
+        return current.map((session) => (
+          Object.prototype.hasOwnProperty.call(data, session.id)
+            ? { ...session, isCompleted: data[session.id] }
+            : session
+        ));
+      });
+    };
+    const unsubscribeFromStatusChanges = subscribeToIntegrationStatusChanges(() => {
+      void applyCloudStatuses();
+    });
+
+    const loadCloudData = async () => {
+      const [sessionsResult, statusesResult] = await Promise.all([
+        fetchIntegrationFromSupabase(),
+        fetchIntegrationStatusesFromSupabase(),
+      ]);
+      if (cancelled) return;
+      if (sessionsResult.error) {
+        console.error('Could not load integration schedule from Supabase', sessionsResult.error);
+      }
+      if (statusesResult.error) {
+        console.error('Could not load integration activity statuses from Supabase', statusesResult.error);
+        setIsStatusSyncReady(false);
+        setStatusSyncMessage(
+          /does not exist|schema cache|could not find the table/i.test(statusesResult.error.message)
+            ? 'Ative os status compartilhados: abra Vercel & Supabase, copie o SQL atualizado e execute-o no SQL Editor do Supabase.'
+            : 'Não foi possível conectar ao Supabase para carregar os status compartilhados.',
+        );
+      } else {
+        setIsStatusSyncReady(true);
+        setStatusSyncMessage('');
+      }
+      const cloudStatuses = statusesResult.data ?? {};
+      if (!sessionsResult.data?.length && !Object.keys(cloudStatuses).length) return;
 
       setSessions((current) => {
         const merged = new Map(current.map((session) => [session.id, session]));
-        for (const session of data) merged.set(session.id, { ...session, audience: session.audience || 'geral' });
-        return Array.from(merged.values());
+        for (const session of sessionsResult.data ?? []) {
+          const previous = merged.get(session.id);
+          merged.set(session.id, {
+            ...session,
+            audience: session.audience || 'geral',
+            isCompleted: Object.prototype.hasOwnProperty.call(cloudStatuses, session.id)
+              ? cloudStatuses[session.id]
+              : previous?.isCompleted ?? session.isCompleted ?? false,
+          });
+        }
+        return Array.from(merged.values()).map((session) => (
+          Object.prototype.hasOwnProperty.call(cloudStatuses, session.id)
+            ? { ...session, isCompleted: cloudStatuses[session.id] }
+            : session
+        ));
       });
     };
-    void loadCloudSessions();
+    void loadCloudData();
     return () => {
       cancelled = true;
+      unsubscribeFromStatusChanges();
     };
   }, []);
 
@@ -178,7 +244,11 @@ export default function App() {
       requestAdminAccess(() => handleSaveSession(savedSession));
       return;
     }
-    savedSession = { ...savedSession, audience: savedSession.audience || selectedAudience };
+    savedSession = {
+      ...savedSession,
+      audience: savedSession.audience || selectedAudience,
+      isCompleted: sessionToEdit?.isCompleted ?? savedSession.isCompleted ?? false,
+    };
     if (sessionToEdit) {
       setSessions((prev) =>
         prev.map((s) => (s.id === savedSession.id ? savedSession : s))
@@ -199,6 +269,35 @@ export default function App() {
     setSessions((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
   };
 
+  const handleToggleSessionStatus = async (session: IntegrationSession, isCompleted: boolean) => {
+    const previousStatus = Boolean(sessions.find((item) => item.id === session.id)?.isCompleted);
+    setSessions((current) => current.map((item) => (
+      item.id === session.id ? { ...item, isCompleted } : item
+    )));
+
+    const { error } = await setIntegrationSessionStatus(session.id, isCompleted);
+    if (error) {
+      setIsStatusSyncReady(false);
+      setStatusSyncMessage(
+        /does not exist|schema cache|could not find the function|could not find the table/i.test(error.message)
+          ? 'Ative os status compartilhados: abra Vercel & Supabase, copie o SQL atualizado e execute-o no SQL Editor do Supabase.'
+          : 'Não foi possível conectar ao Supabase para salvar os status compartilhados.',
+      );
+      setSessions((current) => current.map((item) => (
+        item.id === session.id ? { ...item, isCompleted: previousStatus } : item
+      )));
+      console.error('Could not save integration activity status', error);
+      showToast(
+        `Não foi possível sincronizar o status. Verifique a configuração da tabela de status no Supabase. ${error.message}`,
+        'error',
+      );
+      return;
+    }
+    setIsStatusSyncReady(true);
+    setStatusSyncMessage('');
+    showToast(isCompleted ? 'Atividade marcada como feita.' : 'Atividade voltou para pendente.');
+  };
+
   const handleDeleteSession = (id: string) => {
     if (!hasAdminAccess()) {
       requestAdminAccess(() => handleDeleteSession(id));
@@ -217,6 +316,7 @@ export default function App() {
       ...session,
       id: `session-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       tema: `${session.tema} (Cópia)`,
+      isCompleted: false,
     };
     setSessions((prev) => [...prev, duplicated]);
     showToast('Atividade duplicada com sucesso!');
@@ -299,9 +399,11 @@ export default function App() {
         showToast('Nenhum dado encontrado na planilha importada.', 'error');
         return;
       }
+      const existingStatuses = new Map(sessions.map((session) => [session.id, session.isCompleted]));
       const importedSessions = parsed.map((session) => ({
         ...session,
         audience: session.audience || selectedAudience,
+        isCompleted: existingStatuses.get(session.id) ?? session.isCompleted ?? false,
       }));
       setSessions((previous) => [
         ...previous.filter((session) => (session.audience || 'geral') !== selectedAudience),
@@ -540,6 +642,16 @@ export default function App() {
                   onDuplicateSession={handleDuplicateSession}
                   onEditSession={handleEditSession}
                   onAddNewSession={handleAddNewSession}
+                />
+              )}
+
+              {viewMode === 'status' && (
+                <StatusTrackingView
+                  sessions={audienceSessions}
+                  selectedDay={selectedDay}
+                  syncMessage={statusSyncMessage}
+                  isSyncReady={isStatusSyncReady}
+                  onToggleStatus={handleToggleSessionStatus}
                 />
               )}
 

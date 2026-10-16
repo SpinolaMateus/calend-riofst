@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { 
   FileDown, Printer, FileSpreadsheet, Upload, Copy,
   Palette, Settings, RotateCcw, Plus, Calendar, 
-  Tv, Table as TableIcon, Clock, ChevronDown
+  Tv, Table as TableIcon, Clock, ChevronDown, ListChecks
 } from 'lucide-react';
 import { INTEGRATION_AUDIENCES, IntegrationAudience, UnitInfo, ViewMode } from '../types/schedule';
 
@@ -238,7 +238,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="bg-slate-50/80 border-t border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
           {/* View Mode Buttons */}
-          <div className="flex items-center bg-slate-200/80 p-0.5 rounded-xl border border-slate-300/60 shadow-2xs">
+          <div className="flex flex-wrap items-center gap-0.5 bg-slate-200/80 p-0.5 rounded-xl border border-slate-300/60 shadow-2xs">
             <button
               onClick={() => onChangeViewMode('table')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
@@ -261,6 +261,19 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Clock className="w-3.5 h-3.5" />
               <span>Cronograma Visual (Colunas por Dia)</span>
+            </button>
+
+            <button
+              onClick={() => onChangeViewMode('status')}
+              aria-pressed={viewMode === 'status'}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                viewMode === 'status'
+                  ? 'bg-black text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <ListChecks className="w-3.5 h-3.5" />
+              <span>Status / Pendências</span>
             </button>
 
             <button
