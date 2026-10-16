@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  BarChart3, Check, ChevronDown, CircleHelp, Download, FileUp,
-  Search, Table2, Upload, Users, X,
+  BarChart3, Check, ChevronDown, CircleHelp, Cloud, Download, FileUp,
+  Search, Table2, Upload, UploadCloud, Users, X,
 } from 'lucide-react';
+import { useAdminAuth } from '../services/AdminAuthContext';
+import { downloadSharedFormationsCsv, uploadSharedFormationsCsv } from '../services/supabaseClient';
 import './FormationsDashboard.css';
 
 type FormationRow = Record<string, string> & {
@@ -355,6 +357,7 @@ async function readLastUpload() {
 }
 
 export function FormationsDashboard() {
+  const { isAdmin, isLoading: isAuthLoading, hasAdminAccess, requestAdminAccess } = useAdminAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const workerRef = useRef<Worker | null>(null);
   const loadVersionRef = useRef(0);
@@ -365,7 +368,12 @@ export function FormationsDashboard() {
     resolve: (result: { values: string[]; total: number }) => void;
     reject: (error: Error) => void;
   }>());
-  const pendingFileRef = useRef<{ file: File; persist: boolean; requestId: number } | null>(null);
+  const pendingFileRef = useRef<{
+    file: File;
+    persist: boolean;
+    uploadToCloud: boolean;
+    requestId: number;
+  } | null>(null);
   const loadedRowsRef = useRef(0);
   const [rowCount, setRowCount] = useState(0);
   const [fileName, setFileName] = useState('');
@@ -373,6 +381,10 @@ export function FormationsDashboard() {
   const [storageError, setStorageError] = useState('');
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [lastSavedName, setLastSavedName] = useState('');
+  const [cloudSavedAt, setCloudSavedAt] = useState<number | null>(null);
+  const [cloudSavedName, setCloudSavedName] = useState('');
+  const [cloudError, setCloudError] = useState('');
+  const [isCloudSaving, setIsCloudSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
   const [workerReady, setWorkerReady] = useState(false);
@@ -388,7 +400,7 @@ export function FormationsDashboard() {
     B: { ...EMPTY_COLUMN, facets: { ...EMPTY_FACETS } },
   });
 
-  const loadFile = (file?: File, persist = true) => {
+  const loadFile = (file?: File, persist = true, uploadToCloud = false) => {
     if (!file) return;
     if (!file.name.toLocaleLowerCase().endsWith('.csv')) {
       setError('Selecione um ficheiro CSV.');
@@ -404,7 +416,11 @@ export function FormationsDashboard() {
       reject(new Error('A planilha foi alterada antes de carregar as opções.'));
     });
     pendingFacetRequestsRef.current.clear();
-    pendingFileRef.current = { file, persist, requestId: loadVersion };
+    pendingFileRef.current = { file, persist, uploadToCloud, requestId: loadVersion };
+    if (uploadToCloud) {
+      setIsCloudSaving(true);
+      setCloudError('');
+    }
     if (!workerRef.current) {
       const worker = new Worker(new URL('./FormationsCsv.worker.ts', import.meta.url), { type: 'module' });
       workerRef.current = worker;
@@ -422,8 +438,11 @@ export function FormationsDashboard() {
           if (response.requestId !== loadVersionRef.current
             && response.requestId !== filterRequestRef.current
             && response.requestId !== exportRequestRef.current) return;
-          if (pendingFileRef.current?.requestId === response.requestId) {
+          if (pendingFileRef.current && pendingFileRef.current.requestId === response.requestId) {
+            const pending = pendingFileRef.current;
+            pendingFileRef.current = null;
             setIsLoading(false);
+            if (pending.uploadToCloud) setIsCloudSaving(false);
             setWorkerReady(loadedRowsRef.current > 0);
           }
           setIsFiltering(false);
@@ -465,6 +484,25 @@ export function FormationsDashboard() {
               setStorageError('A planilha foi carregada, mas não pôde ser salva neste navegador.');
             });
           }
+          if (pending.uploadToCloud) {
+            void uploadSharedFormationsCsv(pending.file).then(({ savedAt, error: uploadError }) => {
+              setIsCloudSaving(false);
+              if (uploadError) {
+                console.error('Could not save the formations CSV in private Supabase storage', uploadError);
+                setCloudError(`CSV carregado apenas neste navegador; não foi salvo na nuvem. ${uploadError.message}`);
+                return;
+              }
+              setCloudSavedAt(savedAt);
+              setCloudSavedName(pending.file.name);
+              setCloudError('');
+            }).catch((caught: unknown) => {
+              setIsCloudSaving(false);
+              console.error('Could not save the formations CSV in private Supabase storage', caught);
+              setCloudError(caught instanceof Error
+                ? `CSV carregado apenas neste navegador; não foi salvo na nuvem. ${caught.message}`
+                : 'CSV carregado apenas neste navegador; não foi salvo na nuvem.');
+            });
+          }
           return;
         }
         if (response.type === 'filtered' && response.requestId === filterRequestRef.current
@@ -486,6 +524,7 @@ export function FormationsDashboard() {
       };
       worker.onerror = () => {
         setIsLoading(false);
+        setIsCloudSaving(false);
         setIsFiltering(false);
         setWorkerReady(false);
         pendingFacetRequestsRef.current.forEach(({ reject }) => {
@@ -501,22 +540,54 @@ export function FormationsDashboard() {
   useEffect(() => {
     let cancelled = false;
     const restoreVersion = loadVersionRef.current;
-    void readLastUpload().then((saved) => {
+    if (isAuthLoading) return () => { cancelled = true; };
+    const restoreLatestFile = async () => {
+      if (isAdmin) {
+        const shared = await downloadSharedFormationsCsv();
+        if (cancelled || loadVersionRef.current !== restoreVersion) return;
+        if (shared.error) {
+          console.error('Could not restore the shared formations CSV from Supabase', shared.error);
+          setCloudError(
+            `Não foi possível acessar a cópia privada na nuvem. Verifique se o bucket foi configurado no SQL do Supabase. ${shared.error.message}`,
+          );
+        } else if (shared.file && shared.savedAt !== null) {
+          setCloudSavedAt(shared.savedAt);
+          setCloudSavedName(shared.file.name);
+          setCloudError('');
+          loadFile(shared.file, false);
+          return;
+        }
+      }
+
+      const saved = await readLastUpload();
       if (cancelled || loadVersionRef.current !== restoreVersion || !saved) return;
       setLastSavedAt(saved.savedAt);
       setLastSavedName(saved.file.name);
       loadFile(saved.file, false);
-    }).catch((caught: unknown) => {
+    };
+    void restoreLatestFile().catch((caught: unknown) => {
       if (cancelled) return;
-      console.error('Could not restore the last formations CSV from IndexedDB', caught);
+      console.error('Could not restore the saved formations CSV', caught);
       setStorageError('Não foi possível recuperar a planilha salva neste navegador.');
     });
     return () => {
       cancelled = true;
-      workerRef.current?.terminate();
-      workerRef.current = null;
     };
+  }, [isAdmin, isAuthLoading]);
+
+  useEffect(() => () => {
+    workerRef.current?.terminate();
+    workerRef.current = null;
   }, []);
+
+  const requestFileUpload = (file?: File) => {
+    if (!file) return;
+    if (hasAdminAccess()) {
+      loadFile(file, true, true);
+      return;
+    }
+    requestAdminAccess(() => loadFile(file, true, true));
+  };
 
   const updateColumn = (id: ColumnId, update: (column: ColumnState) => ColumnState) => {
     setColumns((current) => ({ ...current, [id]: update(current[id]) }));
@@ -753,16 +824,20 @@ export function FormationsDashboard() {
           onDragOver={(event) => event.preventDefault()}
           onDrop={(event) => {
             event.preventDefault();
-            loadFile(event.dataTransfer.files[0]);
+            requestFileUpload(event.dataTransfer.files[0]);
           }}
         >
           <button
             type="button"
             className="formation-upload-button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isLoading}
+            onClick={() => {
+              if (hasAdminAccess()) fileInputRef.current?.click();
+              else requestAdminAccess(() => fileInputRef.current?.click());
+            }}
+            disabled={isLoading || isCloudSaving || isAuthLoading}
           >
-            <Upload size={16} /> {isLoading ? 'Processando CSV...' : 'Carregar CSV'}
+            {isCloudSaving ? <UploadCloud size={16} /> : <Upload size={16} />}
+            {isLoading ? 'Processando CSV...' : isCloudSaving ? 'Salvando na nuvem...' : 'Carregar e salvar CSV'}
           </button>
           <input
             ref={fileInputRef}
@@ -770,7 +845,7 @@ export function FormationsDashboard() {
             accept=".csv,text/csv"
             hidden
             onChange={(event) => {
-              loadFile(event.target.files?.[0]);
+              requestFileUpload(event.target.files?.[0]);
               event.target.value = '';
             }}
           />
@@ -779,9 +854,19 @@ export function FormationsDashboard() {
             <span>{isLoading ? 'A processar a planilha em segundo plano...' : fileName ? `${fileName} · ${rowCount} registos` : 'Arraste um ficheiro ou clique ao lado'}</span>
             {lastSavedAt !== null && (
               <span className="formation-last-upload">
-                Último envio: {lastSavedName} · {new Date(lastSavedAt).toLocaleString('pt-BR')}
+                Último carregamento neste navegador: {lastSavedName} · {new Date(lastSavedAt).toLocaleString('pt-BR')}
               </span>
             )}
+            {cloudSavedAt !== null && (
+              <span className="formation-last-upload">
+                <Cloud size={12} /> Cópia privada na nuvem: {cloudSavedName} · {new Date(cloudSavedAt).toLocaleString('pt-BR')}
+              </span>
+            )}
+            <span>
+              {isAdmin
+                ? 'Arquivo compartilhado privado: somente administradores podem recuperar.'
+                : 'A cópia compartilhada é privada; entre como administrador para carregar e salvar.'}
+            </span>
           </div>
         </div>
       </div>
@@ -789,6 +874,7 @@ export function FormationsDashboard() {
       <div className="formation-content">
         {error && <div className="formation-error" role="alert"><CircleHelp size={17} />{error}</div>}
         {storageError && <div className="formation-storage-error" role="status">{storageError}</div>}
+        {cloudError && <div className="formation-storage-error" role="alert">{cloudError}</div>}
         <nav className="formation-tabs" aria-label="Abas do dashboard">
           <button
             type="button"

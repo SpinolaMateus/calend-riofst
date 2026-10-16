@@ -4,6 +4,8 @@ import { IntegrationAudience, IntegrationSession, UnitInfo } from '../types/sche
 
 export const DEFAULT_SUPABASE_URL = 'https://tgmjghxytbwafhrxdkyl.supabase.co';
 export const DEFAULT_SUPABASE_KEY = 'sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c';
+const FORMATIONS_BUCKET = 'formations-dashboard';
+const FORMATIONS_FILE_PATH = 'latest.csv';
 
 export function getSupabaseCredentials() {
   const envUrl = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_SUPABASE_URL : '';
@@ -41,6 +43,85 @@ export function getSupabaseClient(): SupabaseClient | null {
   } catch (err) {
     console.error('Failed to init Supabase client', err);
     return null;
+  }
+}
+
+export async function uploadSharedFormationsCsv(file: File): Promise<{ savedAt: number; error: Error | null }> {
+  const client = getSupabaseClient();
+  if (!client) return { savedAt: 0, error: new Error('Cliente Supabase não inicializado') };
+  const savedAt = Date.now();
+
+  try {
+    const { error } = await client.storage
+      .from(FORMATIONS_BUCKET)
+      .upload(FORMATIONS_FILE_PATH, file, {
+        upsert: true,
+        contentType: 'text/csv',
+        cacheControl: '0',
+        metadata: {
+          originalName: file.name,
+          savedAt: new Date(savedAt).toISOString(),
+        },
+      });
+    return { savedAt: error ? 0 : savedAt, error: error ? new Error(error.message) : null };
+  } catch (caught: unknown) {
+    return {
+      savedAt: 0,
+      error: caught instanceof Error ? caught : new Error('Não foi possível salvar o CSV compartilhado.'),
+    };
+  }
+}
+
+export async function downloadSharedFormationsCsv(): Promise<{
+  file: File | null;
+  savedAt: number | null;
+  error: Error | null;
+}> {
+  const client = getSupabaseClient();
+  if (!client) return { file: null, savedAt: null, error: new Error('Cliente Supabase não inicializado') };
+
+  try {
+    const { data, error } = await client.storage
+      .from(FORMATIONS_BUCKET)
+      .download(FORMATIONS_FILE_PATH);
+    if (error) {
+      if (error.message.toLocaleLowerCase().includes('object not found')) {
+        return { file: null, savedAt: null, error: null };
+      }
+      return { file: null, savedAt: null, error: new Error(error.message) };
+    }
+    if (!data) return { file: null, savedAt: null, error: null };
+
+    const { data: listedFiles, error: listError } = await client.storage
+      .from(FORMATIONS_BUCKET)
+      .list('', { limit: 100, search: FORMATIONS_FILE_PATH });
+    if (listError) return { file: null, savedAt: null, error: new Error(listError.message) };
+    const savedFile = listedFiles?.find((item) => item.name === FORMATIONS_FILE_PATH);
+    const metadata = savedFile?.metadata as Record<string, unknown> | null;
+    const originalName = typeof metadata?.originalName === 'string'
+      ? metadata.originalName
+      : FORMATIONS_FILE_PATH;
+    const metadataSavedAt = typeof metadata?.savedAt === 'string'
+      ? Date.parse(metadata.savedAt)
+      : NaN;
+    const savedAt = Number.isFinite(metadataSavedAt)
+      ? metadataSavedAt
+      : Date.parse(savedFile?.updated_at ?? '') || Date.now();
+
+    return {
+      file: new File([data], originalName, {
+        type: data.type || 'text/csv',
+        lastModified: savedAt,
+      }),
+      savedAt,
+      error: null,
+    };
+  } catch (caught: unknown) {
+    return {
+      file: null,
+      savedAt: null,
+      error: caught instanceof Error ? caught : new Error('Não foi possível recuperar o CSV compartilhado.'),
+    };
   }
 }
 
@@ -454,6 +535,39 @@ CREATE POLICY "Public can read integration session status" ON public.integration
   FOR SELECT TO anon, authenticated USING (true);
 GRANT SELECT ON TABLE public.integration_session_status TO anon, authenticated;
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.integration_session_status FROM anon, authenticated, PUBLIC;
+
+-- 4. CSV PRIVADO DO DASHBOARD DE FORMAÇÕES (somente administradores)
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('formations-dashboard', 'formations-dashboard', FALSE)
+ON CONFLICT (id) DO UPDATE SET public = FALSE;
+
+DROP POLICY IF EXISTS "Formation CSV admins can read" ON storage.objects;
+CREATE POLICY "Formation CSV admins can read" ON storage.objects
+  FOR SELECT TO authenticated
+  USING (
+    bucket_id = 'formations-dashboard'
+    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
+  );
+
+DROP POLICY IF EXISTS "Formation CSV admins can upload" ON storage.objects;
+CREATE POLICY "Formation CSV admins can upload" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    bucket_id = 'formations-dashboard'
+    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
+  );
+
+DROP POLICY IF EXISTS "Formation CSV admins can replace" ON storage.objects;
+CREATE POLICY "Formation CSV admins can replace" ON storage.objects
+  FOR UPDATE TO authenticated
+  USING (
+    bucket_id = 'formations-dashboard'
+    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
+  )
+  WITH CHECK (
+    bucket_id = 'formations-dashboard'
+    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
+  );
 
 CREATE OR REPLACE FUNCTION public.set_integration_session_status(
   p_session_id TEXT,
