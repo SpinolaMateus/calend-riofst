@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Calendar, Clock, Shield, Cloud, FileSpreadsheet, 
-  Tv, FileDown, MapPin, ArrowRight, CheckCircle2, Lock
+  Tv, FileDown, MapPin, ArrowRight, CheckCircle2, Lock, BarChart3
 } from 'lucide-react';
 import { UnitInfo } from '../types/schedule';
 
@@ -9,6 +9,7 @@ interface HomeScreenProps {
   unitInfo: UnitInfo;
   onSelectIntegration: () => void;
   onSelectCalendar: () => void;
+  onSelectFormations: () => void;
   integrationEventsCount: number;
   calendarEventsCount: number;
 }
@@ -17,6 +18,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   unitInfo,
   onSelectIntegration,
   onSelectCalendar,
+  onSelectFormations,
   integrationEventsCount,
   calendarEventsCount,
 }) => {
@@ -49,7 +51,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-            Selecione o módulo corporativo que deseja acessar. Gerencie a integração de novos colaboradores ou o calendário mensal sincronizado na nuvem.
+            Selecione o módulo corporativo que deseja acessar: gestão da integração, calendário de eventos ou comparação de matrizes de formação.
           </p>
 
           <div className="pt-2 flex flex-wrap items-center gap-6 text-xs text-slate-300 font-medium">
@@ -70,7 +72,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </div>
 
       {/* Module Selection Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {/* Module 1: Cronograma de Integração */}
         <div 
           onClick={onSelectIntegration}
@@ -125,6 +127,46 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </span>
             <div className="flex items-center gap-2 font-bold text-sm text-indigo-600 group-hover:translate-x-1 transition-transform">
               <span>Acessar Cronograma</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+
+        <div
+          onClick={onSelectFormations}
+          className="group relative bg-slate-950 rounded-3xl p-8 border border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1"
+        >
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                <BarChart3 className="w-7 h-7" />
+              </div>
+              <span className="text-[11px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-300 px-3 py-1 rounded-full border border-blue-400/20">
+                Análise CSV
+              </span>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black text-white group-hover:text-blue-300 transition-colors tracking-tight">
+                Dashboard de Formações
+              </h2>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Compare duas matrizes lado a lado, aplique multifiltros e analise conclusões por formação, unidade organizacional e cargo.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2.5 pt-2 text-xs">
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 text-slate-200 font-medium">
+                <FileSpreadsheet className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="truncate">Importar CSV</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 text-slate-200 font-medium">
+                <BarChart3 className="w-4 h-4 text-blue-400 shrink-0" />
+                <span className="truncate">Análise gráfica</span>
+              </div>
+            </div>
+          </div>
+          <div className="pt-6 mt-6 border-t border-slate-800 flex items-center justify-end">
+            <div className="flex items-center gap-2 font-bold text-sm text-blue-300 group-hover:translate-x-1 transition-transform">
+              <span>Acessar dashboard</span>
               <ArrowRight className="w-4 h-4" />
             </div>
           </div>

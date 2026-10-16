@@ -30,11 +30,12 @@ import { ConnectivityModal } from './components/ConnectivityModal';
 import { copyElementAsImage, exportElementToPDF, exportToExcel, parseExcelFile } from './utils/exportUtils';
 import { 
   CheckCircle2, AlertCircle, Info, Home, 
-  Clock, Calendar as CalendarIcon, Shield, Cloud
+  Clock, Calendar as CalendarIcon, Shield, Cloud, BarChart3
 } from 'lucide-react';
 import { CorporateEvent } from './types/calendar';
 import { useAdminAuth } from './services/AdminAuthContext';
 import { fetchIntegrationFromSupabase } from './services/supabaseClient';
+import { FormationsDashboard } from './components/FormationsDashboard';
 
 const STORAGE_KEY_SESSIONS = 'cronograma_integracao_sessions_v2';
 const STORAGE_KEY_AREAS = 'cronograma_integracao_areas_v2';
@@ -42,8 +43,8 @@ const STORAGE_KEY_UNIT = 'cronograma_integracao_unit_v2';
 
 export default function App() {
   const { user, isAdmin, hasAdminAccess, requestAdminAccess, signOutAdmin } = useAdminAuth();
-  // Navigation: 'home' | 'integration' | 'calendar'
-  const [activeApp, setActiveApp] = useState<'home' | 'integration' | 'calendar'>('home');
+  // Navigation: 'home' | 'integration' | 'calendar' | 'formations'
+  const [activeApp, setActiveApp] = useState<'home' | 'integration' | 'calendar' | 'formations'>('home');
 
   // Load initial data from localStorage if available
   const [sessions, setSessions] = useState<IntegrationSession[]>(() => {
@@ -405,6 +406,19 @@ export default function App() {
               Nuvem
             </span>
           </button>
+
+          <button
+            onClick={() => setActiveApp('formations')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeApp === 'formations'
+                ? 'bg-violet-600 text-white shadow-xs'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4 text-violet-400" />
+            <span className="hidden sm:inline">Dashboard de Formações</span>
+            <span className="sm:hidden">Formações</span>
+          </button>
         </div>
 
         <div className="flex items-center gap-2 text-xs">
@@ -447,6 +461,7 @@ export default function App() {
             unitInfo={unitInfo}
             onSelectIntegration={() => setActiveApp('integration')}
             onSelectCalendar={() => setActiveApp('calendar')}
+            onSelectFormations={() => setActiveApp('formations')}
             integrationEventsCount={sessions.length}
             calendarEventsCount={calendarEventsCount}
           />
@@ -554,11 +569,13 @@ export default function App() {
         </main>
       )}
 
+      {activeApp === 'formations' && <FormationsDashboard />}
+
       {/* Footer Info (no-print) */}
       <footer className="no-print bg-white border-t border-slate-200 py-4 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
           <div>
-            <strong>{unitInfo.unitName}</strong> • Portal de Gestão & Divulgação de Cronogramas e Eventos
+            <strong>{unitInfo.unitName}</strong> • Portal de Gestão de Cronogramas, Eventos e Formações
           </div>
           <div className="flex items-center gap-4">
             <button
