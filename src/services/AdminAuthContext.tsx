@@ -1,16 +1,20 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { getSupabaseClient } from './supabaseClient';
+import { FORMATIONS_VIEWER_EMAIL, getSupabaseClient } from './supabaseClient';
 
 interface AdminAuthContextValue {
   user: User | null;
   isAdmin: boolean;
+  canViewSharedFormations: boolean;
   isLoading: boolean;
   hasAdminAccess: () => boolean;
   requestAdminAccess: (action?: () => void) => void;
+  requestFormationsAccess: (action?: () => void) => void;
   cancelAdminAccess: () => void;
   signOutAdmin: () => Promise<void>;
 }
+
+type LoginMode = 'admin' | 'formations';
 
 const AdminAuthContext = createContext<AdminAuthContextValue | null>(null);
 
@@ -18,8 +22,11 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const isAdminRef = useRef(false);
+  const [canViewSharedFormations, setCanViewSharedFormations] = useState(false);
+  const canViewSharedFormationsRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [loginMode, setLoginMode] = useState<LoginMode>('admin');
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -28,6 +35,10 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
   const updateAdminState = (value: boolean) => {
     isAdminRef.current = value;
     setIsAdmin(value);
+  };
+  const updateFormationsAccess = (value: boolean) => {
+    canViewSharedFormationsRef.current = value;
+    setCanViewSharedFormations(value);
   };
 
   useEffect(() => {
@@ -47,7 +58,10 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
     void loadSession();
     const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (!session) updateAdminState(false);
+      if (!session) {
+        updateAdminState(false);
+        updateFormationsAccess(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -58,28 +72,28 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
     const checkAdminRole = async () => {
       if (!user) {
         updateAdminState(false);
+        updateFormationsAccess(false);
         return;
       }
 
       const client = getSupabaseClient();
       if (!client) {
         updateAdminState(false);
+        updateFormationsAccess(false);
         return;
       }
 
-      const { data, error } = await client
-        .from('app_admins')
-        .select('user_id')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const [adminResult, viewerResult] = await Promise.all([
+        client.from('app_admins').select('user_id').eq('user_id', user.id).maybeSingle(),
+        client.from('formations_dashboard_viewers').select('user_id').eq('user_id', user.id).maybeSingle(),
+      ]);
 
       if (cancelled) return;
-      if (error) {
-        console.error('Could not verify Supabase administrator role', error);
-        updateAdminState(false);
-        return;
-      }
-      updateAdminState(Boolean(data));
+      if (adminResult.error) console.error('Could not verify Supabase administrator role', adminResult.error);
+      if (viewerResult.error) console.error('Could not verify shared formations access', viewerResult.error);
+      const isAdminUser = !adminResult.error && Boolean(adminResult.data);
+      updateAdminState(isAdminUser);
+      updateFormationsAccess(isAdminUser || (!viewerResult.error && Boolean(viewerResult.data)));
     };
 
     void checkAdminRole();
@@ -93,6 +107,18 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
       action?.();
       return;
     }
+    setLoginMode('admin');
+    setPendingAction(() => action ?? null);
+    setLoginError('');
+    setIsLoginOpen(true);
+  };
+
+  const requestFormationsAccess = (action?: () => void) => {
+    if (canViewSharedFormationsRef.current) {
+      action?.();
+      return;
+    }
+    setLoginMode('formations');
     setPendingAction(() => action ?? null);
     setLoginError('');
     setIsLoginOpen(true);
@@ -111,6 +137,7 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
     const { error } = await client.auth.signOut();
     if (error) throw new Error(error.message);
     updateAdminState(false);
+    updateFormationsAccess(false);
   };
 
   const handleSignIn = async (event: React.FormEvent) => {
@@ -121,41 +148,52 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
     try {
       const client = getSupabaseClient();
       if (!client) throw new Error('Cliente Supabase não inicializado');
-      if (username.trim().toUpperCase() !== 'GGFST') {
-        throw new Error('Usuário ou senha inválidos.');
-      }
       if (password.length < 6) {
-        throw new Error('O Supabase exige senha com pelo menos 6 caracteres. A senha GGFST tem apenas 5.');
+        throw new Error('A senha precisa ter pelo menos 6 caracteres.');
+      }
+      if (loginMode === 'admin' && username.trim().toUpperCase() !== 'GGFST') {
+        throw new Error('Usuário ou senha inválidos.');
       }
 
       const { data, error } = await client.auth.signInWithPassword({
-        email: import.meta.env.VITE_SUPABASE_ADMIN_EMAIL || 'ggfst@tgmjghxytbwafhrxdkyl.supabase.co',
+        email: loginMode === 'admin'
+          ? import.meta.env.VITE_SUPABASE_ADMIN_EMAIL || 'ggfst@tgmjghxytbwafhrxdkyl.supabase.co'
+          : FORMATIONS_VIEWER_EMAIL,
         password,
       });
       if (error) {
         if (error.message === 'Invalid login credentials') {
           throw new Error(
-            'Login não reconhecido. Confira se o usuário administrador foi criado e confirmado em Supabase > Authentication > Users, e se a senha tem pelo menos 6 caracteres.'
+            loginMode === 'admin'
+              ? 'Login não reconhecido. Confira se o usuário administrador foi criado e confirmado em Supabase > Authentication > Users.'
+              : 'Senha não reconhecida. Confira a conta compartilhada do Dashboard em Supabase > Authentication > Users.'
           );
         }
         throw new Error(error.message);
       }
       if (!data.user) throw new Error('O Supabase não retornou um usuário autenticado.');
 
+      const roleTable = loginMode === 'admin' ? 'app_admins' : 'formations_dashboard_viewers';
       const { data: role, error: roleError } = await client
-        .from('app_admins')
+        .from(roleTable)
         .select('user_id')
         .eq('user_id', data.user.id)
         .maybeSingle();
 
-      if (roleError) throw new Error(`Não foi possível verificar o acesso administrativo: ${roleError.message}`);
+      if (roleError) {
+        await client.auth.signOut();
+        throw new Error(`Não foi possível verificar a autorização: ${roleError.message}`);
+      }
       if (!role) {
         await client.auth.signOut();
-        throw new Error('Esta conta não está autorizada como administradora. Solicite a inclusão no Supabase.');
+        throw new Error(loginMode === 'admin'
+          ? 'Esta conta não está autorizada como administradora. Solicite a inclusão no Supabase.'
+          : 'Esta conta não está autorizada a visualizar o Dashboard de Formações.');
       }
 
       setUser(data.user);
-      updateAdminState(true);
+      updateAdminState(loginMode === 'admin');
+      updateFormationsAccess(true);
       setIsLoginOpen(false);
       setPassword('');
       const action = pendingAction;
@@ -173,9 +211,11 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
       value={{
         user,
         isAdmin,
+        canViewSharedFormations,
         isLoading,
         hasAdminAccess: () => isAdminRef.current,
         requestAdminAccess,
+        requestFormationsAccess,
         cancelAdminAccess,
         signOutAdmin,
       }}
@@ -191,21 +231,29 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
               <span className="text-xl font-bold" aria-hidden="true">A</span>
             </div>
             <div className="text-center">
-              <h2 className="font-bold text-slate-900">Acesso administrativo</h2>
-              <p className="text-xs text-slate-500 mt-1">Entre com o usuário administrativo cadastrado no Supabase.</p>
+              <h2 className="font-bold text-slate-900">
+                {loginMode === 'admin' ? 'Acesso administrativo' : 'Acesso ao Dashboard de Formações'}
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                {loginMode === 'admin'
+                  ? 'Entre com o usuário administrativo cadastrado no Supabase.'
+                  : 'Digite a senha compartilhada para visualizar o CSV online.'}
+              </p>
             </div>
-            <label className="block text-xs font-semibold text-slate-700">
-              Usuário
-              <input
-                type="text"
-                autoComplete="username"
-                required
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                placeholder="GGFST"
-                className="mt-1 w-full px-3 py-2.5 text-sm border border-slate-300 rounded-xl"
-              />
-            </label>
+            {loginMode === 'admin' && (
+              <label className="block text-xs font-semibold text-slate-700">
+                Usuário
+                <input
+                  type="text"
+                  autoComplete="username"
+                  required
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  placeholder="GGFST"
+                  className="mt-1 w-full px-3 py-2.5 text-sm border border-slate-300 rounded-xl"
+                />
+              </label>
+            )}
             <label className="block text-xs font-semibold text-slate-700">
               Senha
               <input
@@ -235,7 +283,9 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
               </button>
             </div>
             <p className="text-[11px] text-slate-500 text-center">
-              A conta precisa estar cadastrada em <code>public.app_admins</code>.
+              {loginMode === 'admin'
+                ? <>A conta precisa estar cadastrada em <code>public.app_admins</code>.</>
+                : <>A conta precisa estar autorizada em <code>public.formations_dashboard_viewers</code>.</>}
             </p>
           </form>
         </div>

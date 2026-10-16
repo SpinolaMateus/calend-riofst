@@ -357,7 +357,14 @@ async function readLastUpload() {
 }
 
 export function FormationsDashboard() {
-  const { isAdmin, isLoading: isAuthLoading, hasAdminAccess, requestAdminAccess } = useAdminAuth();
+  const {
+    isAdmin,
+    canViewSharedFormations,
+    isLoading: isAuthLoading,
+    hasAdminAccess,
+    requestAdminAccess,
+    requestFormationsAccess,
+  } = useAdminAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const workerRef = useRef<Worker | null>(null);
   const loadVersionRef = useRef(0);
@@ -542,7 +549,7 @@ export function FormationsDashboard() {
     const restoreVersion = loadVersionRef.current;
     if (isAuthLoading) return () => { cancelled = true; };
     const restoreLatestFile = async () => {
-      if (isAdmin) {
+      if (canViewSharedFormations) {
         const shared = await downloadSharedFormationsCsv();
         if (cancelled || loadVersionRef.current !== restoreVersion) return;
         if (shared.error) {
@@ -573,7 +580,7 @@ export function FormationsDashboard() {
     return () => {
       cancelled = true;
     };
-  }, [isAdmin, isAuthLoading]);
+  }, [canViewSharedFormations, isAuthLoading]);
 
   useEffect(() => () => {
     workerRef.current?.terminate();
@@ -824,20 +831,34 @@ export function FormationsDashboard() {
           onDragOver={(event) => event.preventDefault()}
           onDrop={(event) => {
             event.preventDefault();
-            requestFileUpload(event.dataTransfer.files[0]);
+            if (isAdmin) requestFileUpload(event.dataTransfer.files[0]);
           }}
         >
           <button
             type="button"
             className="formation-upload-button"
             onClick={() => {
-              if (hasAdminAccess()) fileInputRef.current?.click();
-              else requestAdminAccess(() => fileInputRef.current?.click());
+              if (isAdmin) {
+                if (hasAdminAccess()) fileInputRef.current?.click();
+                else requestAdminAccess(() => fileInputRef.current?.click());
+              } else if (!canViewSharedFormations) {
+                requestFormationsAccess();
+              }
             }}
-            disabled={isLoading || isCloudSaving || isAuthLoading}
+            disabled={isLoading || isCloudSaving || isAuthLoading || (!isAdmin && canViewSharedFormations)}
           >
-            {isCloudSaving ? <UploadCloud size={16} /> : <Upload size={16} />}
-            {isLoading ? 'Processando CSV...' : isCloudSaving ? 'Salvando na nuvem...' : 'Carregar e salvar CSV'}
+            {isAdmin
+              ? (isCloudSaving ? <UploadCloud size={16} /> : <Upload size={16} />)
+              : <Cloud size={16} />}
+            {isLoading
+              ? 'Processando CSV...'
+              : isCloudSaving
+                ? 'Salvando na nuvem...'
+                : isAdmin
+                  ? 'Carregar e salvar CSV'
+                  : canViewSharedFormations
+                    ? 'Acesso online ativo'
+                    : 'Acessar CSV online'}
           </button>
           <input
             ref={fileInputRef}
@@ -859,13 +880,15 @@ export function FormationsDashboard() {
             )}
             {cloudSavedAt !== null && (
               <span className="formation-last-upload">
-                <Cloud size={12} /> Cópia privada na nuvem: {cloudSavedName} · {new Date(cloudSavedAt).toLocaleString('pt-BR')}
+                <Cloud size={12} /> Cópia online: {cloudSavedName} · {new Date(cloudSavedAt).toLocaleString('pt-BR')}
               </span>
             )}
             <span>
               {isAdmin
-                ? 'Arquivo compartilhado privado: somente administradores podem recuperar.'
-                : 'A cópia compartilhada é privada; entre como administrador para carregar e salvar.'}
+                ? 'Você pode atualizar o CSV online; outras pessoas acessam com a senha compartilhada.'
+                : canViewSharedFormations
+                  ? 'Acesso de visualização ativo; somente administradores podem enviar uma nova versão.'
+                  : 'Entre com a senha compartilhada para carregar a cópia online.'}
             </span>
           </div>
         </div>

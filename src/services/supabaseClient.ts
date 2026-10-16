@@ -6,6 +6,7 @@ export const DEFAULT_SUPABASE_URL = 'https://tgmjghxytbwafhrxdkyl.supabase.co';
 export const DEFAULT_SUPABASE_KEY = 'sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c';
 const FORMATIONS_BUCKET = 'formations-dashboard';
 const FORMATIONS_FILE_PATH = 'latest.csv';
+export const FORMATIONS_VIEWER_EMAIL = 'formations-viewer@tgmjghxytbwafhrxdkyl.supabase.co';
 
 export function getSupabaseCredentials() {
   const envUrl = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_SUPABASE_URL : '';
@@ -536,17 +537,35 @@ CREATE POLICY "Public can read integration session status" ON public.integration
 GRANT SELECT ON TABLE public.integration_session_status TO anon, authenticated;
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.integration_session_status FROM anon, authenticated, PUBLIC;
 
--- 4. CSV PRIVADO DO DASHBOARD DE FORMAÇÕES (somente administradores)
+-- 4. CSV PRIVADO DO DASHBOARD (visualizadores autorizados leem; administradores enviam)
+CREATE TABLE IF NOT EXISTS public.formations_dashboard_viewers (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+ALTER TABLE public.formations_dashboard_viewers ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.formations_dashboard_viewers FROM anon, authenticated;
+GRANT SELECT ON public.formations_dashboard_viewers TO authenticated;
+DROP POLICY IF EXISTS "Viewers can read own dashboard access" ON public.formations_dashboard_viewers;
+CREATE POLICY "Viewers can read own dashboard access" ON public.formations_dashboard_viewers
+  FOR SELECT TO authenticated USING (user_id = (SELECT auth.uid()));
+
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('formations-dashboard', 'formations-dashboard', FALSE)
 ON CONFLICT (id) DO UPDATE SET public = FALSE;
 
 DROP POLICY IF EXISTS "Formation CSV admins can read" ON storage.objects;
-CREATE POLICY "Formation CSV admins can read" ON storage.objects
+DROP POLICY IF EXISTS "Formation CSV authorized viewers can read" ON storage.objects;
+CREATE POLICY "Formation CSV authorized viewers can read" ON storage.objects
   FOR SELECT TO authenticated
   USING (
     bucket_id = 'formations-dashboard'
-    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
+    AND (
+      EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
+      OR EXISTS (
+        SELECT 1 FROM public.formations_dashboard_viewers v
+        WHERE v.user_id = (SELECT auth.uid())
+      )
+    )
   );
 
 DROP POLICY IF EXISTS "Formation CSV admins can upload" ON storage.objects;
@@ -609,6 +628,12 @@ $$;
 
 -- Crie a conta em Authentication > Users; depois execute com o UUID do usuário:
 -- INSERT INTO public.app_admins (user_id) VALUES ('UUID_DO_USUARIO');
+-- Para acesso de visualização com senha compartilhada, crie/ confirme esta conta:
+-- formations-viewer@tgmjghxytbwafhrxdkyl.supabase.co
+-- Depois execute:
+-- INSERT INTO public.formations_dashboard_viewers (user_id)
+-- SELECT id FROM auth.users WHERE email = 'formations-viewer@tgmjghxytbwafhrxdkyl.supabase.co'
+-- ON CONFLICT (user_id) DO NOTHING;
 -- Desative o cadastro público em Authentication > Settings.
 `;
 }
