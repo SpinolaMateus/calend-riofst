@@ -583,6 +583,7 @@ export function FormationsDashboard() {
                   label={label}
                   selected={state.facets[key]}
                   searchContext={JSON.stringify([
+                    workerReady,
                     state.matrixKind,
                     FACET_DEFINITIONS
                       .filter((definition) => definition.key !== key)
