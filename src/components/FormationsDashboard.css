@@ -108,6 +108,11 @@
   font-weight: 700;
 }
 
+.formation-upload-button:disabled {
+  cursor: wait;
+  opacity: .7;
+}
+
 .formation-upload > div {
   min-width: 0;
   display: flex;
@@ -128,6 +133,11 @@
   white-space: nowrap;
 }
 
+.formation-upload .formation-last-upload {
+  color: #6ee7b7;
+  font-size: 10px;
+}
+
 .formation-content {
   max-width: 1680px;
   margin: 0 auto;
@@ -144,6 +154,16 @@
   border-radius: 10px;
   color: #fecaca;
   background: rgba(127, 29, 29, .28);
+}
+
+.formation-storage-error {
+  margin-bottom: 12px;
+  padding: 9px 12px;
+  border: 1px solid rgba(245, 158, 11, .3);
+  border-radius: 9px;
+  color: #fcd34d;
+  background: rgba(120, 53, 15, .2);
+  font-size: 11px;
 }
 
 .formation-tabs {
@@ -626,6 +646,23 @@
   overflow: auto;
   border: 1px solid var(--fd-border);
   border-radius: 8px;
+}
+
+.formation-pagination {
+  padding-top: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  color: var(--fd-muted);
+  font-size: 10px;
+}
+
+.formation-pagination > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
 }
 
 .formation-table-wrap table {
