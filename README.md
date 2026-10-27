@@ -42,6 +42,8 @@ Para proteger as alterações compartilhadas:
 4. Copie o UUID do usuário administrador e, no SQL Editor, execute `INSERT INTO public.app_admins (user_id) VALUES ('UUID_DO_USUARIO');`.
 5. No aplicativo, use **Acesso admin** e entre com usuário `GGFST` e a senha definida no painel.
 
+No calendário corporativo, **Salvar na nuvem** envia os eventos atuais ao Supabase. As mudanças ficam disponíveis para os outros usuários e telas; para atualização instantânea, execute o script SQL do painel para habilitar a tabela `events` no Supabase Realtime. Se o botão indicar erro, confira a conexão e as permissões no painel **Nuvem Supabase**.
+
 Contas autenticadas que não estiverem em `public.app_admins` continuam sem permissão para editar. Nunca use uma chave `service_role` no navegador nem nas variáveis `VITE_*`.
 
 **Aviso:** uma senha compartilhada e simples pode ser descoberta; qualquer pessoa que a conheça poderá editar. Para uso real da equipe, escolha uma senha forte e única para a conta do Supabase; o código não armazena a senha.

@@ -677,6 +677,7 @@ export default function App() {
           <CorporateCalendarView
             onBackToHome={() => setActiveApp('home')}
             onGoToIntegration={() => setActiveApp('integration')}
+            onEventsChange={setCalendarEvents}
           />
         </main>
       )}

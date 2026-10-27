@@ -204,6 +204,23 @@ export async function deleteEventFromSupabase(id: string): Promise<{ error: Erro
   }
 }
 
+export function subscribeToEventChanges(onChange: () => void) {
+  const client = getSupabaseClient();
+  if (!client) return () => {};
+
+  const channel = client
+    .channel('corporate-calendar-events')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'events' },
+      onChange,
+    )
+    .subscribe();
+  return () => {
+    void client.removeChannel(channel);
+  };
+}
+
 // =========================================================================
 // 2. CRONOGRAMA DE INTEGRAÇÃO (TABLE: integration_sessions)
 // =========================================================================
@@ -595,6 +612,15 @@ GRANT EXECUTE ON FUNCTION public.set_integration_session_status(TEXT, BOOLEAN) T
 
 DO $$
 BEGIN
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime')
+     AND NOT EXISTS (
+       SELECT 1 FROM pg_publication_tables
+       WHERE pubname = 'supabase_realtime'
+         AND schemaname = 'public'
+         AND tablename = 'events'
+     ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.events;
+  END IF;
   IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime')
      AND NOT EXISTS (
        SELECT 1 FROM pg_publication_tables

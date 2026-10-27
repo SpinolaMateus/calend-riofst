@@ -11,10 +11,10 @@ import { copyElementAsImage } from '../utils/exportUtils';
 import { 
   getSupabaseCredentials, 
   saveSupabaseCredentials, 
-  getSupabaseClient, 
   fetchEventsFromSupabase, 
   upsertEventToSupabase, 
-  deleteEventFromSupabase 
+  deleteEventFromSupabase,
+  subscribeToEventChanges,
 } from '../services/supabaseClient';
 
 const DEFAULT_ROOMS = ["Aroeira", "Bambuzal", "Obeia", "Integração"];
@@ -49,11 +49,13 @@ function computeDurationString(start: string, end: string): string {
 interface CorporateCalendarViewProps {
   onBackToHome?: () => void;
   onGoToIntegration?: () => void;
+  onEventsChange?: (events: CorporateEvent[]) => void;
 }
 
 export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   onBackToHome,
   onGoToIntegration,
+  onEventsChange,
 }) => {
   const { isAdmin, hasAdminAccess, requestAdminAccess, signOutAdmin } = useAdminAuth();
   // Calendar state
@@ -91,6 +93,7 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   const [isCopyingImage, setIsCopyingImage] = useState(false);
   const [supabaseUrlInput, setSupabaseUrlInput] = useState('');
   const [supabaseKeyInput, setSupabaseKeyInput] = useState('');
+  const [isSavingCloud, setIsSavingCloud] = useState(false);
 
   // Modals & Forms
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
@@ -142,6 +145,10 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   }, [events]);
 
   useEffect(() => {
+    onEventsChange?.(events);
+  }, [events, onEventsChange]);
+
+  useEffect(() => {
     try {
       localStorage.setItem('app_calendar_rooms_v1', JSON.stringify(rooms));
     } catch (e) {
@@ -151,34 +158,36 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
 
   // Init Supabase and load data from cloud
   useEffect(() => {
+    let cancelled = false;
     const creds = getSupabaseCredentials();
     setSupabaseUrlInput(creds.url);
     setSupabaseKeyInput(creds.key);
 
-    const checkCloud = async () => {
-      const client = getSupabaseClient();
-      if (!client) {
+    const loadCloudEvents = async () => {
+      const { data, error } = await fetchEventsFromSupabase();
+      if (cancelled) return;
+      if (error) {
+        console.error('Could not load calendar events from Supabase', error);
         setIsCloudConnected(false);
+        showToast(`Não foi possível carregar os eventos da nuvem: ${error.message}`, false);
         return;
       }
-      try {
-        const { data, error } = await fetchEventsFromSupabase();
-        if (error) {
-          console.warn('Supabase fetch failed:', error.message);
-          setIsCloudConnected(false);
-        } else {
-          setIsCloudConnected(true);
-          if (data && data.length > 0) {
-            setEvents(data);
-            setCloudRowCount(data.length);
-          }
-        }
-      } catch {
-        setIsCloudConnected(false);
-      }
+
+      const cloudEvents = data ?? [];
+      setEvents(cloudEvents);
+      setCloudRowCount(cloudEvents.length);
+      setIsCloudConnected(true);
     };
 
-    checkCloud();
+    const unsubscribe = subscribeToEventChanges(() => {
+      void loadCloudEvents();
+    });
+    void loadCloudEvents();
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, []);
 
   // Duration recalculation
@@ -348,9 +357,52 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   const handleDeleteEvent = (id: string) => {
     requireAuth(async () => {
       if (window.confirm('Deseja excluir este compromisso da agenda e da nuvem?')) {
+        const { error } = await deleteEventFromSupabase(id);
+        if (error) {
+          console.error('Could not delete calendar event from Supabase', error);
+          showToast(`Não foi possível excluir o evento da nuvem: ${error.message}`, false);
+          return;
+        }
         setEvents((prev) => prev.filter((item) => item.id !== id));
-        await deleteEventFromSupabase(id);
+        setCloudRowCount((count) => (count === null ? null : Math.max(0, count - 1)));
         showToast('Evento excluído com sucesso.');
+      }
+    });
+  };
+
+  const handleDeleteAllEvents = () => {
+    requireAuth(async () => {
+      if (!window.confirm('Atenção: todos os registros serão removidos da nuvem!')) return;
+
+      const failedIds = new Set<string>();
+      let firstError = '';
+      for (const event of events) {
+        const { error } = await deleteEventFromSupabase(event.id);
+        if (error) {
+          failedIds.add(event.id);
+          firstError ||= error.message;
+        }
+      }
+
+      const { data, error: loadError } = await fetchEventsFromSupabase();
+      if (loadError) {
+        console.error('Could not reload calendar events after deletion', loadError);
+        setEvents((current) => current.filter((event) => failedIds.has(event.id)));
+        setCloudRowCount(null);
+        showToast(`Não foi possível confirmar a exclusão na nuvem: ${loadError.message}`, false);
+        return;
+      }
+
+      const cloudEvents = data ?? [];
+      setEvents(cloudEvents);
+      setCloudRowCount(cloudEvents.length);
+      if (failedIds.size) {
+        showToast(
+          `${failedIds.size} evento(s) não puderam ser excluídos. ${firstError}`,
+          false,
+        );
+      } else {
+        showToast('Todos os registros foram removidos da nuvem.');
       }
     });
   };
@@ -365,8 +417,14 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
         id: String(Date.now()),
         title: `${src.title} (Cópia)`,
       };
+      const { error } = await upsertEventToSupabase(dup);
+      if (error) {
+        console.error('Could not duplicate calendar event in Supabase', error);
+        showToast(`Não foi possível salvar a cópia na nuvem: ${error.message}`, false);
+        return;
+      }
       setEvents((prev) => [...prev, dup]);
-      await upsertEventToSupabase(dup);
+      setCloudRowCount((count) => (count === null ? null : count + 1));
       showToast('Evento duplicado com sucesso!');
     });
   };
@@ -425,17 +483,25 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
       requestAdminAccess(() => { void handleManualSyncAll(); });
       return;
     }
+    if (isSavingCloud) return;
+
+    setIsSavingCloud(true);
     showToast('Enviando dados para a nuvem Supabase...', true);
     let count = 0;
     let failed = 0;
     let firstError = '';
-    for (const evt of events) {
-      const res = await upsertEventToSupabase(evt);
-      if (!res.error) count++;
-      else {
-        failed++;
-        firstError ||= res.error.message;
+
+    try {
+      for (const evt of events) {
+        const res = await upsertEventToSupabase(evt);
+        if (!res.error) count++;
+        else {
+          failed++;
+          firstError ||= res.error.message;
+        }
       }
+    } finally {
+      setIsSavingCloud(false);
     }
     setCloudRowCount(count);
     setIsCloudConnected(failed === 0);
@@ -623,6 +689,17 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
           >
             <PlusCircle className="w-3.5 h-3.5" />
             <span>Novo Evento</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleManualSyncAll}
+            disabled={isSavingCloud}
+            title="Salvar todos os eventos atuais no Supabase para compartilhar com a equipe"
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs transition-all disabled:cursor-wait disabled:opacity-60"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>{isSavingCloud ? 'Salvando...' : 'Salvar na nuvem'}</span>
           </button>
 
           {/* Print Button */}
@@ -1128,14 +1205,7 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
                   <Download className="w-3.5 h-3.5 text-slate-600" /> Exportar CSV
                 </button>
                 <button
-                  onClick={() =>
-                    requireAuth(() => {
-                      if (window.confirm('Atenção: todos os registros serão removidos da nuvem!')) {
-                        setEvents([]);
-                        showToast('Registros removidos.');
-                      }
-                    })
-                  }
+                  onClick={handleDeleteAllEvents}
                   className="px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg"
                 >
                   Limpar Tudo
@@ -1298,9 +1368,10 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
                 <button
                   type="button"
                   onClick={handleManualSyncAll}
-                  className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs transition-colors shrink-0 flex items-center gap-1.5 shadow-xs"
+                  disabled={isSavingCloud}
+                  className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs transition-colors shrink-0 flex items-center gap-1.5 shadow-xs disabled:cursor-wait disabled:opacity-60"
                 >
-                  <UploadCloud className="w-4 h-4" /> Subir Agora
+                  <UploadCloud className="w-4 h-4" /> {isSavingCloud ? 'Salvando...' : 'Subir Agora'}
                 </button>
               </div>
 
