@@ -34,11 +34,15 @@ import {
 } from 'lucide-react';
 import { CorporateEvent } from './types/calendar';
 import { useAdminAuth } from './services/AdminAuthContext';
+import { ActionPlanGanttView } from './components/ActionPlanGanttView';
 import {
   fetchIntegrationFromSupabase,
   fetchIntegrationStatusesFromSupabase,
   setIntegrationSessionStatus,
   subscribeToIntegrationStatusChanges,
+  upsertIntegrationSessionToSupabase,
+  deleteIntegrationSessionFromSupabase,
+  subscribeToIntegrationSessions,
 } from './services/supabaseClient';
 import { FormationsDashboard } from './components/FormationsDashboard';
 import { StatusTrackingView } from './components/StatusTrackingView';
@@ -49,8 +53,8 @@ const STORAGE_KEY_UNIT = 'cronograma_integracao_unit_v2';
 
 export default function App() {
   const { user, isAdmin, hasAdminAccess, requestAdminAccess, signOutAdmin } = useAdminAuth();
-  // Navigation: 'home' | 'integration' | 'calendar' | 'formations'
-  const [activeApp, setActiveApp] = useState<'home' | 'integration' | 'calendar' | 'formations'>('home');
+  // Navigation: 'home' | 'integration' | 'calendar' | 'formations' | 'action_plan'
+  const [activeApp, setActiveApp] = useState<'home' | 'integration' | 'calendar' | 'formations' | 'action_plan'>('home');
 
   // Load initial data from localStorage if available
   const [sessions, setSessions] = useState<IntegrationSession[]>(() => {
@@ -197,10 +201,14 @@ export default function App() {
         ));
       });
     };
+    const unsubscribeFromSessionChanges = subscribeToIntegrationSessions(() => {
+      void loadCloudData();
+    });
     void loadCloudData();
     return () => {
       cancelled = true;
       unsubscribeFromStatusChanges();
+      unsubscribeFromSessionChanges();
     };
   }, []);
 
@@ -259,6 +267,13 @@ export default function App() {
       showToast('Nova atividade inserida com sucesso!');
     }
     setSessionToEdit(null);
+
+    // Salvar na nuvem Supabase imediatamente
+    void upsertIntegrationSessionToSupabase(savedSession).then(({ error }) => {
+      if (error) {
+        console.error('Could not save session to Supabase', error);
+      }
+    });
   };
 
   const handleUpdateSession = (updated: IntegrationSession) => {
@@ -267,6 +282,11 @@ export default function App() {
       return;
     }
     setSessions((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
+    void upsertIntegrationSessionToSupabase(updated).then(({ error }) => {
+      if (error) {
+        console.error('Could not update session in Supabase', error);
+      }
+    });
   };
 
   const handleToggleSessionStatus = async (session: IntegrationSession, isCompleted: boolean) => {
@@ -305,6 +325,11 @@ export default function App() {
     }
     setSessions((prev) => prev.filter((s) => s.id !== id));
     showToast('Atividade removida.', 'info');
+    void deleteIntegrationSessionFromSupabase(id).then(({ error }) => {
+      if (error) {
+        console.error('Could not delete session from Supabase', error);
+      }
+    });
   };
 
   const handleDuplicateSession = (session: IntegrationSession) => {
@@ -320,6 +345,11 @@ export default function App() {
     };
     setSessions((prev) => [...prev, duplicated]);
     showToast('Atividade duplicada com sucesso!');
+    void upsertIntegrationSessionToSupabase(duplicated).then(({ error }) => {
+      if (error) {
+        console.error('Could not save duplicated session to Supabase', error);
+      }
+    });
   };
 
   const handleEditSession = (session: IntegrationSession) => {
@@ -521,6 +551,19 @@ export default function App() {
             <span className="hidden sm:inline">Dashboard de Formações</span>
             <span className="sm:hidden">Formações</span>
           </button>
+
+          <button
+            onClick={() => setActiveApp('action_plan')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeApp === 'action_plan'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4 text-emerald-400" />
+            <span className="hidden sm:inline">Plano de Ação (Gantt)</span>
+            <span className="sm:hidden">Plano de Ação</span>
+          </button>
         </div>
 
         <div className="flex items-center gap-2 text-xs">
@@ -564,6 +607,7 @@ export default function App() {
             onSelectIntegration={() => setActiveApp('integration')}
             onSelectCalendar={() => setActiveApp('calendar')}
             onSelectFormations={() => setActiveApp('formations')}
+            onSelectActionPlan={() => setActiveApp('action_plan')}
             integrationEventsCount={sessions.length}
             calendarEventsCount={calendarEventsCount}
             onOpenAdminAccess={() => requestAdminAccess()}
@@ -685,6 +729,15 @@ export default function App() {
       )}
 
       {activeApp === 'formations' && <FormationsDashboard />}
+
+      {/* ========================================================================= */}
+      {/* SCREEN 4: ACTION PLAN (GANTT MODEL) */}
+      {/* ========================================================================= */}
+      {activeApp === 'action_plan' && (
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <ActionPlanGanttView onBackToHome={() => setActiveApp('home')} />
+        </main>
+      )}
 
       {/* Footer Info (no-print) */}
       <footer className="no-print bg-white border-t border-slate-200 py-4 mt-auto">

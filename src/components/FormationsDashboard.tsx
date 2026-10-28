@@ -542,23 +542,25 @@ export function FormationsDashboard() {
     const restoreVersion = loadVersionRef.current;
     if (isAuthLoading) return () => { cancelled = true; };
     const restoreLatestFile = async () => {
-      if (isAdmin) {
-        const shared = await downloadSharedFormationsCsv();
-        if (cancelled || loadVersionRef.current !== restoreVersion) return;
-        if (shared.error) {
-          console.error('Could not restore the shared formations CSV from Supabase', shared.error);
+      // Sempre tenta restaurar o CSV oficial compartilhado no Supabase (para visualização online unificada)
+      const shared = await downloadSharedFormationsCsv();
+      if (cancelled || loadVersionRef.current !== restoreVersion) return;
+      if (shared.error) {
+        console.error('Could not restore the shared formations CSV from Supabase', shared.error);
+        if (isAdmin) {
           setCloudError(
-            `Não foi possível acessar a cópia privada na nuvem. Verifique se o bucket foi configurado no SQL do Supabase. ${shared.error.message}`,
+            `Não foi possível acessar a cópia compartilhada na nuvem. Verifique se o bucket foi configurado no SQL do Supabase. ${shared.error.message}`,
           );
-        } else if (shared.file && shared.savedAt !== null) {
-          setCloudSavedAt(shared.savedAt);
-          setCloudSavedName(shared.file.name);
-          setCloudError('');
-          loadFile(shared.file, false);
-          return;
         }
+      } else if (shared.file && shared.savedAt !== null) {
+        setCloudSavedAt(shared.savedAt);
+        setCloudSavedName(shared.file.name);
+        setCloudError('');
+        loadFile(shared.file, false);
+        return;
       }
 
+      // Fallback para cache local no navegador
       const saved = await readLastUpload();
       if (cancelled || loadVersionRef.current !== restoreVersion || !saved) return;
       setLastSavedAt(saved.savedAt);

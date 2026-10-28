@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   Calendar as CalendarIcon, Clock, Shield, Cloud, FileSpreadsheet, 
   Tv, FileDown, MapPin, ArrowRight, CheckCircle2, Lock, BarChart3,
-  Layers, Users, Sparkles, Building2, Check, ArrowUpRight
+  Layers, Users, Sparkles, Building2, Check, ArrowUpRight,
+  Kanban, CheckSquare, TrendingUp
 } from 'lucide-react';
 import { UnitInfo } from '../types/schedule';
 
@@ -11,6 +12,7 @@ interface HomeScreenProps {
   onSelectIntegration: () => void;
   onSelectCalendar: () => void;
   onSelectFormations: () => void;
+  onSelectActionPlan?: () => void;
   integrationEventsCount: number;
   calendarEventsCount: number;
   onOpenAdminAccess?: () => void;
@@ -22,6 +24,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onSelectIntegration,
   onSelectCalendar,
   onSelectFormations,
+  onSelectActionPlan,
   integrationEventsCount,
   calendarEventsCount,
   onOpenAdminAccess,
@@ -54,7 +57,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           }}
         />
 
-        <div className="relative z-10 max-w-4xl space-y-6">
+        <div className="relative z-10 max-w-5xl space-y-6">
           {/* Badge & Date */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
@@ -91,7 +94,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               Central de Gestão, Cronogramas e Eventos
             </h1>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-3xl font-normal">
-              Ambiente unificado para controle operacional da unidade. Acesse o cronograma de integração de novos colaboradores, a agenda corporativa de salas ou o dashboard de análise de matrizes de formação.
+              Ambiente unificado para controle operacional da unidade. Acesse o cronograma de integração, a agenda corporativa de salas, o dashboard de matrizes e o plano de ação no modelo Gantt.
             </p>
           </div>
 
@@ -118,12 +121,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </div>
 
             <div className="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs hover:bg-white/[0.08] transition-colors">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-violet-300 flex items-center gap-1.5">
-                <BarChart3 className="w-3.5 h-3.5 text-violet-400" />
-                Formações
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                <BarChart3 className="w-3.5 h-3.5 text-emerald-400" />
+                Plano Gantt
               </div>
               <div className="mt-1 text-xl font-black text-white">
-                Matrizes <span className="text-xs font-normal text-slate-400">BI & CSV</span>
+                Projetos <span className="text-xs font-normal text-emerald-400">Ativos</span>
               </div>
             </div>
 
@@ -154,70 +157,66 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </p>
           </div>
           <span className="text-xs font-semibold text-slate-400">
-            3 Módulos Ativos
+            4 Módulos Integrados
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           
           {/* ------------------------------------------------------------- */}
           {/* MÓDULO 1: CRONOGRAMA DE INTEGRAÇÃO */}
           {/* ------------------------------------------------------------- */}
           <div 
             onClick={onSelectIntegration}
-            className="group relative bg-white rounded-3xl p-7 border border-slate-200/90 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1 hover:border-indigo-300"
+            className="group relative bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1 hover:border-indigo-300"
           >
-            <div className="space-y-5">
-              {/* Card Header & Badge */}
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
                   <Clock className="w-6 h-6" />
                 </div>
-                <span className="text-[11px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-200/60">
-                  Acolhimento & Onboarding
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full border border-indigo-200/60">
+                  Onboarding
                 </span>
               </div>
 
-              {/* Title & Description */}
-              <div className="space-y-2">
-                <h3 className="text-xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight flex items-center gap-1.5">
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight flex items-center gap-1">
                   Cronograma de Integração
-                  <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-indigo-600" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-indigo-600" />
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Gestão completa dos 3 dias de acolhimento de novos contratados. Suporta agendas por público (Geral, Temporários, Aprendizes e Estagiários).
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Gestão dos 3 dias de acolhimento de novos colaboradores por públicos (Geral, Temporários, Aprendizes e Estagiários).
                 </p>
               </div>
 
-              {/* Feature Highlights */}
-              <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <Clock className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                  <span className="truncate">Faixas Arrastáveis</span>
+              <div className="grid grid-cols-2 gap-1.5 pt-1 text-xs">
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Clock className="w-3 h-3 text-indigo-600 shrink-0" />
+                  <span className="truncate text-[11px]">Faixas Horário</span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span className="truncate">Tabela Executiva</span>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <FileSpreadsheet className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span className="truncate text-[11px]">Tabela XLS</span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <FileDown className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                  <span className="truncate">PDF em 1 Clique</span>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <FileDown className="w-3 h-3 text-rose-600 shrink-0" />
+                  <span className="truncate text-[11px]">PDF Imediato</span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <Tv className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span className="truncate">Modo Apresentação</span>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Tv className="w-3 h-3 text-amber-600 shrink-0" />
+                  <span className="truncate text-[11px]">Modo TV</span>
                 </div>
               </div>
             </div>
 
-            {/* CTA Footer */}
-            <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">
-                {integrationEventsCount} atividades ativas
+            <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-500">
+                {integrationEventsCount} atividades
               </span>
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 group-hover:text-indigo-700">
-                <span>Abrir Cronograma</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <div className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 group-hover:text-indigo-700">
+                <span>Acessar</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           </div>
@@ -227,121 +226,171 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* ------------------------------------------------------------- */}
           <div 
             onClick={onSelectCalendar}
-            className="group relative bg-white rounded-3xl p-7 border border-slate-200/90 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1 hover:border-sky-300"
+            className="group relative bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1 hover:border-sky-300"
           >
-            <div className="space-y-5">
-              {/* Card Header & Badge */}
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-sky-600 via-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-600 via-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform">
                   <CalendarIcon className="w-6 h-6" />
                 </div>
-                <span className="text-[11px] font-bold uppercase tracking-wider bg-sky-50 text-sky-700 px-3 py-1 rounded-full border border-sky-200/60">
-                  Agenda & Salas
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full border border-sky-200/60">
+                  Agenda
                 </span>
               </div>
 
-              {/* Title & Description */}
-              <div className="space-y-2">
-                <h3 className="text-xl font-black text-slate-900 group-hover:text-sky-600 transition-colors tracking-tight flex items-center gap-1.5">
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-black text-slate-900 group-hover:text-sky-600 transition-colors tracking-tight flex items-center gap-1">
                   Calendário & Eventos
-                  <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-sky-600" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-sky-600" />
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Planejamento mensal de reuniões corporativas e treinamentos com controle de ocupação de salas e sincronização com o Supabase.
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Planejamento mensal de reuniões executivas e treinamentos com controle de ocupação de salas e nuvem Supabase.
                 </p>
               </div>
 
-              {/* Feature Highlights */}
-              <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <Cloud className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                  <span className="truncate">Nuvem Realtime</span>
+              <div className="grid grid-cols-2 gap-1.5 pt-1 text-xs">
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Cloud className="w-3 h-3 text-sky-600 shrink-0" />
+                  <span className="truncate text-[11px]">Nuvem Realtime</span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span className="truncate">Salas da Unidade</span>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span className="truncate text-[11px]">Gestão Salas</span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <Shield className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span className="truncate">Acesso Protegido</span>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Shield className="w-3 h-3 text-amber-600 shrink-0" />
+                  <span className="truncate text-[11px]">Protegido</span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                  <span className="truncate">Exportar Planilha</span>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <FileSpreadsheet className="w-3 h-3 text-indigo-600 shrink-0" />
+                  <span className="truncate text-[11px]">Exportar CSV</span>
                 </div>
               </div>
             </div>
 
-            {/* CTA Footer */}
-            <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">
-                {calendarEventsCount} eventos registrados
+            <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-500">
+                {calendarEventsCount} eventos
               </span>
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 group-hover:text-sky-700">
-                <span>Abrir Calendário</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <div className="inline-flex items-center gap-1 text-xs font-bold text-sky-600 group-hover:text-sky-700">
+                <span>Acessar</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           </div>
 
           {/* ------------------------------------------------------------- */}
-          {/* MÓDULO 3: DASHBOARD DE FORMAÇÕES */}
+          {/* MÓDULO 3: PLANO DE AÇÃO (MODELO GANTT) */}
           {/* ------------------------------------------------------------- */}
           <div 
-            onClick={onSelectFormations}
-            className="group relative bg-white rounded-3xl p-7 border border-slate-200/90 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1 hover:border-violet-300"
+            onClick={onSelectActionPlan}
+            className="group relative bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1 hover:border-emerald-300"
           >
-            <div className="space-y-5">
-              {/* Card Header & Badge */}
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-700 text-white flex items-center justify-center shadow-md shadow-violet-500/20 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
                   <BarChart3 className="w-6 h-6" />
                 </div>
-                <span className="text-[11px] font-bold uppercase tracking-wider bg-violet-50 text-violet-700 px-3 py-1 rounded-full border border-violet-200/60">
-                  BI & Matrizes
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200/60">
+                  Gantt & Ações
                 </span>
               </div>
 
-              {/* Title & Description */}
-              <div className="space-y-2">
-                <h3 className="text-xl font-black text-slate-900 group-hover:text-violet-600 transition-colors tracking-tight flex items-center gap-1.5">
-                  Dashboard de Formações
-                  <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-violet-600" />
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-black text-slate-900 group-hover:text-emerald-600 transition-colors tracking-tight flex items-center gap-1">
+                  Plano de Ação (Gantt)
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-emerald-600" />
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Análise comparativa de matrizes de treinamento. Compare lados A/B, filtre por PRN, cargo ou unidade organizacional e exporte relatórios.
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Gestão cronológica de entregas operacionais, marcos de projetos e acompanhamento com visualização em Gantt.
                 </p>
               </div>
 
-              {/* Feature Highlights */}
-              <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <Layers className="w-3.5 h-3.5 text-violet-600 shrink-0" />
-                  <span className="truncate">Comparação A / B</span>
+              <div className="grid grid-cols-2 gap-1.5 pt-1 text-xs">
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <BarChart3 className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span className="truncate text-[11px]">Linha Gantt</span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <Users className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                  <span className="truncate">Filtros por PRN / UO</span>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <CheckSquare className="w-3 h-3 text-indigo-600 shrink-0" />
+                  <span className="truncate text-[11px]">Cadastro Ações</span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <BarChart3 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span className="truncate">Gráficos de Conclusão</span>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <TrendingUp className="w-3 h-3 text-teal-600 shrink-0" />
+                  <span className="truncate text-[11px]">Avanço em %</span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                  <span className="truncate">Importar / Exportar</span>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Cloud className="w-3 h-3 text-sky-600 shrink-0" />
+                  <span className="truncate text-[11px]">Nuvem Realtime</span>
                 </div>
               </div>
             </div>
 
-            {/* CTA Footer */}
-            <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">
-                Análise em tempo real
+            <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-500">
+                Metas & Prazos
               </span>
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-violet-600 group-hover:text-violet-700">
-                <span>Abrir Dashboard</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <div className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 group-hover:text-emerald-700">
+                <span>Acessar</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </div>
+
+          {/* ------------------------------------------------------------- */}
+          {/* MÓDULO 4: DASHBOARD DE FORMAÇÕES */}
+          {/* ------------------------------------------------------------- */}
+          <div 
+            onClick={onSelectFormations}
+            className="group relative bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1 hover:border-violet-300"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-700 text-white flex items-center justify-center shadow-md shadow-violet-500/20 group-hover:scale-105 transition-transform">
+                  <Layers className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full border border-violet-200/60">
+                  BI Matrizes
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-black text-slate-900 group-hover:text-violet-600 transition-colors tracking-tight flex items-center gap-1">
+                  Dashboard Formações
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-violet-600" />
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Análise comparativa de matrizes de treinamento. Compare lados A/B, filtre por PRN e analise conclusões.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-1.5 pt-1 text-xs">
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Layers className="w-3 h-3 text-violet-600 shrink-0" />
+                  <span className="truncate text-[11px]">Lados A / B</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Users className="w-3 h-3 text-blue-600 shrink-0" />
+                  <span className="truncate text-[11px]">Filtro PRN</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <BarChart3 className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span className="truncate text-[11px]">Gráficos</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <FileSpreadsheet className="w-3 h-3 text-purple-600 shrink-0" />
+                  <span className="truncate text-[11px]">CSV Nuvem</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-500">
+                Apresentação Nuvem
+              </span>
+              <div className="inline-flex items-center gap-1 text-xs font-bold text-violet-600 group-hover:text-violet-700">
+                <span>Acessar</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           </div>

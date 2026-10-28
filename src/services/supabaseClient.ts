@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { CorporateEvent } from '../types/calendar';
 import { IntegrationAudience, IntegrationSession, UnitInfo } from '../types/schedule';
+import { ActionPlanItem } from '../types/actionPlan';
 
 export const DEFAULT_SUPABASE_URL = 'https://tgmjghxytbwafhrxdkyl.supabase.co';
 export const DEFAULT_SUPABASE_KEY = 'sb_publishable_2BYXec4XhnmlsYG9rKhxNQ_9Yq_MY4c';
@@ -45,6 +46,10 @@ export function getSupabaseClient(): SupabaseClient | null {
     return null;
   }
 }
+
+// =========================================================================
+// 1. DASHBOARD DE FORMAÇÕES (STORAGE BUCKET: formations-dashboard)
+// =========================================================================
 
 export async function uploadSharedFormationsCsv(file: File): Promise<{ savedAt: number; error: Error | null }> {
   const client = getSupabaseClient();
@@ -125,9 +130,9 @@ export async function downloadSharedFormationsCsv(): Promise<{
   }
 }
 
-// ==========================================
-// 1. CALENDÁRIO CORPORATIVO (TABLE: events)
-// ==========================================
+// =========================================================================
+// 2. CALENDÁRIO CORPORATIVO (TABLE: events)
+// =========================================================================
 
 export async function fetchEventsFromSupabase(): Promise<{ data: CorporateEvent[] | null; error: Error | null }> {
   const client = getSupabaseClient();
@@ -222,7 +227,7 @@ export function subscribeToEventChanges(onChange: () => void) {
 }
 
 // =========================================================================
-// 2. CRONOGRAMA DE INTEGRAÇÃO (TABLE: integration_sessions)
+// 3. CRONOGRAMA DE INTEGRAÇÃO (TABLE: integration_sessions)
 // =========================================================================
 
 export async function fetchIntegrationFromSupabase(): Promise<{ data: IntegrationSession[] | null; error: Error | null }> {
@@ -237,6 +242,7 @@ export async function fetchIntegrationFromSupabase(): Promise<{ data: Integratio
 
     const mapped: IntegrationSession[] = (data || []).map((item: any) => ({
       id: String(item.id),
+      audience: item.audience || 'geral',
       dia: Number(item.dia) || 1,
       startTime: item.startTime || item.starttime || '08:00',
       endTime: item.endTime || item.endtime || '09:00',
@@ -258,6 +264,67 @@ export async function fetchIntegrationFromSupabase(): Promise<{ data: Integratio
   }
 }
 
+export async function upsertIntegrationSessionToSupabase(s: IntegrationSession): Promise<{ error: Error | null }> {
+  const client = getSupabaseClient();
+  if (!client) return { error: new Error('Cliente Supabase não inicializado') };
+
+  const payload = {
+    id: String(s.id),
+    audience: s.audience || 'geral',
+    dia: Number(s.dia),
+    starttime: s.startTime,
+    endtime: s.endTime,
+    horariotext: s.horarioText || `${s.startTime} às ${s.endTime}`,
+    ch: s.ch,
+    tema: s.tema,
+    area: s.area,
+    responsavel: s.responsavel || '',
+    prn: s.prn || '',
+    local: s.local || '',
+    codigo: s.codigo || '',
+    entregavel: s.entregavel || '',
+    customcolor: s.customColor || null,
+  };
+
+  try {
+    const res = await client.from('integration_sessions').upsert(payload);
+    if (res.error) return { error: new Error(res.error.message) };
+    return { error: null };
+  } catch (err: any) {
+    return { error: err };
+  }
+}
+
+export async function deleteIntegrationSessionFromSupabase(id: string): Promise<{ error: Error | null }> {
+  const client = getSupabaseClient();
+  if (!client) return { error: new Error('Cliente Supabase não inicializado') };
+
+  try {
+    const { error } = await client.from('integration_sessions').delete().eq('id', String(id));
+    if (error) return { error: new Error(error.message) };
+    return { error: null };
+  } catch (err: any) {
+    return { error: err };
+  }
+}
+
+export function subscribeToIntegrationSessions(onChange: () => void) {
+  const client = getSupabaseClient();
+  if (!client) return () => {};
+
+  const channel = client
+    .channel('integration-sessions-realtime')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'integration_sessions' },
+      onChange,
+    )
+    .subscribe();
+  return () => {
+    void client.removeChannel(channel);
+  };
+}
+
 export async function syncIntegrationToSupabase(sessions: IntegrationSession[]): Promise<{ count: number; error: Error | null }> {
   const client = getSupabaseClient();
   if (!client) return { count: 0, error: new Error('Cliente Supabase não inicializado') };
@@ -266,29 +333,11 @@ export async function syncIntegrationToSupabase(sessions: IntegrationSession[]):
     let successCount = 0;
     let firstError: Error | null = null;
     for (const s of sessions) {
-      const payload = {
-        id: String(s.id),
-        audience: s.audience || 'geral',
-        dia: Number(s.dia),
-        starttime: s.startTime,
-        endtime: s.endTime,
-        horariotext: s.horarioText || `${s.startTime} às ${s.endTime}`,
-        ch: s.ch,
-        tema: s.tema,
-        area: s.area,
-        responsavel: s.responsavel || '',
-        prn: s.prn || '',
-        local: s.local || '',
-        codigo: s.codigo || '',
-        entregavel: s.entregavel || '',
-        customcolor: s.customColor || null,
-      };
-
-      const res = await client.from('integration_sessions').upsert(payload);
+      const res = await upsertIntegrationSessionToSupabase(s);
       if (!res.error) {
         successCount++;
       } else if (!firstError) {
-        firstError = new Error(res.error.message);
+        firstError = res.error;
       }
     }
     return { count: successCount, error: firstError };
@@ -367,7 +416,99 @@ export function subscribeToIntegrationStatusChanges(onChange: () => void) {
 }
 
 // =========================================================================
-// 3. DIAGNÓSTICO INTEGRADO (VERIFICAÇÃO SUPABASE + VERCEL)
+// 4. PLANO DE AÇÃO / GANTT (TABLE: action_plans)
+// =========================================================================
+
+export async function fetchActionPlansFromSupabase(): Promise<{ data: ActionPlanItem[] | null; error: Error | null }> {
+  const client = getSupabaseClient();
+  if (!client) return { data: null, error: new Error('Cliente Supabase não inicializado') };
+
+  try {
+    const { data, error } = await client.from('action_plans').select('*').order('start_date', { ascending: true });
+    if (error) return { data: null, error: new Error(error.message) };
+
+    const mapped: ActionPlanItem[] = (data || []).map((item: any) => ({
+      id: String(item.id),
+      title: String(item.title || ''),
+      responsible: String(item.responsible || ''),
+      department: String(item.department || ''),
+      startDate: String(item.start_date || item.startDate || ''),
+      endDate: String(item.end_date || item.endDate || ''),
+      status: item.status || 'not_started',
+      progress: Number(item.progress) || 0,
+      priority: item.priority || 'media',
+      deliverable: item.deliverable || '',
+      notes: item.notes || '',
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
+    }));
+
+    return { data: mapped, error: null };
+  } catch (err: any) {
+    return { data: null, error: err };
+  }
+}
+
+export async function upsertActionPlanToSupabase(item: ActionPlanItem): Promise<{ error: Error | null }> {
+  const client = getSupabaseClient();
+  if (!client) return { error: new Error('Cliente Supabase não inicializado') };
+
+  const payload = {
+    id: String(item.id),
+    title: String(item.title || ''),
+    responsible: String(item.responsible || ''),
+    department: String(item.department || ''),
+    start_date: String(item.startDate || ''),
+    end_date: String(item.endDate || ''),
+    status: String(item.status || 'not_started'),
+    progress: Math.max(0, Math.min(100, Number(item.progress) || 0)),
+    priority: String(item.priority || 'media'),
+    deliverable: String(item.deliverable || ''),
+    notes: String(item.notes || ''),
+    updated_at: new Date().toISOString(),
+  };
+
+  try {
+    const res = await client.from('action_plans').upsert(payload);
+    if (res.error) return { error: new Error(res.error.message) };
+    return { error: null };
+  } catch (err: any) {
+    return { error: err };
+  }
+}
+
+export async function deleteActionPlanFromSupabase(id: string): Promise<{ error: Error | null }> {
+  const client = getSupabaseClient();
+  if (!client) return { error: new Error('Cliente Supabase não inicializado') };
+
+  try {
+    const { error } = await client.from('action_plans').delete().eq('id', String(id));
+    if (error) return { error: new Error(error.message) };
+    return { error: null };
+  } catch (err: any) {
+    return { error: err };
+  }
+}
+
+export function subscribeToActionPlanChanges(onChange: () => void) {
+  const client = getSupabaseClient();
+  if (!client) return () => {};
+
+  const channel = client
+    .channel('action-plans-realtime')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'action_plans' },
+      onChange,
+    )
+    .subscribe();
+  return () => {
+    void client.removeChannel(channel);
+  };
+}
+
+// =========================================================================
+// 5. DIAGNÓSTICO INTEGRADO (VERIFICAÇÃO SUPABASE + VERCEL)
 // =========================================================================
 
 export interface CloudDiagnostics {
@@ -380,6 +521,8 @@ export interface CloudDiagnostics {
   integrationCount: number;
   integrationStatusTableStatus: 'ok' | 'missing' | 'error';
   integrationStatusCount: number;
+  actionPlansTableStatus: 'ok' | 'missing' | 'error';
+  actionPlansCount: number;
   errorMessage: string | null;
   vercelReady: boolean;
   sqlSnippet: string;
@@ -400,6 +543,8 @@ export async function testFullConnectivity(): Promise<CloudDiagnostics> {
     integrationCount: 0,
     integrationStatusTableStatus: 'missing',
     integrationStatusCount: 0,
+    actionPlansTableStatus: 'missing',
+    actionPlansCount: 0,
     errorMessage: null,
     vercelReady: true,
     sqlSnippet: getSqlSetupScript(),
@@ -442,9 +587,19 @@ export async function testFullConnectivity(): Promise<CloudDiagnostics> {
         .test(statusError.message) ? 'missing' : 'error';
     }
 
+    // Test 4: Action Plans table
+    const { data: actData, error: actErr } = await client.from('action_plans').select('id');
+    if (!actErr) {
+      diagnostics.actionPlansTableStatus = 'ok';
+      diagnostics.actionPlansCount = actData ? actData.length : 0;
+    } else {
+      diagnostics.actionPlansTableStatus = actErr.message.includes('does not exist') || actErr.message.includes('relation') ? 'missing' : 'error';
+    }
+
     if (diagnostics.eventsTableStatus === 'ok'
       || diagnostics.integrationTableStatus === 'ok'
-      || diagnostics.integrationStatusTableStatus === 'ok') {
+      || diagnostics.integrationStatusTableStatus === 'ok'
+      || diagnostics.actionPlansTableStatus === 'ok') {
       diagnostics.status = 'connected';
     } else {
       diagnostics.status = 'disconnected';
@@ -458,7 +613,7 @@ export async function testFullConnectivity(): Promise<CloudDiagnostics> {
 }
 
 export function getSqlSetupScript(): string {
-  return `-- SCRIPT SQL PARA O SUPABASE (Cole no SQL Editor do seu projeto Supabase)
+  return `-- SCRIPT SQL ATUALIZADO PARA O SUPABASE (Cole no SQL Editor do seu projeto Supabase)
 -- Projeto: tgmjghxytbwafhrxdkyl.supabase.co
 
 -- LISTA PRIVADA DE ADMINISTRADORES
@@ -473,7 +628,9 @@ DROP POLICY IF EXISTS "Admins can read own role" ON public.app_admins;
 CREATE POLICY "Admins can read own role" ON public.app_admins
   FOR SELECT TO authenticated USING (user_id = (SELECT auth.uid()));
 
+-- =========================================================================
 -- 1. TABELA DE EVENTOS DO CALENDÁRIO CORPORATIVO
+-- =========================================================================
 CREATE TABLE IF NOT EXISTS public.events (
   id TEXT PRIMARY KEY,
   date TEXT NOT NULL,
@@ -486,11 +643,7 @@ CREATE TABLE IF NOT EXISTS public.events (
   description TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
-
--- Visitantes podem ler; somente administradores autenticados podem alterar
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Public Access" ON public.events;
-DROP POLICY IF EXISTS "Acesso publico liberado para events" ON public.events;
 DROP POLICY IF EXISTS "Public can read events" ON public.events;
 DROP POLICY IF EXISTS "Admins manage events" ON public.events;
 CREATE POLICY "Public can read events" ON public.events
@@ -503,7 +656,9 @@ GRANT SELECT ON TABLE public.events TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON TABLE public.events TO authenticated;
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.events FROM anon, PUBLIC;
 
+-- =========================================================================
 -- 2. TABELA DO CRONOGRAMA DE INTEGRAÇÃO DA UNIDADE
+-- =========================================================================
 CREATE TABLE IF NOT EXISTS public.integration_sessions (
   id TEXT PRIMARY KEY,
   audience TEXT NOT NULL DEFAULT 'geral',
@@ -524,10 +679,7 @@ CREATE TABLE IF NOT EXISTS public.integration_sessions (
 );
 ALTER TABLE public.integration_sessions
   ADD COLUMN IF NOT EXISTS audience TEXT NOT NULL DEFAULT 'geral';
--- Visitantes podem ler; somente administradores autenticados podem alterar
 ALTER TABLE public.integration_sessions ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Public Access" ON public.integration_sessions;
-DROP POLICY IF EXISTS "Acesso publico liberado para integration_sessions" ON public.integration_sessions;
 DROP POLICY IF EXISTS "Public can read integration sessions" ON public.integration_sessions;
 DROP POLICY IF EXISTS "Admins manage integration sessions" ON public.integration_sessions;
 CREATE POLICY "Public can read integration sessions" ON public.integration_sessions
@@ -540,7 +692,9 @@ GRANT SELECT ON TABLE public.integration_sessions TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON TABLE public.integration_sessions TO authenticated;
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.integration_sessions FROM anon, PUBLIC;
 
--- 3. ACOMPANHAMENTO DE STATUS DAS ATIVIDADES
+-- =========================================================================
+-- 3. ACOMPANHAMENTO DE STATUS DAS ATIVIDADES DA INTEGRAÇÃO
+-- =========================================================================
 CREATE TABLE IF NOT EXISTS public.integration_session_status (
   session_id TEXT PRIMARY KEY REFERENCES public.integration_sessions(id) ON DELETE CASCADE,
   is_completed BOOLEAN NOT NULL DEFAULT FALSE,
@@ -552,39 +706,6 @@ CREATE POLICY "Public can read integration session status" ON public.integration
   FOR SELECT TO anon, authenticated USING (true);
 GRANT SELECT ON TABLE public.integration_session_status TO anon, authenticated;
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON public.integration_session_status FROM anon, authenticated, PUBLIC;
-
--- 4. CSV PRIVADO DO DASHBOARD DE FORMAÇÕES (somente administradores)
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('formations-dashboard', 'formations-dashboard', FALSE)
-ON CONFLICT (id) DO UPDATE SET public = FALSE;
-
-DROP POLICY IF EXISTS "Formation CSV admins can read" ON storage.objects;
-CREATE POLICY "Formation CSV admins can read" ON storage.objects
-  FOR SELECT TO authenticated
-  USING (
-    bucket_id = 'formations-dashboard'
-    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
-  );
-
-DROP POLICY IF EXISTS "Formation CSV admins can upload" ON storage.objects;
-CREATE POLICY "Formation CSV admins can upload" ON storage.objects
-  FOR INSERT TO authenticated
-  WITH CHECK (
-    bucket_id = 'formations-dashboard'
-    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
-  );
-
-DROP POLICY IF EXISTS "Formation CSV admins can replace" ON storage.objects;
-CREATE POLICY "Formation CSV admins can replace" ON storage.objects
-  FOR UPDATE TO authenticated
-  USING (
-    bucket_id = 'formations-dashboard'
-    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
-  )
-  WITH CHECK (
-    bucket_id = 'formations-dashboard'
-    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
-  );
 
 CREATE OR REPLACE FUNCTION public.set_integration_session_status(
   p_session_id TEXT,
@@ -610,31 +731,90 @@ $$;
 REVOKE ALL ON FUNCTION public.set_integration_session_status(TEXT, BOOLEAN) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.set_integration_session_status(TEXT, BOOLEAN) TO anon, authenticated;
 
+-- =========================================================================
+-- 4. TABELA DO PLANO DE AÇÃO (MODELO GANTT)
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS public.action_plans (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  responsible TEXT,
+  department TEXT,
+  start_date TEXT NOT NULL,
+  end_date TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'not_started',
+  progress INTEGER NOT NULL DEFAULT 0,
+  priority TEXT NOT NULL DEFAULT 'media',
+  deliverable TEXT,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+ALTER TABLE public.action_plans ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can read action plans" ON public.action_plans;
+DROP POLICY IF EXISTS "Admins manage action plans" ON public.action_plans;
+CREATE POLICY "Public can read action plans" ON public.action_plans
+  FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Admins manage action plans" ON public.action_plans
+  FOR ALL TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())))
+  WITH CHECK (EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid())));
+GRANT SELECT ON TABLE public.action_plans TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON TABLE public.action_plans TO authenticated;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE public.action_plans FROM anon, PUBLIC;
+
+-- =========================================================================
+-- 5. BUCKET CSV DO DASHBOARD DE FORMAÇÕES (LEITURA PÚBLICA / UPLOAD ADMIN)
+-- =========================================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('formations-dashboard', 'formations-dashboard', TRUE)
+ON CONFLICT (id) DO UPDATE SET public = TRUE;
+
+DROP POLICY IF EXISTS "Formation CSV public can read" ON storage.objects;
+DROP POLICY IF EXISTS "Formation CSV admins can read" ON storage.objects;
+CREATE POLICY "Formation CSV public can read" ON storage.objects
+  FOR SELECT TO anon, authenticated
+  USING (bucket_id = 'formations-dashboard');
+
+DROP POLICY IF EXISTS "Formation CSV admins can upload" ON storage.objects;
+CREATE POLICY "Formation CSV admins can upload" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    bucket_id = 'formations-dashboard'
+    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
+  );
+
+DROP POLICY IF EXISTS "Formation CSV admins can replace" ON storage.objects;
+CREATE POLICY "Formation CSV admins can replace" ON storage.objects
+  FOR UPDATE TO authenticated
+  USING (
+    bucket_id = 'formations-dashboard'
+    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
+  )
+  WITH CHECK (
+    bucket_id = 'formations-dashboard'
+    AND EXISTS (SELECT 1 FROM public.app_admins a WHERE a.user_id = (SELECT auth.uid()))
+  );
+
+-- =========================================================================
+-- 6. HABILITAR REALTIME NAS TABELAS
+-- =========================================================================
 DO $$
 BEGIN
-  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime')
-     AND NOT EXISTS (
-       SELECT 1 FROM pg_publication_tables
-       WHERE pubname = 'supabase_realtime'
-         AND schemaname = 'public'
-         AND tablename = 'events'
-     ) THEN
-    ALTER PUBLICATION supabase_realtime ADD TABLE public.events;
-  END IF;
-  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime')
-     AND NOT EXISTS (
-       SELECT 1 FROM pg_publication_tables
-       WHERE pubname = 'supabase_realtime'
-         AND schemaname = 'public'
-         AND tablename = 'integration_session_status'
-     ) THEN
-    ALTER PUBLICATION supabase_realtime ADD TABLE public.integration_session_status;
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'events') THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE public.events;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'integration_sessions') THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE public.integration_sessions;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'integration_session_status') THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE public.integration_session_status;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'action_plans') THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE public.action_plans;
+    END IF;
   END IF;
 END;
 $$;
-
--- Crie a conta em Authentication > Users; depois execute com o UUID do usuário:
--- INSERT INTO public.app_admins (user_id) VALUES ('UUID_DO_USUARIO');
--- Desative o cadastro público em Authentication > Settings.
 `;
 }
