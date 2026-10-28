@@ -31,7 +31,7 @@ function oklabToRgba(lightness: string, first: string, second: string, alpha?: s
 
 function oklchToRgba(lightness: string, chroma: string, hue: string, alpha?: string) {
   const parsedChroma = Number.parseFloat(chroma) * (chroma.endsWith('%') ? 0.004 : 1);
-  const hueValue = Number.parseFloat(hue);
+  const hueValue = Number.parseFloat(hue) || 0;
   const hueInDegrees = hue.endsWith('turn')
     ? hueValue * 360
     : hue.endsWith('rad')
@@ -49,7 +49,9 @@ function oklchToRgba(lightness: string, chroma: string, hue: string, alpha?: str
   );
 }
 
-function replaceUnsupportedColorFunctions(value: string) {
+export function replaceUnsupportedColorFunctions(value: string): string {
+  if (!value || typeof value !== 'string') return value;
+  
   return value
     .replace(
       /oklch\(\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?(?:deg|grad|rad|turn)?)\s*(?:\/\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?))?\s*\)/gi,
@@ -63,20 +65,36 @@ function replaceUnsupportedColorFunctions(value: string) {
         oklabToRgba(lightness, first, second, alpha)
       ),
     )
+    .replace(/color-mix\([^)]+\)/gi, 'rgba(100, 116, 139, 0.2)')
     .replace(/\bin\s+ok(?:lab|lch)\b/gi, '');
 }
 
-export async function copyElementAsImage(elementId: string): Promise<void> {
+/**
+ * Captures any HTML element to an HTML5 Canvas with modern Tailwind CSS v4 color compatibility.
+ */
+export async function captureElementToCanvas(elementId: string): Promise<HTMLCanvasElement> {
   const element = document.getElementById(elementId);
-  if (!element) throw new Error('Não foi possível localizar a tela para capturar.');
-
-  if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
-    throw new Error('Seu navegador não permite copiar imagens. Use o Chrome ou Edge atualizado em HTTPS.');
+  if (!element) {
+    throw new Error(`Não foi possível localizar o elemento com ID "${elementId}" para captura.`);
   }
 
-  const width = Math.ceil(element.scrollWidth);
-  const height = Math.ceil(element.scrollHeight);
-  const canvasPromise = html2canvas(element, {
+  const width = Math.ceil(element.scrollWidth || element.offsetWidth || 1200);
+  const height = Math.ceil(element.scrollHeight || element.offsetHeight || 800);
+
+  const COLOR_PROPS = [
+    'color',
+    'backgroundColor',
+    'borderColor',
+    'borderTopColor',
+    'borderRightColor',
+    'borderBottomColor',
+    'borderLeftColor',
+    'outlineColor',
+    'fill',
+    'stroke',
+  ];
+
+  return html2canvas(element, {
     backgroundColor: '#ffffff',
     scale: Math.min(window.devicePixelRatio || 1, 2),
     useCORS: true,
@@ -85,68 +103,104 @@ export async function copyElementAsImage(elementId: string): Promise<void> {
     height,
     windowWidth: Math.max(width, document.documentElement.clientWidth),
     windowHeight: Math.max(height, document.documentElement.clientHeight),
-    onclone: (_document, clonedElement) => {
-      const clonedElements = [clonedElement, ...clonedElement.querySelectorAll<HTMLElement>('*')];
-      clonedElements.forEach((child) => {
-        const styles = _document.defaultView?.getComputedStyle(child);
-        if (!styles) return;
-        for (let index = 0; index < styles.length; index += 1) {
-          const property = styles.item(index);
-          const value = styles.getPropertyValue(property);
-          if (/ok(?:lab|lch)\(/i.test(value)) {
-            child.style.setProperty(property, replaceUnsupportedColorFunctions(value));
+    onclone: (clonedDoc, clonedElement) => {
+      const allElements = [clonedElement, ...clonedElement.querySelectorAll<HTMLElement>('*')];
+      
+      allElements.forEach((el) => {
+        const computed = clonedDoc.defaultView?.getComputedStyle(el);
+        if (!computed) return;
+
+        // Convert any oklch/oklab in specific color properties
+        for (const prop of COLOR_PROPS) {
+          const val = (computed as any)[prop];
+          if (typeof val === 'string' && /ok(?:lab|lch)\(|color-mix\(/i.test(val)) {
+            const safeProp = prop.replace(/([A-Z])/g, '-$1').toLowerCase();
+            el.style.setProperty(safeProp, replaceUnsupportedColorFunctions(val));
           }
         }
+
+        // Check box-shadow
+        const shadow = computed.boxShadow;
+        if (shadow && /ok(?:lab|lch)\(|color-mix\(/i.test(shadow)) {
+          el.style.boxShadow = replaceUnsupportedColorFunctions(shadow);
+        }
+
+        // Normalize sticky/fixed positioning for full capture
+        if (computed.position === 'sticky') el.style.position = 'static';
+        if (computed.overflowY === 'auto' || computed.overflowY === 'scroll') {
+          el.style.maxHeight = 'none';
+          el.style.height = 'auto';
+          el.style.overflow = 'visible';
+        }
+        if (el.hasAttribute('data-capture-ignore') || computed.position === 'fixed') {
+          el.style.display = 'none';
+        }
       });
+
       clonedElement.style.width = `${width}px`;
       clonedElement.style.maxWidth = 'none';
       clonedElement.style.height = `${height}px`;
       clonedElement.style.overflow = 'visible';
-
-      clonedElements.slice(1).forEach((child) => {
-        const styles = _document.defaultView?.getComputedStyle(child);
-        if (styles?.position === 'sticky') child.style.position = 'static';
-        if (styles && (styles.overflowY === 'auto' || styles.overflowY === 'scroll')) {
-          child.style.maxHeight = 'none';
-          child.style.height = 'auto';
-          child.style.overflow = 'visible';
-        }
-        if (child.hasAttribute('data-capture-ignore') || styles?.position === 'fixed') {
-          child.style.display = 'none';
-        }
-      });
     },
   });
-
-  const imagePromise = canvasPromise.then((canvas) => new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((image) => {
-      if (image) resolve(image);
-      else reject(new Error('O navegador não conseguiu gerar a imagem da tela.'));
-    }, 'image/png');
-  }));
-
-  await navigator.clipboard.write([
-    new ClipboardItem({ 'image/png': imagePromise }),
-  ]);
 }
 
+export interface CopyImageResult {
+  success: boolean;
+  method: 'clipboard' | 'download';
+}
+
+/**
+ * Copies an element as an image to the clipboard. If browser permissions or user activation block clipboard writing,
+ * automatically falls back to downloading the PNG image so the user never fails to get their capture.
+ */
+export async function copyElementAsImage(
+  elementId: string,
+  downloadFallbackName: string = 'captura_agenda'
+): Promise<CopyImageResult> {
+  const canvas = await captureElementToCanvas(elementId);
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((b) => resolve(b), 'image/png');
+  });
+
+  if (!blob) {
+    throw new Error('O navegador não conseguiu processar a imagem.');
+  }
+
+  // 1. Try to write directly to system clipboard
+  if (navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob }),
+      ]);
+      return { success: true, method: 'clipboard' };
+    } catch (clipErr) {
+      console.warn('Clipboard write was restricted by browser, downloading image fallback:', clipErr);
+    }
+  }
+
+  // 2. Fallback: Automatically download the PNG image file
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${downloadFallbackName}_${new Date().toISOString().split('T')[0]}.png`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  return { success: true, method: 'download' };
+}
+
+/**
+ * Exports an HTML element directly to a downloadable PDF file with correct A4 proportions.
+ */
 export async function exportElementToPDF(
   elementId: string,
   fileName: string = 'cronograma-integracao.pdf'
 ): Promise<void> {
-  const element = document.getElementById(elementId);
-  if (!element) {
-    throw new Error('Elemento para exportação não encontrado');
-  }
-
-  // Use html2canvas to capture the element
-  const canvas = await html2canvas(element, {
-    scale: 2, // High resolution
-    useCORS: true,
-    logging: false,
-    backgroundColor: '#ffffff',
-    windowWidth: element.scrollWidth,
-  });
+  const canvas = await captureElementToCanvas(elementId);
 
   const imgData = canvas.toDataURL('image/png');
   const imgWidth = canvas.width;
@@ -163,17 +217,29 @@ export async function exportElementToPDF(
   const pdfWidth = pdf.internal.pageSize.getWidth();
   const pdfHeight = pdf.internal.pageSize.getHeight();
 
-  const ratio = Math.min(pdfWidth / (imgWidth * 0.264583), pdfHeight / (imgHeight * 0.264583));
-  const printW = (imgWidth * 0.264583) * ratio;
-  const printH = (imgHeight * 0.264583) * ratio;
+  const mmPerPx = 0.264583;
+  const imgW_mm = imgWidth * mmPerPx;
+  const imgH_mm = imgHeight * mmPerPx;
+
+  // Margin 8mm
+  const margin = 8;
+  const availW = pdfWidth - margin * 2;
+  const availH = pdfHeight - margin * 2;
+
+  const ratio = Math.min(availW / imgW_mm, availH / imgH_mm);
+  const printW = imgW_mm * ratio;
+  const printH = imgH_mm * ratio;
 
   const posX = (pdfWidth - printW) / 2;
-  const posY = 10;
+  const posY = margin + Math.max(0, (availH - printH) / 2);
 
   pdf.addImage(imgData, 'PNG', posX, posY, printW, printH);
   pdf.save(fileName);
 }
 
+/**
+ * Exports schedule sessions to an Excel .xlsx workbook.
+ */
 export function exportToExcel(sessions: IntegrationSession[], unitInfo: UnitInfo, audience?: IntegrationAudience) {
   const rows = sessions.map((s) => ({
     PÚBLICO: INTEGRATION_AUDIENCES.find((option) => option.id === (s.audience || 'geral'))?.label || 'Geral',
@@ -193,7 +259,7 @@ export function exportToExcel(sessions: IntegrationSession[], unitInfo: UnitInfo
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Cronograma');
 
-  // Set column widths
+  // Column widths
   worksheet['!cols'] = [
     { wch: 20 }, // PÚBLICO
     { wch: 6 },  // DIA
@@ -211,9 +277,18 @@ export function exportToExcel(sessions: IntegrationSession[], unitInfo: UnitInfo
   const audienceName = audience
     ? `_${INTEGRATION_AUDIENCES.find((option) => option.id === audience)?.id || audience}`
     : '';
-  XLSX.writeFile(workbook, `cronograma_integracao${audienceName}_${unitInfo.unitName.replace(/\s+/g, '_')}.xlsx`);
+
+  // Sanitize unit name to remove characters invalid on Windows/Linux filenames: / \ : * ? " < > |
+  const safeUnitName = (unitInfo?.unitName || 'unidade')
+    .replace(/[/\\?%*:|"<>]/g, '-')
+    .replace(/\s+/g, '_');
+
+  XLSX.writeFile(workbook, `cronograma_integracao${audienceName}_${safeUnitName}.xlsx`);
 }
 
+/**
+ * Parses an imported Excel file into IntegrationSession items.
+ */
 export function parseExcelFile(
   file: File
 ): Promise<IntegrationSession[]> {
@@ -229,7 +304,6 @@ export function parseExcelFile(
         const rawJson: any[] = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
 
         const sessions: IntegrationSession[] = rawJson.map((row, idx) => {
-          // Normalize keys
           const getVal = (possibleKeys: string[]) => {
             for (const key of possibleKeys) {
               const foundKey = Object.keys(row).find(

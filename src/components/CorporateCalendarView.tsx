@@ -539,8 +539,12 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   const handleCopyCalendarAsImage = async () => {
     try {
       setIsCopyingImage(true);
-      await copyElementAsImage('calendar-capture-content');
-      showToast('Calendário copiado como imagem. Agora você pode colar onde quiser.');
+      const res = await copyElementAsImage('calendar-capture-content', 'calendario_corporativo');
+      if (res.method === 'clipboard') {
+        showToast('Calendário copiado como imagem! Você já pode colar onde quiser.');
+      } else {
+        showToast('Imagem do calendário baixada com sucesso no seu computador!');
+      }
     } catch (error) {
       console.error('Could not copy calendar as image', error);
       showToast(error instanceof Error ? error.message : 'Não foi possível copiar o calendário como imagem.', false);

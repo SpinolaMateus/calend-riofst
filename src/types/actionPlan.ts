@@ -84,3 +84,4 @@ export const INITIAL_ACTION_PLANS: ActionPlanItem[] = [
     notes: 'Events, Integração e Formações sincronizados na nuvem.',
   },
 ];
+

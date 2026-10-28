@@ -984,3 +984,4 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     </div>
   );
 };
+

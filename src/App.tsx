@@ -396,8 +396,12 @@ export default function App() {
   const handleCopyScheduleAsImage = async () => {
     try {
       setIsCopyingImage(true);
-      await copyElementAsImage('integration-capture-content');
-      showToast('Agenda copiada como imagem. Agora você pode colar onde quiser.');
+      const res = await copyElementAsImage('integration-capture-content', 'cronograma_integracao');
+      if (res.method === 'clipboard') {
+        showToast('Agenda copiada como imagem! Você já pode colar no Teams, WhatsApp ou e-mail.');
+      } else {
+        showToast('Imagem da agenda baixada com sucesso no seu computador!');
+      }
     } catch (error) {
       console.error('Could not copy integration schedule as image', error);
       showToast(error instanceof Error ? error.message : 'Não foi possível copiar a agenda como imagem.', 'error');
