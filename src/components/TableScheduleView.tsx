@@ -5,6 +5,10 @@ import {
   Trash, ArrowUp, ArrowDown, Scissors, ClipboardList
 } from 'lucide-react';
 import { AreaDefinition, IntegrationSession } from '../types/schedule';
+import { 
+  parseTimeRange, calculateCH, formatTimeRange, 
+  chToMinutes, minutesToTime, timeToMinutes, syncSessionTimeAndCH 
+} from '../utils/timeUtils';
 
 interface TableScheduleViewProps {
   sessions: IntegrationSession[];
@@ -115,10 +119,42 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
 
   const handleSaveInlineEdit = (session: IntegrationSession) => {
     if (!editingCell) return;
-    onUpdateSession({
+
+    let updatedSession: IntegrationSession = {
       ...session,
       [editingCell.field]: editValue,
-    });
+    };
+
+    if (editingCell.field === 'horarioText') {
+      const parsed = parseTimeRange(editValue);
+      if (parsed) {
+        const newCh = calculateCH(parsed.startTime, parsed.endTime);
+        updatedSession = {
+          ...updatedSession,
+          startTime: parsed.startTime,
+          endTime: parsed.endTime,
+          horarioText: formatTimeRange(parsed.startTime, parsed.endTime),
+          ch: newCh,
+        };
+      }
+    } else if (editingCell.field === 'ch') {
+      const minutes = chToMinutes(editValue);
+      if (minutes > 0 && session.startTime) {
+        const startMins = timeToMinutes(session.startTime);
+        const newEndMins = startMins + minutes;
+        const newEndTime = minutesToTime(newEndMins);
+        updatedSession = {
+          ...updatedSession,
+          endTime: newEndTime,
+          horarioText: formatTimeRange(session.startTime, newEndTime),
+          ch: calculateCH(session.startTime, newEndTime),
+        };
+      }
+    }
+
+    // Garante que o horário sempre sincronize com o cronograma visual e que a diferença entre início e fim reflita o CH
+    const synchronized = syncSessionTimeAndCH(updatedSession);
+    onUpdateSession(synchronized);
     setEditingCell(null);
   };
 

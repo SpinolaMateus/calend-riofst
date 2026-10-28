@@ -339,7 +339,7 @@ export function parseExcelFile(
             }
           }
 
-          const ch = getVal(['ch', 'carga horária', 'duracao', 'duração']) || '1h';
+          const ch = calculateCH(startTime, endTime);
           const tema = getVal(['tema', 'assunto', 'conteúdo', 'titulo']) || `Treinamento ${idx + 1}`;
           const area = getVal(['área', 'area', 'setor', 'departamento']) || 'GENTE E GESTÃO';
           const responsavel = getVal(['responsável', 'responsavel', 'instrutor', 'facilitador']);
