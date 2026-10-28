@@ -1,15 +1,19 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Calendar as CalendarIcon, CheckCircle2, Clock, AlertTriangle, 
   Plus, Search, Filter, Edit2, Trash2, Download, Copy,
   LayoutGrid, ListFilter, ArrowRight, User, Building2, 
-  BarChart3, RefreshCw, X, Check, AlertCircle, FileText, ChevronRight
+  BarChart3, RefreshCw, X, Check, AlertCircle, FileText, ChevronRight,
+  Sparkles, Layers, Target, Bookmark, HelpCircle
 } from 'lucide-react';
 import { 
   ActionPlanItem, 
   ActionPlanStatus, 
   ActionPlanPriority, 
-  INITIAL_ACTION_PLANS 
+  ActionPlanType,
+  INITIAL_ACTION_PLANS,
+  PILAR_ET_TEMPLATE,
+  PILAR_ET_STEPS
 } from '../types/actionPlan';
 import { useAdminAuth } from '../services/AdminAuthContext';
 import { 
@@ -63,17 +67,24 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [stepFilter, setStepFilter] = useState<string>('all');
+  const [kindFilter, setKindFilter] = useState<string>('all');
   const [deptFilter, setDeptFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
 
-  // Modal State
+  // Modal State (Create / Edit)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ActionPlanItem | null>(null);
 
+  // Template Modal State (Carregar Pilar ET)
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+
   // Form State
   const [formTitle, setFormTitle] = useState('');
+  const [formStep, setFormStep] = useState<string>(PILAR_ET_STEPS[0]);
+  const [formKind, setFormKind] = useState<ActionPlanType>('metodo');
   const [formResponsible, setFormResponsible] = useState('');
-  const [formDepartment, setFormDepartment] = useState('GENTE E GESTÃO');
+  const [formDepartment, setFormDepartment] = useState('Pilar Educação e Treinamento');
   const [formStartDate, setFormStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [formEndDate, setFormEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [formStatus, setFormStatus] = useState<ActionPlanStatus>('in_progress');
@@ -134,6 +145,8 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       if (statusFilter !== 'all' && item.status !== statusFilter) return false;
+      if (stepFilter !== 'all' && item.step !== stepFilter) return false;
+      if (kindFilter !== 'all' && (item.kind || 'metodo') !== kindFilter) return false;
       if (deptFilter !== 'all' && item.department !== deptFilter) return false;
       if (priorityFilter !== 'all' && item.priority !== priorityFilter) return false;
 
@@ -143,10 +156,21 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
         item.title.toLowerCase().includes(q) ||
         item.responsible.toLowerCase().includes(q) ||
         item.department.toLowerCase().includes(q) ||
+        (item.step && item.step.toLowerCase().includes(q)) ||
         (item.deliverable && item.deliverable.toLowerCase().includes(q))
       );
     });
-  }, [items, searchQuery, statusFilter, deptFilter, priorityFilter]);
+  }, [items, searchQuery, statusFilter, stepFilter, kindFilter, deptFilter, priorityFilter]);
+
+  // Distinct Steps present in current items
+  const distinctSteps = useMemo(() => {
+    const set = new Set<string>();
+    PILAR_ET_STEPS.forEach((s) => set.add(s));
+    items.forEach((i) => {
+      if (i.step) set.add(i.step);
+    });
+    return Array.from(set);
+  }, [items]);
 
   // Distinct Departments
   const departments = useMemo(() => {
@@ -161,7 +185,9 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     const inProgress = items.filter((i) => i.status === 'in_progress').length;
     const delayed = items.filter((i) => i.status === 'delayed').length;
     const avgProgress = total > 0 ? Math.round(items.reduce((acc, i) => acc + i.progress, 0) / total) : 0;
-    return { total, completed, inProgress, delayed, avgProgress };
+    const metodosCount = items.filter((i) => (i.kind || 'metodo') === 'metodo').length;
+    const resultadosCount = items.filter((i) => i.kind === 'resultado').length;
+    return { total, completed, inProgress, delayed, avgProgress, metodosCount, resultadosCount };
   }, [items]);
 
   // Timeline boundaries for Gantt calculation
@@ -177,9 +203,9 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
       if (endTimes.length > 0) maxDate = new Date(Math.max(...endTimes));
     }
 
-    // Add padding (7 days before and after)
+    // Add padding (4 days before and 7 days after)
     const paddedStart = new Date(minDate);
-    paddedStart.setDate(paddedStart.getDate() - 3);
+    paddedStart.setDate(paddedStart.getDate() - 4);
     const paddedEnd = new Date(maxDate);
     paddedEnd.setDate(paddedEnd.getDate() + 7);
 
@@ -226,8 +252,10 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     }
     setEditingItem(null);
     setFormTitle('');
+    setFormStep(PILAR_ET_STEPS[0]);
+    setFormKind('metodo');
     setFormResponsible('');
-    setFormDepartment('GENTE E GESTÃO');
+    setFormDepartment('Pilar Educação e Treinamento');
     const today = new Date().toISOString().split('T')[0];
     const twoWeeksLater = new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0];
     setFormStartDate(today);
@@ -248,6 +276,8 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     }
     setEditingItem(item);
     setFormTitle(item.title);
+    setFormStep(item.step || PILAR_ET_STEPS[0]);
+    setFormKind(item.kind || 'metodo');
     setFormResponsible(item.responsible);
     setFormDepartment(item.department);
     setFormStartDate(item.startDate);
@@ -260,6 +290,26 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     setIsModalOpen(true);
   };
 
+  // Handle template selection inside the form
+  const handleSelectPresetAction = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    if (!selectedId) return;
+
+    const preset = PILAR_ET_TEMPLATE.find((p) => p.id === selectedId);
+    if (!preset) return;
+
+    setFormTitle(preset.title);
+    setFormStep(preset.step || PILAR_ET_STEPS[0]);
+    setFormKind(preset.kind || 'metodo');
+    setFormResponsible(preset.responsible);
+    setFormDepartment(preset.department);
+    setFormStartDate(preset.startDate);
+    setFormEndDate(preset.endDate);
+    setFormPriority(preset.priority);
+    setFormDeliverable(preset.deliverable || '');
+    setFormNotes(preset.notes || '');
+  };
+
   // Save (Create or Update)
   const handleSaveAction = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -268,7 +318,9 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     const updatedItem: ActionPlanItem = {
       id: editingItem ? editingItem.id : `act-${Date.now()}`,
       title: formTitle.trim(),
-      responsible: formResponsible.trim() || 'Equipe Geral',
+      step: formStep,
+      kind: formKind,
+      responsible: formResponsible.trim() || 'Pilar Educação e Treinamento',
       department: formDepartment.trim() || 'GERAL',
       startDate: formStartDate,
       endDate: formEndDate,
@@ -295,7 +347,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     const { error } = await upsertActionPlanToSupabase(updatedItem);
     if (error) {
       console.error('Could not save action plan to Supabase', error);
-      showToast('Salvo localmente. Execute o SQL de atualização no Supabase para sincronização em nuvem.', 'info');
+      showToast('Salvo localmente.', 'info');
     }
   };
 
@@ -317,10 +369,60 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     }
   };
 
+  // Load Full Pilar ET Template (Substituir ou Adicionar)
+  const handleApplyPilarETTemplate = async (mode: 'replace' | 'append') => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => handleApplyPilarETTemplate(mode));
+      return;
+    }
+
+    setIsCloudSyncing(true);
+
+    let nextItems: ActionPlanItem[] = [];
+    if (mode === 'replace') {
+      nextItems = [...PILAR_ET_TEMPLATE];
+    } else {
+      const existingIds = new Set(items.map((i) => i.id));
+      const newItems = PILAR_ET_TEMPLATE.filter((p) => !existingIds.has(p.id));
+      nextItems = [...items, ...newItems];
+    }
+
+    setItems(nextItems);
+    setIsTemplateModalOpen(false);
+    showToast(`Modelo Pilar ET carregado (${nextItems.length} ações no plano)!`);
+
+    // Sync items in background to Supabase
+    try {
+      for (const item of PILAR_ET_TEMPLATE) {
+        await upsertActionPlanToSupabase(item);
+      }
+      showToast('Modelo sincronizado com o Supabase!', 'success');
+    } catch (err) {
+      console.warn('Batch sync notice:', err);
+    } finally {
+      setIsCloudSyncing(false);
+    }
+  };
+
   // Export to CSV
   const handleExportCSV = () => {
-    const headers = ['Acao', 'Responsavel', 'Setor', 'Data_Inicio', 'Data_Fim', 'Status', 'Progresso_%', 'Prioridade', 'Entregavel', 'Observacoes'];
+    const headers = [
+      'Etapa',
+      'Tipo',
+      'Acao',
+      'Responsavel',
+      'Setor',
+      'Data_Inicio',
+      'Data_Fim',
+      'Status',
+      'Progresso_%',
+      'Prioridade',
+      'Entregavel',
+      'Observacoes'
+    ];
     const rows = items.map((i) => [
+      `"${(i.step || '').replace(/"/g, '""')}"`,
+      `"${((i.kind || 'metodo') === 'resultado' ? 'RESULTADO' : 'MÉTODO').replace(/"/g, '""')}"`,
       `"${i.title.replace(/"/g, '""')}"`,
       `"${i.responsible.replace(/"/g, '""')}"`,
       `"${i.department.replace(/"/g, '""')}"`,
@@ -338,7 +440,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `plano_de_acao_gantt_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `plano_de_acao_pilar_et_${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -375,16 +477,21 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
             <BarChart3 className="w-6 h-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xl font-black text-slate-900 tracking-tight">
                 Plano de Ação • Modelo Gantt
               </h2>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200/60">
-                Sincronizado Supabase
+                Pilar Educação & Treinamento
               </span>
+              {isCloudSyncing && (
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
+                  <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Sincronizando...
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-500">
-              Controle cronológico de entregas operacionais, marcos de projetos e acompanhamento visual por linha do tempo.
+              Controle cronológico de entregas operacionais (Etapa 0 a Passo 6), separação por Método/Resultado e linha do tempo interativa.
             </p>
           </div>
         </div>
@@ -420,6 +527,16 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
             </button>
           </div>
 
+          {/* Load Pilar ET Template Button */}
+          <button
+            onClick={() => setIsTemplateModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-indigo-200 bg-indigo-50/80 hover:bg-indigo-100 text-indigo-800 transition-all shadow-xs"
+            title="Carregar ou restaurar as 52 ações padronizadas do Pilar ET"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Modelo Pilar ET</span>
+          </button>
+
           {/* Export CSV */}
           <button
             onClick={handleExportCSV}
@@ -444,7 +561,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
       {/* ========================================================================= */}
       {/* 2. EXECUTIVE KPI CARDS */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-3.5">
         <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs">
           <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total de Ações</div>
           <div className="mt-1 text-2xl font-black text-slate-900">{stats.total}</div>
@@ -452,11 +569,19 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
         </div>
 
         <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs">
-          <div className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Concluídas
+          <div className="text-[11px] font-semibold text-sky-600 uppercase tracking-wider flex items-center gap-1">
+            <Layers className="w-3.5 h-3.5" /> Métodos
           </div>
-          <div className="mt-1 text-2xl font-black text-emerald-700">{stats.completed}</div>
-          <div className="mt-0.5 text-[11px] text-slate-500 font-medium">entregas homologadas</div>
+          <div className="mt-1 text-2xl font-black text-sky-700">{stats.metodosCount}</div>
+          <div className="mt-0.5 text-[11px] text-slate-500 font-medium">ações de processo</div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs">
+          <div className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider flex items-center gap-1">
+            <Target className="w-3.5 h-3.5" /> Resultados
+          </div>
+          <div className="mt-1 text-2xl font-black text-emerald-700">{stats.resultadosCount}</div>
+          <div className="mt-0.5 text-[11px] text-slate-500 font-medium">marcos de entrega</div>
         </div>
 
         <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs">
@@ -464,7 +589,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
             <Clock className="w-3.5 h-3.5" /> Em Andamento
           </div>
           <div className="mt-1 text-2xl font-black text-indigo-700">{stats.inProgress}</div>
-          <div className="mt-0.5 text-[11px] text-slate-500 font-medium">em execução no polo</div>
+          <div className="mt-0.5 text-[11px] text-slate-500 font-medium">em execução</div>
         </div>
 
         <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs">
@@ -476,7 +601,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
         </div>
 
         <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs col-span-2 sm:col-span-1">
-          <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Avanço Global</div>
+          <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Avanço Médio</div>
           <div className="mt-1 text-2xl font-black text-indigo-600">{stats.avgProgress}%</div>
           <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
             <div className="bg-indigo-600 h-full rounded-full transition-all duration-500" style={{ width: `${stats.avgProgress}%` }} />
@@ -495,13 +620,37 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Pesquisar por título, responsável ou entregável..."
+            placeholder="Pesquisar por título, responsável, entregável ou etapa..."
             className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all"
           />
         </div>
 
         {/* Dropdowns */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Step / Etapa Filter */}
+          <select
+            value={stepFilter}
+            onChange={(e) => setStepFilter(e.target.value)}
+            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 max-w-[190px] truncate"
+            title="Filtrar por Etapa / Passo"
+          >
+            <option value="all">Todas as Etapas / Passos</option>
+            {distinctSteps.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+
+          {/* Kind / Tipo Filter */}
+          <select
+            value={kindFilter}
+            onChange={(e) => setKindFilter(e.target.value)}
+            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          >
+            <option value="all">Todos os Tipos</option>
+            <option value="metodo">MÉTODO (Processos)</option>
+            <option value="resultado">RESULTADO (Marcos)</option>
+          </select>
+
           {/* Status Filter */}
           <select
             value={statusFilter}
@@ -540,10 +689,12 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
             <option value="baixa">Baixa</option>
           </select>
 
-          {(searchQuery || statusFilter !== 'all' || deptFilter !== 'all' || priorityFilter !== 'all') && (
+          {(searchQuery || stepFilter !== 'all' || kindFilter !== 'all' || statusFilter !== 'all' || deptFilter !== 'all' || priorityFilter !== 'all') && (
             <button
               onClick={() => {
                 setSearchQuery('');
+                setStepFilter('all');
+                setKindFilter('all');
                 setStatusFilter('all');
                 setDeptFilter('all');
                 setPriorityFilter('all');
@@ -562,41 +713,43 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
       {activeTab === 'gantt' && (
         <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
           {/* Header of Gantt */}
-          <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+          <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <span className="font-bold text-slate-900 text-sm">Cronograma Visual de Gantt</span>
               <span className="text-xs text-slate-500">
                 ({filteredItems.length} ações exibidas)
               </span>
             </div>
-            <div className="flex items-center gap-3 text-xs text-slate-500 font-medium">
+            
+            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-medium">
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-md bg-emerald-500" /> Concluído
+                <span className="w-2.5 h-2.5 rounded bg-sky-500" /> Método
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-md bg-indigo-500" /> Em Andamento
+                <span className="w-2.5 h-2.5 rounded bg-emerald-500" /> Resultado (Marco)
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-md bg-rose-500" /> Atrasado
+                <span className="w-2.5 h-2.5 rounded bg-rose-500" /> Atrasado
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-md bg-slate-300" /> A Fazer
+                <span className="w-2.5 h-2.5 rounded bg-slate-300" /> A Fazer
               </div>
             </div>
           </div>
 
           {/* Interactive Gantt Table */}
           <div className="overflow-x-auto">
-            <div className="min-w-[950px]">
+            <div className="min-w-[1000px]">
               
-              {/* Gantt Timeline Dates Header */}
-              <div className="grid grid-cols-12 border-b border-slate-200 bg-slate-100/70 text-[11px] font-bold text-slate-600">
-                <div className="col-span-4 p-3 border-r border-slate-200">
-                  Ação / Responsável / Setor
+              {/* Timeline Header (Months and Period) */}
+              <div className="grid grid-cols-12 bg-slate-100/80 border-b border-slate-200 text-xs font-bold text-slate-600">
+                <div className="col-span-4 p-3 border-r border-slate-200 flex items-center justify-between">
+                  <span>Estrutura / Ação / Responsável</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Clique para editar</span>
                 </div>
-                <div className="col-span-8 p-3 flex justify-between items-center">
+                <div className="col-span-8 p-3 flex items-center justify-between text-[11px] text-slate-500">
                   <span>Início: {timelineDates.start.toLocaleDateString('pt-BR')}</span>
-                  <span className="text-indigo-600 font-extrabold uppercase tracking-wider text-[10px] bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200/50">
+                  <span className="font-extrabold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
                     Hoje: {new Date().toLocaleDateString('pt-BR')}
                   </span>
                   <span>Término: {timelineDates.end.toLocaleDateString('pt-BR')}</span>
@@ -612,33 +765,59 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                 ) : (
                   filteredItems.map((item) => {
                     const pos = calculateGanttPosition(item.startDate, item.endDate);
-                    const statusCfg = STATUS_CONFIG[item.status] || STATUS_CONFIG.in_progress;
+                    const isResultado = item.kind === 'resultado';
                     const priorityCfg = PRIORITY_CONFIG[item.priority] || PRIORITY_CONFIG.media;
 
                     return (
                       <div 
                         key={item.id}
-                        className="grid grid-cols-12 hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                        className={`grid grid-cols-12 hover:bg-slate-50/90 transition-colors group cursor-pointer ${
+                          isResultado ? 'bg-emerald-50/20' : ''
+                        }`}
                         onClick={() => handleOpenEditModal(item)}
                       >
                         {/* Left column: Action Details */}
                         <div className="col-span-4 p-3.5 border-r border-slate-200 flex flex-col justify-center space-y-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-bold text-xs text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
-                              {item.title}
+                          
+                          {/* Step Pill & Kind Badge */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {item.step && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200 truncate max-w-[170px]">
+                                {item.step}
+                              </span>
+                            )}
+                            <span
+                              className={`text-[9px] font-black px-1.5 py-0.2 rounded tracking-wider uppercase border flex items-center gap-0.5 ${
+                                isResultado
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                  : 'bg-sky-50 text-sky-800 border-sky-200'
+                              }`}
+                            >
+                              {isResultado && <Target className="w-2.5 h-2.5 text-emerald-600 shrink-0" />}
+                              {isResultado ? 'RESULTADO' : 'MÉTODO'}
                             </span>
-                            <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded border shrink-0 ${priorityCfg.badge}`}>
+                            <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ml-auto shrink-0 ${priorityCfg.badge}`}>
                               {priorityCfg.label}
                             </span>
                           </div>
+
+                          {/* Action Title */}
+                          <div className="flex items-center justify-between gap-2">
+                            <span className={`font-bold text-xs group-hover:text-indigo-600 transition-colors line-clamp-1 ${
+                              isResultado ? 'text-emerald-950 font-black' : 'text-slate-900'
+                            }`}>
+                              {item.title}
+                            </span>
+                          </div>
                           
+                          {/* Responsible and Department */}
                           <div className="flex items-center gap-2 text-[11px] text-slate-500">
-                            <span className="flex items-center gap-1 font-semibold text-slate-700">
-                              <User className="w-3 h-3 text-slate-400" />
+                            <span className="flex items-center gap-1 font-semibold text-slate-700 truncate max-w-[150px]">
+                              <User className="w-3 h-3 text-slate-400 shrink-0" />
                               {item.responsible}
                             </span>
                             <span>•</span>
-                            <span className="truncate max-w-[120px] text-slate-500">
+                            <span className="truncate max-w-[130px] text-slate-500">
                               {item.department}
                             </span>
                           </div>
@@ -653,13 +832,19 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
 
                           {/* Gantt Bar */}
                           <div
-                            className="relative h-7 rounded-xl shadow-xs transition-all flex items-center px-2.5 overflow-hidden border"
+                            className={`relative h-7 rounded-xl shadow-xs transition-all flex items-center px-2.5 overflow-hidden border ${
+                              isResultado ? 'ring-1 ring-emerald-400/50' : ''
+                            }`}
                             style={{
                               marginLeft: `${pos.left}%`,
                               width: `${pos.width}%`,
-                              minWidth: '40px',
-                              backgroundColor: item.status === 'completed' ? '#ecfdf5' : item.status === 'delayed' ? '#fff1f2' : item.status === 'not_started' ? '#f8fafc' : '#eef2ff',
-                              borderColor: item.status === 'completed' ? '#10b981' : item.status === 'delayed' ? '#f43f5e' : item.status === 'not_started' ? '#cbd5e1' : '#6366f1',
+                              minWidth: '46px',
+                              backgroundColor: isResultado
+                                ? item.status === 'completed' ? '#d1fae5' : '#ecfdf5'
+                                : item.status === 'completed' ? '#ecfdf5' : item.status === 'delayed' ? '#fff1f2' : item.status === 'not_started' ? '#f8fafc' : '#eff6ff',
+                              borderColor: isResultado
+                                ? '#059669'
+                                : item.status === 'completed' ? '#10b981' : item.status === 'delayed' ? '#f43f5e' : item.status === 'not_started' ? '#cbd5e1' : '#3b82f6',
                             }}
                           >
                             {/* Inner Progress Fill */}
@@ -667,11 +852,14 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                               className="absolute top-0 bottom-0 left-0 opacity-25"
                               style={{
                                 width: `${item.progress}%`,
-                                backgroundColor: item.status === 'completed' ? '#059669' : item.status === 'delayed' ? '#e11d48' : item.status === 'not_started' ? '#94a3b8' : '#4f46e5',
+                                backgroundColor: isResultado
+                                  ? '#047857'
+                                  : item.status === 'completed' ? '#059669' : item.status === 'delayed' ? '#e11d48' : item.status === 'not_started' ? '#94a3b8' : '#2563eb',
                               }}
                             />
 
-                            <span className="relative z-10 text-[10px] font-extrabold truncate text-slate-800">
+                            <span className="relative z-10 text-[10px] font-extrabold truncate text-slate-800 flex items-center gap-1">
+                              {isResultado && <Target className="w-3 h-3 text-emerald-700 shrink-0" />}
                               {item.progress}% • {new Date(item.startDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} até {new Date(item.endDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                             </span>
                           </div>
@@ -696,6 +884,8 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                  <th className="py-3 px-3">Etapa / Passo</th>
+                  <th className="py-3 px-2">Tipo</th>
                   <th className="py-3 px-4">Ação / Título</th>
                   <th className="py-3 px-3">Responsável</th>
                   <th className="py-3 px-3">Setor</th>
@@ -710,7 +900,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
               <tbody className="divide-y divide-slate-100">
                 {filteredItems.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-8 text-center text-slate-400">
+                    <td colSpan={11} className="py-8 text-center text-slate-400">
                       Nenhuma ação cadastrada no plano.
                     </td>
                   </tr>
@@ -718,11 +908,35 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                   filteredItems.map((item) => {
                     const statusCfg = STATUS_CONFIG[item.status] || STATUS_CONFIG.in_progress;
                     const priorityCfg = PRIORITY_CONFIG[item.priority] || PRIORITY_CONFIG.media;
+                    const isResultado = item.kind === 'resultado';
 
                     return (
-                      <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                      <tr 
+                        key={item.id} 
+                        className={`hover:bg-slate-50/80 transition-colors ${
+                          isResultado ? 'bg-emerald-50/20' : ''
+                        }`}
+                      >
+                        <td className="py-3.5 px-3 whitespace-nowrap text-slate-600 font-semibold">
+                          <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            {item.step || 'Etapa Geral'}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-2 whitespace-nowrap">
+                          <span
+                            className={`text-[10px] font-black px-1.5 py-0.5 rounded border uppercase flex items-center gap-0.5 w-max ${
+                              isResultado
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                : 'bg-sky-50 text-sky-800 border-sky-200'
+                            }`}
+                          >
+                            {isResultado ? 'RESULTADO' : 'MÉTODO'}
+                          </span>
+                        </td>
                         <td className="py-3.5 px-4 font-bold text-slate-900 max-w-xs">
-                          <div className="line-clamp-2">{item.title}</div>
+                          <div className={`line-clamp-2 ${isResultado ? 'font-black text-emerald-950' : ''}`}>
+                            {item.title}
+                          </div>
                           {item.deliverable && (
                             <div className="text-[10px] text-slate-400 font-normal mt-0.5 truncate">
                               Entregável: {item.deliverable}
@@ -746,22 +960,30 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                             <div className="w-16 bg-slate-100 rounded-full h-2 overflow-hidden">
                               <div
                                 className={`h-full rounded-full ${
-                                  item.progress === 100 ? 'bg-emerald-500' : 'bg-indigo-600'
+                                  item.progress === 100 
+                                    ? 'bg-emerald-500' 
+                                    : isResultado 
+                                    ? 'bg-emerald-600' 
+                                    : 'bg-indigo-600'
                                 }`}
                                 style={{ width: `${item.progress}%` }}
                               />
                             </div>
-                            <span className="font-bold text-slate-700">{item.progress}%</span>
+                            <span className="font-extrabold text-slate-800 text-[11px]">
+                              {item.progress}%
+                            </span>
                           </div>
                         </td>
                         <td className="py-3.5 px-3 whitespace-nowrap">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${statusCfg.bg} ${statusCfg.text} ${statusCfg.border}`}>
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusCfg.bg} ${statusCfg.text} ${statusCfg.border}`}
+                          >
                             <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
                             {statusCfg.label}
                           </span>
                         </td>
                         <td className="py-3.5 px-3 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold border ${priorityCfg.badge}`}>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${priorityCfg.badge}`}>
                             {priorityCfg.label}
                           </span>
                         </td>
@@ -772,14 +994,14 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                               className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                               title="Editar Ação"
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <Edit2 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => handleDeleteAction(item.id)}
                               className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                              title="Excluir Ação"
+                              title="Remover Ação"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </td>
@@ -794,11 +1016,94 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
       )}
 
       {/* ========================================================================= */}
-      {/* 6. MODAL: CADASTRO / EDIÇÃO DE AÇÃO */}
+      {/* 6. MODAL DE CARREGAR MODELO PILAR ET */}
+      {/* ========================================================================= */}
+      {isTemplateModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 p-6 sm:p-7 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">
+                    Carregar Modelo Pilar ET
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Pilar Educação e Treinamento (Superar)
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsTemplateModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-600">
+              <p>
+                Este modelo contém o roteiro metodológico completo de implantação com <strong>52 ações estruturadas</strong>:
+              </p>
+              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-1.5 text-[11px]">
+                <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                  <span>Etapa 0: Estrutura (Governança, KPIs, Master Plan)</span>
+                </div>
+                <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                  <span>0.2: Capacitação do Pilar (LUP, Matriz de Habilidades)</span>
+                </div>
+                <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                  <span>Passo 1 a Passo 6: Diretrizes, Programa, Matriz, Auto Desenvolvimento e Avaliação Futura</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-emerald-700 font-bold mt-1">
+                  <Target className="w-3.5 h-3.5 shrink-0" />
+                  <span>Inclui separação automática de Ações de Método e Marcos de Resultado.</span>
+                </div>
+              </div>
+              <p className="text-slate-500 text-[11px]">
+                Escolha se deseja substituir totalmente o plano de ação atual ou mesclar/adicionar as ações do modelo ao plano existente.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setIsTemplateModalOpen(false)}
+                className="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => handleApplyPilarETTemplate('append')}
+                className="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-xl border border-indigo-200 transition-colors"
+              >
+                Mesclar / Adicionar Novas
+              </button>
+              <button
+                type="button"
+                onClick={() => handleApplyPilarETTemplate('replace')}
+                className="w-full sm:w-auto px-4 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition-all"
+              >
+                Substituir Plano Completo
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 7. MODAL DE CADASTRO / EDIÇÃO */}
       {/* ========================================================================= */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="relative bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 p-6 sm:p-7 space-y-5 max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 p-6 sm:p-7 space-y-4 max-h-[92vh] overflow-y-auto">
             
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -811,7 +1116,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                     {editingItem ? 'Editar Ação do Plano' : 'Cadastrar Nova Ação'}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Defina o escopo, prazos, responsável e status de acompanhamento.
+                    Defina o escopo, etapa, tipo (Método/Resultado), prazos e responsáveis.
                   </p>
                 </div>
               </div>
@@ -823,8 +1128,74 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
               </button>
             </div>
 
+            {/* Template Quick Selector (For New or Updating) */}
+            <div className="p-3 bg-indigo-50/70 rounded-2xl border border-indigo-100 space-y-1.5">
+              <label className="text-[11px] font-bold text-indigo-900 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                Puxar Ação Pré-preenchida do Modelo Pilar ET:
+              </label>
+              <select
+                onChange={handleSelectPresetAction}
+                defaultValue=""
+                className="w-full px-3 py-2 bg-white rounded-xl border border-indigo-200 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              >
+                <option value="">-- Selecione uma ação para auto-preencher os campos --</option>
+                {PILAR_ET_TEMPLATE.map((preset) => (
+                  <option key={preset.id} value={preset.id}>
+                    [{preset.kind === 'resultado' ? 'RESULTADO' : 'MÉTODO'}] {preset.step} • {preset.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Form */}
             <form onSubmit={handleSaveAction} className="space-y-4 text-xs font-semibold">
+              
+              {/* Etapa / Passo and Tipo (Método / Resultado) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-slate-700">Etapa / Passo do Roteiro *</label>
+                  <select
+                    value={formStep}
+                    onChange={(e) => setFormStep(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  >
+                    {distinctSteps.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-slate-700">Tipo de Ação *</label>
+                  <div className="grid grid-cols-2 gap-2 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setFormKind('metodo')}
+                      className={`py-2 px-3 rounded-xl border text-center font-bold transition-all ${
+                        formKind === 'metodo'
+                          ? 'bg-sky-50 text-sky-800 border-sky-300 ring-2 ring-sky-500/20'
+                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      MÉTODO
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormKind('resultado')}
+                      className={`py-2 px-3 rounded-xl border text-center font-bold flex items-center justify-center gap-1 transition-all ${
+                        formKind === 'resultado'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-2 ring-emerald-500/20'
+                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      <Target className="w-3.5 h-3.5 text-emerald-600" />
+                      RESULTADO
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Title */}
               <div className="space-y-1">
                 <label className="block text-slate-700">Título da Ação / Atividade *</label>
@@ -833,7 +1204,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                   required
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  placeholder="Ex: Treinamento Prático de NR-12 com Turno A"
+                  placeholder="Ex: Treinamento de Matriz de Habilidades"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                 />
               </div>
@@ -847,17 +1218,17 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                     required
                     value={formResponsible}
                     onChange={(e) => setFormResponsible(e.target.value)}
-                    placeholder="Ex: Eng. de Segurança / Mateus"
+                    placeholder="Ex: Pilar Educação e Treinamento"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-slate-700">Setor / Departamento</label>
+                  <label className="block text-slate-700">Setor / Pilar de Suporte</label>
                   <input
                     type="text"
                     value={formDepartment}
                     onChange={(e) => setFormDepartment(e.target.value)}
-                    placeholder="Ex: GENTE E GESTÃO, SEGURANÇA..."
+                    placeholder="Ex: Superar, GA/MP, Qualidade, MF..."
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
                   />
                 </div>
@@ -942,7 +1313,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                   type="text"
                   value={formDeliverable}
                   onChange={(e) => setFormDeliverable(e.target.value)}
-                  placeholder="Ex: Lista de presença assinada e fotos do treinamento"
+                  placeholder="Ex: Matriz de Habilidades preenchida com gaps identificados"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 />
               </div>
@@ -984,4 +1355,3 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     </div>
   );
 };
-

@@ -427,21 +427,39 @@ export async function fetchActionPlansFromSupabase(): Promise<{ data: ActionPlan
     const { data, error } = await client.from('action_plans').select('*').order('start_date', { ascending: true });
     if (error) return { data: null, error: new Error(error.message) };
 
-    const mapped: ActionPlanItem[] = (data || []).map((item: any) => ({
-      id: String(item.id),
-      title: String(item.title || ''),
-      responsible: String(item.responsible || ''),
-      department: String(item.department || ''),
-      startDate: String(item.start_date || item.startDate || ''),
-      endDate: String(item.end_date || item.endDate || ''),
-      status: item.status || 'not_started',
-      progress: Number(item.progress) || 0,
-      priority: item.priority || 'media',
-      deliverable: item.deliverable || '',
-      notes: item.notes || '',
-      createdAt: item.created_at,
-      updatedAt: item.updated_at,
-    }));
+    const mapped: ActionPlanItem[] = (data || []).map((item: any) => {
+      let step = item.step || '';
+      let kind = (item.kind || item.type || '') as 'metodo' | 'resultado';
+      let notes = String(item.notes || '');
+
+      // Parse metadata from notes fallback if columns were not present
+      if (!step && notes.includes('[ETAPA:')) {
+        const match = notes.match(/\[ETAPA:\s*([^\]]+)\]/);
+        if (match) step = match[1].trim();
+      }
+      if (!kind && notes.includes('[TIPO:')) {
+        const match = notes.match(/\[TIPO:\s*([^\]]+)\]/);
+        if (match) kind = match[1].trim() as 'metodo' | 'resultado';
+      }
+
+      return {
+        id: String(item.id),
+        title: String(item.title || ''),
+        responsible: String(item.responsible || ''),
+        department: String(item.department || ''),
+        startDate: String(item.start_date || item.startDate || ''),
+        endDate: String(item.end_date || item.endDate || ''),
+        status: item.status || 'not_started',
+        progress: Number(item.progress) || 0,
+        priority: item.priority || 'media',
+        deliverable: item.deliverable || '',
+        notes,
+        step: step || undefined,
+        kind: kind || 'metodo',
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+      };
+    });
 
     return { data: mapped, error: null };
   } catch (err: any) {
@@ -453,7 +471,7 @@ export async function upsertActionPlanToSupabase(item: ActionPlanItem): Promise<
   const client = getSupabaseClient();
   if (!client) return { error: new Error('Cliente Supabase não inicializado') };
 
-  const payload = {
+  const fullPayload = {
     id: String(item.id),
     title: String(item.title || ''),
     responsible: String(item.responsible || ''),
@@ -465,13 +483,38 @@ export async function upsertActionPlanToSupabase(item: ActionPlanItem): Promise<
     priority: String(item.priority || 'media'),
     deliverable: String(item.deliverable || ''),
     notes: String(item.notes || ''),
+    step: item.step || null,
+    kind: item.kind || 'metodo',
     updated_at: new Date().toISOString(),
   };
 
   try {
-    const res = await client.from('action_plans').upsert(payload);
-    if (res.error) return { error: new Error(res.error.message) };
-    return { error: null };
+    const res = await client.from('action_plans').upsert(fullPayload);
+    if (!res.error) return { error: null };
+
+    // Fallback if step or kind columns do not exist in the database yet:
+    if (res.error.message && (res.error.message.includes('step') || res.error.message.includes('kind') || res.error.message.includes('column'))) {
+      const fallbackNotes = `[ETAPA: ${item.step || ''}] [TIPO: ${item.kind || 'metodo'}]\n${item.notes || ''}`.trim();
+      const safePayload = {
+        id: String(item.id),
+        title: String(item.title || ''),
+        responsible: String(item.responsible || ''),
+        department: String(item.department || ''),
+        start_date: String(item.startDate || ''),
+        end_date: String(item.endDate || ''),
+        status: String(item.status || 'not_started'),
+        progress: Math.max(0, Math.min(100, Number(item.progress) || 0)),
+        priority: String(item.priority || 'media'),
+        deliverable: String(item.deliverable || ''),
+        notes: fallbackNotes,
+        updated_at: new Date().toISOString(),
+      };
+      const retryRes = await client.from('action_plans').upsert(safePayload);
+      if (retryRes.error) return { error: new Error(retryRes.error.message) };
+      return { error: null };
+    }
+
+    return { error: new Error(res.error.message) };
   } catch (err: any) {
     return { error: err };
   }
@@ -746,9 +789,13 @@ CREATE TABLE IF NOT EXISTS public.action_plans (
   priority TEXT NOT NULL DEFAULT 'media',
   deliverable TEXT,
   notes TEXT,
+  step TEXT,
+  kind TEXT DEFAULT 'metodo',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+ALTER TABLE public.action_plans ADD COLUMN IF NOT EXISTS step TEXT;
+ALTER TABLE public.action_plans ADD COLUMN IF NOT EXISTS kind TEXT DEFAULT 'metodo';
 ALTER TABLE public.action_plans ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public can read action plans" ON public.action_plans;
 DROP POLICY IF EXISTS "Admins manage action plans" ON public.action_plans;

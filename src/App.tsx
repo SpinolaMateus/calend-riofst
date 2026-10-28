@@ -35,6 +35,7 @@ import {
 import { CorporateEvent } from './types/calendar';
 import { useAdminAuth } from './services/AdminAuthContext';
 import { ActionPlanGanttView } from './components/ActionPlanGanttView';
+import { syncSessionTimeAndCH } from './utils/timeUtils';
 import {
   fetchIntegrationFromSupabase,
   fetchIntegrationStatusesFromSupabase,
@@ -61,9 +62,9 @@ export default function App() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_SESSIONS);
       const initial = saved ? JSON.parse(saved) as IntegrationSession[] : INITIAL_SESSIONS;
-      return initial.map((session) => ({ ...session, audience: session.audience || 'geral' }));
+      return initial.map((session) => syncSessionTimeAndCH({ ...session, audience: session.audience || 'geral' }));
     } catch {
-      return INITIAL_SESSIONS.map((session) => ({ ...session, audience: session.audience || 'geral' }));
+      return INITIAL_SESSIONS.map((session) => syncSessionTimeAndCH({ ...session, audience: session.audience || 'geral' }));
     }
   });
 
@@ -186,13 +187,13 @@ export default function App() {
         const merged = new Map(current.map((session) => [session.id, session]));
         for (const session of sessionsResult.data ?? []) {
           const previous = merged.get(session.id);
-          merged.set(session.id, {
+          merged.set(session.id, syncSessionTimeAndCH({
             ...session,
             audience: session.audience || 'geral',
             isCompleted: Object.prototype.hasOwnProperty.call(cloudStatuses, session.id)
               ? cloudStatuses[session.id]
               : previous?.isCompleted ?? session.isCompleted ?? false,
-          });
+          }));
         }
         return Array.from(merged.values()).map((session) => (
           Object.prototype.hasOwnProperty.call(cloudStatuses, session.id)
@@ -252,11 +253,11 @@ export default function App() {
       requestAdminAccess(() => handleSaveSession(savedSession));
       return;
     }
-    savedSession = {
+    savedSession = syncSessionTimeAndCH({
       ...savedSession,
       audience: savedSession.audience || selectedAudience,
       isCompleted: sessionToEdit?.isCompleted ?? savedSession.isCompleted ?? false,
-    };
+    });
     if (sessionToEdit) {
       setSessions((prev) =>
         prev.map((s) => (s.id === savedSession.id ? savedSession : s))
@@ -281,8 +282,9 @@ export default function App() {
       requestAdminAccess(() => handleUpdateSession(updated));
       return;
     }
-    setSessions((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
-    void upsertIntegrationSessionToSupabase(updated).then(({ error }) => {
+    const synced = syncSessionTimeAndCH(updated);
+    setSessions((prev) => prev.map((s) => (s.id === synced.id ? synced : s)));
+    void upsertIntegrationSessionToSupabase(synced).then(({ error }) => {
       if (error) {
         console.error('Could not update session in Supabase', error);
       }
