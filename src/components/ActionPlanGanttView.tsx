@@ -22,6 +22,7 @@ import {
   deleteActionPlanFromSupabase,
   subscribeToActionPlanChanges 
 } from '../services/supabaseClient';
+import { copyElementAsImage } from '../utils/exportUtils';
 
 const STORAGE_KEY_ACTIONS = 'app_action_plans_v1';
 
@@ -62,6 +63,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isCloudSyncing, setIsCloudSyncing] = useState<boolean>(false);
+  const [isCopyingImage, setIsCopyingImage] = useState<boolean>(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // Filters
@@ -447,8 +449,26 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     showToast('Planilha CSV exportada com sucesso!');
   };
 
+  // Copy Gantt / Action Plan as Image
+  const handleCopyGanttAsImage = async () => {
+    try {
+      setIsCopyingImage(true);
+      const res = await copyElementAsImage('action-plan-gantt-capture', 'plano_de_acao_gantt');
+      if (res.method === 'clipboard') {
+        showToast('Plano de ação copiado como imagem! Você já pode colar onde quiser.');
+      } else {
+        showToast('Imagem do plano de ação baixada com sucesso no seu computador!');
+      }
+    } catch (error) {
+      console.error('Could not copy action plan as image', error);
+      showToast(error instanceof Error ? error.message : 'Não foi possível copiar o plano como imagem.', 'error');
+    } finally {
+      setIsCopyingImage(false);
+    }
+  };
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div id="action-plan-gantt-capture" className="space-y-6 animate-in fade-in duration-300">
       
       {/* Toast Feedback */}
       {toast && (
@@ -537,9 +557,23 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
             <span>Modelo Pilar ET</span>
           </button>
 
+          {/* Copy as Image */}
+          <button
+            type="button"
+            onClick={handleCopyGanttAsImage}
+            disabled={isCopyingImage}
+            data-capture-ignore
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-900 text-white transition-all shadow-xs disabled:opacity-50"
+            title="Copiar visualização como imagem para WhatsApp, Teams ou e-mail"
+          >
+            <Copy className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{isCopyingImage ? 'Capturando...' : 'Copiar como imagem'}</span>
+          </button>
+
           {/* Export CSV */}
           <button
             onClick={handleExportCSV}
+            data-capture-ignore
             className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all shadow-xs"
             title="Exportar dados para Excel (.csv)"
           >

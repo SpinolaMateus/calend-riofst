@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { CorporateEvent, EventCategory } from '../types/calendar';
 import { useAdminAuth } from '../services/AdminAuthContext';
-import { copyElementAsImage } from '../utils/exportUtils';
+import { copyElementAsImage, exportElementToPDF } from '../utils/exportUtils';
 import { 
   getSupabaseCredentials, 
   saveSupabaseCredentials, 
@@ -91,6 +91,7 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   const [cloudRowCount, setCloudRowCount] = useState<number | null>(null);
   const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
   const [isCopyingImage, setIsCopyingImage] = useState(false);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [supabaseUrlInput, setSupabaseUrlInput] = useState('');
   const [supabaseKeyInput, setSupabaseKeyInput] = useState('');
   const [isSavingCloud, setIsSavingCloud] = useState(false);
@@ -553,6 +554,22 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
     }
   };
 
+  const handleExportCalendarPDF = async () => {
+    try {
+      setIsExportingPDF(true);
+      await exportElementToPDF(
+        'calendar-capture-content',
+        `calendario_corporativo_${MONTH_NAMES[curMonth].toLowerCase()}_${curYear}.pdf`
+      );
+      showToast('PDF do calendário gerado com sucesso!');
+    } catch (error) {
+      console.error('Could not export calendar to PDF', error);
+      showToast(error instanceof Error ? error.message : 'Não foi possível gerar o PDF do calendário.', false);
+    } finally {
+      setIsExportingPDF(false);
+    }
+  };
+
   return (
     <div id="calendar-capture-content" className="space-y-6 bg-slate-100/70">
       {/* Toast Notification */}
@@ -706,7 +723,7 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
             <span>{isSavingCloud ? 'Salvando...' : 'Salvar na nuvem'}</span>
           </button>
 
-          {/* Print Button */}
+          {/* Copy as Image Button */}
           <button
             type="button"
             onClick={handleCopyCalendarAsImage}
@@ -718,6 +735,20 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
             <Copy className="w-3.5 h-3.5" />
             <span>{isCopyingImage ? 'Capturando...' : 'Copiar como imagem'}</span>
           </button>
+
+          {/* Export PDF Button */}
+          <button
+            type="button"
+            onClick={handleExportCalendarPDF}
+            disabled={isExportingPDF}
+            data-capture-ignore
+            title="Exportar calendário em formato PDF"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-colors disabled:opacity-50"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>{isExportingPDF ? 'Gerando...' : 'Exportar PDF'}</span>
+          </button>
+
           <button
             onClick={() => window.print()}
             title="Imprimir"
