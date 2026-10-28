@@ -101,6 +101,7 @@ export default function App() {
   const [isUnitSettingsOpen, setIsUnitSettingsOpen] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isCopyingImage, setIsCopyingImage] = useState(false);
+  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
   const [isConnectivityModalOpen, setIsConnectivityModalOpen] = useState(false);
   const [isStatusSyncReady, setIsStatusSyncReady] = useState(false);
   const [statusSyncMessage, setStatusSyncMessage] = useState('');
@@ -181,7 +182,16 @@ export default function App() {
         setStatusSyncMessage('');
       }
       const cloudStatuses = statusesResult.data ?? {};
-      if (!sessionsResult.data?.length && !Object.keys(cloudStatuses).length) return;
+      if (!sessionsResult.data?.length && !Object.keys(cloudStatuses).length) {
+        // If Supabase table is empty, auto-backup current sessions to cloud
+        setSessions((current) => {
+          if (current.length > 0) {
+            void syncIntegrationToSupabase(current);
+          }
+          return current;
+        });
+        return;
+      }
 
       setSessions((current) => {
         const merged = new Map(current.map((session) => [session.id, session]));
@@ -195,6 +205,14 @@ export default function App() {
               : previous?.isCompleted ?? session.isCompleted ?? false,
           }));
         }
+
+        // Auto-backup any local sessions not yet in the cloud
+        const cloudIds = new Set((sessionsResult.data ?? []).map((s) => s.id));
+        const unsynced = current.filter((s) => !cloudIds.has(s.id));
+        if (unsynced.length > 0) {
+          void syncIntegrationToSupabase(unsynced);
+        }
+
         return Array.from(merged.values()).map((session) => (
           Object.prototype.hasOwnProperty.call(cloudStatuses, session.id)
             ? { ...session, isCompleted: cloudStatuses[session.id] }
@@ -262,17 +280,20 @@ export default function App() {
       setSessions((prev) =>
         prev.map((s) => (s.id === savedSession.id ? savedSession : s))
       );
-      showToast('Atividade atualizada com sucesso!');
+      showToast('Atividade atualizada e salva com sucesso!');
     } else {
       setSessions((prev) => [...prev, savedSession]);
-      showToast('Nova atividade inserida com sucesso!');
+      showToast('Nova atividade inserida e salva com sucesso!');
     }
     setSessionToEdit(null);
 
     // Salvar na nuvem Supabase imediatamente
+    setIsCloudSyncing(true);
     void upsertIntegrationSessionToSupabase(savedSession).then(({ error }) => {
+      setIsCloudSyncing(false);
       if (error) {
         console.error('Could not save session to Supabase', error);
+        showToast('Salvo localmente (erro ao sincronizar na nuvem Supabase).', 'info');
       }
     });
   };
@@ -284,7 +305,9 @@ export default function App() {
     }
     const synced = syncSessionTimeAndCH(updated);
     setSessions((prev) => prev.map((s) => (s.id === synced.id ? synced : s)));
+    setIsCloudSyncing(true);
     void upsertIntegrationSessionToSupabase(synced).then(({ error }) => {
+      setIsCloudSyncing(false);
       if (error) {
         console.error('Could not update session in Supabase', error);
       }
@@ -297,7 +320,7 @@ export default function App() {
       item.id === session.id ? { ...item, isCompleted } : item
     )));
 
-    const { error } = await setIntegrationSessionStatus(session.id, isCompleted);
+    const { error } = await setIntegrationSessionStatus(session.id, isCompleted, session);
     if (error) {
       setIsStatusSyncReady(false);
       setStatusSyncMessage(
@@ -327,7 +350,9 @@ export default function App() {
     }
     setSessions((prev) => prev.filter((s) => s.id !== id));
     showToast('Atividade removida.', 'info');
+    setIsCloudSyncing(true);
     void deleteIntegrationSessionFromSupabase(id).then(({ error }) => {
+      setIsCloudSyncing(false);
       if (error) {
         console.error('Could not delete session from Supabase', error);
       }
@@ -346,8 +371,10 @@ export default function App() {
       isCompleted: false,
     };
     setSessions((prev) => [...prev, duplicated]);
-    showToast('Atividade duplicada com sucesso!');
+    showToast('Atividade duplicada e salva com sucesso!');
+    setIsCloudSyncing(true);
     void upsertIntegrationSessionToSupabase(duplicated).then(({ error }) => {
+      setIsCloudSyncing(false);
       if (error) {
         console.error('Could not save duplicated session to Supabase', error);
       }
@@ -445,7 +472,19 @@ export default function App() {
         ...previous.filter((session) => (session.audience || 'geral') !== selectedAudience),
         ...importedSessions,
       ]);
-      showToast(`Importação concluída! ${parsed.length} atividades carregadas.`);
+      showToast(`Importação concluída! Salvando ${importedSessions.length} atividades no Supabase...`, 'info');
+
+      // Sincronizar atividades importadas no Supabase imediatamente
+      setIsCloudSyncing(true);
+      void syncIntegrationToSupabase(importedSessions).then(({ error, count }) => {
+        setIsCloudSyncing(false);
+        if (error) {
+          console.warn('Could not sync imported sessions to Supabase', error);
+          showToast('Importado localmente (erro ao sincronizar na nuvem).', 'info');
+        } else {
+          showToast(`${count} atividades importadas e salvas no Supabase!`, 'success');
+        }
+      });
     } catch (err) {
       console.error(err);
       showToast('Erro ao ler planilha. Verifique as colunas do arquivo.', 'error');
@@ -467,6 +506,36 @@ export default function App() {
         ...defaultSessions,
       ]);
       showToast(`Agenda ${selectedAudience} restaurada aos dados padrão.`);
+      
+      // Sincronizar com Supabase
+      if (defaultSessions.length > 0) {
+        setIsCloudSyncing(true);
+        void syncIntegrationToSupabase(defaultSessions).then(({ error }) => {
+          setIsCloudSyncing(false);
+          if (!error) {
+            showToast('Dados padrão salvos no Supabase com sucesso!', 'success');
+          }
+        });
+      }
+    }
+  };
+
+  // Sincronização manual total com a nuvem Supabase
+  const handleSyncAllIntegrationToCloud = async () => {
+    try {
+      setIsCloudSyncing(true);
+      showToast('Sincronizando todas as atividades no Supabase...', 'info');
+      const { count, error } = await syncIntegrationToSupabase(sessions);
+      if (error) {
+        console.error('Could not sync integration to Supabase', error);
+        showToast(`Erro ao salvar no Supabase: ${error.message}`, 'error');
+      } else {
+        showToast(`Todas as ${count} atividades foram salvas com sucesso no Supabase!`, 'success');
+      }
+    } catch (err: any) {
+      showToast(`Erro na sincronização: ${err?.message || err}`, 'error');
+    } finally {
+      setIsCloudSyncing(false);
     }
   };
 
@@ -657,6 +726,8 @@ export default function App() {
             }}
             onResetDefault={handleResetDefault}
             isExportingPDF={isExportingPDF}
+            onSyncCloud={handleSyncAllIntegrationToCloud}
+            isCloudSyncing={isCloudSyncing}
           />
 
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">

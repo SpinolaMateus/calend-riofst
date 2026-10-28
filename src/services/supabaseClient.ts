@@ -328,10 +328,37 @@ export function subscribeToIntegrationSessions(onChange: () => void) {
 export async function syncIntegrationToSupabase(sessions: IntegrationSession[]): Promise<{ count: number; error: Error | null }> {
   const client = getSupabaseClient();
   if (!client) return { count: 0, error: new Error('Cliente Supabase não inicializado') };
+  if (!sessions || sessions.length === 0) return { count: 0, error: null };
+
+  const payloads = sessions.map((s) => ({
+    id: String(s.id),
+    audience: s.audience || 'geral',
+    dia: Number(s.dia),
+    starttime: s.startTime,
+    endtime: s.endTime,
+    horariotext: s.horarioText || `${s.startTime} às ${s.endTime}`,
+    ch: s.ch,
+    tema: s.tema,
+    area: s.area,
+    responsavel: s.responsavel || '',
+    prn: s.prn || '',
+    local: s.local || '',
+    codigo: s.codigo || '',
+    entregavel: s.entregavel || '',
+    customcolor: s.customColor || null,
+  }));
 
   try {
+    // Attempt fast batch upsert
+    const { error } = await client.from('integration_sessions').upsert(payloads);
+    if (!error) {
+      return { count: payloads.length, error: null };
+    }
+    console.warn('Batch upsert failed, retrying item by item:', error.message);
+
+    // Fallback: item-by-item upsert
     let successCount = 0;
-    let firstError: Error | null = null;
+    let firstError: Error | null = error ? new Error(error.message) : null;
     for (const s of sessions) {
       const res = await upsertIntegrationSessionToSupabase(s);
       if (!res.error) {
@@ -377,15 +404,28 @@ export async function fetchIntegrationStatusesFromSupabase(): Promise<{
 export async function setIntegrationSessionStatus(
   sessionId: string,
   isCompleted: boolean,
+  sessionFallback?: IntegrationSession,
 ): Promise<{ error: Error | null }> {
   const client = getSupabaseClient();
   if (!client) return { error: new Error('Cliente Supabase não inicializado') };
 
   try {
-    const { data, error } = await client.rpc('set_integration_session_status', {
+    let { data, error } = await client.rpc('set_integration_session_status', {
       p_session_id: sessionId,
       p_is_completed: isCompleted,
     });
+
+    // If activity does not exist in Supabase yet, upsert it first and retry
+    if ((!data || error) && sessionFallback) {
+      await upsertIntegrationSessionToSupabase(sessionFallback);
+      const retry = await client.rpc('set_integration_session_status', {
+        p_session_id: sessionId,
+        p_is_completed: isCompleted,
+      });
+      data = retry.data;
+      error = retry.error;
+    }
+
     if (error) return { error: new Error(error.message) };
     if (!data) {
       return { error: new Error('A atividade ainda não foi sincronizada com o cronograma na nuvem.') };

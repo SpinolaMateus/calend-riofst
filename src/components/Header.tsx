@@ -2,7 +2,8 @@ import React, { useRef, useState } from 'react';
 import { 
   FileDown, Printer, FileSpreadsheet, Upload, Copy,
   Palette, Settings, RotateCcw, Plus, Calendar, 
-  Tv, Table as TableIcon, Clock, ChevronDown, ListChecks
+  Tv, Table as TableIcon, Clock, ChevronDown, ListChecks,
+  Cloud, Save, RefreshCw, CheckCircle2
 } from 'lucide-react';
 import { INTEGRATION_AUDIENCES, IntegrationAudience, UnitInfo, ViewMode } from '../types/schedule';
 
@@ -27,6 +28,8 @@ interface HeaderProps {
   onOpenUnitSettings: () => void;
   onResetDefault: () => void;
   isExportingPDF: boolean;
+  onSyncCloud?: () => void;
+  isCloudSyncing?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -50,6 +53,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenUnitSettings,
   onResetDefault,
   isExportingPDF,
+  onSyncCloud,
+  isCloudSyncing = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -71,13 +76,21 @@ export const Header: React.FC<HeaderProps> = ({
             CI
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-lg font-black text-slate-900 tracking-tight">
                 {unitInfo.unitName}
               </h1>
               <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200/60">
                 Divulgação Oficial
               </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
+                <Cloud className="w-3 h-3 text-emerald-600" /> Nuvem Supabase
+              </span>
+              {isCloudSyncing && (
+                <span className="text-[10px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200 animate-pulse flex items-center gap-1">
+                  <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Salvando na nuvem...
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-500 font-medium">
               {unitInfo.cohortName} • <span className="text-slate-700 font-semibold">{unitInfo.period}</span>
@@ -87,6 +100,25 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Global Action Toolbar */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+          {/* Cloud Save Button */}
+          {onSyncCloud && (
+            <button
+              type="button"
+              onClick={onSyncCloud}
+              disabled={isCloudSyncing}
+              data-capture-ignore
+              title="Salvar e sincronizar todas as atividades no Supabase"
+              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all disabled:opacity-60"
+            >
+              {isCloudSyncing ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              <span>{isCloudSyncing ? 'Salvando...' : 'Salvar na nuvem'}</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onCopyAsImage}
