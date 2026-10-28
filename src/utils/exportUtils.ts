@@ -4,6 +4,36 @@ import * as XLSX from 'xlsx';
 import { IntegrationAudience, INTEGRATION_AUDIENCES, IntegrationSession, UnitInfo } from '../types/schedule';
 import { formatTimeRange } from './timeUtils';
 
+let colorConverterCanvas: HTMLCanvasElement | null = null;
+let colorConverterCtx: CanvasRenderingContext2D | null = null;
+
+/**
+ * Attempts to resolve modern CSS color functions (lab, lch, oklab, oklch, color, color-mix)
+ * into standard sRGB "#rrggbb" or "rgba(...)" using the browser's native Canvas2D parsing engine.
+ */
+function tryResolveViaCanvas(colorStr: string): string | null {
+  if (typeof document === 'undefined') return null;
+  try {
+    if (!colorConverterCanvas) {
+      colorConverterCanvas = document.createElement('canvas');
+      colorConverterCanvas.width = 1;
+      colorConverterCanvas.height = 1;
+      colorConverterCtx = colorConverterCanvas.getContext('2d', { willReadFrequently: true });
+    }
+    if (colorConverterCtx) {
+      colorConverterCtx.fillStyle = '#00000000';
+      colorConverterCtx.fillStyle = colorStr;
+      const res = colorConverterCtx.fillStyle;
+      if (res && res !== '#00000000' && (res.startsWith('#') || res.startsWith('rgb'))) {
+        return res;
+      }
+    }
+  } catch {
+    // Ignore and fallback to mathematical conversion
+  }
+  return null;
+}
+
 function colorChannelToSrgb(value: number) {
   const channel = Math.min(1, Math.max(0, value));
   return Math.round(255 * (channel <= 0.0031308
@@ -49,24 +79,112 @@ function oklchToRgba(lightness: string, chroma: string, hue: string, alpha?: str
   );
 }
 
+function cielabToRgba(lightness: string, aVal: string, bVal: string, alpha?: string) {
+  const parseCoord = (val: string, scale: number) => (
+    Number.parseFloat(val) * (val.endsWith('%') ? scale / 100 : 1)
+  );
+  const L = parseCoord(lightness, 100);
+  const a = parseCoord(aVal, 125);
+  const b = parseCoord(bVal, 125);
+
+  const y = (L + 16) / 116;
+  const x = a / 500 + y;
+  const z = y - b / 200;
+
+  const fInv = (t: number) => (t ** 3 > 0.008856 ? t ** 3 : (116 * t - 16) / 903.3);
+
+  // Standard D65 reference white
+  const X = 0.95047 * fInv(x);
+  const Y = 1.00000 * fInv(y);
+  const Z = 1.08883 * fInv(z);
+
+  // Convert XYZ to linear sRGB
+  const r = 3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z;
+  const g = -0.9692660 * X + 1.8760108 * Y + 0.0415560 * Z;
+  const b_srgb = 0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z;
+
+  const red = colorChannelToSrgb(r);
+  const green = colorChannelToSrgb(g);
+  const blue = colorChannelToSrgb(b_srgb);
+  const opacity = alpha ? Number.parseFloat(alpha) / (alpha.endsWith('%') ? 100 : 1) : 1;
+
+  return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
+}
+
+function cielchToRgba(lightness: string, chroma: string, hue: string, alpha?: string) {
+  const C = Number.parseFloat(chroma) * (chroma.endsWith('%') ? 1.5 : 1);
+  const hueValue = Number.parseFloat(hue) || 0;
+  const hueInDegrees = hue.endsWith('turn')
+    ? hueValue * 360
+    : hue.endsWith('rad')
+      ? (hueValue * 180) / Math.PI
+      : hue.endsWith('grad')
+        ? hueValue * 0.9
+        : hueValue;
+  const hueInRadians = (hueInDegrees * Math.PI) / 180;
+
+  return cielabToRgba(
+    lightness,
+    String(C * Math.cos(hueInRadians)),
+    String(C * Math.sin(hueInRadians)),
+    alpha,
+  );
+}
+
 export function replaceUnsupportedColorFunctions(value: string): string {
   if (!value || typeof value !== 'string') return value;
+
+  // If the whole value is a single color function, attempt direct canvas resolution
+  const trimmed = value.trim();
+  if (/^(?:(?:ok)?(?:lab|lch)|color(?:-mix)?)\(/i.test(trimmed)) {
+    const directResolved = tryResolveViaCanvas(trimmed);
+    if (directResolved) return directResolved;
+  }
   
   return value
+    // oklch(...)
     .replace(
       /oklch\(\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?(?:deg|grad|rad|turn)?)\s*(?:\/\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?))?\s*\)/gi,
-      (_match, lightness: string, chroma: string, hue: string, alpha?: string) => (
-        oklchToRgba(lightness, chroma, hue, alpha)
-      ),
+      (match, lightness: string, chroma: string, hue: string, alpha?: string) => {
+        const direct = tryResolveViaCanvas(match);
+        return direct || oklchToRgba(lightness, chroma, hue, alpha);
+      },
     )
+    // oklab(...)
     .replace(
       /oklab\(\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)(?:\s*\/\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?))?\s*\)/gi,
-      (_match, lightness: string, first: string, second: string, alpha?: string) => (
-        oklabToRgba(lightness, first, second, alpha)
-      ),
+      (match, lightness: string, first: string, second: string, alpha?: string) => {
+        const direct = tryResolveViaCanvas(match);
+        return direct || oklabToRgba(lightness, first, second, alpha);
+      },
     )
-    .replace(/color-mix\([^)]+\)/gi, 'rgba(100, 116, 139, 0.2)')
-    .replace(/\bin\s+ok(?:lab|lch)\b/gi, '');
+    // lab(...) -> CIELAB (matches the error: Attempting to parse an unsupported color function "lab")
+    .replace(
+      /lab\(\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)(?:\s*\/\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?))?\s*\)/gi,
+      (match, lightness: string, aVal: string, bVal: string, alpha?: string) => {
+        const direct = tryResolveViaCanvas(match);
+        return direct || cielabToRgba(lightness, aVal, bVal, alpha);
+      },
+    )
+    // lch(...) -> CIELCH
+    .replace(
+      /lch\(\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?)\s+([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?(?:deg|grad|rad|turn)?)(?:\s*\/\s*([+-]?(?:\d*\.?\d+)(?:e[+-]?\d+)?%?))?\s*\)/gi,
+      (match, lightness: string, chroma: string, hue: string, alpha?: string) => {
+        const direct = tryResolveViaCanvas(match);
+        return direct || cielchToRgba(lightness, chroma, hue, alpha);
+      },
+    )
+    // color(...) e.g. color(display-p3 ...) or color(srgb ...)
+    .replace(
+      /color\([^)]+\)/gi,
+      (match) => tryResolveViaCanvas(match) || 'rgba(100, 116, 139, 0.9)'
+    )
+    // color-mix(...)
+    .replace(
+      /color-mix\([^)]+\)/gi,
+      (match) => tryResolveViaCanvas(match) || 'rgba(100, 116, 139, 0.2)'
+    )
+    .replace(/\bin\s+(?:ok)?(?:lab|lch|srgb)\b/gi, '');
 }
 
 /**
@@ -90,6 +208,8 @@ export async function captureElementToCanvas(elementId: string): Promise<HTMLCan
     'borderBottomColor',
     'borderLeftColor',
     'outlineColor',
+    'textDecorationColor',
+    'caretColor',
     'fill',
     'stroke',
   ];
@@ -104,25 +224,68 @@ export async function captureElementToCanvas(elementId: string): Promise<HTMLCan
     windowWidth: Math.max(width, document.documentElement.clientWidth),
     windowHeight: Math.max(height, document.documentElement.clientHeight),
     onclone: (clonedDoc, clonedElement) => {
+      // 1. Sanitize all <style> tags in the cloned document head/body
+      clonedDoc.querySelectorAll('style').forEach((styleEl) => {
+        if (styleEl.textContent && /(?:ok)?(?:lab|lch)\(|color(?:-mix)?\(/i.test(styleEl.textContent)) {
+          styleEl.textContent = replaceUnsupportedColorFunctions(styleEl.textContent);
+        }
+      });
+
+      // 2. Sanitize rules in accessible styleSheets
+      try {
+        Array.from(clonedDoc.styleSheets).forEach((sheet) => {
+          try {
+            const rules = sheet.cssRules;
+            if (!rules) return;
+            for (let i = 0; i < rules.length; i++) {
+              const rule = rules[i];
+              if (rule instanceof CSSStyleRule) {
+                const text = rule.style.cssText;
+                if (/(?:ok)?(?:lab|lch)\(|color(?:-mix)?\(/i.test(text)) {
+                  rule.style.cssText = replaceUnsupportedColorFunctions(text);
+                }
+              }
+            }
+          } catch {
+            // Cross-origin stylesheet access restriction - safe to skip
+          }
+        });
+      } catch {
+        // Safe skip
+      }
+
+      // 3. Inspect every element and override computed colors with standard RGBA
       const allElements = [clonedElement, ...clonedElement.querySelectorAll<HTMLElement>('*')];
       
       allElements.forEach((el) => {
         const computed = clonedDoc.defaultView?.getComputedStyle(el);
         if (!computed) return;
 
-        // Convert any oklch/oklab in specific color properties
+        // Convert any lab/lch/oklab/oklch/color-mix in specific color properties
         for (const prop of COLOR_PROPS) {
           const val = (computed as any)[prop];
-          if (typeof val === 'string' && /ok(?:lab|lch)\(|color-mix\(/i.test(val)) {
+          if (typeof val === 'string' && /(?:ok)?(?:lab|lch)\(|color(?:-mix)?\(/i.test(val)) {
             const safeProp = prop.replace(/([A-Z])/g, '-$1').toLowerCase();
-            el.style.setProperty(safeProp, replaceUnsupportedColorFunctions(val));
+            el.style.setProperty(safeProp, replaceUnsupportedColorFunctions(val), 'important');
           }
         }
 
         // Check box-shadow
         const shadow = computed.boxShadow;
-        if (shadow && /ok(?:lab|lch)\(|color-mix\(/i.test(shadow)) {
-          el.style.boxShadow = replaceUnsupportedColorFunctions(shadow);
+        if (shadow && /(?:ok)?(?:lab|lch)\(|color(?:-mix)?\(/i.test(shadow)) {
+          el.style.setProperty('box-shadow', replaceUnsupportedColorFunctions(shadow), 'important');
+        }
+
+        // Check text-shadow
+        const textShadow = (computed as any).textShadow;
+        if (textShadow && /(?:ok)?(?:lab|lch)\(|color(?:-mix)?\(/i.test(textShadow)) {
+          el.style.setProperty('text-shadow', replaceUnsupportedColorFunctions(textShadow), 'important');
+        }
+
+        // Check background-image (gradients)
+        const bgImage = computed.backgroundImage;
+        if (bgImage && /(?:ok)?(?:lab|lch)\(|color(?:-mix)?\(/i.test(bgImage)) {
+          el.style.setProperty('background-image', replaceUnsupportedColorFunctions(bgImage), 'important');
         }
 
         // Normalize sticky/fixed positioning for full capture
@@ -258,125 +421,47 @@ export function exportToExcel(sessions: IntegrationSession[], unitInfo: UnitInfo
   const worksheet = XLSX.utils.json_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Cronograma');
-
-  // Column widths
-  worksheet['!cols'] = [
-    { wch: 20 }, // PÚBLICO
-    { wch: 6 },  // DIA
-    { wch: 18 }, // HORÁRIO
-    { wch: 10 }, // CH
-    { wch: 35 }, // TEMA
-    { wch: 22 }, // ÁREA
-    { wch: 24 }, // RESPONSÁVEL
-    { wch: 22 }, // PRN
-    { wch: 20 }, // LOCAL
-    { wch: 16 }, // CÓDIGO
-    { wch: 32 }, // ENTREGÁVEL
-  ];
-
-  const audienceName = audience
-    ? `_${INTEGRATION_AUDIENCES.find((option) => option.id === audience)?.id || audience}`
-    : '';
-
-  // Sanitize unit name to remove characters invalid on Windows/Linux filenames: / \ : * ? " < > |
-  const safeUnitName = (unitInfo?.unitName || 'unidade')
-    .replace(/[/\\?%*:|"<>]/g, '-')
-    .replace(/\s+/g, '_');
-
-  XLSX.writeFile(workbook, `cronograma_integracao${audienceName}_${safeUnitName}.xlsx`);
+  
+  const audienceLabel = audience && audience !== 'geral' ? `_${audience}` : '';
+  const sanitizedUnit = (unitInfo.unitName || 'unidade').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const safeDate = new Date().toISOString().split('T')[0];
+  XLSX.writeFile(workbook, `cronograma_${sanitizedUnit}${audienceLabel}_${safeDate}.xlsx`);
 }
 
 /**
- * Parses an imported Excel file into IntegrationSession items.
+ * Parses an imported Excel .xlsx file back into structured IntegrationSession objects.
  */
-export function parseExcelFile(
-  file: File
-): Promise<IntegrationSession[]> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+export async function parseExcelFile(file: File): Promise<IntegrationSession[]> {
+  const data = await file.arrayBuffer();
+  const workbook = XLSX.read(data, { type: 'array' });
+  const firstSheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[firstSheetName];
+  const rows: any[] = XLSX.utils.sheet_to_json(worksheet);
 
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const rawJson: any[] = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+  return rows.map((row, index) => {
+    const rawHorario = row['HORÁRIO'] || row['Horário'] || row['horario'] || '08:00 às 09:00';
+    const rawDia = row['DIA'] || row['Dia'] || row['dia'] || 1;
+    const rawAudience = row['PÚBLICO'] || row['Público'] || row['publico'] || 'geral';
 
-        const sessions: IntegrationSession[] = rawJson.map((row, idx) => {
-          const getVal = (possibleKeys: string[]) => {
-            for (const key of possibleKeys) {
-              const foundKey = Object.keys(row).find(
-                (k) => k.trim().toLowerCase() === key.toLowerCase()
-              );
-              if (foundKey && row[foundKey] !== undefined) {
-                return String(row[foundKey]).trim();
-              }
-            }
-            return '';
-          };
+    const audienceMatch = INTEGRATION_AUDIENCES.find(
+      (a) => a.label.toLowerCase() === String(rawAudience).toLowerCase() || a.id === String(rawAudience).toLowerCase()
+    );
 
-          const diaVal = parseInt(getVal(['dia', 'dia da semana', 'dia_semana']), 10) || 1;
-          const horarioRaw = getVal(['horário', 'horario', 'hora', 'horários']);
-          
-          let startTime = '08:00';
-          let endTime = '09:00';
-
-          if (horarioRaw) {
-            const timeParts = horarioRaw.split(/às|as|-|a|\/|–/).map((p) => p.trim());
-            if (timeParts.length >= 2) {
-              const cleanPart = (p: string) => {
-                const match = p.match(/(\d{1,2})[:h](\d{2})?/i);
-                if (match) {
-                  const h = String(match[1]).padStart(2, '0');
-                  const m = String(match[2] || '00').padStart(2, '0');
-                  return `${h}:${m}`;
-                }
-                return '08:00';
-              };
-              startTime = cleanPart(timeParts[0]);
-              endTime = cleanPart(timeParts[1]);
-            }
-          }
-
-          const ch = calculateCH(startTime, endTime);
-          const tema = getVal(['tema', 'assunto', 'conteúdo', 'titulo']) || `Treinamento ${idx + 1}`;
-          const area = getVal(['área', 'area', 'setor', 'departamento']) || 'GENTE E GESTÃO';
-          const responsavel = getVal(['responsável', 'responsavel', 'instrutor', 'facilitador']);
-          const prn = getVal(['prn', 'matrícula', 'registro']);
-          const local = getVal(['local', 'sala', 'ambiente']) || 'Sala de Integração';
-          const codigo = getVal(['código', 'codigo', 'cod']);
-          const entregavel = getVal(['entregável', 'entregavel', 'entrega']) || 'Lançamento em aplicativo ou lista';
-          const audienceValue = getVal(['público', 'publico', 'audience']).toLowerCase();
-          const audience = INTEGRATION_AUDIENCES.find(
-            (option) => option.id === audienceValue || option.label.toLowerCase() === audienceValue
-          )?.id;
-
-          return {
-            id: `imported-${Date.now()}-${idx}`,
-            audience,
-            dia: diaVal,
-            startTime,
-            endTime,
-            horarioText: horarioRaw || `${startTime} às ${endTime}`,
-            ch,
-            tema,
-            area: area.toUpperCase(),
-            responsavel,
-            prn,
-            local,
-            codigo,
-            entregavel,
-          };
-        });
-
-        resolve(sessions);
-      } catch (err) {
-        reject(err);
-      }
+    return {
+      id: `imported-${Date.now()}-${index}`,
+      audience: audienceMatch ? audienceMatch.id : 'geral',
+      dia: Number(rawDia) || 1,
+      horarioText: String(rawHorario),
+      startTime: String(rawHorario).split('às')[0]?.trim() || '08:00',
+      endTime: String(rawHorario).split('às')[1]?.trim() || '09:00',
+      ch: String(row['CH'] || row['Carga Horária'] || '1h'),
+      tema: String(row['TEMA'] || row['Tema'] || ''),
+      area: String(row['ÁREA'] || row['Área'] || row['area'] || 'GENTE E GESTÃO'),
+      responsavel: String(row['RESPONSÁVEL'] || row['Responsável'] || ''),
+      prn: String(row['PRN'] || row['prn'] || ''),
+      local: String(row['LOCAL'] || row['Local'] || 'Sala de Integração'),
+      codigo: String(row['CÓDIGO'] || row['Código'] || ''),
+      entregavel: String(row['ENTREGÁVEL'] || row['Entregável'] || ''),
     };
-
-    reader.onerror = (err) => reject(err);
-    reader.readAsArrayBuffer(file);
   });
 }
