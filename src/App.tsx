@@ -566,6 +566,8 @@ export default function App() {
             onSelectFormations={() => setActiveApp('formations')}
             integrationEventsCount={sessions.length}
             calendarEventsCount={calendarEventsCount}
+            onOpenAdminAccess={() => requestAdminAccess()}
+            isAdmin={isAdmin}
           />
         </main>
       )}

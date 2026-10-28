@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
+import { ShieldCheck, Lock, User as UserIcon, X, Loader2, AlertCircle } from 'lucide-react';
 import { getSupabaseClient } from './supabaseClient';
 
 interface AdminAuthContextValue {
@@ -182,62 +183,111 @@ export const AdminAuthProvider: React.FC<React.PropsWithChildren> = ({ children 
     >
       {children}
       {isLoginOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <form
-            onSubmit={handleSignIn}
-            className="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-4"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center mx-auto">
-              <span className="text-xl font-bold" aria-hidden="true">A</span>
+        <div className="fixed inset-0 z-[100] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl border border-slate-200/90 p-7 space-y-6">
+            
+            {/* Close Button */}
+            <button
+              onClick={cancelAdminAccess}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+              title="Fechar"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Header Icon & Title */}
+            <div className="text-center space-y-2">
+              <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 text-white flex items-center justify-center mx-auto shadow-md shadow-indigo-500/20">
+                <ShieldCheck className="w-7 h-7" />
+              </div>
+              <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                Acesso Administrativo
+              </h2>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Entre com as credenciais administrativas autorizadas no Supabase.
+              </p>
             </div>
-            <div className="text-center">
-              <h2 className="font-bold text-slate-900">Acesso administrativo</h2>
-              <p className="text-xs text-slate-500 mt-1">Entre com o usuário administrativo cadastrado no Supabase.</p>
-            </div>
-            <label className="block text-xs font-semibold text-slate-700">
-              Usuário
-              <input
-                type="text"
-                autoComplete="username"
-                required
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                placeholder="GGFST"
-                className="mt-1 w-full px-3 py-2.5 text-sm border border-slate-300 rounded-xl"
-              />
-            </label>
-            <label className="block text-xs font-semibold text-slate-700">
-              Senha
-              <input
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="mt-1 w-full px-3 py-2.5 text-sm border border-slate-300 rounded-xl"
-              />
-            </label>
-            {loginError && <p role="alert" className="text-xs text-red-700">{loginError}</p>}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={cancelAdminAccess}
-                className="w-1/2 px-4 py-2.5 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-1/2 px-4 py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl disabled:opacity-50"
-              >
-                {isSubmitting ? 'Verificando...' : 'Entrar'}
-              </button>
-            </div>
-            <p className="text-[11px] text-slate-500 text-center">
-              A conta precisa estar cadastrada em <code>public.app_admins</code>.
-            </p>
-          </form>
+
+            <form onSubmit={handleSignIn} className="space-y-4">
+              {/* Username Input */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700">
+                  Usuário Administrador
+                </label>
+                <div className="relative">
+                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    autoComplete="username"
+                    required
+                    value={username}
+                    onChange={(event) => setUsername(event.target.value)}
+                    placeholder="GGFST"
+                    className="w-full pl-9.5 pr-3 py-2.5 text-xs font-semibold text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all bg-slate-50/50"
+                  />
+                </div>
+              </div>
+
+              {/* Password Input */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700">
+                  Senha de Acesso
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-9.5 pr-3 py-2.5 text-xs font-semibold text-slate-900 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all bg-slate-50/50"
+                  />
+                </div>
+              </div>
+
+              {/* Error Message */}
+              {loginError && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                  <span className="leading-snug">{loginError}</span>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={cancelAdminAccess}
+                  className="w-1/2 px-4 py-2.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-1/2 px-4 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 disabled:opacity-50 transition-all flex items-center justify-center gap-1.5"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Verificando...</span>
+                    </>
+                  ) : (
+                    <span>Entrar</span>
+                  )}
+                </button>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100">
+                <p className="text-[11px] text-slate-400 text-center">
+                  A conta precisa estar cadastrada na tabela <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-600 font-mono">public.app_admins</code>.
+                </p>
+              </div>
+            </form>
+
+          </div>
         </div>
       )}
     </AdminAuthContext.Provider>
