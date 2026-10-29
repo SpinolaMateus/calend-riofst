@@ -216,7 +216,22 @@ export async function captureElementToCanvas(elementOrId: string | HTMLElement):
     'stroke',
   ];
 
-  return html2canvas(element, {
+  // Suppress html2canvas "unsupported color function" console warnings (lab, lch, oklab, oklch)
+  // These are benign because our onclone handler already converts them before rendering.
+  const _originalConsoleError = console.error;
+  const _originalConsoleWarn = console.warn;
+  const _suppressPattern = /unsupported color function|attempting to parse/i;
+  console.error = (...args: unknown[]) => {
+    if (args.some((a) => _suppressPattern.test(String(a)))) return;
+    _originalConsoleError.apply(console, args);
+  };
+  console.warn = (...args: unknown[]) => {
+    if (args.some((a) => _suppressPattern.test(String(a)))) return;
+    _originalConsoleWarn.apply(console, args);
+  };
+
+  try {
+  return await html2canvas(element, {
     backgroundColor: '#ffffff',
     scale: Math.min(window.devicePixelRatio || 1, 2),
     useCORS: true,
@@ -321,6 +336,11 @@ export async function captureElementToCanvas(elementOrId: string | HTMLElement):
       clonedElement.style.overflow = 'visible';
     },
   });
+  } finally {
+    // Restore original console methods after html2canvas completes
+    console.error = _originalConsoleError;
+    console.warn = _originalConsoleWarn;
+  }
 }
 
 export interface CopyImageResult {

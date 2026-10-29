@@ -1192,13 +1192,29 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                 defaultValue=""
                 className="w-full px-3 py-2 bg-white rounded-xl border border-indigo-200 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               >
-                <option value="">-- Selecione uma ação para auto-preencher os campos --</option>
-                {PILAR_ET_TEMPLATE.map((preset) => (
-                  <option key={preset.id} value={preset.id}>
-                    [{preset.kind === 'resultado' ? 'RESULTADO' : 'MÉTODO'}] {preset.step} • {preset.title}
-                  </option>
-                ))}
+                <option value="">-- Selecione uma ação para auto-preencher --</option>
+                {(() => {
+                  // Agrupar ações por etapa para melhor navegação
+                  const groups: Record<string, typeof PILAR_ET_TEMPLATE> = {};
+                  PILAR_ET_TEMPLATE.forEach((preset) => {
+                    const key = preset.step || 'Outros';
+                    if (!groups[key]) groups[key] = [];
+                    groups[key].push(preset);
+                  });
+                  return Object.entries(groups).map(([step, presets]) => (
+                    <optgroup key={step} label={`📋 ${step}`}>
+                      {presets.map((preset) => (
+                        <option key={preset.id} value={preset.id}>
+                          {preset.kind === 'resultado' ? '🎯 RESULTADO' : '🔹 MÉTODO'} — {preset.title}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ));
+                })()}
               </select>
+              <p className="text-[10px] text-indigo-600/70 font-medium">
+                💡 Ao selecionar, todos os campos são preenchidos automaticamente com os dados do modelo.
+              </p>
             </div>
 
             {/* Form */}
