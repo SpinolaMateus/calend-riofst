@@ -21,6 +21,7 @@ import {
 import * as XLSX from 'xlsx';
 import { copyElementAsImage, exportElementToPDF } from '../utils/exportUtils';
 import { ExecutiveOverviewTab } from './peopleAnalytics/ExecutiveOverviewTab';
+import { HeadcountAnalyticsTab } from './peopleAnalytics/HeadcountAnalyticsTab';
 import { IndicatorsGGTab } from './peopleAnalytics/IndicatorsGGTab';
 import { AbsenteeismMovementsTab } from './peopleAnalytics/AbsenteeismMovementsTab';
 import { SectorsShiftsTab } from './peopleAnalytics/SectorsShiftsTab';
@@ -47,8 +48,16 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
   // Estado principal de Colaboradores da Unidade Bahia (KBA1 / K111)
   const [employees, setEmployees] = useState<Employee[]>(() => {
     try {
-      const stored = localStorage.getItem('kba1_people_analytics_employees_v1');
-      return stored ? JSON.parse(stored) : generateInitialBahiaEmployees();
+      const stored = localStorage.getItem('kba1_people_analytics_employees_v2');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].gender) {
+          return parsed;
+        }
+      }
+      const initial = generateInitialBahiaEmployees();
+      localStorage.setItem('kba1_people_analytics_employees_v2', JSON.stringify(initial));
+      return initial;
     } catch {
       return generateInitialBahiaEmployees();
     }
@@ -114,6 +123,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
   const [manualFormType, setManualFormType] = useState<'employee' | 'kpi' | 'action'>('employee');
   const [importSummary, setImportSummary] = useState<ExcelImportSummary | null>(null);
   const [importPreview, setImportPreview] = useState<any[]>([]);
+  const [allImportedEmployees, setAllImportedEmployees] = useState<Employee[]>([]);
   const [importFeedback, setImportFeedback] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // Formulário manual de novo colaborador
@@ -134,7 +144,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
   const saveEmployees = (data: Employee[]) => {
     setEmployees(data);
     try {
-      localStorage.setItem('kba1_people_analytics_employees_v1', JSON.stringify(data));
+      localStorage.setItem('kba1_people_analytics_employees_v2', JSON.stringify(data));
     } catch (e) {
       console.error(e);
     }
@@ -330,17 +340,53 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
         let validBahia: Employee[] = [];
         let discardedOther = 0;
 
-        // Índices prováveis de colunas baseados no PAAH
+        // Índices de colunas do PAAH
         const idxPRN = headers.findIndex(h => /prn|matr/i.test(h));
-        const idxName = headers.findIndex(h => /nome/i.test(h));
-        const idxUnit = headers.findIndex(h => /área de recursos humanos|area de recursos|unidade/i.test(h));
+        const idxFullName = headers.findIndex(h => /nome completo/i.test(h));
+        const idxName = headers.findIndex(h => /^nome$/i.test(h));
+        const idxLastName = headers.findIndex(h => /sobrenome/i.test(h));
+        const idxGender = headers.findIndex(h => /sexo|gênero|genero|gender/i.test(h));
+        const idxUnit = headers.findIndex(h => /área de recursos humanos.*código|área de recursos humanos|area rh|unidade/i.test(h));
         const idxSubarea = headers.findIndex(h => /subárea|subarea/i.test(h));
         const idxGroup = headers.findIndex(h => /grupo de empregados|vínculo|vinculo/i.test(h));
+        const idxSubgroup = headers.findIndex(h => /subgrupo/i.test(h));
         const idxCC = headers.findIndex(h => /centro de custo/i.test(h));
         const idxLoc = headers.findIndex(h => /local/i.test(h));
-        const idxJob = headers.findIndex(h => /cargo/i.test(h));
-        const idxManager = headers.findIndex(h => /gestor/i.test(h));
-        const idxShift = headers.findIndex(h => /jornada|escala|horário/i.test(h));
+        const idxJob = headers.findIndex(h => /^cargo$/i.test(h) || /código do cargo/i.test(h));
+        const idxPos = headers.findIndex(h => /^posição$/i.test(h));
+        const idxManager = headers.findIndex(h => /gestor imediato|gestor/i.test(h));
+        
+        // No PAAH, a coluna 38 (Nome) é o Nome da Jornada/Turno
+        let idxShift = -1;
+        for (let j = headers.length - 1; j >= 0; j--) {
+          if (/nome/i.test(headers[j]) && j > 20) {
+            idxShift = j;
+            break;
+          }
+        }
+        if (idxShift === -1) {
+          idxShift = headers.findIndex(h => /jornada|escala|horário|horario/i.test(h));
+        }
+
+        const getMacro = (cc: string, loc: string) => {
+          const s = (cc + ' ' + loc).toLowerCase();
+          if (s.includes('expedi') || s.includes('logística') || s.includes('logistica')) return 'Logística & Expedição';
+          if (s.includes('manuten') || s.includes('caldeira') || s.includes('utilidade') || s.includes('elétrica') || s.includes('eletrica') || s.includes('mecânica') || s.includes('mecanica')) return 'Manutenção & Utilidades';
+          if (s.includes('gente') || s.includes('rh') || s.includes('superar') || s.includes('treinamento') || s.includes('segurança') || s.includes('ssma') || s.includes('controladoria') || s.includes('ti') || s.includes('comercial') || s.includes('atendimento')) return 'Gente & Gestão & ADM';
+          return 'Operação Fabril';
+        };
+
+        const cleanLoc = (raw: string) => {
+          if (!raw) return 'Geral FST';
+          const parts = raw.split('-');
+          return parts.length > 1 ? parts.slice(1).join('-').trim() : raw.trim();
+        };
+
+        const cleanCC = (raw: string) => {
+          if (!raw) return 'Geral';
+          const parts = raw.split('-');
+          return parts.length > 1 ? parts.slice(1).join('-').trim() : raw.trim();
+        };
 
         rows.forEach((row, i) => {
           if (!row || row.length === 0) return;
@@ -349,54 +395,80 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
           const subareaVal = idxSubarea !== -1 ? String(row[idxSubarea] || '') : 'K111';
 
           // Filtro estrito: apenas KBA1 (Bahia) / K111 (Feira de Santana)
-          const isBahia = /kba1|bahia/i.test(unitVal) || /k111|feira/i.test(subareaVal) || idxUnit === -1;
+          const isBahia = /kba1|bahia/i.test(unitVal) || /k111|feira/i.test(subareaVal) || (idxUnit === -1 && idxSubarea === -1);
 
           if (!isBahia) {
             discardedOther++;
             return;
           }
 
-          const prn = idxPRN !== -1 && row[idxPRN] ? String(row[idxPRN]).trim() : `IMP-${i + 1}`;
-          const name = idxName !== -1 && row[idxName] ? String(row[idxName]).trim() : `Colaborador PRN ${prn}`;
-          const groupRaw = idxGroup !== -1 ? String(row[idxGroup] || '') : 'CLT';
-          const employmentGroup: 'CLT' | 'Aprendiz' | 'Estagiário' = 
-            /aprendiz/i.test(groupRaw) ? 'Aprendiz' : /estagi/i.test(groupRaw) ? 'Estagiário' : 'CLT';
+          const prn = idxPRN !== -1 && row[idxPRN] ? String(row[idxPRN]).trim() : `15${String(i).padStart(4, '0')}`;
+          
+          let name = '';
+          if (idxFullName !== -1 && row[idxFullName]) {
+            name = String(row[idxFullName]).trim();
+          } else if (idxName !== -1 && row[idxName]) {
+            const firstName = String(row[idxName]).trim();
+            const lastName = idxLastName !== -1 && row[idxLastName] ? String(row[idxLastName]).trim() : '';
+            name = `${firstName} ${lastName}`.trim();
+          } else {
+            name = `Colaborador(a) PRN ${prn}`;
+          }
 
-          const ccName = idxCC !== -1 && row[idxCC] ? String(row[idxCC]).trim() : 'Produção Geral';
-          const locName = idxLoc !== -1 && row[idxLoc] ? String(row[idxLoc]).trim() : 'Área Operacional';
+          const rawSex = idxGender !== -1 ? String(row[idxGender] || '').trim().toLowerCase() : '';
+          const gender: 'Masculino' | 'Feminino' = rawSex.startsWith('f') || rawSex === 'feminino' ? 'Feminino' : 'Masculino';
+
+          const groupRaw = idxGroup !== -1 ? String(row[idxGroup] || '').toLowerCase() : 'clt';
+          const employmentGroup: 'CLT' | 'Aprendiz' | 'Estagiário' = 
+            groupRaw.includes('aprendiz') ? 'Aprendiz' : groupRaw.includes('estagi') ? 'Estagiário' : 'CLT';
+
+          const ccRaw = idxCC !== -1 && row[idxCC] ? String(row[idxCC]).trim() : 'Produção Geral';
+          const locRaw = idxLoc !== -1 && row[idxLoc] ? String(row[idxLoc]).trim() : 'Área Operacional';
           const jobTitle = idxJob !== -1 && row[idxJob] ? String(row[idxJob]).trim() : 'Operador';
           const manager = idxManager !== -1 && row[idxManager] ? String(row[idxManager]).trim() : 'Gestor Operacional';
           const shiftText = idxShift !== -1 && row[idxShift] ? String(row[idxShift]).trim() : 'Turno A';
 
           let shiftCat: ShiftCategory = 'Turno A';
-          if (/14:20|tarde/i.test(shiftText)) shiftCat = 'Turno B';
-          else if (/22:30|noite/i.test(shiftText)) shiftCat = 'Turno C';
-          else if (/08:00|adm|5x2/i.test(shiftText)) shiftCat = 'Administrativo';
-          else if (/aprendiz|estágio|07:00/i.test(shiftText) || employmentGroup !== 'CLT') shiftCat = 'Outras Jornadas';
+          const sLower = shiftText.toLowerCase();
+          if (sLower.includes('06:00-14:20') || sLower.includes('06:00 às 14:20') || sLower.includes('06:00 as 14:20') || sLower.includes('turno 1') || sLower.includes('manhã')) {
+            shiftCat = 'Turno A';
+          } else if (sLower.includes('14:20-22:30') || sLower.includes('14:20 às 22:30') || sLower.includes('14:20 as 22:30') || sLower.includes('turno 2') || sLower.includes('tarde')) {
+            shiftCat = 'Turno B';
+          } else if (sLower.includes('22:30-06:00') || sLower.includes('22:30 às 06:00') || sLower.includes('22:30 as 06:00') || sLower.includes('turno 3') || sLower.includes('noite')) {
+            shiftCat = 'Turno C';
+          } else if (sLower.includes('08:00-17:00') || sLower.includes('08:00 às 17:00') || sLower.includes('5x2 08:00') || sLower.includes('adm')) {
+            shiftCat = 'Administrativo';
+          } else {
+            shiftCat = 'Outras Jornadas';
+          }
 
           validBahia.push({
             prn,
             name,
+            gender,
             unitCode: 'KBA1',
             unitName: 'Bahia',
             subareaCode: 'K111',
             subareaName: 'Feira de Santana',
             employmentGroup,
-            costCenterCode: 'CC-IMP',
-            costCenterName: ccName,
-            macroarea: 'Operação Fabril',
-            locationCode: 'LOC-IMP',
-            locationName: locName,
-            jobCode: 'JOB-IMP',
+            employmentSubgroup: idxSubgroup !== -1 && row[idxSubgroup] ? String(row[idxSubgroup]).trim() : employmentGroup,
+            costCenterCode: ccRaw.split('-')[0] || '10001',
+            costCenterName: cleanCC(ccRaw),
+            macroarea: getMacro(ccRaw, locRaw),
+            locationCode: locRaw.split('-')[0] || '10400',
+            locationName: cleanLoc(locRaw),
+            jobCode: 'JOB-PAAH',
             jobTitle,
+            position: idxPos !== -1 && row[idxPos] ? String(row[idxPos]).trim() : undefined,
             immediateManager: manager,
-            shiftCode: 'JRN-IMP',
+            shiftCode: 'JRN-PAAH',
             shiftName: shiftText,
             shiftCategory: shiftCat,
             status: 'Ativo',
           });
         });
 
+        setAllImportedEmployees(validBahia);
         setImportSummary({
           fileName: file.name,
           totalRowsRead: totalRead,
@@ -408,7 +480,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
 
         setImportPreview(validBahia.slice(0, 10));
         setImportFeedback({
-          message: `Arquivo analisado! ${validBahia.length} colaboradores elegíveis da Bahia identificados. ${discardedOther} registros de outras unidades (Ceará/etc) descartados.`,
+          message: `Arquivo analisado com sucesso! ${validBahia.length} colaboradores elegíveis da Bahia identificados (${validBahia.filter(e => e.gender === 'Feminino').length} mulheres, ${validBahia.filter(e => e.gender === 'Masculino').length} homens). ${discardedOther} registros de outras unidades (Ceará/etc) descartados.`,
           type: 'success',
         });
       } catch (err: any) {
@@ -420,13 +492,14 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
   };
 
   const confirmImport = () => {
-    if (!importSummary || importSummary.validBahiaRows === 0) return;
-    // Realiza a persistência
-    showToast(`Base importada com sucesso! ${importSummary.validBahiaRows} colaboradores carregados.`);
+    if (!importSummary || allImportedEmployees.length === 0) return;
+    saveEmployees(allImportedEmployees);
+    showToast(`Base importada com sucesso! ${allImportedEmployees.length} colaboradores carregados.`);
     setImportFeedback({
-      message: `Importação confirmada e salva!`,
+      message: `Importação confirmada e salva! Base atualizada com ${allImportedEmployees.length} colaboradores da Bahia.`,
       type: 'success',
     });
+    setActiveTab('headcount');
   };
 
   // =========================================================================
@@ -436,6 +509,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
     const dataToExport = filteredEmployees.map(emp => ({
       'PRN': emp.prn,
       'Nome': emp.name,
+      'Sexo': emp.gender || 'Masculino',
       'Unidade': emp.unitCode,
       'Subárea': emp.subareaName,
       'Vínculo': emp.employmentGroup,
@@ -765,95 +839,10 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
             />
           )}
 
-          {/* ABA 2: QUADRO DE PESSOAL */}
+          {/* ABA 2: QUADRO DE PESSOAL (HEADCOUNT, GÊNERO, TURNOS, SETORES & GESTORES) */}
           {activeTab === 'headcount' && (
-                    
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                  <Users className="w-5 h-5 text-indigo-600" />
-                  Quadro de Pessoal Completo — Unidade Bahia
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Exibindo {filteredEmployees.length} registros conforme filtros aplicados.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={exportToExcel}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-xs"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5" />
-                  Exportar Tabela
-                </button>
-              </div>
-            </div>
-
-            {/* TABELA DE COMPOSIÇÃO NOMINATIVA / REGISTROS */}
-            <div className="overflow-x-auto rounded-2xl border border-slate-200 max-h-[600px] overflow-y-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead className="bg-slate-100/80 sticky top-0 z-10 text-slate-700 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
-                  <tr>
-                    <th className="p-3">PRN</th>
-                    <th className="p-3">Nome do Colaborador</th>
-                    <th className="p-3">Vínculo</th>
-                    <th className="p-3">Cargo</th>
-                    <th className="p-3">Centro de Custo</th>
-                    <th className="p-3">Local / Setor</th>
-                    <th className="p-3">Turno / Jornada</th>
-                    <th className="p-3">Gestor Imediato</th>
-                    <th className="p-3 text-center">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
-                  {filteredEmployees.map((emp) => (
-                    <tr key={emp.prn} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="p-3 font-mono font-bold text-slate-900">{emp.prn}</td>
-                      <td className="p-3 font-medium text-slate-900">{emp.name}</td>
-                      <td className="p-3">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          emp.employmentGroup === 'CLT'
-                            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                            : emp.employmentGroup === 'Aprendiz'
-                            ? 'bg-sky-50 text-sky-700 border border-sky-200'
-                            : 'bg-purple-50 text-purple-700 border border-purple-200'
-                        }`}>
-                          {emp.employmentGroup}
-                        </span>
-                      </td>
-                      <td className="p-3 font-semibold text-slate-800">{emp.jobTitle}</td>
-                      <td className="p-3">{emp.costCenterName}</td>
-                      <td className="p-3 text-slate-600">{emp.locationName}</td>
-                      <td className="p-3">
-                        <span className="font-semibold text-slate-800 block">{emp.shiftCategory}</span>
-                        <span className="text-[10px] text-slate-400 block truncate max-w-[140px]">{emp.shiftName}</span>
-                      </td>
-                      <td className="p-3 text-slate-600">{emp.immediateManager}</td>
-                      <td className="p-3 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          emp.status === 'Ativo'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : emp.status === 'Férias'
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : 'bg-slate-100 text-slate-600 border border-slate-200'
-                        }`}>
-                          {emp.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="text-xs text-slate-500 flex items-center justify-between pt-2">
-              <span>Total de {filteredEmployees.length} colaboradores na visão atual</span>
-              <span>Visualização restrita ao estabelecimento KBA1 (Bahia)</span>
-            </div>
-          </div>
-        )}
+            <HeadcountAnalyticsTab employees={filteredEmployees} />
+          )}
 
           {/* ABA 3: SETORES & TURNOS */}
           {activeTab === 'jobs_shifts' && (

@@ -1,4 +1,5 @@
 import { Employee, PeopleAnalyticsKPI, MacroareaMapping, ActionPlanItem } from '../types/peopleAnalytics';
+import kba1RealEmployees from './kba1RealEmployees.json';
 
 export const OFFICIAL_GG_KPIS: PeopleAnalyticsKPI[] = [
   {
@@ -191,9 +192,12 @@ export const INITIAL_ACTION_PLANS: ActionPlanItem[] = [
   },
 ];
 
-// Gerador fiel dos 353 colaboradores da unidade Bahia (KBA1 / K111 Feira de Santana)
-// com totais e proporções exatas da especificação
+// Retorna a base oficial real de 353 colaboradores da unidade Bahia (KBA1 / K111 Feira de Santana)
+// com totais, dados nominais, gêneros (homens/mulheres), turnos e gestores auditados do PAAH
 export function generateInitialBahiaEmployees(): Employee[] {
+  if (Array.isArray(kba1RealEmployees) && kba1RealEmployees.length > 0) {
+    return kba1RealEmployees as unknown as Employee[];
+  }
   const employees: Employee[] = [];
 
   const costCenterDist: { name: string; code: string; count: number; macro: string; location: string }[] = [

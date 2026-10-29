@@ -10,6 +10,7 @@ export type EmploymentGroup = 'CLT' | 'Aprendiz' | 'Estagiário';
 export interface Employee {
   prn: string;
   name: string;
+  gender?: 'Masculino' | 'Feminino' | string;
   unitCode: string; // 'KBA1'
   unitName: string; // 'Bahia'
   subareaCode: string; // 'K111'
