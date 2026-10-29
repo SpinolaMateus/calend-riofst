@@ -248,3 +248,4 @@ export function calculateVacancyAnalytics(v: JobVacancy, refDate = new Date()) {
     slaStatus,
   };
 }
+

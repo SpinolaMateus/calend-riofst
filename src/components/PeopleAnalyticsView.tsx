@@ -700,12 +700,12 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
       {/* ========================================================================= */}
       {isMobileSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-xs transition-opacity"
+          className="fixed top-14 inset-x-0 bottom-0 bg-black/60 z-30 lg:hidden backdrop-blur-xs transition-opacity"
           onClick={() => setIsMobileSidebarOpen(false)}
         />
       )}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#0a3641] text-white flex flex-col justify-between shadow-2xl transition-transform duration-200 lg:translate-x-0 ${
+      <aside className={`fixed top-14 bottom-0 left-0 z-30 w-72 bg-[#0a3641] text-white flex flex-col justify-between shadow-2xl transition-transform duration-200 lg:translate-x-0 ${
         isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
         <div className="flex flex-col flex-1 overflow-y-auto">
@@ -787,7 +787,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
       <div className="flex-1 lg:ml-72 flex flex-col min-w-0 min-h-screen">
         
         {/* Top Header Bar */}
-        <header data-capture-ignore className="no-print bg-[#132F46] text-white border-b border-slate-700/80 sticky top-0 z-30 shadow-md">
+        <header data-capture-ignore className="no-print bg-[#132F46] text-white border-b border-slate-700/80 sticky top-14 z-20 shadow-md">
           <div className="px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
             
             <div className="flex items-center gap-3 w-full md:w-auto">

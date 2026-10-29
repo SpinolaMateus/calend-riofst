@@ -584,7 +584,7 @@ export default function App() {
       )}
 
       {/* Top Global Portal Switcher Bar */}
-      <nav className="no-print bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 py-2.5 flex items-center justify-between z-50 shadow-md">
+      <nav className="no-print bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 h-14 flex items-center justify-between sticky top-0 z-50 shadow-md">
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setActiveApp('home')}
