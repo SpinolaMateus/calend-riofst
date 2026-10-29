@@ -6,7 +6,7 @@ import {
   ArrowLeft, RefreshCw, Layers, ShieldCheck, ChevronRight,
   Info, Sparkles, UserCheck, ShieldAlert, Check, HelpCircle,
   FolderTree, GitCommit, FileText, UploadCloud, Edit3, ArrowUpRight,
-  Factory, Sliders, Menu
+  Factory, Sliders, Menu, Award
 } from 'lucide-react';
 import { 
   Employee, PeopleAnalyticsKPI, PeopleAnalyticsFilter, 
