@@ -25,14 +25,11 @@ import { HeadcountAnalyticsTab } from './peopleAnalytics/HeadcountAnalyticsTab';
 import { IndicatorsGGTab } from './peopleAnalytics/IndicatorsGGTab';
 import { AbsenteeismMovementsTab } from './peopleAnalytics/AbsenteeismMovementsTab';
 import { SectorsShiftsTab } from './peopleAnalytics/SectorsShiftsTab';
+import { FormationsDashboard } from './FormationsDashboard';
 import { AuditFormulasModal } from './peopleAnalytics/AuditFormulasModal';
 import { CalculationRulesModal } from './peopleAnalytics/CalculationRulesModal';
 
-interface PeopleAnalyticsViewProps {
-  onBackToHome: () => void;
-}
-
-type TabType = 
+export type TabType = 
   | 'overview' 
   | 'headcount' 
   | 'jobs_shifts' 
@@ -44,7 +41,12 @@ type TabType =
   | 'data_entry' 
   | 'admin';
 
-export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBackToHome }) => {
+interface PeopleAnalyticsViewProps {
+  onBackToHome: () => void;
+  initialTab?: TabType;
+}
+
+export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBackToHome, initialTab }) => {
   // Estado principal de Colaboradores da Unidade Bahia (KBA1 / K111)
   const [employees, setEmployees] = useState<Employee[]>(() => {
     try {
@@ -87,7 +89,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
   const [macroMappings] = useState(INITIAL_MACROAREA_MAPPINGS);
 
   // Navegação de Abas do Menu
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab || 'overview');
 
   // Filtros Globais Interdependentes
   const [filters, setFilters] = useState<PeopleAnalyticsFilter>({
@@ -867,44 +869,53 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
             <AbsenteeismMovementsTab />
           )}
 
-          {/* ABA 7: TREINAMENTO & DHO */}
+          {/* ABA 7: TREINAMENTO & DHO — UNIFICADO COM DASHBOARD DE FORMAÇÕES */}
           {activeTab === 'trainings' && (
-                    
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                Treinamento, Matriz de Habilidades & Programa Superar
-              </h3>
-              <p className="text-xs text-slate-500">
-                Acompanhamento das metas de capacitação técnica, requisitos legais e instrutores internos.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {kpis.filter(k => k.category === 'Treinamento').map(kpi => (
-                <div key={kpi.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                    Treinamento
+            <div className="space-y-6">
+              {/* Painel Estratégico de Metas de DHO & Superar */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                  <div>
+                    <h3 className="text-base font-bold text-[#0b1c30] tracking-tight flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                      Treinamento, Matriz de Habilidades & Programa Superar
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Metas corporativas do Pilar ET (Educação e Treinamento) e aderência aos requisitos legais
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#eff4ff] text-[#306576] border border-[#cbd5e1] self-start sm:self-auto">
+                    Pilar ET • KBA1-DHO-2024
                   </span>
-                  <h4 className="text-sm font-bold text-slate-900">{kpi.name}</h4>
-                  <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-200">
-                    <span className="text-slate-500">Metas (1 / 3 / 5):</span>
-                    <span className="font-mono font-bold text-slate-800">
-                      {kpi.target1}% / {kpi.target3}% / <span className="text-emerald-700">{kpi.target5}%</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-200">
-                    <span className="text-slate-500">Realizado:</span>
-                    <span className="font-mono font-bold text-slate-500">
-                      {kpi.actual !== null ? `${kpi.actual}%` : 'Sem realizado'}
-                    </span>
-                  </div>
                 </div>
-              ))}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                  {kpis.filter(k => k.category === 'Treinamento').map(kpi => (
+                    <div key={kpi.id} className="p-3.5 rounded-2xl bg-[#f8fafc] border border-slate-200/90 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#047857] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                          Meta Oficial
+                        </span>
+                        <span className="text-xs font-black text-emerald-700 bg-white px-2 py-0.5 rounded-lg border border-slate-200 shadow-2xs font-mono">
+                          {kpi.target1}% (M1)
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-bold text-[#0b1c30] leading-snug line-clamp-2">{kpi.name}</h4>
+                      <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-slate-200/80">
+                        <span className="text-slate-500">Alvos M1 / M3 / M5:</span>
+                        <span className="font-mono font-bold text-slate-800">
+                          {kpi.target1}% / {kpi.target3}% / <strong className="text-emerald-700">{kpi.target5}%</strong>
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dashboard de Formações & Comparação de Matrizes (Design Analytics) */}
+              <FormationsDashboard embeddedInAnalytics={true} />
             </div>
-          </div>
-        )}
+          )}
 
           {/* ABA 8: INTELIGÊNCIA ANALÍTICA & PLANOS DE AÇÃO */}
           {activeTab === 'action_plans' && (

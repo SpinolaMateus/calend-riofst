@@ -59,6 +59,7 @@ export default function App() {
   const { user, isAdmin, hasAdminAccess, requestAdminAccess, signOutAdmin } = useAdminAuth();
   // Navigation: 'home' | 'integration' | 'calendar' | 'formations' | 'action_plan' | 'people_analytics'
   const [activeApp, setActiveApp] = useState<'home' | 'integration' | 'calendar' | 'formations' | 'action_plan' | 'people_analytics'>('home');
+  const [peopleAnalyticsInitialTab, setPeopleAnalyticsInitialTab] = useState<'overview' | 'trainings' | 'headcount'>('overview');
 
   // Load initial data from localStorage if available
   const [sessions, setSessions] = useState<IntegrationSession[]>(() => {
@@ -634,16 +635,19 @@ export default function App() {
           </button>
 
           <button
-            onClick={() => setActiveApp('formations')}
+            onClick={() => {
+              setPeopleAnalyticsInitialTab('trainings');
+              setActiveApp('people_analytics');
+            }}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeApp === 'formations'
+              activeApp === 'people_analytics' && peopleAnalyticsInitialTab === 'trainings'
                 ? 'bg-violet-600 text-white shadow-xs'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800'
             }`}
           >
             <BarChart3 className="w-4 h-4 text-violet-400" />
-            <span className="hidden sm:inline">Dashboard de Formações</span>
-            <span className="sm:hidden">Formações</span>
+            <span className="hidden sm:inline">Treinamento & DHO</span>
+            <span className="sm:hidden">Treinamentos</span>
           </button>
 
           <button
@@ -660,9 +664,12 @@ export default function App() {
           </button>
 
           <button
-            onClick={() => setActiveApp('people_analytics')}
+            onClick={() => {
+              setPeopleAnalyticsInitialTab('overview');
+              setActiveApp('people_analytics');
+            }}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeApp === 'people_analytics'
+              activeApp === 'people_analytics' && peopleAnalyticsInitialTab !== 'trainings'
                 ? 'bg-[#15877B] text-white shadow-xs'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800'
             }`}
@@ -717,9 +724,15 @@ export default function App() {
               unitInfo={unitInfo}
               onSelectIntegration={() => setActiveApp('integration')}
               onSelectCalendar={() => setActiveApp('calendar')}
-              onSelectFormations={() => setActiveApp('formations')}
+              onSelectFormations={() => {
+                setPeopleAnalyticsInitialTab('trainings');
+                setActiveApp('people_analytics');
+              }}
               onSelectActionPlan={() => setActiveApp('action_plan')}
-              onSelectPeopleAnalytics={() => setActiveApp('people_analytics')}
+              onSelectPeopleAnalytics={() => {
+                setPeopleAnalyticsInitialTab('overview');
+                setActiveApp('people_analytics');
+              }}
               integrationEventsCount={sessions.length}
               calendarEventsCount={calendarEventsCount}
               onOpenAdminAccess={() => requestAdminAccess()}
@@ -885,7 +898,11 @@ export default function App() {
       {activeApp === 'people_analytics' && (
         <main className="flex-1 w-full">
           <ErrorBoundary moduleName="People Analytics (Feira de Santana - BA)">
-            <PeopleAnalyticsView onBackToHome={() => setActiveApp('home')} />
+            <PeopleAnalyticsView 
+              key={peopleAnalyticsInitialTab}
+              onBackToHome={() => setActiveApp('home')} 
+              initialTab={peopleAnalyticsInitialTab}
+            />
           </ErrorBoundary>
         </main>
       )}

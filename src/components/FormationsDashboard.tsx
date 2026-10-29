@@ -356,7 +356,11 @@ async function readLastUpload() {
   });
 }
 
-export function FormationsDashboard() {
+export interface FormationsDashboardProps {
+  embeddedInAnalytics?: boolean;
+}
+
+export function FormationsDashboard({ embeddedInAnalytics = false }: FormationsDashboardProps = {}) {
   const { isAdmin, isLoading: isAuthLoading, hasAdminAccess, requestAdminAccess } = useAdminAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const workerRef = useRef<Worker | null>(null);
@@ -812,13 +816,13 @@ export function FormationsDashboard() {
   };
 
   return (
-    <main className="formations-dashboard">
+    <div className={`formations-dashboard ${embeddedInAnalytics ? 'is-embedded' : ''}`}>
       <div className="formation-topbar">
         <div className="formation-brand">
-          <div className="formation-brand-icon"><BarChart3 size={23} /></div>
+          <div className="formation-brand-icon"><BarChart3 size={22} /></div>
           <div>
-            <h1>Dashboard de Formações</h1>
-            <p>Comparação de matrizes · Multifiltros inteligentes · Análise por cargo e UO</p>
+            <h1>Dashboard de Formações & Matrizes</h1>
+            <p>Comparação de matrizes (A vs B) · Multifiltros inteligentes · Análise por cargo e UO</p>
           </div>
         </div>
         <div
@@ -942,6 +946,6 @@ export function FormationsDashboard() {
           <div className="formation-hint"><FileUp size={18} /> Carregue a exportação CSV da matriz para começar a análise.</div>
         )}
       </div>
-    </main>
+    </div>
   );
 }
