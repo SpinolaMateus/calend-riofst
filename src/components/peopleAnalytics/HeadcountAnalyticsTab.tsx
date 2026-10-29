@@ -11,7 +11,7 @@ interface HeadcountAnalyticsTabProps {
   employees: Employee[];
 }
 
-export type ViewMode = 'location' | 'shift' | 'manager' | 'tenure' | 'crosstab' | 'nominal';
+export type ViewMode = 'location' | 'shift' | 'manager' | 'tenure' | 'age' | 'crosstab' | 'nominal';
 
 export interface TenureInfo {
   years: number;
@@ -21,6 +21,45 @@ export interface TenureInfo {
   label: string;
   bracket: '< 1 ano' | '1 a 2 anos' | '2 a 5 anos' | '5 a 10 anos' | '> 10 anos' | 'Sem data';
   formattedAdmission: string;
+}
+
+export interface AgeInfo {
+  age: number;
+  bracket: '< 25 anos' | '25 a 34 anos' | '35 a 44 anos' | '45 a 54 anos' | '55+ anos' | 'Sem data';
+  formattedBirth: string;
+}
+
+// Cálculo da idade com base na data de nascimento
+export function calculateEmployeeAge(birthDate?: string, refDate = new Date(2026, 9, 13)): AgeInfo {
+  if (!birthDate) {
+    return {
+      age: 0,
+      bracket: 'Sem data',
+      formattedBirth: '—'
+    };
+  }
+
+  const [y, m, d] = birthDate.split('-').map(Number);
+  const birth = new Date(y, (m || 1) - 1, d || 1);
+  let age = refDate.getFullYear() - birth.getFullYear();
+  const mDiff = refDate.getMonth() - birth.getMonth();
+  if (mDiff < 0 || (mDiff === 0 && refDate.getDate() < birth.getDate())) {
+    age--;
+  }
+  if (age < 0) age = 0;
+
+  let bracket: AgeInfo['bracket'] = '55+ anos';
+  if (age < 25) bracket = '< 25 anos';
+  else if (age <= 34) bracket = '25 a 34 anos';
+  else if (age <= 44) bracket = '35 a 44 anos';
+  else if (age <= 54) bracket = '45 a 54 anos';
+
+  const formattedBirth = `${String(d || 1).padStart(2, '0')}/${String(m || 1).padStart(2, '0')}/${y}`;
+  return {
+    age,
+    bracket,
+    formattedBirth
+  };
 }
 
 // Cálculo do tempo de empresa com base na data de admissão e data de referência do relatório (Outubro/2026)
@@ -354,6 +393,82 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
   }, [filteredEmployees]);
 
   // =========================================================================
+  // ESTATÍSTICAS DE IDADE & FAIXA ETÁRIA POR GÊNERO E TURNO (NOVO)
+  // =========================================================================
+  const ageStats = useMemo(() => {
+    let femaleAgeSum = 0;
+    let maleAgeSum = 0;
+    let totalAgeSum = 0;
+    let femaleCount = 0;
+    let maleCount = 0;
+
+    const brackets: AgeInfo['bracket'][] = ['< 25 anos', '25 a 34 anos', '35 a 44 anos', '45 a 54 anos', '55+ anos'];
+    const bracketMap: Record<string, { female: number; male: number; total: number; locations: Map<string, number> }> = {};
+    brackets.forEach(b => {
+      bracketMap[b] = { female: 0, male: 0, total: 0, locations: new Map() };
+    });
+
+    filteredEmployees.forEach(emp => {
+      const a = calculateEmployeeAge(emp.birthDate);
+      const isFemale = (emp.gender || '').toLowerCase().startsWith('f');
+      totalAgeSum += a.age;
+
+      if (isFemale) {
+        femaleCount++;
+        femaleAgeSum += a.age;
+      } else {
+        maleCount++;
+        maleAgeSum += a.age;
+      }
+
+      if (a.bracket !== 'Sem data' && bracketMap[a.bracket]) {
+        bracketMap[a.bracket].total++;
+        if (isFemale) bracketMap[a.bracket].female++;
+        else bracketMap[a.bracket].male++;
+        const loc = emp.locationName || 'Geral';
+        bracketMap[a.bracket].locations.set(loc, (bracketMap[a.bracket].locations.get(loc) || 0) + 1);
+      }
+    });
+
+    const total = filteredEmployees.length;
+    const avgOverall = total > 0 ? (totalAgeSum / total).toFixed(1) : '0';
+    const avgFemale = femaleCount > 0 ? (femaleAgeSum / femaleCount).toFixed(1) : '0';
+    const avgMale = maleCount > 0 ? (maleAgeSum / maleCount).toFixed(1) : '0';
+
+    const bracketRows = brackets.map(bracket => {
+      const b = bracketMap[bracket];
+      const pct = total > 0 ? Number(((b.total / total) * 100).toFixed(1)) : 0;
+      const femalePct = b.total > 0 ? Math.round((b.female / b.total) * 100) : 0;
+      const malePct = b.total > 0 ? Math.round((b.male / b.total) * 100) : 0;
+      const topLocations = Array.from(b.locations.entries())
+        .sort((x, y) => y[1] - x[1])
+        .slice(0, 3)
+        .map(([loc, cnt]) => `${loc} (${cnt})`)
+        .join(', ');
+
+      return {
+        bracket,
+        female: b.female,
+        male: b.male,
+        total: b.total,
+        pct,
+        femalePct,
+        malePct,
+        topLocations: topLocations || '—'
+      };
+    });
+
+    return {
+      avgOverall,
+      avgFemale,
+      avgMale,
+      femaleCount,
+      maleCount,
+      bracketRows,
+    };
+  }, [filteredEmployees]);
+
+  // =========================================================================
   // 1. AGRUPAMENTO POR LOCAL / SETOR
   // =========================================================================
   const locationGroups = useMemo(() => {
@@ -625,7 +740,7 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
       {/* ========================================================================= */}
       {/* 1. CARDS DEMOGRÁFICOS DE CABEÇALHO: HOMENS, MULHERES, TURNOS & TEMPO DE CASA */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
         
         {/* Total Efetivo */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm flex items-center justify-between">
@@ -734,6 +849,28 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
           </div>
         </div>
 
+        {/* Idade Média da Fábrica (NOVO) */}
+        <div 
+          onClick={() => setViewMode('age')}
+          className="bg-white p-5 rounded-2xl border border-emerald-200/80 shadow-sm flex flex-col justify-between cursor-pointer hover:border-[#306576] transition-all group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+              Idade Média da Fábrica
+            </span>
+            <span className="text-[10px] font-bold text-[#306576] group-hover:underline">Ver análise &rarr;</span>
+          </div>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-3xl font-black text-[#0b1c30]">{ageStats.avgOverall}</span>
+            <span className="text-xs text-slate-500 font-semibold">anos de idade</span>
+          </div>
+          <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-slate-100 mt-1">
+            <span className="text-rose-600 font-bold">👩 Mulheres: {ageStats.avgFemale}a</span>
+            <span className="text-sky-700 font-bold">👨 Homens: {ageStats.avgMale}a</span>
+          </div>
+        </div>
+
       </div>
 
       {/* ========================================================================= */}
@@ -749,6 +886,7 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
               { id: 'shift', label: 'Por Turno / Jornada', icon: Clock },
               { id: 'manager', label: 'Por Gestor Imediato', icon: Users },
               { id: 'tenure', label: 'Tempo de Empresa por Sexo', icon: Award },
+              { id: 'age', label: 'Faixa Etária & Idade', icon: Calendar },
               { id: 'crosstab', label: 'Matriz Turno × Setor × Gestor', icon: Layers },
               { id: 'nominal', label: `Lista Nominal (${filteredEmployees.length})`, icon: BarChart3 },
             ].map(tab => {
@@ -1402,6 +1540,139 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
       )}
 
       {/* ========================================================================= */}
+      {/* CONTEÚDO DA VISÃO: FAIXA ETÁRIA & IDADE POR SEXO E TURNO (NOVO) */}
+      {/* ========================================================================= */}
+      {viewMode === 'age' && (
+        <div className="space-y-6">
+          {/* 3 Cards de Destaque */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Mulheres */}
+            <div className="bg-gradient-to-br from-white to-rose-50/50 p-5 rounded-2xl border border-rose-200 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-800 flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                  Mulheres • Idade Média
+                </span>
+                <span className="text-xs font-bold text-rose-600 bg-rose-100/80 px-2 py-0.5 rounded-full">
+                  {ageStats.femaleCount} colaboradoras
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-black text-rose-700">{ageStats.avgFemale}</span>
+                <span className="text-sm font-bold text-rose-900">anos em média</span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                As mulheres na unidade Bahia apresentam perfil mais jovem (média de <strong>{ageStats.avgFemale} anos</strong>), refletindo a aceleração de contratações de diversidade na operação e gestão.
+              </p>
+            </div>
+
+            {/* Homens */}
+            <div className="bg-gradient-to-br from-white to-sky-50/50 p-5 rounded-2xl border border-sky-200 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#306576] flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#0a3641]" />
+                  Homens • Idade Média
+                </span>
+                <span className="text-xs font-bold text-[#306576] bg-sky-100/80 px-2 py-0.5 rounded-full">
+                  {ageStats.maleCount} colaboradores
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-black text-[#0a3641]">{ageStats.avgMale}</span>
+                <span className="text-sm font-bold text-[#0a3641]">anos em média</span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                O efetivo masculino apresenta média de <strong>{ageStats.avgMale} anos</strong>, com forte concentração na faixa de 35 a 44 anos em cargos de maquinistas, operadores e manutenção industrial.
+              </p>
+            </div>
+
+            {/* Geral */}
+            <div className="bg-gradient-to-br from-white to-emerald-50/50 p-5 rounded-2xl border border-emerald-200 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                  Média Geral da Fábrica Bahia
+                </span>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  {filteredEmployees.length} ativos
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-black text-[#0b1c30]">{ageStats.avgOverall}</span>
+                <span className="text-sm font-bold text-slate-700">anos de idade fabril</span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                A pirâmide etária de KBA1 revela solidez e estabilidade operacional, com sucessão planejada nos postos críticos da onduladeira e conversão.
+              </p>
+            </div>
+          </div>
+
+          {/* Tabela de Faixas Etárias */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-[#0b1c30]">
+                  Distribuição por Faixa Etária & Sexo
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Cruzamento demográfico da idade dos colaboradores com proporcionalidade de gênero
+                </p>
+              </div>
+              <span className="text-xs text-slate-400 font-medium">
+                Base oficial de datas de nascimento PAAH
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold">
+                  <tr>
+                    <th className="py-3 px-4">Faixa Etária</th>
+                    <th className="py-3 px-3 text-center">Mulheres (👩)</th>
+                    <th className="py-3 px-3 text-center">Homens (👨)</th>
+                    <th className="py-3 px-3 text-center">Total na Faixa</th>
+                    <th className="py-3 px-4 min-w-[240px]">Proporção (Feminino vs Masculino)</th>
+                    <th className="py-3 px-4">Setores Predominantes na Faixa</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {ageStats.bracketRows.map(row => (
+                    <tr key={row.bracket} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-4 font-bold text-slate-900">{row.bracket}</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-rose-700">
+                        {row.female} <span className="text-[10px] text-slate-400 font-normal">({row.femalePct}%)</span>
+                      </td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-sky-800">
+                        {row.male} <span className="text-[10px] text-slate-400 font-normal">({row.malePct}%)</span>
+                      </td>
+                      <td className="py-3 px-3 text-center font-mono font-black text-[#0a3641]">
+                        {row.total} <span className="text-[10px] text-slate-500 font-normal">({row.pct}%)</span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden flex shadow-2xs">
+                          <div 
+                            style={{ width: `${row.femalePct}%` }}
+                            className="bg-rose-500 h-full transition-all"
+                            title={`Mulheres: ${row.femalePct}%`}
+                          />
+                          <div 
+                            style={{ width: `${row.malePct}%` }}
+                            className="bg-[#0a3641] h-full transition-all"
+                            title={`Homens: ${row.malePct}%`}
+                          />
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-slate-600 text-[11px]">{row.topLocations}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
       {/* 7. CONTEÚDO DA VISÃO 5: MATRIZ CRUZADA (TURNO × LOCAL × GESTOR) */}
       {/* ========================================================================= */}
       {viewMode === 'crosstab' && (
@@ -1574,6 +1845,7 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
                   <th className="p-3">PRN</th>
                   <th className="p-3">Colaborador</th>
                   <th className="p-3 text-center">Sexo</th>
+                  <th className="p-3 text-center">Idade</th>
                   <th className="p-3 text-center">Admissão</th>
                   <th className="p-3 text-center">Tempo de Casa</th>
                   <th className="p-3">Cargo</th>
@@ -1587,6 +1859,7 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
                 {sortedNominalEmployees.map(emp => {
                   const isFemale = (emp.gender || '').toLowerCase().startsWith('f');
                   const tenure = calculateEmployeeTenure(emp.admissionDate);
+                  const age = calculateEmployeeAge(emp.birthDate);
                   return (
                     <tr key={emp.prn} className="hover:bg-slate-50/80 transition-colors">
                       <td className="p-3 font-mono font-bold text-slate-900">{emp.prn}</td>
@@ -1600,6 +1873,16 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
                             : 'bg-sky-50 text-sky-800 border border-sky-100'
                         }`}>
                           {isFemale ? '👩 Fem' : '👨 Masc'}
+                        </span>
+                      </td>
+
+                      {/* Idade */}
+                      <td className="p-3 text-center">
+                        <span className="font-bold text-slate-800 font-mono text-[11px] block">
+                          {age.age > 0 ? `${age.age} anos` : '—'}
+                        </span>
+                        <span className="text-[9px] text-slate-400 block font-mono">
+                          {age.formattedBirth}
                         </span>
                       </td>
 

@@ -3,7 +3,7 @@ import {
   Clock, Users, Factory, Layers, AlertTriangle, 
   CheckCircle2, Search, Filter, ShieldCheck, ChevronRight,
   Cake, Gift, PartyPopper, CalendarDays, Sparkles, Copy, Check,
-  Calendar, Building2, UserCheck
+  Calendar, Building2, UserCheck, ArrowUpDown, Download, History, Award
 } from 'lucide-react';
 import { Employee, ShiftCategory } from '../../types/peopleAnalytics';
 
@@ -16,18 +16,130 @@ const MONTH_NAMES = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
+export interface TenureInfo {
+  years: number;
+  months: number;
+  totalMonths: number;
+  totalYears: number;
+  label: string;
+  bracket: '< 1 ano' | '1 a 2 anos' | '2 a 5 anos' | '5 a 10 anos' | '> 10 anos' | 'Sem data';
+  formattedAdmission: string;
+}
+
+export interface AgeInfo {
+  age: number;
+  bracket: '< 25 anos' | '25 a 34 anos' | '35 a 44 anos' | '45 a 54 anos' | '55+ anos' | 'Sem data';
+  formattedBirth: string;
+}
+
+// Cálculo do tempo de empresa
+export function calculateEmployeeTenure(admissionDate?: string, refDate = new Date(2026, 9, 13)): TenureInfo {
+  if (!admissionDate) {
+    return {
+      years: 0,
+      months: 0,
+      totalMonths: 0,
+      totalYears: 0,
+      label: '—',
+      bracket: 'Sem data',
+      formattedAdmission: '—'
+    };
+  }
+
+  const [y, m, d] = admissionDate.split('-').map(Number);
+  const adm = new Date(y, (m || 1) - 1, d || 1);
+  const effectiveRef = refDate.getTime() > adm.getTime() ? refDate : new Date();
+
+  let diffMonths = (effectiveRef.getFullYear() - adm.getFullYear()) * 12 + (effectiveRef.getMonth() - adm.getMonth());
+  if (effectiveRef.getDate() < adm.getDate()) {
+    diffMonths--;
+  }
+  if (diffMonths < 0) diffMonths = 0;
+
+  const years = Math.floor(diffMonths / 12);
+  const months = diffMonths % 12;
+  const totalYears = Number((diffMonths / 12).toFixed(1));
+
+  let bracket: TenureInfo['bracket'] = '> 10 anos';
+  if (years < 1) bracket = '< 1 ano';
+  else if (years < 2) bracket = '1 a 2 anos';
+  else if (years < 5) bracket = '2 a 5 anos';
+  else if (years < 10) bracket = '5 a 10 anos';
+
+  const label = years > 0 ? (months > 0 ? `${years}a ${months}m` : `${years} anos`) : `${months} meses`;
+  const formattedAdmission = `${String(d || 1).padStart(2, '0')}/${String(m || 1).padStart(2, '0')}/${y}`;
+
+  return {
+    years,
+    months,
+    totalMonths: diffMonths,
+    totalYears,
+    label,
+    bracket,
+    formattedAdmission
+  };
+}
+
+// Cálculo da idade com base na data de nascimento
+export function calculateEmployeeAge(birthDate?: string, refDate = new Date(2026, 9, 13)): AgeInfo {
+  if (!birthDate) {
+    return {
+      age: 0,
+      bracket: 'Sem data',
+      formattedBirth: '—'
+    };
+  }
+
+  const [y, m, d] = birthDate.split('-').map(Number);
+  const birth = new Date(y, (m || 1) - 1, d || 1);
+  let age = refDate.getFullYear() - birth.getFullYear();
+  const mDiff = refDate.getMonth() - birth.getMonth();
+  if (mDiff < 0 || (mDiff === 0 && refDate.getDate() < birth.getDate())) {
+    age--;
+  }
+  if (age < 0) age = 0;
+
+  let bracket: AgeInfo['bracket'] = '55+ anos';
+  if (age < 25) bracket = '< 25 anos';
+  else if (age <= 34) bracket = '25 a 34 anos';
+  else if (age <= 44) bracket = '35 a 44 anos';
+  else if (age <= 54) bracket = '45 a 54 anos';
+
+  const formattedBirth = `${String(d || 1).padStart(2, '0')}/${String(m || 1).padStart(2, '0')}/${y}`;
+
+  return {
+    age,
+    bracket,
+    formattedBirth
+  };
+}
+
 export const SectorsShiftsTab: React.FC<SectorsShiftsTabProps> = ({ employees }) => {
+  // Controle de Sub-abas
+  const [activeSubTab, setActiveSubTab] = useState<'analytics' | 'cells' | 'birthdays'>('analytics');
+
+  // Filtros da Visão Analítica
   const [selectedShift, setSelectedShift] = useState<string>('all');
+  const [selectedGender, setSelectedGender] = useState<string>('all');
+  const [selectedAgeBracket, setSelectedAgeBracket] = useState<string>('all');
+  const [selectedTenureBracket, setSelectedTenureBracket] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [groupBy, setGroupBy] = useState<'location' | 'manager' | 'shift'>('location');
+  const [showNominalTable, setShowNominalTable] = useState<boolean>(true);
+
+  // Filtros da aba de Células
+  const [cellSearch, setCellSearch] = useState<string>('');
+
+  // Filtros da aba de Aniversariantes
   const [selectedMonth, setSelectedMonth] = useState<number>(() => {
-    // Default no mês corrente (Outubro = 10 na simulação de 2026 ou mês atual da máquina)
     const nowMonth = new Date().getMonth() + 1;
-    return nowMonth === 10 ? 10 : 10; // Foco em Outubro conforme dados de competência da fábrica
+    return nowMonth === 10 ? 10 : 10; // Foco em Outubro conforme mês de competência da fábrica
   });
+  const [birthdayShift, setBirthdayShift] = useState<string>('all');
   const [birthdaySearch, setBirthdaySearch] = useState<string>('');
   const [copiedMural, setCopiedMural] = useState(false);
 
-  // Agrupamentos por Turno
+  // Agrupamentos por Turno (Cards Oficiais)
   const shiftGroups = [
     {
       id: 'Turno A',
@@ -96,7 +208,7 @@ export const SectorsShiftsTab: React.FC<SectorsShiftsTabProps> = ({ employees })
     }
   ];
 
-  // Principais Células Operacionais Fabris de KBA1
+  // Células Operacionais Fabris de KBA1
   const operationalCells = [
     {
       name: 'Onduladeira 2.50m (Linha de Frente)',
@@ -158,18 +270,222 @@ export const SectorsShiftsTab: React.FC<SectorsShiftsTabProps> = ({ employees })
       name: 'Gente & Gestão, SESMT & Ambulatório',
       macroarea: 'Gente & Gestão & ADM',
       totalStaff: 18,
-      criticalJobs: 'Técnico de Segurança, Enfermeiro do Trabalho, Analista G&G',
+      criticalJobs: 'Engenheiro de Segurança, Médico do Trabalho, BP RH',
       coverage: '100%',
       alert: null
     }
   ];
 
-  const filteredCells = operationalCells.filter(cell => {
-    const matchesSearch = cell.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          cell.macroarea.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          cell.criticalJobs.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  });
+  // =========================================================================
+  // PROCESSAMENTO ANALÍTICO: GÊNERO, IDADE & TEMPO DE CASA
+  // =========================================================================
+  const employeesWithMetrics = useMemo(() => {
+    return employees.map(emp => {
+      const tenure = calculateEmployeeTenure(emp.admissionDate);
+      const age = calculateEmployeeAge(emp.birthDate);
+      const isFemale = (emp.gender || '').toLowerCase().startsWith('f');
+      return {
+        emp,
+        tenure,
+        age,
+        isFemale,
+        genderLabel: isFemale ? 'Feminino' : 'Masculino'
+      };
+    });
+  }, [employees]);
+
+  // Filtragem da lista para Visão Analítica
+  const filteredEmployeesList = useMemo(() => {
+    return employeesWithMetrics.filter(item => {
+      if (selectedShift !== 'all' && item.emp.shiftCategory !== selectedShift) return false;
+      if (selectedGender !== 'all' && item.genderLabel !== selectedGender) return false;
+      if (selectedAgeBracket !== 'all' && item.age.bracket !== selectedAgeBracket) return false;
+      if (selectedTenureBracket !== 'all' && item.tenure.bracket !== selectedTenureBracket) return false;
+
+      if (searchTerm.trim()) {
+        const q = searchTerm.toLowerCase();
+        const mName = item.emp.name.toLowerCase().includes(q);
+        const mPrn = item.emp.prn.toLowerCase().includes(q);
+        const mJob = (item.emp.jobTitle || '').toLowerCase().includes(q);
+        const mLoc = (item.emp.locationName || '').toLowerCase().includes(q);
+        const mMgr = (item.emp.immediateManager || '').toLowerCase().includes(q);
+        if (!mName && !mPrn && !mJob && !mLoc && !mMgr) return false;
+      }
+      return true;
+    });
+  }, [employeesWithMetrics, selectedShift, selectedGender, selectedAgeBracket, selectedTenureBracket, searchTerm]);
+
+  // Estatísticas Globais da Visão Filtrada
+  const analyticsKpis = useMemo(() => {
+    const total = filteredEmployeesList.length;
+    if (total === 0) {
+      return {
+        total: 0,
+        female: 0,
+        male: 0,
+        femalePct: 0,
+        malePct: 0,
+        avgAge: 0,
+        avgAgeFemale: 0,
+        avgAgeMale: 0,
+        avgTenure: 0,
+        avgTenureFemale: 0,
+        avgTenureMale: 0,
+        shiftCounts: { 'Turno A': 0, 'Turno B': 0, 'Turno C': 0, 'Administrativo': 0, 'Outras Jornadas': 0 }
+      };
+    }
+
+    let fCount = 0;
+    let mCount = 0;
+    let fAgeSum = 0;
+    let mAgeSum = 0;
+    let totalAgeSum = 0;
+    let fTenureSum = 0;
+    let mTenureSum = 0;
+    let totalTenureSum = 0;
+    const shiftCounts: Record<string, number> = {
+      'Turno A': 0,
+      'Turno B': 0,
+      'Turno C': 0,
+      'Administrativo': 0,
+      'Outras Jornadas': 0
+    };
+
+    filteredEmployeesList.forEach(item => {
+      totalAgeSum += item.age.age;
+      totalTenureSum += item.tenure.totalYears;
+      const s = item.emp.shiftCategory || 'Outras Jornadas';
+      shiftCounts[s] = (shiftCounts[s] || 0) + 1;
+
+      if (item.isFemale) {
+        fCount++;
+        fAgeSum += item.age.age;
+        fTenureSum += item.tenure.totalYears;
+      } else {
+        mCount++;
+        mAgeSum += item.age.age;
+        mTenureSum += item.tenure.totalYears;
+      }
+    });
+
+    return {
+      total,
+      female: fCount,
+      male: mCount,
+      femalePct: Number(((fCount / total) * 100).toFixed(1)),
+      malePct: Number(((mCount / total) * 100).toFixed(1)),
+      avgAge: Number((totalAgeSum / total).toFixed(1)),
+      avgAgeFemale: fCount > 0 ? Number((fAgeSum / fCount).toFixed(1)) : 0,
+      avgAgeMale: mCount > 0 ? Number((mAgeSum / mCount).toFixed(1)) : 0,
+      avgTenure: Number((totalTenureSum / total).toFixed(1)),
+      avgTenureFemale: fCount > 0 ? Number((fTenureSum / fCount).toFixed(1)) : 0,
+      avgTenureMale: mCount > 0 ? Number((mTenureSum / mCount).toFixed(1)) : 0,
+      shiftCounts
+    };
+  }, [filteredEmployeesList]);
+
+  // Agrupamento Multidimensional (Setor ou Gestor)
+  const groupedMatrix = useMemo(() => {
+    const map = new Map<string, {
+      key: string;
+      label: string;
+      total: number;
+      female: number;
+      male: number;
+      ageSum: number;
+      tenureSum: number;
+      shifts: Record<string, number>;
+      ageBrackets: Record<string, number>;
+    }>();
+
+    filteredEmployeesList.forEach(item => {
+      let key = '';
+      if (groupBy === 'location') {
+        key = item.emp.locationName || 'Setor Fabril Não Definido';
+      } else if (groupBy === 'manager') {
+        key = item.emp.immediateManager || 'Gestor Não Informado';
+      } else {
+        key = item.emp.shiftCategory || 'Outras Jornadas';
+      }
+
+      let entry = map.get(key);
+      if (!entry) {
+        entry = {
+          key,
+          label: key,
+          total: 0,
+          female: 0,
+          male: 0,
+          ageSum: 0,
+          tenureSum: 0,
+          shifts: { 'Turno A': 0, 'Turno B': 0, 'Turno C': 0, 'Administrativo': 0, 'Outras Jornadas': 0 },
+          ageBrackets: { '< 25 anos': 0, '25 a 34 anos': 0, '35 a 44 anos': 0, '45 a 54 anos': 0, '55+ anos': 0 }
+        };
+        map.set(key, entry);
+      }
+
+      entry.total++;
+      if (item.isFemale) entry.female++;
+      else entry.male++;
+
+      entry.ageSum += item.age.age;
+      entry.tenureSum += item.tenure.totalYears;
+
+      const s = item.emp.shiftCategory || 'Outras Jornadas';
+      entry.shifts[s] = (entry.shifts[s] || 0) + 1;
+
+      const ab = item.age.bracket;
+      if (ab !== 'Sem data') {
+        entry.ageBrackets[ab] = (entry.ageBrackets[ab] || 0) + 1;
+      }
+    });
+
+    const rows = Array.from(map.values()).map(r => {
+      const avgAge = r.total > 0 ? Number((r.ageSum / r.total).toFixed(1)) : 0;
+      const avgTenure = r.total > 0 ? Number((r.tenureSum / r.total).toFixed(1)) : 0;
+      const femalePct = r.total > 0 ? Number(((r.female / r.total) * 100).toFixed(1)) : 0;
+      const malePct = r.total > 0 ? Number(((r.male / r.total) * 100).toFixed(1)) : 0;
+
+      // Faixa etária predominante
+      let topBracket = '< 25 anos';
+      let topCount = -1;
+      Object.entries(r.ageBrackets).forEach(([b, c]) => {
+        if (c > topCount) {
+          topCount = c;
+          topBracket = b;
+        }
+      });
+
+      return {
+        ...r,
+        avgAge,
+        avgTenure,
+        femalePct,
+        malePct,
+        topBracket
+      };
+    });
+
+    // Ordenar pelo total decrescente
+    rows.sort((a, b) => b.total - a.total);
+    return rows;
+  }, [filteredEmployeesList, groupBy]);
+
+  // Exportar Tabela Nominal para CSV
+  const handleExportCSV = () => {
+    let csv = 'PRN;Nome;Genero;Idade;DataNascimento;FaixaEtaria;TempoAnos;TempoMeses;DataAdmissao;FaixaPermanencia;Setor;Turno;Gestor;Cargo;Status\n';
+    filteredEmployeesList.forEach(({ emp, age, tenure, genderLabel }) => {
+      csv += `${emp.prn};"${emp.name}";${genderLabel};${age.age};${age.formattedBirth};"${age.bracket}";${tenure.totalYears};${tenure.totalMonths};${tenure.formattedAdmission};"${tenure.bracket}";"${emp.locationName}";"${emp.shiftCategory}";"${emp.immediateManager}";"${emp.jobTitle}";"${emp.status}"\n`;
+    });
+
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `quadro_detalhado_kba1_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // =========================================================================
   // PROCESSAMENTO DA LISTA DE ANIVERSARIANTES DO MÊS
@@ -181,12 +497,14 @@ export const SectorsShiftsTab: React.FC<SectorsShiftsTabProps> = ({ employees })
       dayFormatted: string;
       isFemale: boolean;
       tenureYears: number;
+      ageCompleting: number;
     }> = [];
 
     employees.forEach(emp => {
       if (!emp.birthDate) return;
       const parts = emp.birthDate.split('-');
       if (parts.length >= 3) {
+        const y = parseInt(parts[0], 10);
         const m = parseInt(parts[1], 10);
         const d = parseInt(parts[2], 10);
         if (m === selectedMonth) {
@@ -196,21 +514,22 @@ export const SectorsShiftsTab: React.FC<SectorsShiftsTabProps> = ({ employees })
             const admYear = parseInt(emp.admissionDate.split('-')[0], 10);
             tenureYears = Math.max(0, 2026 - admYear);
           }
+          const ageCompleting = 2026 - y;
           list.push({
             emp,
             day: d,
             dayFormatted: `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`,
             isFemale,
-            tenureYears
+            tenureYears,
+            ageCompleting
           });
         }
       }
     });
 
-    // Ordenação cronológica por dia do aniversário
+    // Ordenação cronológica por dia do mês
     list.sort((a, b) => a.day - b.day);
 
-    // Contagem por turno para o mês selecionado
     const byShift: Record<string, number> = {
       'Turno A': 0,
       'Turno B': 0,
@@ -227,10 +546,9 @@ export const SectorsShiftsTab: React.FC<SectorsShiftsTabProps> = ({ employees })
     return { list, byShift };
   }, [employees, selectedMonth]);
 
-  // Filtragem dos aniversariantes por turno e busca
   const filteredBirthdays = useMemo(() => {
     return birthdayData.list.filter(item => {
-      if (selectedShift !== 'all' && item.emp.shiftCategory !== selectedShift) {
+      if (birthdayShift !== 'all' && item.emp.shiftCategory !== birthdayShift) {
         return false;
       }
       if (birthdaySearch.trim()) {
@@ -243,9 +561,8 @@ export const SectorsShiftsTab: React.FC<SectorsShiftsTabProps> = ({ employees })
       }
       return true;
     });
-  }, [birthdayData.list, selectedShift, birthdaySearch]);
+  }, [birthdayData.list, birthdayShift, birthdaySearch]);
 
-  // Copiar lista formatada para mural do WhatsApp / Quadro de Avisos do Turno
   const handleCopyMural = () => {
     const monthName = MONTH_NAMES[selectedMonth - 1];
     let text = `🎂 *ANIVERSARIANTES DE ${monthName.toUpperCase()} — KLABIN FEIRA DE SANTANA (KBA1)* 🎂\n`;
@@ -259,403 +576,811 @@ export const SectorsShiftsTab: React.FC<SectorsShiftsTabProps> = ({ employees })
     });
 
     Object.entries(grouped).forEach(([shift, items]) => {
-      text += `*${shift.toUpperCase()}* (${items.length}):\n`;
+      text += `📍 *${shift.toUpperCase()}* (${items.length} aniversariantes):\n`;
       items.forEach(it => {
-        text += `• Dia ${it.dayFormatted}: ${it.emp.name} — ${it.emp.locationName}\n`;
+        text += ` • ${it.dayFormatted} - *${it.emp.name}* (${it.emp.jobTitle}) - ${it.emp.locationName}\n`;
       });
       text += `\n`;
     });
 
-    text += `🎉 Parabéns a todos os aniversariantes! Gente & Gestão KBA1`;
+    text += `Desejamos muita saúde, realizações e segurança para todo o time da KBA1! 🎉👏`;
 
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedMural(true);
-      setTimeout(() => setCopiedMural(false), 3000);
-    });
+    navigator.clipboard.writeText(text);
+    setCopiedMural(true);
+    setTimeout(() => setCopiedMural(false), 2500);
   };
+
+  // Filtragem de Células Fabris
+  const filteredCells = operationalCells.filter(cell => {
+    if (!cellSearch.trim()) return true;
+    const q = cellSearch.toLowerCase();
+    return cell.name.toLowerCase().includes(q) || cell.criticalJobs.toLowerCase().includes(q) || cell.macroarea.toLowerCase().includes(q);
+  });
 
   return (
     <div className="space-y-6">
-      {/* ========================================================================= */}
-      {/* 1. TOPO: CONTEXTO DE SETORES & TURNOS */}
-      {/* ========================================================================= */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-xl bg-[#0a3641] text-white flex items-center justify-center shadow-sm">
-            <Clock className="w-6 h-6 text-[#6ffbbe]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-[#0b1c30] tracking-tight">Setores Fabris & Escalas de Turnos</h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#ecfdf5] text-[#047857] border border-[#a7f3d0]">
-                Ocupação Plena
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Gestão de contingente, postos críticos, escalas operacionais e boa prática de celebrações na unidade KBA1
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span>Total Alocado: <strong className="text-[#0b1c30] font-bold">{employees.length || 353}</strong> colaboradores</span>
-          <span className="text-slate-300">|</span>
-          <span>Cobertura Global: <strong className="text-[#047857] font-bold">96,8%</strong></span>
-        </div>
-      </div>
 
       {/* ========================================================================= */}
-      {/* 2. OS 5 CARDS DAS ESCALAS DE TURNO (INTERATIVOS) */}
+      {/* 1. SELETOR DE SUB-ABAS SUPERIORES */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5">
-        {shiftGroups.map(grp => (
-          <div 
-            key={grp.id} 
-            className={`p-4 rounded-xl border transition-all ${
-              selectedShift === grp.id 
-                ? 'bg-[#eff4ff] border-[#306576] shadow-md ring-2 ring-[#306576]/20' 
-                : 'bg-white border-slate-200/90 hover:border-slate-300 shadow-sm'
+      <div className="bg-white p-3 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setActiveSubTab('analytics')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
+              activeSubTab === 'analytics'
+                ? 'bg-[#0a3641] text-[#6ffbbe] shadow-xs'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
-            onClick={() => setSelectedShift(selectedShift === grp.id ? 'all' : grp.id)}
-            style={{ cursor: 'pointer' }}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-[#0a3641]">{grp.title}</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${grp.statusColor}`}>
-                {grp.status}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 font-mono mb-2">{grp.hours}</p>
+            <Users className="w-4 h-4" />
+            <span>Quadro Analítico Completo (Setor, Turno, Gênero, Tempo & Idade)</span>
+          </button>
 
-            <div className="flex items-baseline justify-between mb-2">
-              <span className="text-2xl font-extrabold text-[#0b1c30]">{grp.count}</span>
-              <span className="text-xs text-slate-400">/ {grp.planned} meta</span>
-            </div>
+          <button
+            onClick={() => setActiveSubTab('cells')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
+              activeSubTab === 'cells'
+                ? 'bg-[#0a3641] text-[#6ffbbe] shadow-xs'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            <Factory className="w-4 h-4" />
+            <span>Células Fabris & Escalas de Turno</span>
+          </button>
 
-            <div className="space-y-1 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
-              <div className="flex justify-between">
-                <span>Líder de Turno:</span>
-                <strong className="text-slate-700">{grp.leader}</strong>
-              </div>
-              <div className="flex justify-between">
-                <span>Absenteísmo:</span>
-                <strong className={grp.id === 'Turno C' ? 'text-amber-800' : 'text-[#047857]'}>{grp.absRate}</strong>
-              </div>
-              <div className="flex justify-between">
-                <span>Aniversariantes ({MONTH_NAMES[selectedMonth - 1].slice(0, 3)}):</span>
-                <strong className="text-purple-700 font-black">
-                  🎂 {birthdayData.byShift[grp.id] || 0}
-                </strong>
-              </div>
-            </div>
-          </div>
-        ))}
+          <button
+            onClick={() => setActiveSubTab('birthdays')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${
+              activeSubTab === 'birthdays'
+                ? 'bg-gradient-to-r from-purple-700 to-indigo-700 text-white shadow-xs'
+                : 'bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200'
+            }`}
+          >
+            <PartyPopper className="w-4 h-4 text-amber-300" />
+            <span>🎂 Aniversariantes do Mês ({birthdayData.list.length})</span>
+          </button>
+        </div>
+
+        <div className="text-right text-[11px] font-mono text-slate-400">
+          Base Ativa: <strong>{employees.length} colaboradores KBA1</strong>
+        </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. BOA PRÁTICA: LISTA DE ANIVERSARIANTES DO MÊS CORRENTE POR SETOR E TURNO */}
+      {/* SUB-ABA 1: QUADRO ANALÍTICO COMPLETO (GÊNERO, TEMPO & IDADE POR SETOR/TURNO) */}
       {/* ========================================================================= */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 space-y-5">
-        
-        {/* Cabeçalho da Seção de Aniversariantes */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-700 text-white flex items-center justify-center shadow-sm shrink-0">
-              <Cake className="w-6 h-6 text-purple-200" />
+      {activeSubTab === 'analytics' && (
+        <div className="space-y-6">
+
+          {/* Cards de Resumo Executivo */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+            {/* Total */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Total Efetivo Filtrado</span>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-3xl font-black text-[#0b1c30]">{analyticsKpis.total}</span>
+                <span className="text-xs text-slate-400 font-semibold">de {employees.length}</span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">100% alocados na planta KBA1</p>
             </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-lg font-black text-[#0b1c30] tracking-tight">
-                  Aniversariantes do Mês — Setores & Escalas de Turno
-                </h3>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-200 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-purple-600" /> Boa Prática G&G
+
+            {/* Gênero */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Gênero (Homens / Mulheres)</span>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-2xl font-black text-[#0a3641]">{analyticsKpis.male} 👨</span>
+                <span className="text-2xl font-black text-rose-600">{analyticsKpis.female} 👩</span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100 mt-1">
+                <span className="text-sky-700 font-bold">{analyticsKpis.malePct}% Masc</span>
+                <span className="text-rose-600 font-bold">{analyticsKpis.femalePct}% Fem</span>
+              </div>
+            </div>
+
+            {/* Idade Média */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
+              <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                Idade Média da Fábrica
+              </span>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-3xl font-black text-[#0b1c30]">{analyticsKpis.avgAge}</span>
+                <span className="text-xs text-slate-500 font-semibold">anos de idade</span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100 mt-1">
+                <span className="text-rose-600 font-bold">👩 {analyticsKpis.avgAgeFemale}a</span>
+                <span className="text-sky-700 font-bold">👨 {analyticsKpis.avgAgeMale}a</span>
+              </div>
+            </div>
+
+            {/* Tempo de Empresa */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
+              <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block flex items-center gap-1">
+                <Award className="w-3.5 h-3.5 text-amber-600" />
+                Tempo Médio de Casa
+              </span>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-3xl font-black text-[#0b1c30]">{analyticsKpis.avgTenure}</span>
+                <span className="text-xs text-slate-500 font-semibold">anos de retenção</span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100 mt-1">
+                <span className="text-rose-600 font-bold">👩 {analyticsKpis.avgTenureFemale}a</span>
+                <span className="text-sky-700 font-bold">👨 {analyticsKpis.avgTenureMale}a</span>
+              </div>
+            </div>
+
+            {/* Turnos */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                Presença nos Turnos
+              </span>
+              <div className="grid grid-cols-3 gap-1 text-center mt-1">
+                <div className="bg-slate-50 p-1 rounded font-mono text-[10px]">
+                  <span className="text-slate-400 block font-bold">T1</span>
+                  <span className="font-bold text-slate-800">{analyticsKpis.shiftCounts['Turno A']}</span>
+                </div>
+                <div className="bg-slate-50 p-1 rounded font-mono text-[10px]">
+                  <span className="text-slate-400 block font-bold">T2</span>
+                  <span className="font-bold text-slate-800">{analyticsKpis.shiftCounts['Turno B']}</span>
+                </div>
+                <div className="bg-slate-50 p-1 rounded font-mono text-[10px]">
+                  <span className="text-slate-400 block font-bold">T3</span>
+                  <span className="font-bold text-slate-800">{analyticsKpis.shiftCounts['Turno C']}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-100 mt-1">
+                <span>ADM: <strong>{analyticsKpis.shiftCounts['Administrativo']}</strong></span>
+                <span>Outros: <strong>{analyticsKpis.shiftCounts['Outras Jornadas']}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          {/* Barra de Filtros e Opções de Agrupamento */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              {/* Seletor de Agrupamento */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs font-bold text-slate-600 mr-1 flex items-center gap-1">
+                  <Layers className="w-3.5 h-3.5 text-[#306576]" />
+                  Agrupar Matriz Por:
+                </span>
+                <button
+                  onClick={() => setGroupBy('location')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    groupBy === 'location'
+                      ? 'bg-[#0a3641] text-[#6ffbbe] shadow-2xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Local / Setor Fabril ({groupedMatrix.length})
+                </button>
+                <button
+                  onClick={() => setGroupBy('manager')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    groupBy === 'manager'
+                      ? 'bg-[#0a3641] text-[#6ffbbe] shadow-2xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Gestor Imediato
+                </button>
+                <button
+                  onClick={() => setGroupBy('shift')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    groupBy === 'shift'
+                      ? 'bg-[#0a3641] text-[#6ffbbe] shadow-2xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Turno / Escala
+                </button>
+              </div>
+
+              {/* Botões de Ação */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowNominalTable(!showNominalTable)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#eff4ff] text-[#306576] hover:bg-[#e0edff] border border-[#cbd5e1] transition-colors"
+                >
+                  {showNominalTable ? 'Ocultar Lista Nominal' : 'Ver Lista Nominal Completa'}
+                </button>
+                <button
+                  onClick={handleExportCSV}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#ecfdf5] text-[#047857] hover:bg-[#d1fae5] border border-[#a7f3d0] transition-colors flex items-center gap-1.5"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Exportar CSV
+                </button>
+              </div>
+            </div>
+
+            {/* Multifiltros em Linha */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-2 border-t border-slate-100 text-xs">
+              {/* Turno */}
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Turno / Escala</label>
+                <select
+                  value={selectedShift}
+                  onChange={e => setSelectedShift(e.target.value)}
+                  className="w-full p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold"
+                >
+                  <option value="all">Todos os Turnos</option>
+                  <option value="Turno A">Turno A (Manhã)</option>
+                  <option value="Turno B">Turno B (Tarde)</option>
+                  <option value="Turno C">Turno C (Noite)</option>
+                  <option value="Administrativo">Administrativo</option>
+                  <option value="Outras Jornadas">Outras Jornadas</option>
+                </select>
+              </div>
+
+              {/* Gênero */}
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Gênero</label>
+                <select
+                  value={selectedGender}
+                  onChange={e => setSelectedGender(e.target.value)}
+                  className="w-full p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold"
+                >
+                  <option value="all">Todos os Gêneros</option>
+                  <option value="Feminino">Mulheres (👩)</option>
+                  <option value="Masculino">Homens (👨)</option>
+                </select>
+              </div>
+
+              {/* Faixa Etária */}
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Faixa de Idade</label>
+                <select
+                  value={selectedAgeBracket}
+                  onChange={e => setSelectedAgeBracket(e.target.value)}
+                  className="w-full p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold"
+                >
+                  <option value="all">Todas as Idades</option>
+                  <option value="< 25 anos">&lt; 25 anos (Jovens)</option>
+                  <option value="25 a 34 anos">25 a 34 anos</option>
+                  <option value="35 a 44 anos">35 a 44 anos</option>
+                  <option value="45 a 54 anos">45 a 54 anos</option>
+                  <option value="55+ anos">55+ anos (Maturidade)</option>
+                </select>
+              </div>
+
+              {/* Tempo de Casa */}
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Tempo de Casa</label>
+                <select
+                  value={selectedTenureBracket}
+                  onChange={e => setSelectedTenureBracket(e.target.value)}
+                  className="w-full p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold"
+                >
+                  <option value="all">Todas as Permanências</option>
+                  <option value="< 1 ano">&lt; 1 ano (Admitidos 2026)</option>
+                  <option value="1 a 2 anos">1 a 2 anos</option>
+                  <option value="2 a 5 anos">2 a 5 anos</option>
+                  <option value="5 a 10 anos">5 a 10 anos</option>
+                  <option value="> 10 anos">&gt; 10 anos (Veteranos)</option>
+                </select>
+              </div>
+
+              {/* Busca Textual */}
+              <div className="col-span-2">
+                <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Busca Rápida</label>
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" />
+                  <input
+                    type="text"
+                    placeholder="Nome, PRN, Cargo, Setor ou Gestor..."
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    className="w-full pl-8 pr-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#306576]"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* MATRIZ DE CRUZAMENTO MULTIDIMENSIONAL */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h4 className="font-bold text-sm text-[#0b1c30]">
+                  Matriz Multidimensional: {groupBy === 'location' ? 'Local / Setor Fabril' : groupBy === 'manager' ? 'Gestor Imediato' : 'Turno / Escala'}
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Cruzamento de efetivo, gênero, tempo de permanência, idade média e distribuição por turno
+                </p>
+              </div>
+              <span className="text-xs font-mono font-bold text-slate-400">
+                {groupedMatrix.length} agrupamentos
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold">
+                  <tr>
+                    <th className="py-3 px-4">
+                      {groupBy === 'location' ? 'Local / Setor' : groupBy === 'manager' ? 'Gestor Imediato' : 'Turno / Escala'}
+                    </th>
+                    <th className="py-3 px-3 text-center">Total</th>
+                    <th className="py-3 px-3 text-center">Mulheres (👩)</th>
+                    <th className="py-3 px-3 text-center">Homens (👨)</th>
+                    <th className="py-3 px-3 text-center">Idade Média</th>
+                    <th className="py-3 px-3 text-center">Tempo Médio</th>
+                    <th className="py-3 px-2 text-center">T1</th>
+                    <th className="py-3 px-2 text-center">T2</th>
+                    <th className="py-3 px-2 text-center">T3</th>
+                    <th className="py-3 px-2 text-center">ADM</th>
+                    <th className="py-3 px-2 text-center">Outros</th>
+                    <th className="py-3 px-3">Faixa Etária Predominante</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {groupedMatrix.map(row => (
+                    <tr key={row.key} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-4 font-bold text-slate-900">
+                        {row.label}
+                      </td>
+                      <td className="py-3 px-3 text-center font-mono font-black text-[#0a3641]">
+                        {row.total}
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <span className="font-mono font-bold text-rose-700">{row.female}</span>
+                        <span className="text-[10px] text-slate-400 block">({row.femalePct}%)</span>
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <span className="font-mono font-bold text-sky-800">{row.male}</span>
+                        <span className="text-[10px] text-slate-400 block">({row.malePct}%)</span>
+                      </td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-emerald-800">
+                        {row.avgAge}a
+                      </td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-amber-700">
+                        {row.avgTenure}a
+                      </td>
+                      <td className="py-3 px-2 text-center font-mono text-slate-600">{row.shifts['Turno A'] || '—'}</td>
+                      <td className="py-3 px-2 text-center font-mono text-slate-600">{row.shifts['Turno B'] || '—'}</td>
+                      <td className="py-3 px-2 text-center font-mono text-slate-600">{row.shifts['Turno C'] || '—'}</td>
+                      <td className="py-3 px-2 text-center font-mono text-slate-600">{row.shifts['Administrativo'] || '—'}</td>
+                      <td className="py-3 px-2 text-center font-mono text-slate-600">{row.shifts['Outras Jornadas'] || '—'}</td>
+                      <td className="py-3 px-3">
+                        <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                          {row.topBracket}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* TABELA NOMINAL COMPLETA (QUADRO DE PESSOAL) */}
+          {showNominalTable && (
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+              <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h4 className="font-bold text-sm text-[#0b1c30]">
+                    Quadro Nominal Completo ({filteredEmployeesList.length} colaboradores)
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Detalhes nominais com gênero, data de nascimento, idade calculada, data de admissão e tempo de casa
+                  </p>
+                </div>
+                <span className="text-xs font-mono text-slate-400">
+                  Unidade Bahia • KBA1 / K111
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Reconhecimento, integração de equipes e celebração nas passagens de turno da planta Feira de Santana
-              </p>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Seletor de Mês */}
-            <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200">
-              <CalendarDays className="w-4 h-4 text-slate-400 ml-1.5" />
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="bg-transparent text-xs font-black text-slate-800 focus:outline-none pr-2 py-1 cursor-pointer"
+              <div className="overflow-x-auto max-h-[550px] overflow-y-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold sticky top-0 z-10 shadow-2xs">
+                    <tr>
+                      <th className="py-3 px-3">PRN</th>
+                      <th className="py-3 px-4">Colaborador & Cargo</th>
+                      <th className="py-3 px-2 text-center">Gênero</th>
+                      <th className="py-3 px-3">Idade & Nascimento</th>
+                      <th className="py-3 px-3">Tempo de Casa & Admissão</th>
+                      <th className="py-3 px-3">Local / Setor Fabril</th>
+                      <th className="py-3 px-3">Turno / Escala</th>
+                      <th className="py-3 px-3">Gestor Imediato</th>
+                      <th className="py-3 px-2 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {filteredEmployeesList.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} className="py-8 text-center text-slate-400">
+                          Nenhum colaborador encontrado com os filtros aplicados.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredEmployeesList.map(({ emp, age, tenure, isFemale, genderLabel }) => (
+                        <tr key={emp.prn} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-2.5 px-3 font-mono font-bold text-slate-500 text-[11px]">
+                            {emp.prn}
+                          </td>
+                          <td className="py-2.5 px-4">
+                            <span className="font-bold text-[#0b1c30] block">{emp.name}</span>
+                            <span className="text-[10px] text-slate-500">{emp.jobTitle}</span>
+                          </td>
+                          <td className="py-2.5 px-2 text-center">
+                            <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              isFemale ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-sky-50 text-sky-800 border border-sky-100'
+                            }`}>
+                              {isFemale ? '👩 Fem' : '👨 Masc'}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span className="font-bold text-slate-800 font-mono text-[11px] block">
+                              {age.age > 0 ? `${age.age} anos` : '—'}
+                            </span>
+                            <span className="text-[10px] text-slate-400">
+                              Nasc: {age.formattedBirth} • {age.bracket}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span className="font-bold text-slate-800 font-mono text-[11px] block">
+                              {tenure.label}
+                            </span>
+                            <span className="text-[10px] text-slate-400">
+                              Adm: {tenure.formattedAdmission} • {tenure.bracket}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 font-medium text-slate-800">
+                            {emp.locationName}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                              emp.shiftCategory === 'Turno A'
+                                ? 'bg-sky-50 text-sky-800 border border-sky-200'
+                                : emp.shiftCategory === 'Turno B'
+                                ? 'bg-indigo-50 text-indigo-800 border border-indigo-200'
+                                : emp.shiftCategory === 'Turno C'
+                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                : emp.shiftCategory === 'Administrativo'
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                : 'bg-purple-50 text-purple-800 border border-purple-200'
+                            }`}>
+                              {emp.shiftCategory}
+                            </span>
+                            <span className="text-[9px] text-slate-400 block font-mono mt-0.5">{emp.shiftName}</span>
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-600">
+                            {emp.immediateManager}
+                          </td>
+                          <td className="py-2.5 px-2 text-center">
+                            <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              {emp.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUB-ABA 2: CÉLULAS OPERACIONAIS FABRIS & ESCALAS DE TURNO (ORIGINAL COMPLETO) */}
+      {/* ========================================================================= */}
+      {activeSubTab === 'cells' && (
+        <div className="space-y-6">
+
+          {/* Cards dos 4 Turnos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5">
+            {shiftGroups.map(grp => (
+              <div 
+                key={grp.id}
+                className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-4 flex flex-col justify-between"
               >
-                {MONTH_NAMES.map((name, idx) => (
-                  <option key={name} value={idx + 1}>
-                    {name} ({idx + 1 === 10 ? 'Mês Corrente' : `${idx + 1}`})
-                  </option>
-                ))}
-              </select>
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-bold text-[#0b1c30]">{grp.title}</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${grp.statusColor}`}>
+                      {grp.status}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 font-mono mb-2">{grp.hours}</p>
+
+                  <div className="flex items-baseline justify-between mb-2">
+                    <span className="text-2xl font-extrabold text-[#0b1c30]">{grp.count}</span>
+                    <span className="text-xs text-slate-400">/ {grp.planned} meta</span>
+                  </div>
+
+                  <div className="space-y-1 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+                    <div className="flex justify-between">
+                      <span>Líder de Turno:</span>
+                      <strong className="text-slate-700">{grp.leader}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Absenteísmo:</span>
+                      <strong className={grp.id === 'Turno C' ? 'text-amber-800 font-bold' : 'text-[#047857]'}>{grp.absRate}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Horas Extras:</span>
+                      <strong className={grp.id === 'Turno C' ? 'text-amber-900 font-bold' : 'text-slate-700'}>{grp.otRate}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Tabela de Células Operacionais Fabris */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+            <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-base font-bold text-[#0b1c30]">Mapeamento de Células Operacionais Fabris</h3>
+                <p className="text-xs text-slate-500">Capacidade produtiva, postos críticos e alertas por célula</p>
+              </div>
+
+              <div className="relative w-full sm:w-64">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                <input 
+                  type="text"
+                  placeholder="Buscar célula ou função..."
+                  value={cellSearch}
+                  onChange={(e) => setCellSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-[#f8f9ff] text-[#0b1c30] focus:outline-none focus:ring-2 focus:ring-[#306576]"
+                />
+              </div>
             </div>
 
-            {/* Botão Copiar Lista para Mural */}
-            <button
-              onClick={handleCopyMural}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${
-                copiedMural 
-                  ? 'bg-emerald-600 text-white' 
-                  : 'bg-[#0a3641] hover:bg-[#134e5e] text-[#6ffbbe]'
-              }`}
-              title="Copiar lista organizada para WhatsApp ou mural do turno"
-            >
-              {copiedMural ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedMural ? 'Lista Copiada!' : 'Copiar p/ Mural de Turno'}</span>
-            </button>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold">
+                  <tr>
+                    <th className="py-3 px-4">Célula / Linha de Produção</th>
+                    <th className="py-3 px-3">Macroárea</th>
+                    <th className="py-3 px-3 text-center">Efetivo Alocado</th>
+                    <th className="py-3 px-4">Funções Críticas Mapeadas</th>
+                    <th className="py-3 px-3 text-center">Taxa de Cobertura</th>
+                    <th className="py-3 px-4">Observações de Gestão</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredCells.map((cell, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-4 font-semibold text-[#0b1c30]">{cell.name}</td>
+                      <td className="py-3.5 px-3 text-slate-600">{cell.macroarea}</td>
+                      <td className="py-3.5 px-3 text-center font-bold text-[#0a3641]">{cell.totalStaff} colab</td>
+                      <td className="py-3.5 px-4 text-slate-600 font-mono text-[11px]">{cell.criticalJobs}</td>
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ecfdf5] text-[#047857]">
+                          {cell.coverage}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        {cell.alert ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-amber-800 font-medium">
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                            {cell.alert}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#10b981] shrink-0" />
+                            Escala estabilizada
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
 
-        {/* Resumo Rápido dos Aniversariantes do Mês Selecionado */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-          <div className="p-3 rounded-xl bg-purple-50/60 border border-purple-100 flex items-center justify-between">
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUB-ABA 3: ANIVERSARIANTES DO MÊS (PRÁTICA DHO & MURAL DE TURNO) */}
+      {/* ========================================================================= */}
+      {activeSubTab === 'birthdays' && (
+        <div className="bg-white rounded-2xl border border-purple-200/90 shadow-2xs overflow-hidden space-y-4 p-5">
+          
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-purple-100 pb-4">
             <div>
-              <span className="text-[10px] font-bold text-purple-700 uppercase block">Total no Mês</span>
-              <span className="text-xl font-black text-purple-900">{birthdayData.list.length}</span>
+              <div className="flex items-center gap-2">
+                <span className="p-2 rounded-xl bg-purple-100 text-purple-700">
+                  <Cake className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="text-base font-bold text-[#0b1c30] flex items-center gap-2">
+                    Aniversariantes de {MONTH_NAMES[selectedMonth - 1]} • KBA1
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 font-mono font-bold">
+                      {birthdayData.list.length} aniversariantes
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Prática de Gestão DHO: Acompanhamento de aniversariantes por Setor, Turno e Gestor Imediato
+                  </p>
+                </div>
+              </div>
             </div>
-            <PartyPopper className="w-5 h-5 text-purple-500" />
-          </div>
 
-          <div 
-            onClick={() => setSelectedShift(selectedShift === 'Turno A' ? 'all' : 'Turno A')}
-            className={`p-3 rounded-xl border cursor-pointer transition-all ${
-              selectedShift === 'Turno A' ? 'bg-sky-100 border-sky-400 font-bold' : 'bg-slate-50 border-slate-200'
-            }`}
-          >
-            <span className="text-[10px] text-slate-500 font-bold uppercase block">T1 (Manhã)</span>
-            <span className="text-lg font-black text-slate-900">{birthdayData.byShift['Turno A'] || 0} colab.</span>
-          </div>
+            {/* Controles: Seletor de Mês e Botão de Copiar */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                <CalendarDays className="w-3.5 h-3.5 text-slate-500 ml-1.5" />
+                <select
+                  value={selectedMonth}
+                  onChange={e => setSelectedMonth(Number(e.target.value))}
+                  className="bg-transparent text-xs font-bold text-slate-700 py-1 px-2 focus:outline-none cursor-pointer"
+                >
+                  {MONTH_NAMES.map((m, idx) => (
+                    <option key={m} value={idx + 1}>
+                      {m} ({employees.filter(emp => {
+                        if (!emp.birthDate) return false;
+                        const parts = emp.birthDate.split('-');
+                        return parts.length >= 2 && parseInt(parts[1], 10) === idx + 1;
+                      }).length})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          <div 
-            onClick={() => setSelectedShift(selectedShift === 'Turno B' ? 'all' : 'Turno B')}
-            className={`p-3 rounded-xl border cursor-pointer transition-all ${
-              selectedShift === 'Turno B' ? 'bg-indigo-100 border-indigo-400 font-bold' : 'bg-slate-50 border-slate-200'
-            }`}
-          >
-            <span className="text-[10px] text-slate-500 font-bold uppercase block">T2 (Tarde)</span>
-            <span className="text-lg font-black text-slate-900">{birthdayData.byShift['Turno B'] || 0} colab.</span>
-          </div>
-
-          <div 
-            onClick={() => setSelectedShift(selectedShift === 'Turno C' ? 'all' : 'Turno C')}
-            className={`p-3 rounded-xl border cursor-pointer transition-all ${
-              selectedShift === 'Turno C' ? 'bg-amber-100 border-amber-400 font-bold' : 'bg-slate-50 border-slate-200'
-            }`}
-          >
-            <span className="text-[10px] text-slate-500 font-bold uppercase block">T3 (Noite)</span>
-            <span className="text-lg font-black text-slate-900">{birthdayData.byShift['Turno C'] || 0} colab.</span>
-          </div>
-
-          <div 
-            onClick={() => setSelectedShift(selectedShift === 'Administrativo' ? 'all' : 'Administrativo')}
-            className={`p-3 rounded-xl border cursor-pointer transition-all ${
-              selectedShift === 'Administrativo' ? 'bg-emerald-100 border-emerald-400 font-bold' : 'bg-slate-50 border-slate-200'
-            }`}
-          >
-            <span className="text-[10px] text-slate-500 font-bold uppercase block">ADM / Apoio</span>
-            <span className="text-lg font-black text-slate-900">{birthdayData.byShift['Administrativo'] || 0} colab.</span>
-          </div>
-
-          <div 
-            onClick={() => setSelectedShift(selectedShift === 'Outras Jornadas' ? 'all' : 'Outras Jornadas')}
-            className={`p-3 rounded-xl border cursor-pointer transition-all ${
-              selectedShift === 'Outras Jornadas' ? 'bg-rose-100 border-rose-400 font-bold' : 'bg-slate-50 border-slate-200'
-            }`}
-          >
-            <span className="text-[10px] text-slate-500 font-bold uppercase block">Outras Jornadas</span>
-            <span className="text-lg font-black text-slate-900">{birthdayData.byShift['Outras Jornadas'] || 0} colab.</span>
-          </div>
-        </div>
-
-        {/* Barra de Filtro e Busca de Aniversariantes */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-xs font-semibold text-slate-500 mr-1">Filtrar Turno:</span>
-            {['all', 'Turno A', 'Turno B', 'Turno C', 'Administrativo', 'Outras Jornadas'].map(s => (
               <button
-                key={s}
-                onClick={() => setSelectedShift(s)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                  selectedShift === s
-                    ? 'bg-[#0a3641] text-[#6ffbbe] shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                onClick={handleCopyMural}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-2xs transition-all"
+                title="Copiar texto comemorativo formatado para envio no WhatsApp do Turno ou Mural"
+              >
+                {copiedMural ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedMural ? 'Copiado para o Mural!' : 'Copiar p/ Mural de Turno'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Resumo por Turno */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+            {['Turno A', 'Turno B', 'Turno C', 'Administrativo', 'Outras Jornadas'].map(sh => (
+              <button
+                key={sh}
+                onClick={() => setBirthdayShift(birthdayShift === sh ? 'all' : sh)}
+                className={`p-2.5 rounded-xl border text-center transition-all ${
+                  birthdayShift === sh 
+                    ? 'bg-purple-600 text-white border-purple-700 shadow-2xs' 
+                    : 'bg-purple-50/50 hover:bg-purple-100/60 text-purple-900 border-purple-100'
                 }`}
               >
-                {s === 'all' ? 'Todos os Turnos' : s}
+                <span className="text-[10px] font-bold block opacity-80">{sh}</span>
+                <span className="text-lg font-black font-mono">
+                  {birthdayData.byShift[sh] || 0}
+                </span>
+                <span className="text-[10px] block opacity-70">aniversariantes</span>
               </button>
             ))}
           </div>
 
-          <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Buscar aniversariante, setor..."
-              value={birthdaySearch}
-              onChange={(e) => setBirthdaySearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-[#f8f9ff] text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#306576]"
-            />
-          </div>
-        </div>
-
-        {/* Tabela dos Aniversariantes do Mês */}
-        <div className="overflow-x-auto rounded-2xl border border-slate-200/90 overflow-hidden">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold">
-              <tr>
-                <th className="py-2.5 px-3 text-center min-w-[70px]">Dia</th>
-                <th className="py-2.5 px-3">Colaborador(a)</th>
-                <th className="py-2.5 px-2 text-center">Gênero</th>
-                <th className="py-2.5 px-3">Local / Setor Fabril</th>
-                <th className="py-2.5 px-3">Turno / Escala</th>
-                <th className="py-2.5 px-3">Gestor Imediato</th>
-                <th className="py-2.5 px-3 text-center">Tempo de Casa</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
-              {filteredBirthdays.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-400">
-                    Nenhum aniversariante encontrado com os filtros selecionados.
-                  </td>
-                </tr>
-              ) : (
-                filteredBirthdays.map(({ emp, dayFormatted, isFemale, tenureYears }) => (
-                  <tr key={emp.prn} className="hover:bg-purple-50/30 transition-colors">
-                    
-                    {/* Dia com Badge Comemorativo */}
-                    <td className="py-2.5 px-3 text-center">
-                      <span className="inline-flex items-center gap-1 font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-900 border border-purple-200 shadow-2xs">
-                        🎂 {dayFormatted}
-                      </span>
-                    </td>
-
-                    {/* Nome do Colaborador */}
-                    <td className="py-2.5 px-3">
-                      <span className="font-bold text-[#0b1c30] block">{emp.name}</span>
-                      <span className="text-[10px] text-slate-400 font-mono">PRN: {emp.prn} • {emp.jobTitle}</span>
-                    </td>
-
-                    {/* Gênero */}
-                    <td className="py-2.5 px-2 text-center">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        isFemale ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-sky-50 text-sky-800 border border-sky-100'
-                      }`}>
-                        {isFemale ? '👩 Fem' : '👨 Masc'}
-                      </span>
-                    </td>
-
-                    {/* Setor */}
-                    <td className="py-2.5 px-3 font-semibold text-slate-800">
-                      {emp.locationName}
-                    </td>
-
-                    {/* Turno */}
-                    <td className="py-2.5 px-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                        emp.shiftCategory === 'Turno A'
-                          ? 'bg-sky-50 text-sky-800 border border-sky-200'
-                          : emp.shiftCategory === 'Turno B'
-                          ? 'bg-indigo-50 text-indigo-800 border border-indigo-200'
-                          : emp.shiftCategory === 'Turno C'
-                          ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                          : emp.shiftCategory === 'Administrativo'
-                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                          : 'bg-purple-50 text-purple-800 border border-purple-200'
-                      }`}>
-                        {emp.shiftCategory}
-                      </span>
-                    </td>
-
-                    {/* Gestor */}
-                    <td className="py-2.5 px-3 text-slate-600">
-                      {emp.immediateManager}
-                    </td>
-
-                    {/* Tempo de Casa */}
-                    <td className="py-2.5 px-3 text-center font-mono text-[11px] font-bold text-slate-700">
-                      {tenureYears > 0 ? `${tenureYears} anos` : '< 1 ano'}
-                    </td>
-
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 4. TABELA DE CÉLULAS OPERACIONAIS E POSTOS CRÍTICOS */}
-      {/* ========================================================================= */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h3 className="text-base font-bold text-[#0b1c30]">Mapeamento de Células Operacionais Fabris</h3>
-            <p className="text-xs text-slate-500">Capacidade produtiva, postos críticos e alertas por célula</p>
-          </div>
-
-          <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input 
-              type="text"
-              placeholder="Buscar célula ou função..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-[#f8f9ff] text-[#0b1c30] focus:outline-none focus:ring-2 focus:ring-[#306576]"
-            />
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold">
-              <tr>
-                <th className="py-3 px-4">Célula / Linha de Produção</th>
-                <th className="py-3 px-3">Macroárea</th>
-                <th className="py-3 px-3 text-center">Efetivo Alocado</th>
-                <th className="py-3 px-4">Funções Críticas Mapeadas</th>
-                <th className="py-3 px-3 text-center">Taxa de Cobertura</th>
-                <th className="py-3 px-4">Observações de Gestão</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredCells.map((cell, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3.5 px-4 font-semibold text-[#0b1c30]">{cell.name}</td>
-                  <td className="py-3.5 px-3 text-slate-600">{cell.macroarea}</td>
-                  <td className="py-3.5 px-3 text-center font-bold text-[#0a3641]">{cell.totalStaff} colab</td>
-                  <td className="py-3.5 px-4 text-slate-600 font-mono text-[11px]">{cell.criticalJobs}</td>
-                  <td className="py-3.5 px-3 text-center">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ecfdf5] text-[#047857]">
-                      {cell.coverage}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    {cell.alert ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] text-amber-800 font-medium">
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                        {cell.alert}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#10b981] shrink-0" />
-                        Escala estabilizada
-                      </span>
-                    )}
-                  </td>
-                </tr>
+          {/* Filtro e Busca de Aniversariantes */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+            <div className="flex items-center gap-2 text-xs w-full sm:w-auto">
+              <span className="text-slate-500 font-semibold text-xs">Filtrar Turno:</span>
+              <button
+                onClick={() => setBirthdayShift('all')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
+                  birthdayShift === 'all' ? 'bg-purple-700 text-white' : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                Todos ({birthdayData.list.length})
+              </button>
+              {['Turno A', 'Turno B', 'Turno C', 'Administrativo'].map(sh => (
+                <button
+                  key={sh}
+                  onClick={() => setBirthdayShift(sh)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
+                    birthdayShift === sh ? 'bg-purple-700 text-white' : 'bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {sh.replace('Turno ', 'T')} ({birthdayData.byShift[sh] || 0})
+                </button>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            <div className="relative w-full sm:w-64">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Buscar aniversariante..."
+                value={birthdaySearch}
+                onChange={e => setBirthdaySearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              />
+            </div>
+          </div>
+
+          {/* Tabela de Aniversariantes */}
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-purple-50 text-purple-900 uppercase text-[10px] tracking-wider font-semibold">
+                <tr>
+                  <th className="py-2.5 px-3 text-center">Dia</th>
+                  <th className="py-2.5 px-3">Colaborador Homenageado</th>
+                  <th className="py-2.5 px-2 text-center">Gênero</th>
+                  <th className="py-2.5 px-3">Local / Setor Fabril</th>
+                  <th className="py-2.5 px-3">Turno / Escala</th>
+                  <th className="py-2.5 px-3">Gestor Imediato</th>
+                  <th className="py-2.5 px-3 text-center">Idade no Ano</th>
+                  <th className="py-2.5 px-3 text-center">Tempo de Casa</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {filteredBirthdays.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-8 text-center text-slate-400">
+                      Nenhum aniversariante encontrado com os filtros selecionados.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredBirthdays.map(({ emp, dayFormatted, isFemale, tenureYears, ageCompleting }) => (
+                    <tr key={emp.prn} className="hover:bg-purple-50/30 transition-colors">
+                      <td className="py-2.5 px-3 text-center">
+                        <span className="inline-flex items-center gap-1 font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-900 border border-purple-200 shadow-2xs">
+                          🎂 {dayFormatted}
+                        </span>
+                      </td>
+
+                      <td className="py-2.5 px-3">
+                        <span className="font-bold text-[#0b1c30] block">{emp.name}</span>
+                        <span className="text-[10px] text-slate-400 font-mono">PRN: {emp.prn} • {emp.jobTitle}</span>
+                      </td>
+
+                      <td className="py-2.5 px-2 text-center">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          isFemale ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-sky-50 text-sky-800 border border-sky-100'
+                        }`}>
+                          {isFemale ? '👩 Fem' : '👨 Masc'}
+                        </span>
+                      </td>
+
+                      <td className="py-2.5 px-3 font-semibold text-slate-800">
+                        {emp.locationName}
+                      </td>
+
+                      <td className="py-2.5 px-3">
+                        <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                          emp.shiftCategory === 'Turno A'
+                            ? 'bg-sky-50 text-sky-800 border border-sky-200'
+                            : emp.shiftCategory === 'Turno B'
+                            ? 'bg-indigo-50 text-indigo-800 border border-indigo-200'
+                            : emp.shiftCategory === 'Turno C'
+                            ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                            : emp.shiftCategory === 'Administrativo'
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                            : 'bg-purple-50 text-purple-800 border border-purple-200'
+                        }`}>
+                          {emp.shiftCategory}
+                        </span>
+                      </td>
+
+                      <td className="py-2.5 px-3 text-slate-600">
+                        {emp.immediateManager}
+                      </td>
+
+                      <td className="py-2.5 px-3 text-center font-mono text-[11px] font-bold text-purple-800">
+                        {ageCompleting > 0 ? `${ageCompleting} anos` : '—'}
+                      </td>
+
+                      <td className="py-2.5 px-3 text-center font-mono text-[11px] font-bold text-slate-700">
+                        {tenureYears > 0 ? `${tenureYears} anos` : '< 1 ano'}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
         </div>
-      </div>
+      )}
+
     </div>
   );
 };
