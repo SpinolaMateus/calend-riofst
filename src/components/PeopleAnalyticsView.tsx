@@ -28,12 +28,18 @@ import { SectorsShiftsTab } from './peopleAnalytics/SectorsShiftsTab';
 import { FormationsDashboard } from './FormationsDashboard';
 import { AuditFormulasModal } from './peopleAnalytics/AuditFormulasModal';
 import { CalculationRulesModal } from './peopleAnalytics/CalculationRulesModal';
+import { SuperarTab } from './peopleAnalytics/SuperarTab';
+import { 
+  SUPERAR_AUDITS_INITIAL, SUPERAR_INDICATORS_INITIAL, 
+  SuperarAudit, SuperarMonthlyIndicator 
+} from '../data/superarInitialData';
 
 export type TabType = 
   | 'overview' 
   | 'headcount' 
   | 'jobs_shifts' 
   | 'indicators' 
+  | 'superar'
   | 'absenteeism' 
   | 'movements' 
   | 'trainings' 
@@ -85,6 +91,43 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
     }
   });
 
+  // Estado das Auditorias e Indicadores do Programa Superar
+  const [superarIndicators, setSuperarIndicators] = useState<SuperarMonthlyIndicator[]>(() => {
+    try {
+      const stored = localStorage.getItem('kba1_superar_indicators_v1');
+      return stored ? JSON.parse(stored) : SUPERAR_INDICATORS_INITIAL;
+    } catch {
+      return SUPERAR_INDICATORS_INITIAL;
+    }
+  });
+
+  const [superarAudits, setSuperarAudits] = useState<SuperarAudit[]>(() => {
+    try {
+      const stored = localStorage.getItem('kba1_superar_audits_v1');
+      return stored ? JSON.parse(stored) : SUPERAR_AUDITS_INITIAL;
+    } catch {
+      return SUPERAR_AUDITS_INITIAL;
+    }
+  });
+
+  const saveSuperarIndicators = (data: SuperarMonthlyIndicator[]) => {
+    setSuperarIndicators(data);
+    try {
+      localStorage.setItem('kba1_superar_indicators_v1', JSON.stringify(data));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const saveSuperarAudits = (data: SuperarAudit[]) => {
+    setSuperarAudits(data);
+    try {
+      localStorage.setItem('kba1_superar_audits_v1', JSON.stringify(data));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   // Mapeamento de Macroáreas
   const [macroMappings] = useState(INITIAL_MACROAREA_MAPPINGS);
 
@@ -120,13 +163,24 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
     status: 'Planejado',
   });
 
-  // Estado para Entrada de Dados
-  const [dataEntryTab, setDataEntryTab] = useState<'import' | 'manual'>('import');
-  const [manualFormType, setManualFormType] = useState<'employee' | 'kpi' | 'action'>('employee');
+  // Estado para Entrada de Dados & Atualização Manual
+  const [dataEntryTab, setDataEntryTab] = useState<'import' | 'manual'>('manual');
+  const [manualFormType, setManualFormType] = useState<'superar' | 'employee' | 'kpi' | 'action'>('superar');
   const [importSummary, setImportSummary] = useState<ExcelImportSummary | null>(null);
   const [importPreview, setImportPreview] = useState<any[]>([]);
   const [allImportedEmployees, setAllImportedEmployees] = useState<Employee[]>([]);
   const [importFeedback, setImportFeedback] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  // Estados para atualização manual de meses do Superar
+  const [selectedSuperarIndId, setSelectedSuperarIndId] = useState<string>('habilidade_piloto');
+  const [selectedSuperarMonth, setSelectedSuperarMonth] = useState<string>('OUT');
+  const [superarValInput, setSuperarValInput] = useState<string>('');
+  const [superarNoteInput, setSuperarNoteInput] = useState<string>('');
+
+  // Estados para atualização manual de auditorias do Superar
+  const [selectedSuperarAuditId, setSelectedSuperarAuditId] = useState<string>('aud_passo');
+  const [selectedSuperarAuditMonth, setSelectedSuperarAuditMonth] = useState<string>('ABR');
+  const [superarAuditValInput, setSuperarAuditValInput] = useState<string>('');
 
   // Formulário manual de novo colaborador
   const [newEmployeeForm, setNewEmployeeForm] = useState<Partial<Employee>>({
@@ -623,10 +677,11 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
               { id: 'headcount', label: `Quadro de Pessoal (${filteredEmployees.length})`, icon: Users },
               { id: 'jobs_shifts', label: 'Setores & Turnos', icon: Clock },
               { id: 'indicators', label: 'Indicadores G&G (9)', icon: TrendingUp },
+              { id: 'superar', label: 'Programa Superar', icon: Award },
               { id: 'absenteeism', label: 'Absenteísmo & Movimentações', icon: TrendingDown },
               { id: 'trainings', label: 'Treinamento & DHO', icon: Layers },
               { id: 'action_plans', label: 'Inteligência Analítica', icon: AlertTriangle },
-              { id: 'data_entry', label: 'Entrada de Dados', icon: UploadCloud },
+              { id: 'data_entry', label: 'Atualizar Dados', icon: UploadCloud },
             ].map((item) => {
               const Icon = item.icon || BarChart3;
               const isActive = activeTab === item.id || (item.id === 'absenteeism' && activeTab === 'movements');
@@ -864,6 +919,45 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
             />
           )}
 
+          {/* ABA SUPERAR: PROGRAMA SUPERAR OFICIAL */}
+          {activeTab === 'superar' && (
+            <SuperarTab
+              onOpenDataEntry={() => {
+                setActiveTab('data_entry');
+                setDataEntryTab('manual');
+                setManualFormType('superar');
+              }}
+              audits={superarAudits}
+              indicators={superarIndicators}
+              onUpdateIndicatorMonth={(indId, m, val) => {
+                const updated = superarIndicators.map(item => {
+                  if (item.id === indId) {
+                    const months = { ...item.months, [m]: val };
+                    const filled = Object.values(months).filter(v => v !== null && v !== undefined) as number[];
+                    const media = filled.length > 0 ? Number((filled.reduce((a, b) => a + b, 0) / filled.length).toFixed(1)) : 0;
+                    return { ...item, months, media };
+                  }
+                  return item;
+                });
+                saveSuperarIndicators(updated);
+                showToast(`Indicador atualizado para o mês ${m}!`);
+              }}
+              onUpdateAuditMonth={(audId, m, val) => {
+                const updated = superarAudits.map(item => {
+                  if (item.id === audId) {
+                    const months = { ...item.months, [m]: val };
+                    const filled = Object.values(months).filter(v => v !== null && v !== undefined && typeof v === 'number') as number[];
+                    const media = filled.length > 0 ? Number((filled.reduce((a, b) => a + b, 0) / filled.length).toFixed(1)) : 0;
+                    return { ...item, months, media };
+                  }
+                  return item;
+                });
+                saveSuperarAudits(updated);
+                showToast(`Auditoria atualizada para o mês ${m}!`);
+              }}
+            />
+          )}
+
           {/* ABA 5 & 6: ABSENTEÍSMO & MOVIMENTAÇÕES */}
           {(activeTab === 'absenteeism' || activeTab === 'movements') && (
             <AbsenteeismMovementsTab />
@@ -1087,35 +1181,255 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
               </div>
             )}
 
-            {/* SUB-ABA 2: LANÇAMENTO MANUAL */}
+            {/* SUB-ABA 2: LANÇAMENTO MANUAL & ATUALIZAÇÕES */}
             {dataEntryTab === 'manual' && (
               <div className="space-y-6">
-                <div className="flex items-center gap-2 text-xs">
+                <div className="flex items-center gap-2 text-xs flex-wrap">
                   <button
-                    onClick={() => setManualFormType('employee')}
-                    className={`px-3 py-1.5 rounded-lg font-bold ${
-                      manualFormType === 'employee' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
+                    onClick={() => setManualFormType('superar')}
+                    className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
+                      manualFormType === 'superar' ? 'bg-[#0a3641] text-[#6ffbbe] shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    Cadastrar Colaborador
+                    <Award className="w-4 h-4" />
+                    Atualizar Programa Superar
                   </button>
                   <button
                     onClick={() => setManualFormType('kpi')}
-                    className={`px-3 py-1.5 rounded-lg font-bold ${
-                      manualFormType === 'kpi' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
+                    className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
+                      manualFormType === 'kpi' ? 'bg-[#0a3641] text-[#6ffbbe] shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    Lançar Realizado de Indicador
+                    <TrendingUp className="w-4 h-4" />
+                    Lançar Realizado de Indicador G&G
+                  </button>
+                  <button
+                    onClick={() => setManualFormType('employee')}
+                    className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
+                      manualFormType === 'employee' ? 'bg-[#0a3641] text-[#6ffbbe] shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    <Users className="w-4 h-4" />
+                    Cadastrar Colaborador
                   </button>
                   <button
                     onClick={() => setManualFormType('action')}
-                    className={`px-3 py-1.5 rounded-lg font-bold ${
-                      manualFormType === 'action' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
+                    className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all ${
+                      manualFormType === 'action' ? 'bg-[#0a3641] text-[#6ffbbe] shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
+                    <AlertTriangle className="w-4 h-4" />
                     Cadastrar Plano de Ação
                   </button>
                 </div>
+
+                {/* FORMULÁRIO 0: ATUALIZAÇÃO DO PROGRAMA SUPERAR */}
+                {manualFormType === 'superar' && (
+                  <div className="space-y-6">
+                    <div className="bg-[#eff4ff] p-5 rounded-2xl border border-[#cbd5e1] space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
+                        <div>
+                          <h5 className="font-bold text-sm text-[#0b1c30] flex items-center gap-2">
+                            <Award className="w-4 h-4 text-emerald-600" />
+                            Lançar / Atualizar Mês de Indicador Superar
+                          </h5>
+                          <p className="text-xs text-slate-500">
+                            Atualize a realização mensal dos 9 indicadores do Pilar ET (Educação e Treinamento)
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('superar')}
+                          className="px-3 py-1.5 text-xs font-bold text-[#306576] bg-white rounded-lg border border-slate-200 hover:bg-slate-50 self-start sm:self-auto shadow-2xs"
+                        >
+                          Ir para Aba Superar &rarr;
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                        {/* Indicador */}
+                        <div className="sm:col-span-2">
+                          <label className="font-bold text-slate-700 block mb-1">Indicador *</label>
+                          <select
+                            value={selectedSuperarIndId}
+                            onChange={(e) => {
+                              const indId = e.target.value;
+                              setSelectedSuperarIndId(indId);
+                              const ind = superarIndicators.find(i => i.id === indId);
+                              if (ind) {
+                                const v = ind.months[selectedSuperarMonth];
+                                setSuperarValInput(v !== null && v !== undefined ? String(v) : '');
+                                setSuperarNoteInput(ind.notes || '');
+                              }
+                            }}
+                            className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#306576]"
+                          >
+                            {superarIndicators.map(i => (
+                              <option key={i.id} value={i.id}>
+                                {i.name} (Meta 1: {i.meta1}{i.unit === '%' ? '%' : ''} | Meta 3: {i.meta3}{i.unit === '%' ? '%' : ''})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Mês */}
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Mês de Referência *</label>
+                          <select
+                            value={selectedSuperarMonth}
+                            onChange={(e) => {
+                              const m = e.target.value;
+                              setSelectedSuperarMonth(m);
+                              const ind = superarIndicators.find(i => i.id === selectedSuperarIndId);
+                              if (ind) {
+                                const v = ind.months[m];
+                                setSuperarValInput(v !== null && v !== undefined ? String(v) : '');
+                              }
+                            }}
+                            className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#306576]"
+                          >
+                            {['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'].map(m => (
+                              <option key={m} value={m}>{m} / 2026</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Valor Realizado */}
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Valor Realizado *</label>
+                          <input
+                            type="text"
+                            placeholder="Ex: 96.5"
+                            value={superarValInput}
+                            onChange={e => setSuperarValInput(e.target.value)}
+                            className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-mono text-sm font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#306576]"
+                          />
+                        </div>
+
+                        {/* Observação / Diagnóstico Técnico */}
+                        <div className="sm:col-span-4">
+                          <label className="font-bold text-slate-700 block mb-1">
+                            Diagnóstico Técnico / Análise Operacional (Opcional)
+                          </label>
+                          <textarea
+                            rows={2}
+                            placeholder="Descreva o plano de ação, causa raiz de desvio ou justificativa técnica..."
+                            value={superarNoteInput}
+                            onChange={e => setSuperarNoteInput(e.target.value)}
+                            className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#306576]"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const num = parseFloat(superarValInput.replace(',', '.'));
+                            if (isNaN(num)) {
+                              alert('Por favor informe um valor numérico válido.');
+                              return;
+                            }
+                            const updated = superarIndicators.map(item => {
+                              if (item.id === selectedSuperarIndId) {
+                                const months = { ...item.months, [selectedSuperarMonth]: num };
+                                const filled = Object.values(months).filter(v => v !== null && v !== undefined) as number[];
+                                const media = filled.length > 0 ? Number((filled.reduce((a, b) => a + b, 0) / filled.length).toFixed(1)) : 0;
+                                const notes = superarNoteInput.trim() ? superarNoteInput : item.notes;
+                                return { ...item, months, media, notes };
+                              }
+                              return item;
+                            });
+                            saveSuperarIndicators(updated);
+                            showToast(`Indicador atualizado para ${selectedSuperarMonth}: ${num}!`);
+                          }}
+                          className="px-5 py-2.5 bg-[#0a3641] hover:bg-[#134e5e] text-[#6ffbbe] font-black text-xs rounded-xl shadow-xs transition-colors flex items-center gap-2"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          Gravar e Atualizar Superar
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Bloco 2: Atualização de Auditorias (Passo, Selo, Confirmação) */}
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
+                      <div>
+                        <h5 className="font-bold text-xs text-slate-800 uppercase tracking-wider">
+                          Atualizar Auditorias & Avaliações Superar
+                        </h5>
+                        <p className="text-[11px] text-slate-500">
+                          Auditoria de Passo, Auditoria de Selo, Confirmação de Processo e Auto Avaliação
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Auditoria</label>
+                          <select
+                            value={selectedSuperarAuditId}
+                            onChange={e => setSelectedSuperarAuditId(e.target.value)}
+                            className="w-full p-2 bg-white border border-slate-200 rounded-xl font-medium"
+                          >
+                            {superarAudits.map(a => (
+                              <option key={a.id} value={a.id}>{a.name} (Meta: {a.meta})</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Mês</label>
+                          <select
+                            value={selectedSuperarAuditMonth}
+                            onChange={e => setSelectedSuperarAuditMonth(e.target.value)}
+                            className="w-full p-2 bg-white border border-slate-200 rounded-xl font-bold"
+                          >
+                            {['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'].map(m => (
+                              <option key={m} value={m}>{m}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="font-bold text-slate-700 block mb-1">Resultado Obtido</label>
+                          <input
+                            type="text"
+                            placeholder="Ex: 95.5"
+                            value={superarAuditValInput}
+                            onChange={e => setSuperarAuditValInput(e.target.value)}
+                            className="w-full p-2 bg-white border border-slate-200 rounded-xl font-mono font-bold"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const num = parseFloat(superarAuditValInput.replace(',', '.'));
+                            if (isNaN(num)) {
+                              alert('Por favor informe um valor numérico válido.');
+                              return;
+                            }
+                            const updated = superarAudits.map(item => {
+                              if (item.id === selectedSuperarAuditId) {
+                                const months = { ...item.months, [selectedSuperarAuditMonth]: num };
+                                const filled = Object.values(months).filter(v => v !== null && v !== undefined && typeof v === 'number') as number[];
+                                const media = filled.length > 0 ? Number((filled.reduce((a, b) => a + b, 0) / filled.length).toFixed(1)) : 0;
+                                return { ...item, months, media };
+                              }
+                              return item;
+                            });
+                            saveSuperarAudits(updated);
+                            showToast(`Auditoria atualizada para ${selectedSuperarAuditMonth}: ${num}!`);
+                          }}
+                          className="px-4 py-2 bg-[#306576] hover:bg-[#0a3641] text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
+                        >
+                          Gravar Auditoria
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* FORMULÁRIO 1: NOVO COLABORADOR */}
                 {manualFormType === 'employee' && (
