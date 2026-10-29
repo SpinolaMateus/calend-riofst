@@ -491,7 +491,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
       {/* ========================================================================= */}
       {/* 1. TOP HEADER & NAVIGATION */}
       {/* ========================================================================= */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div data-capture-ignore className="no-print bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
             <BarChart3 className="w-6 h-6" />
@@ -592,6 +592,25 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
         </div>
       </div>
 
+      {/* Cabeçalho Executivo Inteligente para Captura de Imagem e Impressão */}
+      <div className="capture-only hidden bg-white p-5 rounded-3xl border border-slate-200 mb-4 text-left shadow-xs">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-black text-slate-900 uppercase">
+              Plano de Ação • Modelo Gantt — Pilar Educação & Treinamento
+            </h2>
+            <p className="text-xs text-slate-600 font-semibold mt-0.5">
+              Acompanhamento de Marcos e Entregáveis (Etapa 0 a Passo 6) • Unidade Feira de Santana
+            </p>
+          </div>
+          <div className="text-right">
+            <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 bg-indigo-600 text-white rounded-xl shadow-xs">
+              {filteredActions.length} Ações Mapeadas
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* ========================================================================= */}
       {/* 2. EXECUTIVE KPI CARDS */}
       {/* ========================================================================= */}
@@ -646,7 +665,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
       {/* ========================================================================= */}
       {/* 3. FILTER BAR */}
       {/* ========================================================================= */}
-      <div className="bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div data-capture-ignore className="no-print bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
         {/* Search Input */}
         <div className="relative flex-1 min-w-[220px]">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />

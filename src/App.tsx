@@ -444,7 +444,7 @@ export default function App() {
   const handleCopyScheduleAsImage = async () => {
     try {
       setIsCopyingImage(true);
-      const res = await copyElementAsImage('integration-capture-content', 'cronograma_integracao');
+      const res = await copyElementAsImage('printable-content', 'cronograma_integracao');
       if (res.method === 'clipboard') {
         showToast('Agenda copiada como imagem! Você já pode colar no Teams, WhatsApp ou e-mail.');
       } else {
@@ -770,15 +770,30 @@ export default function App() {
             />
 
             <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              <div id="printable-content" className="print-container">
-                <div className="hidden print:block mb-4 border-b pb-3 text-left">
-                  <h1 className="text-xl font-bold uppercase">{unitInfo.unitName}</h1>
-                  <p className="text-xs text-slate-700 font-medium">
-                    {unitInfo.cohortName} — {unitInfo.period}
-                  </p>
-                  <p className="text-[10px] text-slate-500">
-                    Local: {unitInfo.locationDefault} • Contato: {unitInfo.contactPerson}
-                  </p>
+              <div id="printable-content" className="print-container bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/90 shadow-2xs">
+                {/* Cabeçalho Executivo Inteligente para Captura de Imagem e Impressão */}
+                <div className="capture-only hidden border-b border-slate-200 pb-3 mb-4 text-left">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h1 className="text-xl font-bold uppercase text-slate-900">{unitInfo.unitName}</h1>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          Divulgação Oficial
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-700 font-semibold mt-0.5">
+                        {unitInfo.cohortName} — {unitInfo.period}
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        Local: {unitInfo.locationDefault} • Contato: {unitInfo.contactPerson}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 bg-[#132F46] text-white rounded-xl shadow-xs">
+                        {INTEGRATION_AUDIENCES.find((a) => a.id === selectedAudience)?.label || 'Geral'} • {selectedDay === 'all' ? 'Todos os Dias' : `Dia ${selectedDay}`}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 {viewMode === 'timeline' && (

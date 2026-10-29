@@ -445,11 +445,19 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
   };
 
   const handleCopyAsImage = async () => {
-    const el = document.getElementById('people-analytics-capture-area');
-    if (!el) return;
-    const ok = await copyElementAsImage(el);
-    if (ok) showToast('Imagem copiada para a área de transferência!');
-    else showToast('Não foi possível copiar como imagem no momento.');
+    try {
+      const el = document.getElementById('people-analytics-capture-area');
+      if (!el) return;
+      const res = await copyElementAsImage(el, 'people_analytics_kba1');
+      if (res.method === 'clipboard') {
+        showToast('Painel copiado como imagem! Você já pode colar onde quiser.');
+      } else {
+        showToast('Imagem do painel baixada com sucesso no seu computador!');
+      }
+    } catch (err: any) {
+      console.error(err);
+      showToast('Não foi possível copiar como imagem no momento.');
+    }
   };
 
   const handlePrintPDF = () => {
@@ -489,7 +497,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
       {/* ========================================================================= */}
       {/* 1. CABEÇALHO EXECUTIVO — PEOPLE ANALYTICS BAHIA (KBA1 / K111) */}
       {/* ========================================================================= */}
-      <header className="bg-[#132F46] text-white border-b border-slate-700/80 sticky top-0 z-40 shadow-md">
+      <header data-capture-ignore className="no-print bg-[#132F46] text-white border-b border-slate-700/80 sticky top-0 z-40 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
           
           {/* Título & Badges de Unidade */}
@@ -677,7 +685,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
       {/* ========================================================================= */}
       {/* 2. FILTROS GLOBAIS INTERDEPENDENTES */}
       {/* ========================================================================= */}
-      <section className="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-3.5 shadow-2xs">
+      <section data-capture-ignore className="no-print bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-3.5 shadow-2xs">
         <div className="max-w-7xl mx-auto space-y-3">
           
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
@@ -814,6 +822,31 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
       {/* 3. CONTEÚDO PRINCIPAL DAS ABAS */}
       {/* ========================================================================= */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        {/* Cabeçalho Executivo Inteligente para Captura de Imagem e Impressão */}
+        <div className="capture-only hidden bg-white p-5 rounded-3xl border border-slate-200 mb-5 text-left shadow-xs">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                  People Analytics
+                  <span className="text-[#15877B] font-normal text-base"> | Feira de Santana</span>
+                </h2>
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-teal-50 text-[#15877B] border border-teal-200">
+                  Unidade Bahia • KBA1 / K111
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 font-medium mt-0.5">
+                Quadro de Pessoal & Performance Operacional • Competência: {filters.competence}
+              </p>
+            </div>
+            <div className="text-right">
+              <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 bg-[#132F46] text-white rounded-xl shadow-xs">
+                {filteredEmployees.length} Registros Bahia
+              </span>
+            </div>
+          </div>
+        </div>
 
         {/* --------------------------------------------------------------------- */}
         {/* ABA 1: VISÃO GERAL */}
@@ -2298,3 +2331,4 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
 };
 
 export default PeopleAnalyticsView;
+

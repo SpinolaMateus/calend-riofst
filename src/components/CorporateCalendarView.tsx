@@ -591,7 +591,7 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
       )}
 
       {/* Calendar Header / Navigation Bar */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div data-capture-ignore className="no-print bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-md shrink-0">
             <CalendarIcon className="w-5 h-5" />
@@ -819,6 +819,25 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
                 <option value="Liderança">Liderança</option>
                 <option value="Geral">Outros</option>
               </select>
+            </div>
+          </div>
+
+          {/* Cabeçalho Executivo Inteligente para Captura de Imagem e Impressão */}
+          <div className="capture-only hidden bg-white p-4 rounded-2xl border border-slate-200 mb-3 text-left">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-black text-slate-900 uppercase">
+                  Calendário Corporativo de Eventos & Salas
+                </h2>
+                <p className="text-xs text-slate-600 font-semibold mt-0.5">
+                  Mês de Referência: {MONTH_NAMES[curMonth]} {curYear}
+                </p>
+              </div>
+              <div className="text-right">
+                <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 bg-sky-600 text-white rounded-xl shadow-xs">
+                  {events.length} Eventos Cadastrados
+                </span>
+              </div>
             </div>
           </div>
 

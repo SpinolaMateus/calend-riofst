@@ -188,14 +188,16 @@ export function replaceUnsupportedColorFunctions(value: string): string {
 }
 
 /**
- * Captures any HTML element to an HTML5 Canvas with modern Tailwind CSS v4 color compatibility.
+ * Captures any HTML element to an HTML5 Canvas with modern Tailwind CSS v4 color compatibility
+ * and intelligent boundary delimitation (omits toolbars/action buttons, reveals capture headers).
  */
-export async function captureElementToCanvas(elementId: string): Promise<HTMLCanvasElement> {
-  const element = document.getElementById(elementId);
+export async function captureElementToCanvas(elementOrId: string | HTMLElement): Promise<HTMLCanvasElement> {
+  const element = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
   if (!element) {
-    throw new Error(`Não foi possível localizar o elemento com ID "${elementId}" para captura.`);
+    throw new Error(`Não foi possível localizar o elemento para captura.`);
   }
 
+  // Pre-calcular dimensões com segurança
   const width = Math.ceil(element.scrollWidth || element.offsetWidth || 1200);
   const height = Math.ceil(element.scrollHeight || element.offsetHeight || 800);
 
@@ -295,14 +297,27 @@ export async function captureElementToCanvas(elementId: string): Promise<HTMLCan
           el.style.height = 'auto';
           el.style.overflow = 'visible';
         }
-        if (el.hasAttribute('data-capture-ignore') || computed.position === 'fixed') {
+
+        // Delimitação Inteligente: ocultar botões de ação, menus interativos e elementos marcados
+        if (
+          el.hasAttribute('data-capture-ignore') ||
+          el.classList.contains('no-print') ||
+          el.classList.contains('capture-ignore') ||
+          (computed.position === 'fixed' && !el.classList.contains('capture-keep'))
+        ) {
           el.style.display = 'none';
+        }
+
+        // Delimitação Inteligente: revelar cabeçalhos executivos marcados como capture-only
+        if (el.classList.contains('capture-only')) {
+          el.style.display = 'block';
+          el.style.visibility = 'visible';
         }
       });
 
       clonedElement.style.width = `${width}px`;
       clonedElement.style.maxWidth = 'none';
-      clonedElement.style.height = `${height}px`;
+      clonedElement.style.height = 'auto';
       clonedElement.style.overflow = 'visible';
     },
   });
@@ -318,10 +333,10 @@ export interface CopyImageResult {
  * automatically falls back to downloading the PNG image so the user never fails to get their capture.
  */
 export async function copyElementAsImage(
-  elementId: string,
+  elementOrId: string | HTMLElement,
   downloadFallbackName: string = 'captura_agenda'
 ): Promise<CopyImageResult> {
-  const canvas = await captureElementToCanvas(elementId);
+  const canvas = await captureElementToCanvas(elementOrId);
 
   const blob = await new Promise<Blob | null>((resolve) => {
     canvas.toBlob((b) => resolve(b), 'image/png');
@@ -360,10 +375,10 @@ export async function copyElementAsImage(
  * Exports an HTML element directly to a downloadable PDF file with correct A4 proportions.
  */
 export async function exportElementToPDF(
-  elementId: string,
+  elementOrId: string | HTMLElement,
   fileName: string = 'cronograma-integracao.pdf'
 ): Promise<void> {
-  const canvas = await captureElementToCanvas(elementId);
+  const canvas = await captureElementToCanvas(elementOrId);
 
   const imgData = canvas.toDataURL('image/png');
   const imgWidth = canvas.width;
