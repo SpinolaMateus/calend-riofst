@@ -13,6 +13,7 @@ interface HomeScreenProps {
   onSelectCalendar: () => void;
   onSelectFormations: () => void;
   onSelectActionPlan?: () => void;
+  onSelectPeopleAnalytics?: () => void;
   integrationEventsCount: number;
   calendarEventsCount: number;
   onOpenAdminAccess?: () => void;
@@ -25,6 +26,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onSelectCalendar,
   onSelectFormations,
   onSelectActionPlan,
+  onSelectPeopleAnalytics,
   integrationEventsCount,
   calendarEventsCount,
   onOpenAdminAccess,
@@ -157,11 +159,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </p>
           </div>
           <span className="text-xs font-semibold text-slate-400">
-            4 Módulos Integrados
+            5 Módulos Integrados
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
           
           {/* ------------------------------------------------------------- */}
           {/* MÓDULO 1: CRONOGRAMA DE INTEGRAÇÃO */}
@@ -389,6 +391,64 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 Apresentação Nuvem
               </span>
               <div className="inline-flex items-center gap-1 text-xs font-bold text-violet-600 group-hover:text-violet-700">
+                <span>Acessar</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </div>
+
+          {/* ------------------------------------------------------------- */}
+          {/* MÓDULO 5: PEOPLE ANALYTICS (GENTE & GESTÃO - UNIDADE BAHIA) */}
+          {/* ------------------------------------------------------------- */}
+          <div 
+            onClick={onSelectPeopleAnalytics}
+            className="group relative bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1 hover:border-teal-400"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#132F46] via-[#15877B] to-teal-500 text-white flex items-center justify-center shadow-md shadow-teal-500/20 group-hover:scale-105 transition-transform">
+                  <Users className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-teal-50 text-[#15877B] px-2.5 py-1 rounded-full border border-teal-200/60">
+                  Gente & Gestão
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-black text-slate-900 group-hover:text-[#15877B] transition-colors tracking-tight flex items-center gap-1">
+                  People Analytics
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-[#15877B]" />
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  BI completo da unidade Bahia (KBA1 / Feira de Santana). Quadro de 353 colaboradores, turnos, centros de custo e metas G&G.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-1.5 pt-1 text-xs">
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Users className="w-3 h-3 text-[#15877B] shrink-0" />
+                  <span className="truncate text-[11px]">353 Pessoas</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Clock className="w-3 h-3 text-amber-600 shrink-0" />
+                  <span className="truncate text-[11px]">5 Turnos</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <TrendingUp className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span className="truncate text-[11px]">9 Metas G&G</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Building2 className="w-3 h-3 text-indigo-600 shrink-0" />
+                  <span className="truncate text-[11px]">48 CCs</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-500">
+                Base KBA1 Oficial
+              </span>
+              <div className="inline-flex items-center gap-1 text-xs font-bold text-[#15877B] group-hover:text-teal-700">
                 <span>Acessar</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>

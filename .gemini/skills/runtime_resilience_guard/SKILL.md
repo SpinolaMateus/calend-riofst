@@ -71,3 +71,4 @@ Sua missão é auditar o código-fonte, componentes, hooks de ciclo de vida e ca
 - [ ] Não há chamadas de rede assíncronas sendo disparadas dentro de `setState((prev) => ...)`?
 - [ ] Os listeners de canais em tempo real possuem proteção contra loops infinitos?
 - [ ] O comando de build (`npm run build`) roda com zero erros de compilação TypeScript?
+

@@ -49,6 +49,7 @@ import {
 } from './services/supabaseClient';
 import { FormationsDashboard } from './components/FormationsDashboard';
 import { StatusTrackingView } from './components/StatusTrackingView';
+import { PeopleAnalyticsView } from './components/PeopleAnalyticsView';
 
 const STORAGE_KEY_SESSIONS = 'cronograma_integracao_sessions_v2';
 const STORAGE_KEY_AREAS = 'cronograma_integracao_areas_v2';
@@ -56,8 +57,8 @@ const STORAGE_KEY_UNIT = 'cronograma_integracao_unit_v2';
 
 export default function App() {
   const { user, isAdmin, hasAdminAccess, requestAdminAccess, signOutAdmin } = useAdminAuth();
-  // Navigation: 'home' | 'integration' | 'calendar' | 'formations' | 'action_plan'
-  const [activeApp, setActiveApp] = useState<'home' | 'integration' | 'calendar' | 'formations' | 'action_plan'>('home');
+  // Navigation: 'home' | 'integration' | 'calendar' | 'formations' | 'action_plan' | 'people_analytics'
+  const [activeApp, setActiveApp] = useState<'home' | 'integration' | 'calendar' | 'formations' | 'action_plan' | 'people_analytics'>('home');
 
   // Load initial data from localStorage if available
   const [sessions, setSessions] = useState<IntegrationSession[]>(() => {
@@ -657,6 +658,22 @@ export default function App() {
             <span className="hidden sm:inline">Plano de Ação (Gantt)</span>
             <span className="sm:hidden">Plano de Ação</span>
           </button>
+
+          <button
+            onClick={() => setActiveApp('people_analytics')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeApp === 'people_analytics'
+                ? 'bg-[#15877B] text-white shadow-xs'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <Users className="w-4 h-4 text-teal-400" />
+            <span className="hidden sm:inline">People Analytics</span>
+            <span className="sm:hidden">People</span>
+            <span className="bg-teal-900/60 text-teal-300 border border-teal-500/30 px-1.5 py-0.2 rounded-full text-[10px]">
+              KBA1
+            </span>
+          </button>
         </div>
 
         <div className="flex items-center gap-2 text-xs">
@@ -702,6 +719,7 @@ export default function App() {
               onSelectCalendar={() => setActiveApp('calendar')}
               onSelectFormations={() => setActiveApp('formations')}
               onSelectActionPlan={() => setActiveApp('action_plan')}
+              onSelectPeopleAnalytics={() => setActiveApp('people_analytics')}
               integrationEventsCount={sessions.length}
               calendarEventsCount={calendarEventsCount}
               onOpenAdminAccess={() => requestAdminAccess()}
@@ -842,6 +860,17 @@ export default function App() {
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <ErrorBoundary moduleName="Plano de Ação (Gantt)">
             <ActionPlanGanttView onBackToHome={() => setActiveApp('home')} />
+          </ErrorBoundary>
+        </main>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SCREEN 5: PEOPLE ANALYTICS (GENTE & GESTÃO - UNIDADE BAHIA KBA1) */}
+      {/* ========================================================================= */}
+      {activeApp === 'people_analytics' && (
+        <main className="flex-1 w-full">
+          <ErrorBoundary moduleName="People Analytics (Feira de Santana - BA)">
+            <PeopleAnalyticsView onBackToHome={() => setActiveApp('home')} />
           </ErrorBoundary>
         </main>
       )}
