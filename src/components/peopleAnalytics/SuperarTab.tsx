@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Award, CheckCircle2, AlertTriangle, Clock, TrendingUp, 
   HelpCircle, Sparkles, Filter, ChevronRight, FileText, 
@@ -42,6 +42,52 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
     if (selectedAlavanca === 'all') return true;
     return ind.alavanca.toLowerCase() === selectedAlavanca.toLowerCase();
   });
+
+  // Premissas obrigatórias calculadas dinamicamente com base nas médias dos indicadores
+  const computedPremises = useMemo(() => {
+    const p1 = indicators.find(i => i.id === 'lideranca' || i.name.toLowerCase().includes('liderança'));
+    const p2 = indicators.find(i => i.id === 'conhecimento_unidade' || i.name.toLowerCase().includes('conhecimento (unidade)'));
+    const p3 = indicators.find(i => i.id === 'habilidade_piloto' || i.name.toLowerCase().includes('habilidade'));
+    const p4 = indicators.find(i => i.id === 'requisitos_legais' || i.name.toLowerCase().includes('requisitos legais'));
+
+    const v1 = p1?.media ?? 88.6;
+    const v2 = p2?.media ?? 85.9;
+    const v3 = p3?.media ?? 90.8;
+    const v4 = p4?.media ?? 97.6;
+
+    return [
+      {
+        id: 'premise_1',
+        description: 'Mínimo de 80% adesão / participação nas ações da jornada da Liderança na Unidade.',
+        target: '≥ 80.0%',
+        currentValue: `${v1}%`,
+        status: (v1 >= 80 ? 'atendida' : 'pendente') as 'atendida' | 'pendente'
+      },
+      {
+        id: 'premise_2',
+        description: 'Mínimo de 75% de atendimento na Matriz de Conhecimento, conforme critério de abrangência do Selo.',
+        target: '≥ 75.0%',
+        currentValue: `${v2}%`,
+        status: (v2 >= 75 ? 'atendida' : 'pendente') as 'atendida' | 'pendente'
+      },
+      {
+        id: 'premise_3',
+        description: 'Mínimo de 75% de atendimento na matriz de habilidades para todos os cargos, conforme critério de abrangência do Selo.',
+        target: '≥ 75.0%',
+        currentValue: `${v3}%`,
+        status: (v3 >= 75 ? 'atendida' : 'pendente') as 'atendida' | 'pendente'
+      },
+      {
+        id: 'premise_4',
+        description: 'Mínimo de 95% de atendimento nos treinamentos de requisitos legais da Unidade (NRs + Obrigatórios Portal ENK).',
+        target: '≥ 95.0%',
+        currentValue: `${v4}%`,
+        status: (v4 >= 95 ? 'atendida' : 'pendente') as 'atendida' | 'pendente'
+      }
+    ];
+  }, [indicators]);
+
+  const metPremisesCount = computedPremises.filter(p => p.status === 'atendida').length;
 
   // Função para retornar a classe de cor da célula baseada na meta
   const getCellColorClass = (ind: SuperarMonthlyIndicator, val: number | null): string => {
@@ -268,28 +314,43 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
             Critérios & Premissas Obrigatórias para Concessão do Selo Bronze (Pilar ET) • Ciclo {year}
           </h3>
-          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-            4 de 4 Premissas Atendidas (100%)
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
+            metPremisesCount === 4 
+              ? 'text-emerald-700 bg-emerald-50 border-emerald-200' 
+              : 'text-amber-800 bg-amber-50 border-amber-200'
+          }`}>
+            {metPremisesCount} de 4 Premissas Atendidas ({Math.round((metPremisesCount / 4) * 100)}%)
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
-          {SELO_PREMISES_INITIAL.map(p => (
-            <div key={p.id} className="p-3.5 rounded-xl border border-emerald-100 bg-emerald-50/30 flex flex-col justify-between space-y-2">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-700 font-medium leading-snug">
-                  {p.description}
-                </p>
+          {computedPremises.map(p => {
+            const isOk = p.status === 'atendida';
+            return (
+              <div key={p.id} className={`p-3.5 rounded-xl border flex flex-col justify-between space-y-2 ${
+                isOk ? 'border-emerald-100 bg-emerald-50/30' : 'border-amber-200 bg-amber-50/30'
+              }`}>
+                <div className="flex items-start gap-2">
+                  {isOk ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  )}
+                  <p className="text-xs text-slate-700 font-medium leading-snug">
+                    {p.description}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-slate-200/50">
+                  <span className="text-slate-500 font-medium">Exigido: <strong>{p.target}</strong></span>
+                  <span className={`font-extrabold px-2 py-0.5 rounded-md border ${
+                    isOk ? 'text-emerald-800 bg-white border-emerald-200' : 'text-amber-800 bg-white border-amber-200'
+                  }`}>
+                    Realizado: {p.currentValue}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-emerald-200/50">
-                <span className="text-slate-500 font-medium">Exigido: <strong>{p.target}</strong></span>
-                <span className="font-extrabold text-emerald-800 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
-                  Realizado: {p.currentValue}
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
