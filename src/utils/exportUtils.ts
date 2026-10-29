@@ -233,13 +233,12 @@ export async function captureElementToCanvas(elementOrId: string | HTMLElement):
   try {
   return await html2canvas(element, {
     backgroundColor: '#ffffff',
-    scale: Math.min(window.devicePixelRatio || 1, 2),
+    scale: 2, // Altíssima definição para relatórios e apresentações
     useCORS: true,
     logging: false,
     width,
-    height,
-    windowWidth: Math.max(width, document.documentElement.clientWidth),
-    windowHeight: Math.max(height, document.documentElement.clientHeight),
+    windowWidth: Math.max(width, document.documentElement.clientWidth, 1200),
+    windowHeight: Math.max(height * 2, 2400),
     onclone: (clonedDoc, clonedElement) => {
       // 1. Sanitize all <style> tags in the cloned document head/body
       clonedDoc.querySelectorAll('style').forEach((styleEl) => {
@@ -307,7 +306,7 @@ export async function captureElementToCanvas(elementOrId: string | HTMLElement):
 
         // Normalize sticky/fixed positioning for full capture
         if (computed.position === 'sticky') el.style.position = 'static';
-        if (computed.overflowY === 'auto' || computed.overflowY === 'scroll') {
+        if (computed.overflowY === 'auto' || computed.overflowY === 'scroll' || computed.overflowY === 'hidden') {
           el.style.maxHeight = 'none';
           el.style.height = 'auto';
           el.style.overflow = 'visible';
@@ -323,10 +322,11 @@ export async function captureElementToCanvas(elementOrId: string | HTMLElement):
           el.style.display = 'none';
         }
 
-        // Delimitação Inteligente: revelar cabeçalhos executivos marcados como capture-only
-        if (el.classList.contains('capture-only')) {
-          el.style.display = 'block';
-          el.style.visibility = 'visible';
+        // Delimitação Inteligente: revelar cabeçalhos executivos marcados como capture-only ou print-only
+        if (el.classList.contains('capture-only') || el.classList.contains('print-only')) {
+          el.classList.remove('hidden');
+          el.style.setProperty('display', 'block', 'important');
+          el.style.setProperty('visibility', 'visible', 'important');
         }
       });
 
@@ -389,6 +389,33 @@ export async function copyElementAsImage(
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 
   return { success: true, method: 'download' };
+}
+
+/**
+ * Downloads an HTML element directly as a high-resolution PNG image file.
+ */
+export async function downloadElementAsImage(
+  elementOrId: string | HTMLElement,
+  downloadName: string = 'captura_calendario'
+): Promise<void> {
+  const canvas = await captureElementToCanvas(elementOrId);
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((b) => resolve(b), 'image/png');
+  });
+
+  if (!blob) {
+    throw new Error('Não foi possível gerar a imagem.');
+  }
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${downloadName}_${new Date().toISOString().split('T')[0]}.png`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /**

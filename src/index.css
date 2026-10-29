@@ -91,7 +91,8 @@
     display: none !important;
   }
 
-  .print-only {
+  .print-only,
+  .capture-only {
     display: block !important;
   }
 
@@ -111,6 +112,12 @@
 
   th, td {
     border: 1px solid #334155 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Forçar preservação de cores, fundos escuros e bordas exatas na impressão em qualquer navegador */
+  * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }

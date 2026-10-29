@@ -3,11 +3,12 @@ import {
   Calendar as CalendarIcon, LayoutGrid, TableProperties, Cloud, CloudOff, 
   Lock, Unlock, MapPin, PlusCircle, Printer, ChevronLeft, ChevronRight, 
   Search, Shield, AlertTriangle, Save, Download, Trash2, Edit2, Copy, 
-  ExternalLink, X, CheckCircle2, AlertCircle, RefreshCw, UploadCloud, Plus
+  ExternalLink, X, CheckCircle2, AlertCircle, RefreshCw, UploadCloud, Plus,
+  Camera
 } from 'lucide-react';
 import { CorporateEvent, EventCategory } from '../types/calendar';
 import { useAdminAuth } from '../services/AdminAuthContext';
-import { copyElementAsImage, exportElementToPDF } from '../utils/exportUtils';
+import { copyElementAsImage, downloadElementAsImage, exportElementToPDF } from '../utils/exportUtils';
 import { 
   getSupabaseCredentials, 
   saveSupabaseCredentials, 
@@ -540,15 +541,34 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
   const handleCopyCalendarAsImage = async () => {
     try {
       setIsCopyingImage(true);
-      const res = await copyElementAsImage('calendar-capture-content', 'calendario_corporativo');
+      const res = await copyElementAsImage(
+        'calendar-printable-area',
+        `calendario_kba1_${MONTH_NAMES[curMonth].toLowerCase()}_${curYear}`
+      );
       if (res.method === 'clipboard') {
-        showToast('Calendário copiado como imagem! Você já pode colar onde quiser.');
+        showToast('Print do calendário copiado! Você já pode colar (Ctrl+V) onde quiser.');
       } else {
-        showToast('Imagem do calendário baixada com sucesso no seu computador!');
+        showToast('Imagem PNG do calendário baixada com sucesso!');
       }
     } catch (error) {
       console.error('Could not copy calendar as image', error);
-      showToast(error instanceof Error ? error.message : 'Não foi possível copiar o calendário como imagem.', false);
+      showToast(error instanceof Error ? error.message : 'Não foi possível tirar o print do calendário.', false);
+    } finally {
+      setIsCopyingImage(false);
+    }
+  };
+
+  const handleDownloadCalendarImage = async () => {
+    try {
+      setIsCopyingImage(true);
+      await downloadElementAsImage(
+        'calendar-printable-area',
+        `calendario_kba1_${MONTH_NAMES[curMonth].toLowerCase()}_${curYear}`
+      );
+      showToast('Imagem PNG de alta resolução baixada com sucesso!');
+    } catch (error) {
+      console.error('Could not download calendar as image', error);
+      showToast(error instanceof Error ? error.message : 'Não foi possível baixar a imagem do calendário.', false);
     } finally {
       setIsCopyingImage(false);
     }
@@ -558,8 +578,8 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
     try {
       setIsExportingPDF(true);
       await exportElementToPDF(
-        'calendar-capture-content',
-        `calendario_corporativo_${MONTH_NAMES[curMonth].toLowerCase()}_${curYear}.pdf`
+        'calendar-printable-area',
+        `calendario_kba1_${MONTH_NAMES[curMonth].toLowerCase()}_${curYear}.pdf`
       );
       showToast('PDF do calendário gerado com sucesso!');
     } catch (error) {
@@ -723,17 +743,30 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
             <span>{isSavingCloud ? 'Salvando...' : 'Salvar na nuvem'}</span>
           </button>
 
-          {/* Copy as Image Button */}
+          {/* Botão Tirar Print / Copiar Imagem */}
           <button
             type="button"
             onClick={handleCopyCalendarAsImage}
             disabled={isCopyingImage}
             data-capture-ignore
-            title="Copiar o calendário completo como imagem"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-xl border border-slate-700 transition-colors disabled:opacity-50"
+            title="Tirar print completo do calendário (copia para área de transferência e salva PNG)"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-black active:scale-95 rounded-xl border border-slate-700 shadow-sm transition-all disabled:opacity-50"
           >
-            <Copy className="w-3.5 h-3.5" />
-            <span>{isCopyingImage ? 'Capturando...' : 'Copiar como imagem'}</span>
+            <Camera className="w-3.5 h-3.5 text-sky-400" />
+            <span>{isCopyingImage ? 'Tirando Print...' : 'Tirar Print'}</span>
+          </button>
+
+          {/* Botão Baixar Imagem PNG */}
+          <button
+            type="button"
+            onClick={handleDownloadCalendarImage}
+            disabled={isCopyingImage}
+            data-capture-ignore
+            title="Baixar print do calendário em arquivo de imagem PNG de alta resolução"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-xl border border-slate-300 shadow-2xs transition-colors disabled:opacity-50"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-600" />
+            <span className="hidden sm:inline">Baixar PNG</span>
           </button>
 
           {/* Export PDF Button */}
@@ -746,16 +779,19 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-colors disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>{isExportingPDF ? 'Gerando...' : 'Exportar PDF'}</span>
+            <span>{isExportingPDF ? 'Gerando...' : 'PDF'}</span>
           </button>
 
+          {/* Imprimir via navegador */}
           <button
+            type="button"
             onClick={() => window.print()}
-            title="Imprimir"
+            title="Imprimir calendário em folha A4 Paisagem"
             data-capture-ignore
-            className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-300 transition-colors"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-3.5 h-3.5 text-slate-700" />
+            <span className="hidden sm:inline">Imprimir</span>
           </button>
         </div>
       </div>
@@ -793,6 +829,17 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
               >
                 Hoje
               </button>
+
+              <button
+                type="button"
+                onClick={handleCopyCalendarAsImage}
+                disabled={isCopyingImage}
+                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-900 hover:bg-black text-white transition-all shadow-xs ml-1.5 flex items-center gap-1 active:scale-95"
+                title="Tirar print deste mês"
+              >
+                <Camera className="w-3.5 h-3.5 text-sky-400" />
+                <span>{isCopyingImage ? 'Tirando print...' : 'Tirar Print'}</span>
+              </button>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
@@ -822,24 +869,45 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
             </div>
           </div>
 
-          {/* Cabeçalho Executivo Inteligente para Captura de Imagem e Impressão */}
-          <div className="capture-only hidden bg-white p-4 rounded-2xl border border-slate-200 mb-3 text-left">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-black text-slate-900 uppercase">
-                  Calendário Corporativo de Eventos & Salas
-                </h2>
-                <p className="text-xs text-slate-600 font-semibold mt-0.5">
-                  Mês de Referência: {MONTH_NAMES[curMonth]} {curYear}
-                </p>
-              </div>
-              <div className="text-right">
-                <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 bg-sky-600 text-white rounded-xl shadow-xs">
-                  {events.length} Eventos Cadastrados
-                </span>
+          {/* ========================================================================= */}
+          {/* ÁREA EXECUTIVA DE IMPRESSÃO & CAPTURA DO CALENDÁRIO                      */}
+          {/* ========================================================================= */}
+          <div id="calendar-printable-area" className="print-container bg-white p-3 sm:p-5 rounded-2xl border border-slate-300 shadow-sm space-y-4">
+            
+            {/* Cabeçalho Executivo Oficial para Captura de Imagem e Impressão */}
+            <div className="capture-only print-only hidden bg-[#0a3641] text-white p-4 sm:p-5 rounded-xl border border-[#306576]/50 text-left">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center text-[#6ffbbe] font-black text-sm shadow-inner shrink-0">
+                    KBA1
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base sm:text-lg font-black uppercase tracking-tight text-white">
+                        Agenda Corporativa & Treinamentos
+                      </h2>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
+                        Oficial
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300 font-semibold mt-0.5">
+                      KBA1 • Unidade Feira de Santana (BA) • Papelão Ondulado | Competência: <strong className="text-white uppercase">{MONTH_NAMES[curMonth]} de {curYear}</strong>
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 bg-white/10 text-[#6ffbbe] border border-white/20 rounded-lg">
+                    {events.filter((e) => {
+                      const [ey, em] = e.date.split('-');
+                      return Number(ey) === curYear && Number(em) === curMonth + 1;
+                    }).length} Eventos Cadastrados
+                  </span>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Emitido em: {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
           {/* Calendar 7-column Grid */}
           <div className="bg-white rounded-2xl border border-slate-300 shadow-sm overflow-hidden">
@@ -1009,38 +1077,47 @@ export const CorporateCalendarView: React.FC<CorporateCalendarViewProps> = ({
             </div>
           </div>
 
-          {/* Footer Legend */}
-          <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 px-1 pt-1 gap-2 no-print">
+          {/* Footer Legend corporativo visível tanto na tela quanto na impressão/captura */}
+          <div className="flex flex-wrap items-center justify-between text-xs text-slate-600 pt-3 border-t border-slate-200 gap-2">
             <div className="flex items-center gap-4 flex-wrap">
-              <span className="font-medium text-slate-700">Categorias:</span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-blue-500 inline-block" /> Reunião
+              <span className="font-bold text-slate-800">Categorias:</span>
+              <span className="flex items-center gap-1.5 font-medium">
+                <span className="w-3 h-3 rounded-xs bg-blue-500 inline-block shrink-0" /> Reunião
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-emerald-500 inline-block" /> Treinamento
+              <span className="flex items-center gap-1.5 font-medium">
+                <span className="w-3 h-3 rounded-xs bg-emerald-500 inline-block shrink-0" /> Treinamento
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-amber-500 inline-block" /> Consultoria
+              <span className="flex items-center gap-1.5 font-medium">
+                <span className="w-3 h-3 rounded-xs bg-amber-500 inline-block shrink-0" /> Consultoria
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-indigo-500 inline-block" /> Liderança
+              <span className="flex items-center gap-1.5 font-medium">
+                <span className="w-3 h-3 rounded-xs bg-indigo-500 inline-block shrink-0" /> Liderança
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-purple-500 inline-block" /> Geral
+              <span className="flex items-center gap-1.5 font-medium">
+                <span className="w-3 h-3 rounded-xs bg-purple-500 inline-block shrink-0" /> Geral
               </span>
             </div>
 
-            <div className="flex items-center gap-2 text-slate-600 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
-              <Shield className="w-3.5 h-3.5 text-amber-500" />
-              <span>
-                {isAdmin
-                  ? 'Modo administrador: edição ativa'
-                  : 'Modo leitura: edição disponível para administradores autenticados'}
-              </span>
+            <div className="text-[11px] text-slate-500 font-semibold flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+              <span>KBA1 Analytics • Gestão de Gente & Gestão • Feira de Santana (BA)</span>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Informações de Autenticação / Modo Leitura no rodapé */}
+        <div className="flex justify-end no-print pt-1">
+          <div className="flex items-center gap-2 text-xs text-slate-600 bg-white px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+            <Shield className="w-3.5 h-3.5 text-amber-500" />
+            <span>
+              {isAdmin
+                ? 'Modo administrador: edição ativa na agenda'
+                : 'Modo leitura: autentique para incluir ou editar eventos'}
+            </span>
+          </div>
+        </div>
+      </div>
+    )}
 
       {/* ========================================================================= */}
       {/* TAB 2: EVENTS & TABLE VIEW */}
