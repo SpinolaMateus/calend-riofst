@@ -30,6 +30,7 @@ export interface Employee {
   shiftName: string;
   shiftCategory: ShiftCategory;
   admissionDate?: string;
+  birthDate?: string;
   status: 'Ativo' | 'Férias' | 'Afastado' | 'Desligado';
 }
 

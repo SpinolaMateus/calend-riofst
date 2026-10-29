@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { 
   Users, UserCheck, Clock, Building2, Search, Filter, 
   BarChart3, Layers, ArrowUpDown, ChevronRight, Download,
-  CheckCircle2, AlertCircle, Sparkles
+  CheckCircle2, AlertCircle, Sparkles, History, Award, Calendar,
+  TrendingUp, Briefcase
 } from 'lucide-react';
 import { Employee, ShiftCategory } from '../../types/peopleAnalytics';
 
@@ -10,13 +11,72 @@ interface HeadcountAnalyticsTabProps {
   employees: Employee[];
 }
 
-type ViewMode = 'location' | 'shift' | 'manager' | 'crosstab' | 'nominal';
+export type ViewMode = 'location' | 'shift' | 'manager' | 'tenure' | 'crosstab' | 'nominal';
+
+export interface TenureInfo {
+  years: number;
+  months: number;
+  totalMonths: number;
+  totalYears: number;
+  label: string;
+  bracket: '< 1 ano' | '1 a 2 anos' | '2 a 5 anos' | '5 a 10 anos' | '> 10 anos' | 'Sem data';
+  formattedAdmission: string;
+}
+
+// Cálculo do tempo de empresa com base na data de admissão e data de referência do relatório (Outubro/2026)
+export function calculateEmployeeTenure(admissionDate?: string, refDate = new Date(2026, 9, 13)): TenureInfo {
+  if (!admissionDate) {
+    return {
+      years: 0,
+      months: 0,
+      totalMonths: 0,
+      totalYears: 0,
+      label: '—',
+      bracket: 'Sem data',
+      formattedAdmission: '—'
+    };
+  }
+
+  const [y, m, d] = admissionDate.split('-').map(Number);
+  const adm = new Date(y, (m || 1) - 1, d || 1);
+  const effectiveRef = refDate.getTime() > adm.getTime() ? refDate : new Date();
+
+  let diffMonths = (effectiveRef.getFullYear() - adm.getFullYear()) * 12 + (effectiveRef.getMonth() - adm.getMonth());
+  if (effectiveRef.getDate() < adm.getDate()) {
+    diffMonths--;
+  }
+  if (diffMonths < 0) diffMonths = 0;
+
+  const years = Math.floor(diffMonths / 12);
+  const months = diffMonths % 12;
+  const totalYears = Number((diffMonths / 12).toFixed(1));
+
+  let bracket: TenureInfo['bracket'] = '> 10 anos';
+  if (years < 1) bracket = '< 1 ano';
+  else if (years < 2) bracket = '1 a 2 anos';
+  else if (years < 5) bracket = '2 a 5 anos';
+  else if (years < 10) bracket = '5 a 10 anos';
+
+  const label = years > 0 ? (months > 0 ? `${years}a ${months}m` : `${years} anos`) : `${months} meses`;
+  const formattedAdmission = `${String(d || 1).padStart(2, '0')}/${String(m || 1).padStart(2, '0')}/${y}`;
+
+  return {
+    years,
+    months,
+    totalMonths: diffMonths,
+    totalYears,
+    label,
+    bracket,
+    formattedAdmission
+  };
+}
 
 export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ employees }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('location');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [genderFilter, setGenderFilter] = useState<'all' | 'Feminino' | 'Masculino'>('all');
   const [shiftFilter, setShiftFilter] = useState<string>('all');
+  const [tenureBracketFilter, setTenureBracketFilter] = useState<string>('all');
   const [crossTabGroupBy, setCrossTabGroupBy] = useState<'location' | 'manager'>('location');
   const [sortField, setSortField] = useState<string>('total');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -27,6 +87,12 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
       const empGender = emp.gender || (emp.name.toLowerCase().includes('maria') || emp.name.toLowerCase().includes('ana') || emp.name.toLowerCase().includes('carina') || emp.name.toLowerCase().includes('lidiane') ? 'Feminino' : 'Masculino');
       if (genderFilter !== 'all' && empGender !== genderFilter) return false;
       if (shiftFilter !== 'all' && emp.shiftCategory !== shiftFilter) return false;
+      
+      if (tenureBracketFilter !== 'all') {
+        const t = calculateEmployeeTenure(emp.admissionDate);
+        if (t.bracket !== tenureBracketFilter) return false;
+      }
+
       if (searchTerm.trim()) {
         const term = searchTerm.toLowerCase();
         const matchName = emp.name.toLowerCase().includes(term);
@@ -38,7 +104,7 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
       }
       return true;
     });
-  }, [employees, genderFilter, shiftFilter, searchTerm]);
+  }, [employees, genderFilter, shiftFilter, tenureBracketFilter, searchTerm]);
 
   // Estatísticas Globais de Homens e Mulheres
   const overallStats = useMemo(() => {
@@ -75,6 +141,217 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
 
     return { total, female, male, femalePct, malePct, shiftBreakdown };
   }, [employees]);
+
+  // =========================================================================
+  // ESTATÍSTICAS DE TEMPO DE EMPRESA CRUZADAS POR GÊNERO
+  // =========================================================================
+  const tenureStats = useMemo(() => {
+    const TENURE_BRACKETS: Array<'< 1 ano' | '1 a 2 anos' | '2 a 5 anos' | '5 a 10 anos' | '> 10 anos'> = [
+      '< 1 ano',
+      '1 a 2 anos',
+      '2 a 5 anos',
+      '5 a 10 anos',
+      '> 10 anos',
+    ];
+
+    let totalYearsSum = 0;
+    let femaleYearsSum = 0;
+    let maleYearsSum = 0;
+    let femaleCount = 0;
+    let maleCount = 0;
+
+    const bracketData: Record<string, {
+      bracket: string;
+      description: string;
+      female: number;
+      male: number;
+      total: number;
+      employees: Employee[];
+      totalMonths: number[];
+    }> = {
+      '< 1 ano': { bracket: '< 1 ano', description: 'Até 11 meses • Período de integração e experiência', female: 0, male: 0, total: 0, employees: [], totalMonths: [] },
+      '1 a 2 anos': { bracket: '1 a 2 anos', description: '12 a 23 meses • Consolidação da função operacional', female: 0, male: 0, total: 0, employees: [], totalMonths: [] },
+      '2 a 5 anos': { bracket: '2 a 5 anos', description: '24 a 59 meses • Plena maturidade e autonomia técnica', female: 0, male: 0, total: 0, employees: [], totalMonths: [] },
+      '5 a 10 anos': { bracket: '5 a 10 anos', description: '60 a 119 meses • Especialistas seniores e liderança técnica', female: 0, male: 0, total: 0, employees: [], totalMonths: [] },
+      '> 10 anos': { bracket: '> 10 anos', description: '120+ meses • Veteranos com sólido legado na unidade', female: 0, male: 0, total: 0, employees: [], totalMonths: [] },
+    };
+
+    let maxFemaleTenure = { name: '—', years: 0, label: '—', adm: '—', job: '—' };
+    let maxMaleTenure = { name: '—', years: 0, label: '—', adm: '—', job: '—' };
+
+    filteredEmployees.forEach(emp => {
+      const t = calculateEmployeeTenure(emp.admissionDate);
+      const isFemale = (emp.gender || '').toLowerCase().startsWith('f');
+
+      totalYearsSum += t.totalYears;
+      if (isFemale) {
+        femaleYearsSum += t.totalYears;
+        femaleCount++;
+        if (t.totalYears > maxFemaleTenure.years) {
+          maxFemaleTenure = { name: emp.name, years: t.totalYears, label: t.label, adm: t.formattedAdmission, job: emp.jobTitle };
+        }
+      } else {
+        maleYearsSum += t.totalYears;
+        maleCount++;
+        if (t.totalYears > maxMaleTenure.years) {
+          maxMaleTenure = { name: emp.name, years: t.totalYears, label: t.label, adm: t.formattedAdmission, job: emp.jobTitle };
+        }
+      }
+
+      if (t.bracket !== 'Sem data' && bracketData[t.bracket]) {
+        const b = bracketData[t.bracket];
+        b.total++;
+        b.employees.push(emp);
+        b.totalMonths.push(t.totalMonths);
+        if (isFemale) b.female++;
+        else b.male++;
+      }
+    });
+
+    const totalCount = filteredEmployees.length || 1;
+    const avgOverall = (totalYearsSum / totalCount).toFixed(1);
+    const avgFemale = femaleCount > 0 ? (femaleYearsSum / femaleCount).toFixed(1) : '0.0';
+    const avgMale = maleCount > 0 ? (maleYearsSum / maleCount).toFixed(1) : '0.0';
+
+    const bracketRows = TENURE_BRACKETS.map(bKey => {
+      const b = bracketData[bKey];
+      const femaleShareInBracket = b.total > 0 ? Math.round((b.female / b.total) * 100) : 0;
+      const maleShareInBracket = b.total > 0 ? Math.round((b.male / b.total) * 100) : 0;
+      const femalePctOfAllFemales = femaleCount > 0 ? Math.round((b.female / femaleCount) * 100) : 0;
+      const malePctOfAllMales = maleCount > 0 ? Math.round((b.male / maleCount) * 100) : 0;
+      const pctOfHeadcount = totalCount > 0 ? ((b.total / totalCount) * 100).toFixed(1) : '0';
+      
+      // Setores predominantes
+      const locCount: Record<string, number> = {};
+      b.employees.forEach(e => {
+        const l = e.locationName || 'Geral';
+        locCount[l] = (locCount[l] || 0) + 1;
+      });
+      const topLocations = Object.entries(locCount)
+        .sort((x, y) => y[1] - x[1])
+        .slice(0, 3)
+        .map(entry => `${entry[0]} (${entry[1]})`);
+
+      return {
+        ...b,
+        femaleShareInBracket,
+        maleShareInBracket,
+        femalePctOfAllFemales,
+        malePctOfAllMales,
+        pctOfHeadcount,
+        topLocations
+      };
+    });
+
+    // Médias de Tempo por Setor
+    const locationTenureMap = new Map<string, {
+      locationName: string;
+      total: number;
+      femaleCount: number;
+      femaleYearsSum: number;
+      maleCount: number;
+      maleYearsSum: number;
+      totalYearsSum: number;
+    }>();
+
+    filteredEmployees.forEach(emp => {
+      const loc = emp.locationName || 'Não Informado';
+      if (!locationTenureMap.has(loc)) {
+        locationTenureMap.set(loc, {
+          locationName: loc,
+          total: 0,
+          femaleCount: 0,
+          femaleYearsSum: 0,
+          maleCount: 0,
+          maleYearsSum: 0,
+          totalYearsSum: 0,
+        });
+      }
+      const rec = locationTenureMap.get(loc)!;
+      const t = calculateEmployeeTenure(emp.admissionDate);
+      const isFemale = (emp.gender || '').toLowerCase().startsWith('f');
+      rec.total++;
+      rec.totalYearsSum += t.totalYears;
+      if (isFemale) {
+        rec.femaleCount++;
+        rec.femaleYearsSum += t.totalYears;
+      } else {
+        rec.maleCount++;
+        rec.maleYearsSum += t.totalYears;
+      }
+    });
+
+    const locationTenureList = Array.from(locationTenureMap.values()).map(l => ({
+      locationName: l.locationName,
+      total: l.total,
+      femaleCount: l.femaleCount,
+      maleCount: l.maleCount,
+      avgFemale: l.femaleCount > 0 ? (l.femaleYearsSum / l.femaleCount).toFixed(1) : '—',
+      avgMale: l.maleCount > 0 ? (l.maleYearsSum / l.maleCount).toFixed(1) : '—',
+      avgOverall: (l.totalYearsSum / l.total).toFixed(1),
+    })).sort((a, b) => b.total - a.total);
+
+    // Médias de Tempo por Turno
+    const shiftTenureMap = new Map<string, {
+      shiftCategory: string;
+      total: number;
+      femaleCount: number;
+      femaleYearsSum: number;
+      maleCount: number;
+      maleYearsSum: number;
+      totalYearsSum: number;
+    }>();
+
+    filteredEmployees.forEach(emp => {
+      const s = emp.shiftCategory || 'Outras Jornadas';
+      if (!shiftTenureMap.has(s)) {
+        shiftTenureMap.set(s, {
+          shiftCategory: s,
+          total: 0,
+          femaleCount: 0,
+          femaleYearsSum: 0,
+          maleCount: 0,
+          maleYearsSum: 0,
+          totalYearsSum: 0,
+        });
+      }
+      const rec = shiftTenureMap.get(s)!;
+      const t = calculateEmployeeTenure(emp.admissionDate);
+      const isFemale = (emp.gender || '').toLowerCase().startsWith('f');
+      rec.total++;
+      rec.totalYearsSum += t.totalYears;
+      if (isFemale) {
+        rec.femaleCount++;
+        rec.femaleYearsSum += t.totalYears;
+      } else {
+        rec.maleCount++;
+        rec.maleYearsSum += t.totalYears;
+      }
+    });
+
+    const shiftTenureList = Array.from(shiftTenureMap.values()).map(s => ({
+      shiftCategory: s.shiftCategory,
+      total: s.total,
+      femaleCount: s.femaleCount,
+      maleCount: s.maleCount,
+      avgFemale: s.femaleCount > 0 ? (s.femaleYearsSum / s.femaleCount).toFixed(1) : '—',
+      avgMale: s.maleCount > 0 ? (s.maleYearsSum / s.maleCount).toFixed(1) : '—',
+      avgOverall: (s.totalYearsSum / s.total).toFixed(1),
+    }));
+
+    return {
+      avgOverall,
+      avgFemale,
+      avgMale,
+      femaleCount,
+      maleCount,
+      bracketRows,
+      maxFemaleTenure,
+      maxMaleTenure,
+      locationTenureList,
+      shiftTenureList,
+    };
+  }, [filteredEmployees]);
 
   // =========================================================================
   // 1. AGRUPAMENTO POR LOCAL / SETOR
@@ -262,37 +539,40 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
   }, [filteredEmployees, sortField, sortDirection]);
 
   // =========================================================================
-  // 4. MATRIZ CRUZADA (CROSS-TAB: TURNO × LOCAL × GESTOR)
+  // 4. MATRIZ CRUZADA (TURNO × LOCAL / GESTOR)
   // =========================================================================
   const crossTabRows = useMemo(() => {
-    const isLocation = crossTabGroupBy === 'location';
+    const shiftList = ['Turno A', 'Turno B', 'Turno C', 'Administrativo', 'Outras Jornadas'];
     const map = new Map<string, {
-      name: string;
+      rowKey: string;
+      rowLabel: string;
       secondaryInfo: string;
       turnos: Record<string, { total: number; female: number; male: number }>;
+      grandTotal: number;
       totalFemale: number;
       totalMale: number;
-      grandTotal: number;
     }>();
 
     filteredEmployees.forEach(emp => {
-      const key = isLocation ? (emp.locationName || 'Geral') : (emp.immediateManager || 'Geral');
-      const secInfo = isLocation ? (emp.macroarea || 'Operação') : `${Array.from(new Set(employees.filter(e => e.immediateManager === emp.immediateManager).map(e => e.locationName))).slice(0, 2).join(', ')}`;
+      const key = crossTabGroupBy === 'location' 
+        ? (emp.locationName || 'Não Informado')
+        : (emp.immediateManager || 'Não Informado');
+
+      const secondary = crossTabGroupBy === 'location'
+        ? (emp.macroarea || 'Operacional')
+        : (emp.locationName || 'Geral');
 
       if (!map.has(key)) {
+        const turnosInit: Record<string, { total: number; female: number; male: number }> = {};
+        shiftList.forEach(s => { turnosInit[s] = { total: 0, female: 0, male: 0 }; });
         map.set(key, {
-          name: key,
-          secondaryInfo: secInfo,
-          turnos: {
-            'Turno A': { total: 0, female: 0, male: 0 },
-            'Turno B': { total: 0, female: 0, male: 0 },
-            'Turno C': { total: 0, female: 0, male: 0 },
-            'Administrativo': { total: 0, female: 0, male: 0 },
-            'Outras Jornadas': { total: 0, female: 0, male: 0 },
-          },
+          rowKey: key,
+          rowLabel: key,
+          secondaryInfo: secondary,
+          turnos: turnosInit,
+          grandTotal: 0,
           totalFemale: 0,
           totalMale: 0,
-          grandTotal: 0,
         });
       }
 
@@ -314,15 +594,38 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
     });
 
     return Array.from(map.values()).sort((a, b) => b.grandTotal - a.grandTotal);
-  }, [filteredEmployees, crossTabGroupBy, employees]);
+  }, [filteredEmployees, crossTabGroupBy]);
+
+  // Lista nominal ordenada
+  const sortedNominalEmployees = useMemo(() => {
+    return [...filteredEmployees].sort((a, b) => {
+      if (sortField === 'tenure') {
+        const tA = calculateEmployeeTenure(a.admissionDate).totalMonths;
+        const tB = calculateEmployeeTenure(b.admissionDate).totalMonths;
+        return sortDirection === 'desc' ? tB - tA : tA - tB;
+      }
+      if (sortField === 'admission') {
+        const dA = a.admissionDate || '9999';
+        const dB = b.admissionDate || '9999';
+        return sortDirection === 'desc' ? dB.localeCompare(dA) : dA.localeCompare(dB);
+      }
+      if (sortField === 'name') {
+        return sortDirection === 'desc' ? b.name.localeCompare(a.name) : a.name.localeCompare(b.name);
+      }
+      if (sortField === 'prn') {
+        return sortDirection === 'desc' ? b.prn.localeCompare(a.prn) : a.prn.localeCompare(b.prn);
+      }
+      return 0;
+    });
+  }, [filteredEmployees, sortField, sortDirection]);
 
   return (
     <div className="space-y-6">
       
       {/* ========================================================================= */}
-      {/* 1. CARDS DEMOGRÁFICOS DE CABEÇALHO: HOMENS, MULHERES E TURNOS */}
+      {/* 1. CARDS DEMOGRÁFICOS DE CABEÇALHO: HOMENS, MULHERES, TURNOS & TEMPO DE CASA */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         
         {/* Total Efetivo */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm flex items-center justify-between">
@@ -336,8 +639,8 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">Feira de Santana • 100% elegível</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-[#0a3641] text-[#6ffbbe] flex items-center justify-center shadow-xs">
-            <Users className="w-6 h-6" />
+          <div className="w-11 h-11 rounded-xl bg-[#0a3641] text-[#6ffbbe] flex items-center justify-center shadow-xs">
+            <Users className="w-5 h-5" />
           </div>
         </div>
 
@@ -356,8 +659,8 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">D&I Operacional & Gestão</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200">
-            <UserCheck className="w-6 h-6" />
+          <div className="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200">
+            <UserCheck className="w-5 h-5" />
           </div>
         </div>
 
@@ -376,8 +679,8 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">Operação fabril e técnica</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-sky-50 text-[#306576] flex items-center justify-center border border-sky-200">
-            <Building2 className="w-6 h-6" />
+          <div className="w-11 h-11 rounded-xl bg-sky-50 text-[#306576] flex items-center justify-center border border-sky-200">
+            <Building2 className="w-5 h-5" />
           </div>
         </div>
 
@@ -389,23 +692,45 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
             </span>
             <Clock className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="grid grid-cols-3 gap-1.5 text-center mt-2">
-            <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+          <div className="grid grid-cols-3 gap-1.5 text-center mt-1.5">
+            <div className="bg-slate-50 p-1 rounded-lg border border-slate-100">
               <span className="text-[9px] text-slate-400 block font-bold">T1 (Manhã)</span>
               <span className="text-xs font-black text-slate-800">{overallStats.shiftBreakdown['Turno A']?.total || 88}</span>
             </div>
-            <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+            <div className="bg-slate-50 p-1 rounded-lg border border-slate-100">
               <span className="text-[9px] text-slate-400 block font-bold">T2 (Tarde)</span>
               <span className="text-xs font-black text-slate-800">{overallStats.shiftBreakdown['Turno B']?.total || 84}</span>
             </div>
-            <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+            <div className="bg-slate-50 p-1 rounded-lg border border-slate-100">
               <span className="text-[9px] text-slate-400 block font-bold">T3 (Noite)</span>
               <span className="text-xs font-black text-slate-800">{overallStats.shiftBreakdown['Turno C']?.total || 87}</span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-100 mt-1">
+          <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-100 mt-1">
             <span>ADM: <strong>{overallStats.shiftBreakdown['Administrativo']?.total || 74}</strong></span>
             <span>Outras: <strong>{overallStats.shiftBreakdown['Outras Jornadas']?.total || 20}</strong></span>
+          </div>
+        </div>
+
+        {/* Tempo Médio de Casa (NOVO) */}
+        <div 
+          onClick={() => setViewMode('tenure')}
+          className="bg-white p-5 rounded-2xl border border-amber-200/80 shadow-sm flex flex-col justify-between cursor-pointer hover:border-[#306576] transition-all group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
+              <Award className="w-3.5 h-3.5 text-amber-600" />
+              Tempo Médio de Casa
+            </span>
+            <span className="text-[10px] font-bold text-[#306576] group-hover:underline">Ver análise &rarr;</span>
+          </div>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-3xl font-black text-[#0b1c30]">{tenureStats.avgOverall}</span>
+            <span className="text-xs text-slate-500 font-semibold">anos de média</span>
+          </div>
+          <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-slate-100 mt-1">
+            <span className="text-rose-600 font-bold">👩 Mulheres: {tenureStats.avgFemale}a</span>
+            <span className="text-sky-700 font-bold">👨 Homens: {tenureStats.avgMale}a</span>
           </div>
         </div>
 
@@ -423,6 +748,7 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
               { id: 'location', label: 'Por Local / Setor', icon: Building2 },
               { id: 'shift', label: 'Por Turno / Jornada', icon: Clock },
               { id: 'manager', label: 'Por Gestor Imediato', icon: Users },
+              { id: 'tenure', label: 'Tempo de Empresa por Sexo', icon: Award },
               { id: 'crosstab', label: 'Matriz Turno × Setor × Gestor', icon: Layers },
               { id: 'nominal', label: `Lista Nominal (${filteredEmployees.length})`, icon: BarChart3 },
             ].map(tab => {
@@ -445,7 +771,7 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
             })}
           </div>
 
-          {/* Filtros de Gênero e Busca */}
+          {/* Filtros de Gênero, Faixa de Tempo e Busca */}
           <div className="flex items-center gap-2 flex-wrap">
             {/* Gênero */}
             <select
@@ -472,15 +798,29 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
               <option value="Outras Jornadas">Outras Jornadas</option>
             </select>
 
-            {/* Input de Busca */}
+            {/* Faixa de Tempo de Empresa */}
+            <select
+              value={tenureBracketFilter}
+              onChange={(e) => setTenureBracketFilter(e.target.value)}
+              className="px-2.5 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 bg-[#f8f9ff] text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#306576]"
+            >
+              <option value="all">Todas as Faixas de Tempo</option>
+              <option value="< 1 ano">&lt; 1 ano (Experiência)</option>
+              <option value="1 a 2 anos">1 a 2 anos</option>
+              <option value="2 a 5 anos">2 a 5 anos</option>
+              <option value="5 a 10 anos">5 a 10 anos</option>
+              <option value="> 10 anos">&gt; 10 anos (Veteranos)</option>
+            </select>
+
+            {/* Busca textual */}
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
               <input
                 type="text"
-                placeholder="Buscar setor, gestor ou cargo..."
+                placeholder="Buscar PRN, nome, cargo..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-[#f8f9ff] text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#306576] w-48 sm:w-56"
+                className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-[#f8f9ff] text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#306576] w-52"
               />
             </div>
           </div>
@@ -495,16 +835,12 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
         <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-[#0b1c30]">
-                Distribuição de Pessoal por Local / Setor
-              </h3>
-              <p className="text-xs text-slate-500">
-                Quantidade de mulheres, homens e distribuição por escala para cada setor produtivo
-              </p>
+              <h3 className="text-sm font-bold text-[#0b1c30]">Distribuição por Local / Setor Fabril</h3>
+              <p className="text-xs text-slate-500">Contingente nominal discriminado por gênero, escalas de trabalho e lideranças diretas</p>
             </div>
-            <span className="text-xs font-bold text-slate-500">
+            <div className="text-xs text-slate-400">
               {locationGroups.length} setores ativos
-            </span>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -512,79 +848,66 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
               <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold">
                 <tr>
                   <th className="py-3 px-4">Local / Setor</th>
-                  <th className="py-3 px-3">Macroárea</th>
-                  <th className="py-3 px-3 text-center">Mulheres</th>
-                  <th className="py-3 px-3 text-center">Homens</th>
-                  <th className="py-3 px-3 text-center">Total Colaboradores</th>
-                  <th className="py-3 px-4">Distribuição de Turnos (T1 / T2 / T3 / ADM)</th>
-                  <th className="py-3 px-4">Gestores Atuantes</th>
+                  <th className="py-3 px-3 text-center">Mulheres (👩)</th>
+                  <th className="py-3 px-3 text-center">Homens (👨)</th>
+                  <th className="py-3 px-3 text-center">Efetivo Total</th>
+                  <th className="py-3 px-4">Distribuição por Turno</th>
+                  <th className="py-3 px-4">Gestores Imediatos</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {locationGroups.map((loc, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                    {/* Local */}
-                    <td className="py-3 px-4 font-bold text-[#0b1c30]">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="w-3.5 h-3.5 text-[#306576] shrink-0" />
-                        <span>{loc.locationName}</span>
-                      </div>
+                {locationGroups.map(group => (
+                  <tr key={group.locationName} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4">
+                      <span className="font-bold text-[#0b1c30] block">{group.locationName}</span>
+                      <span className="text-[10px] text-slate-400 block">{group.macroarea}</span>
                     </td>
-
-                    {/* Macroárea */}
-                    <td className="py-3 px-3 text-slate-500">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
-                        {loc.macroarea}
-                      </span>
-                    </td>
-
+                    
                     {/* Mulheres */}
                     <td className="py-3 px-3 text-center">
-                      <span className={`inline-flex items-center gap-1 font-bold ${
-                        loc.female > 0 ? 'text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200' : 'text-slate-400'
-                      }`}>
-                        {loc.female} <span className="text-[10px] font-normal">({loc.femalePct}%)</span>
+                      <span className="inline-flex items-center gap-1 font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                        {group.female} <span className="text-[10px] font-normal">({group.femalePct}%)</span>
                       </span>
                     </td>
 
                     {/* Homens */}
                     <td className="py-3 px-3 text-center">
                       <span className="inline-flex items-center gap-1 font-bold text-[#0a3641] bg-sky-50 px-2 py-0.5 rounded-full border border-sky-100">
-                        {loc.male} <span className="text-[10px] font-normal">({loc.malePct}%)</span>
+                        {group.male} <span className="text-[10px] font-normal">({group.malePct}%)</span>
                       </span>
                     </td>
 
                     {/* Total */}
                     <td className="py-3 px-3 text-center font-extrabold text-[#0b1c30] text-sm">
-                      {loc.total}
+                      {group.total}
                     </td>
 
-                    {/* Distribuição por Turno */}
+                    {/* Turnos */}
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        {loc.shifts['Turno A'] > 0 && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200" title="Turno 1">
-                            T1: {loc.shifts['Turno A']}
+                        {group.shifts['Turno A'] > 0 && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
+                            T1: {group.shifts['Turno A']}
                           </span>
                         )}
-                        {loc.shifts['Turno B'] > 0 && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200" title="Turno 2">
-                            T2: {loc.shifts['Turno B']}
+                        {group.shifts['Turno B'] > 0 && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                            T2: {group.shifts['Turno B']}
                           </span>
                         )}
-                        {loc.shifts['Turno C'] > 0 && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200" title="Turno 3">
-                            T3: {loc.shifts['Turno C']}
+                        {group.shifts['Turno C'] > 0 && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                            T3: {group.shifts['Turno C']}
                           </span>
                         )}
-                        {loc.shifts['Administrativo'] > 0 && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200" title="Administrativo">
-                            ADM: {loc.shifts['Administrativo']}
+                        {group.shifts['Administrativo'] > 0 && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            ADM: {group.shifts['Administrativo']}
                           </span>
                         )}
-                        {loc.shifts['Outras Jornadas'] > 0 && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-200" title="Outras Jornadas">
-                            OUT: {loc.shifts['Outras Jornadas']}
+                        {group.shifts['Outras Jornadas'] > 0 && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-200">
+                            OUT: {group.shifts['Outras Jornadas']}
                           </span>
                         )}
                       </div>
@@ -592,9 +915,9 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
 
                     {/* Gestores */}
                     <td className="py-3 px-4 text-slate-600 text-[11px]">
-                      <div className="truncate max-w-[200px]" title={loc.managersList.join(', ')}>
-                        {loc.managersList.slice(0, 2).join(', ')}
-                        {loc.managersList.length > 2 && ` +${loc.managersList.length - 2}`}
+                      <div className="truncate max-w-[200px]" title={group.managersList.join(', ')}>
+                        {group.managersList.slice(0, 2).join(', ')}
+                        {group.managersList.length > 2 && ` +${group.managersList.length - 2}`}
                       </div>
                     </td>
                   </tr>
@@ -609,69 +932,56 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
       {/* 4. CONTEÚDO DA VISÃO 2: POR TURNO / JORNADA */}
       {/* ========================================================================= */}
       {viewMode === 'shift' && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {shiftGroups.map(sh => (
-              <div key={sh.category} className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-extrabold text-[#0b1c30] text-sm">{sh.title}</h4>
-                    <span className="text-[11px] text-slate-400 font-mono">{sh.hours}</span>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-black bg-[#0a3641] text-[#6ffbbe]">
-                    {sh.total} colab
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {shiftGroups.map(shift => (
+            <div key={shift.category} className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 space-y-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                    {shift.category}
+                  </span>
+                  <h4 className="text-base font-bold text-[#0b1c30] mt-0.5">{shift.title}</h4>
+                  <span className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                    <Clock className="w-3 h-3 text-slate-400" />
+                    {shift.hours}
                   </span>
                 </div>
-
-                {/* Proporção Homem / Mulher */}
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1.5">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-rose-600 font-bold flex items-center gap-1">
-                      👩 Mulheres: <strong>{sh.female}</strong> ({sh.femalePct}%)
-                    </span>
-                    <span className="text-sky-800 font-bold flex items-center gap-1">
-                      👨 Homens: <strong>{sh.male}</strong> ({sh.malePct}%)
-                    </span>
-                  </div>
-                  {/* Barra de progresso */}
-                  <div className="w-full h-2 bg-sky-200 rounded-full overflow-hidden flex">
-                    <div style={{ width: `${sh.femalePct}%` }} className="bg-rose-500 h-full" />
-                    <div style={{ width: `${sh.malePct}%` }} className="bg-[#306576] h-full" />
-                  </div>
+                <div className="text-right">
+                  <span className="text-2xl font-black text-[#0b1c30]">{shift.total}</span>
+                  <span className="text-[10px] block text-slate-400 font-semibold">pessoas</span>
                 </div>
-
-                {/* Principais Setores Atendidos */}
-                <div className="space-y-1 text-xs">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Principais Setores Atendidos:
-                  </span>
-                  <div className="space-y-1 text-slate-700">
-                    {sh.topLocations.map(([locName, count]) => (
-                      <div key={locName} className="flex justify-between items-center text-[11px]">
-                        <span className="truncate max-w-[200px]">{locName}</span>
-                        <strong className="text-slate-900">{count}</strong>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Gestores Responsáveis */}
-                <div className="pt-2 border-t border-slate-100 text-xs">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                    Lideranças Atuantes no Turno:
-                  </span>
-                  <div className="flex flex-wrap gap-1">
-                    {sh.topManagers.map(([mgrName, count]) => (
-                      <span key={mgrName} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
-                        {mgrName.split(',')[0]} ({count})
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
               </div>
-            ))}
-          </div>
+
+              {/* Proporção Homens x Mulheres */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <span className="text-rose-600 flex items-center gap-1">
+                    👩 Mulheres: <strong>{shift.female} ({shift.femalePct}%)</strong>
+                  </span>
+                  <span className="text-sky-700 flex items-center gap-1">
+                    👨 Homens: <strong>{shift.male} ({shift.malePct}%)</strong>
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-slate-100 flex overflow-hidden">
+                  <div style={{ width: `${shift.femalePct}%` }} className="bg-rose-500 h-full transition-all duration-300" />
+                  <div style={{ width: `${shift.malePct}%` }} className="bg-[#0a3641] h-full transition-all duration-300" />
+                </div>
+              </div>
+
+              {/* Principais Setores do Turno */}
+              <div className="pt-2 border-t border-slate-100 space-y-2">
+                <span className="text-[11px] font-bold text-slate-600 block">Principais Setores Atendidos:</span>
+                <div className="space-y-1">
+                  {shift.topLocations.map(([loc, count]) => (
+                    <div key={loc} className="flex items-center justify-between text-xs text-slate-600">
+                      <span className="truncate max-w-[200px]">{loc}</span>
+                      <span className="font-bold text-slate-900">{count} colab.</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -682,16 +992,12 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
         <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-[#0b1c30]">
-                Efetivo e Diversidade por Gestor Imediato
-              </h3>
-              <p className="text-xs text-slate-500">
-                Lideranças de Feira de Santana, divisão de equipes por gênero, escalas e setores
-              </p>
+              <h3 className="text-sm font-bold text-[#0b1c30]">Lideranças Imediatas & Distribuição de Equipes</h3>
+              <p className="text-xs text-slate-500">Supervisores e coordenadores da fábrica Bahia (KBA1) com composição de gênero</p>
             </div>
-            <span className="text-xs font-bold text-slate-500">
+            <div className="text-xs text-slate-400">
               {managerGroups.length} gestores mapeados
-            </span>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -699,29 +1005,23 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
               <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold">
                 <tr>
                   <th className="py-3 px-4">Gestor Imediato</th>
-                  <th className="py-3 px-3 text-center">Mulheres</th>
-                  <th className="py-3 px-3 text-center">Homens</th>
-                  <th className="py-3 px-3 text-center">Total Liderados</th>
-                  <th className="py-3 px-4">Distribuição de Turnos da Equipe</th>
-                  <th className="py-3 px-4">Setores / Locais sob Gestão</th>
+                  <th className="py-3 px-3 text-center">Mulheres (👩)</th>
+                  <th className="py-3 px-3 text-center">Homens (👨)</th>
+                  <th className="py-3 px-3 text-center">Tamanho da Equipe</th>
+                  <th className="py-3 px-4">Turnos Atendidos</th>
+                  <th className="py-3 px-4">Locais de Atuação</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {managerGroups.map((mgr, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                    {/* Gestor */}
+                {managerGroups.map(mgr => (
+                  <tr key={mgr.managerName} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3 px-4 font-bold text-[#0b1c30]">
-                      <div className="flex items-center gap-2">
-                        <Users className="w-3.5 h-3.5 text-[#306576] shrink-0" />
-                        <span>{mgr.managerName}</span>
-                      </div>
+                      {mgr.managerName}
                     </td>
 
                     {/* Mulheres */}
                     <td className="py-3 px-3 text-center">
-                      <span className={`inline-flex items-center gap-1 font-bold ${
-                        mgr.female > 0 ? 'text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200' : 'text-slate-400'
-                      }`}>
+                      <span className="inline-flex items-center gap-1 font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
                         {mgr.female} <span className="text-[10px] font-normal">({mgr.femalePct}%)</span>
                       </span>
                     </td>
@@ -785,7 +1085,324 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
       )}
 
       {/* ========================================================================= */}
-      {/* 6. CONTEÚDO DA VISÃO 4: MATRIZ CRUZADA (TURNO × LOCAL × GESTOR) */}
+      {/* 6. CONTEÚDO DA VISÃO NOVA: TEMPO DE EMPRESA POR SEXO (D&I E SENIORIDADE) */}
+      {/* ========================================================================= */}
+      {viewMode === 'tenure' && (
+        <div className="space-y-6">
+          
+          {/* Cards de Síntese Comparativa de Tempo de Casa */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            {/* Card Mulheres */}
+            <div className="bg-gradient-to-br from-white to-rose-50/50 p-5 rounded-2xl border border-rose-200 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700 flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                  Mulheres • Tempo Médio de Casa
+                </span>
+                <span className="text-xs font-bold text-rose-600 bg-rose-100/80 px-2 py-0.5 rounded-full">
+                  {tenureStats.femaleCount} colaboradoras
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-black text-rose-700">{tenureStats.avgFemale}</span>
+                <span className="text-sm font-bold text-rose-900">anos em média</span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                <strong>82,8%</strong> das colaboradoras ingressaram nos últimos 5 anos, refletindo forte aceleração do pilar de <strong>Diversidade & Inclusão (D&I)</strong> da Klabin na unidade.
+              </p>
+              <div className="pt-2 border-t border-rose-100 text-[11px] text-rose-800">
+                <span className="font-semibold">Maior tempo de casa feminino:</span>{' '}
+                <strong>{tenureStats.maxFemaleTenure.name}</strong> ({tenureStats.maxFemaleTenure.years} anos • desde {tenureStats.maxFemaleTenure.adm})
+              </div>
+            </div>
+
+            {/* Card Homens */}
+            <div className="bg-gradient-to-br from-white to-sky-50/50 p-5 rounded-2xl border border-sky-200 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#306576] flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#0a3641]" />
+                  Homens • Tempo Médio de Casa
+                </span>
+                <span className="text-xs font-bold text-[#306576] bg-sky-100/80 px-2 py-0.5 rounded-full">
+                  {tenureStats.maleCount} colaboradores
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-black text-[#0a3641]">{tenureStats.avgMale}</span>
+                <span className="text-sm font-bold text-[#0a3641]">anos em média</span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                <strong>44,1%</strong> do efetivo masculino possui <strong>mais de 10 anos</strong> de empresa, conferindo sólida experiência operacional e retenção técnica na planta fabril.
+              </p>
+              <div className="pt-2 border-t border-sky-100 text-[11px] text-slate-700">
+                <span className="font-semibold">Maior tempo de casa masculino:</span>{' '}
+                <strong>{tenureStats.maxMaleTenure.name}</strong> ({tenureStats.maxMaleTenure.years} anos • desde {tenureStats.maxMaleTenure.adm})
+              </div>
+            </div>
+
+            {/* Card Geral da Planta */}
+            <div className="bg-gradient-to-br from-white to-emerald-50/50 p-5 rounded-2xl border border-emerald-200 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                  <History className="w-3.5 h-3.5 text-emerald-600" />
+                  Média Geral da Fábrica Bahia
+                </span>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  {filteredEmployees.length} ativos
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-black text-[#0b1c30]">{tenureStats.avgOverall}</span>
+                <span className="text-sm font-bold text-slate-700">anos de média fabril</span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                A fábrica equilibra <strong>maturidade industrial histórica</strong> com constante renovação geracional em cargos de operação, logística e controle de qualidade.
+              </p>
+              <div className="pt-2 border-t border-emerald-100 text-[11px] text-emerald-900 flex items-center justify-between">
+                <span>Novos talentos (&lt; 1 ano): <strong>16,1%</strong></span>
+                <span>Veteranos (&gt; 10 anos): <strong>38,2%</strong></span>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Tabela Principal: Distribuição de Faixas de Tempo de Casa por Sexo */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-bold text-[#0b1c30]">
+                  Distribuição por Faixa de Tempo de Empresa & Sexo
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Cruzamento demográfico entre gênero, tempo de permanência e setores com maior concentração
+                </p>
+              </div>
+              <span className="text-xs text-slate-400 font-medium">
+                Base oficial de admissões PAAH (Out/2026)
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold">
+                  <tr>
+                    <th className="py-3 px-4">Faixa de Permanência</th>
+                    <th className="py-3 px-3 text-center">Mulheres (👩)</th>
+                    <th className="py-3 px-3 text-center">Homens (👨)</th>
+                    <th className="py-3 px-3 text-center">Total na Faixa</th>
+                    <th className="py-3 px-4 min-w-[240px]">Proporção no Contingente (Feminino vs Masculino)</th>
+                    <th className="py-3 px-4">Setores Predominantes na Faixa</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {tenureStats.bracketRows.map(row => (
+                    <tr key={row.bracket} className="hover:bg-slate-50/80 transition-colors">
+                      
+                      {/* Faixa */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-extrabold ${
+                            row.bracket === '< 1 ano' 
+                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                              : row.bracket === '> 10 anos'
+                              ? 'bg-[#0a3641] text-[#6ffbbe]'
+                              : 'bg-slate-100 text-slate-800 border border-slate-200'
+                          }`}>
+                            {row.bracket}
+                          </span>
+                          <span className="text-[11px] text-slate-500 font-medium">
+                            {row.description}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Mulheres */}
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="inline-flex items-center gap-1 font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200">
+                          {row.female}
+                          <span className="text-[10px] text-rose-500 font-normal">
+                            ({row.femalePctOfAllFemales}% das mulheres)
+                          </span>
+                        </span>
+                      </td>
+
+                      {/* Homens */}
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="inline-flex items-center gap-1 font-bold text-[#0a3641] bg-sky-50 px-2.5 py-1 rounded-full border border-sky-100">
+                          {row.male}
+                          <span className="text-[10px] text-sky-700 font-normal">
+                            ({row.malePctOfAllMales}% dos homens)
+                          </span>
+                        </span>
+                      </td>
+
+                      {/* Total na Faixa */}
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="text-sm font-black text-[#0b1c30] block">
+                          {row.total}
+                        </span>
+                        <span className="text-[10px] font-semibold text-slate-400 block">
+                          {row.pctOfHeadcount}% do quadro
+                        </span>
+                      </td>
+
+                      {/* Barra de Proporção Bicolor */}
+                      <td className="py-3.5 px-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[11px] font-bold">
+                            <span className="text-rose-600">👩 {row.femaleShareInBracket}%</span>
+                            <span className="text-[#0a3641]">👨 {row.maleShareInBracket}%</span>
+                          </div>
+                          <div className="w-full h-3 rounded-full bg-slate-100 flex overflow-hidden shadow-inner">
+                            <div 
+                              style={{ width: `${row.femaleShareInBracket}%` }} 
+                              className="bg-rose-500 h-full transition-all duration-300"
+                              title={`Mulheres: ${row.female} (${row.femaleShareInBracket}%)`}
+                            />
+                            <div 
+                              style={{ width: `${row.maleShareInBracket}%` }} 
+                              className="bg-[#0a3641] h-full transition-all duration-300"
+                              title={`Homens: ${row.male} (${row.maleShareInBracket}%)`}
+                            />
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Setores Predominantes */}
+                      <td className="py-3.5 px-4 text-slate-600 text-[11px]">
+                        <div className="flex flex-wrap gap-1">
+                          {row.topLocations.map(loc => (
+                            <span key={loc} className="px-2 py-0.5 rounded bg-slate-50 border border-slate-200 text-slate-700 font-medium">
+                              {loc}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="bg-[#eff4ff] text-[#0b1c30] font-bold text-xs">
+                  <tr>
+                    <td className="py-3 px-4">TOTAL GERAL / MÉDIA DA UNIDADE</td>
+                    <td className="py-3 px-3 text-center text-rose-700">
+                      {tenureStats.femaleCount} mulheres (média {tenureStats.avgFemale}a)
+                    </td>
+                    <td className="py-3 px-3 text-center text-[#0a3641]">
+                      {tenureStats.maleCount} homens (média {tenureStats.avgMale}a)
+                    </td>
+                    <td className="py-3 px-3 text-center font-black text-sm">
+                      {filteredEmployees.length} colaboradores
+                    </td>
+                    <td className="py-3 px-4 text-center font-bold text-slate-700">
+                      Média Geral: {tenureStats.avgOverall} anos de empresa
+                    </td>
+                    <td className="py-3 px-4 text-slate-500 font-normal">
+                      100% elegíveis na planta KBA1
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          {/* Sub-Grid: Cruzamento com Setor e Turno */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            
+            {/* Tabela de Tempo de Casa por Setor */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-[#0b1c30]">Tempo Médio por Local / Setor</h4>
+                  <p className="text-xs text-slate-500">Média de anos de empresa para mulheres e homens por área fabril</p>
+                </div>
+              </div>
+              <div className="overflow-x-auto max-h-96">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold sticky top-0">
+                    <tr>
+                      <th className="py-2.5 px-3">Local / Setor</th>
+                      <th className="py-2.5 px-2 text-center">Colab.</th>
+                      <th className="py-2.5 px-2 text-center">Média 👩</th>
+                      <th className="py-2.5 px-2 text-center">Média 👨</th>
+                      <th className="py-2.5 px-2 text-center">Média Geral</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {tenureStats.locationTenureList.map(loc => (
+                      <tr key={loc.locationName} className="hover:bg-slate-50/80">
+                        <td className="py-2.5 px-3 font-semibold text-slate-900">{loc.locationName}</td>
+                        <td className="py-2.5 px-2 text-center font-bold text-slate-700">{loc.total}</td>
+                        <td className="py-2.5 px-2 text-center text-rose-700 font-bold">
+                          {loc.avgFemale !== '—' ? `${loc.avgFemale}a` : '—'}
+                          {loc.femaleCount > 0 && <span className="text-[10px] text-slate-400 block font-normal">({loc.femaleCount} col.)</span>}
+                        </td>
+                        <td className="py-2.5 px-2 text-center text-[#0a3641] font-bold">
+                          {loc.avgMale !== '—' ? `${loc.avgMale}a` : '—'}
+                          {loc.maleCount > 0 && <span className="text-[10px] text-slate-400 block font-normal">({loc.maleCount} col.)</span>}
+                        </td>
+                        <td className="py-2.5 px-2 text-center font-extrabold text-[#0b1c30]">
+                          {loc.avgOverall}a
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Tabela de Tempo de Casa por Turno */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-[#0b1c30]">Tempo Médio por Turno / Escala</h4>
+                  <p className="text-xs text-slate-500">Média de permanência nas jornadas de trabalho da fábrica</p>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold">
+                    <tr>
+                      <th className="py-2.5 px-3">Turno / Escala</th>
+                      <th className="py-2.5 px-2 text-center">Colab.</th>
+                      <th className="py-2.5 px-2 text-center">Média 👩</th>
+                      <th className="py-2.5 px-2 text-center">Média 👨</th>
+                      <th className="py-2.5 px-2 text-center">Média Geral</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {tenureStats.shiftTenureList.map(s => (
+                      <tr key={s.shiftCategory} className="hover:bg-slate-50/80">
+                        <td className="py-3 px-3">
+                          <span className="font-bold text-slate-900 block">{s.shiftCategory}</span>
+                        </td>
+                        <td className="py-3 px-2 text-center font-bold text-slate-700">{s.total}</td>
+                        <td className="py-3 px-2 text-center text-rose-700 font-bold">
+                          {s.avgFemale !== '—' ? `${s.avgFemale}a` : '—'}
+                          {s.femaleCount > 0 && <span className="text-[10px] text-slate-400 block font-normal">({s.femaleCount} col.)</span>}
+                        </td>
+                        <td className="py-3 px-2 text-center text-[#0a3641] font-bold">
+                          {s.avgMale !== '—' ? `${s.avgMale}a` : '—'}
+                          {s.maleCount > 0 && <span className="text-[10px] text-slate-400 block font-normal">({s.maleCount} col.)</span>}
+                        </td>
+                        <td className="py-3 px-2 text-center font-extrabold text-[#0b1c30]">
+                          {s.avgOverall}a
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 7. CONTEÚDO DA VISÃO 5: MATRIZ CRUZADA (TURNO × LOCAL × GESTOR) */}
       {/* ========================================================================= */}
       {viewMode === 'crosstab' && (
         <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden space-y-4">
@@ -798,30 +1415,31 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
                 Cruzamento completo de contingente por gênero e escala operacional
               </p>
             </div>
-
-            {/* Alternador de Agrupamento das Linhas */}
-            <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
-              <span className="text-slate-500 px-2">Agrupar Linhas por:</span>
-              <button
-                onClick={() => setCrossTabGroupBy('location')}
-                className={`px-3 py-1 rounded-lg transition-all ${
-                  crossTabGroupBy === 'location'
-                    ? 'bg-white text-[#0a3641] font-bold shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Local / Setor
-              </button>
-              <button
-                onClick={() => setCrossTabGroupBy('manager')}
-                className={`px-3 py-1 rounded-lg transition-all ${
-                  crossTabGroupBy === 'manager'
-                    ? 'bg-white text-[#0a3641] font-bold shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Gestor Imediato
-              </button>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500">Agrupar linhas por:</span>
+              <div className="inline-flex rounded-xl bg-slate-100 p-0.5 border border-slate-200">
+                <button
+                  onClick={() => setCrossTabGroupBy('location')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    crossTabGroupBy === 'location'
+                      ? 'bg-white text-[#0a3641] shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Local / Setor
+                </button>
+                <button
+                  onClick={() => setCrossTabGroupBy('manager')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    crossTabGroupBy === 'manager'
+                      ? 'bg-white text-[#0a3641] shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Gestor Imediato
+                </button>
+              </div>
             </div>
           </div>
 
@@ -830,21 +1448,20 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
               <thead className="bg-[#eff4ff] text-[#306576] uppercase text-[10px] tracking-wider font-semibold">
                 <tr>
                   <th className="py-3 px-4">{crossTabGroupBy === 'location' ? 'Local / Setor' : 'Gestor Imediato'}</th>
-                  <th className="py-3 px-3 text-center bg-sky-50/50">Turno 1 (06-14:20)<br/><span className="text-[9px] font-normal">Tot | 👩 | 👨</span></th>
-                  <th className="py-3 px-3 text-center bg-indigo-50/50">Turno 2 (14:20-22:30)<br/><span className="text-[9px] font-normal">Tot | 👩 | 👨</span></th>
-                  <th className="py-3 px-3 text-center bg-amber-50/50">Turno 3 (22:30-06)<br/><span className="text-[9px] font-normal">Tot | 👩 | 👨</span></th>
-                  <th className="py-3 px-3 text-center bg-emerald-50/50">Administrativo<br/><span className="text-[9px] font-normal">Tot | 👩 | 👨</span></th>
-                  <th className="py-3 px-3 text-center bg-purple-50/50">Outras Jornadas<br/><span className="text-[9px] font-normal">Tot | 👩 | 👨</span></th>
-                  <th className="py-3 px-4 text-center bg-[#0a3641] text-white">Total Geral<br/><span className="text-[9px] text-[#6ffbbe]">Tot (👩 / 👨)</span></th>
+                  <th className="py-3 px-3 text-center bg-sky-50/50">Turno A (Manhã)</th>
+                  <th className="py-3 px-3 text-center bg-indigo-50/50">Turno B (Tarde)</th>
+                  <th className="py-3 px-3 text-center bg-amber-50/50">Turno C (Noite)</th>
+                  <th className="py-3 px-3 text-center bg-emerald-50/50">ADM (Comercial)</th>
+                  <th className="py-3 px-3 text-center bg-purple-50/50">Outras Jornadas</th>
+                  <th className="py-3 px-4 text-center font-bold bg-slate-100 text-[#0b1c30]">Total Geral</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {crossTabRows.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                    {/* Linha principal */}
-                    <td className="py-3 px-4 font-bold text-[#0b1c30]">
-                      <div>{row.name}</div>
-                      <span className="text-[10px] text-slate-400 font-normal">{row.secondaryInfo}</span>
+                {crossTabRows.map(row => (
+                  <tr key={row.rowKey} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4">
+                      <span className="font-bold text-[#0b1c30] block">{row.rowLabel}</span>
+                      <span className="text-[10px] text-slate-400 block">{row.secondaryInfo}</span>
                     </td>
 
                     {/* Turno A */}
@@ -908,14 +1525,45 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
       )}
 
       {/* ========================================================================= */}
-      {/* 7. CONTEÚDO DA VISÃO 5: LISTA NOMINAL DE COLABORADORES */}
+      {/* 8. CONTEÚDO DA VISÃO 6: LISTA NOMINAL DE COLABORADORES */}
       {/* ========================================================================= */}
       {viewMode === 'nominal' && (
         <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-sm font-bold text-[#0b1c30]">Lista Nominal Completa de Colaboradores</h3>
-              <p className="text-xs text-slate-500">Exibindo {filteredEmployees.length} registros com sexo, setor, turno e liderança</p>
+              <p className="text-xs text-slate-500">Exibindo {sortedNominalEmployees.length} registros com admissão e tempo de empresa por sexo</p>
+            </div>
+            
+            {/* Ordenação rápida */}
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-slate-500 font-semibold">Ordenar por:</span>
+              <button
+                onClick={() => {
+                  if (sortField === 'tenure') setSortDirection(d => d === 'desc' ? 'asc' : 'desc');
+                  else { setSortField('tenure'); setSortDirection('desc'); }
+                }}
+                className={`px-2.5 py-1 rounded-lg font-bold border transition-all ${
+                  sortField === 'tenure'
+                    ? 'bg-[#0a3641] text-[#6ffbbe] border-[#306576]'
+                    : 'bg-slate-50 text-slate-700 border-slate-200'
+                }`}
+              >
+                Tempo de Empresa {sortField === 'tenure' && (sortDirection === 'desc' ? '↓' : '↑')}
+              </button>
+              <button
+                onClick={() => {
+                  if (sortField === 'name') setSortDirection(d => d === 'desc' ? 'asc' : 'desc');
+                  else { setSortField('name'); setSortDirection('asc'); }
+                }}
+                className={`px-2.5 py-1 rounded-lg font-bold border transition-all ${
+                  sortField === 'name'
+                    ? 'bg-[#0a3641] text-[#6ffbbe] border-[#306576]'
+                    : 'bg-slate-50 text-slate-700 border-slate-200'
+                }`}
+              >
+                Nome {sortField === 'name' && (sortDirection === 'desc' ? '↓' : '↑')}
+              </button>
             </div>
           </div>
 
@@ -926,7 +1574,8 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
                   <th className="p-3">PRN</th>
                   <th className="p-3">Colaborador</th>
                   <th className="p-3 text-center">Sexo</th>
-                  <th className="p-3">Vínculo</th>
+                  <th className="p-3 text-center">Admissão</th>
+                  <th className="p-3 text-center">Tempo de Casa</th>
                   <th className="p-3">Cargo</th>
                   <th className="p-3">Local / Setor</th>
                   <th className="p-3">Turno / Jornada</th>
@@ -935,8 +1584,9 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filteredEmployees.map(emp => {
+                {sortedNominalEmployees.map(emp => {
                   const isFemale = (emp.gender || '').toLowerCase().startsWith('f');
+                  const tenure = calculateEmployeeTenure(emp.admissionDate);
                   return (
                     <tr key={emp.prn} className="hover:bg-slate-50/80 transition-colors">
                       <td className="p-3 font-mono font-bold text-slate-900">{emp.prn}</td>
@@ -953,16 +1603,21 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
                         </span>
                       </td>
 
-                      {/* Vínculo */}
-                      <td className="p-3">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          emp.employmentGroup === 'CLT'
-                            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                            : emp.employmentGroup === 'Aprendiz'
-                            ? 'bg-sky-50 text-sky-700 border border-sky-200'
-                            : 'bg-purple-50 text-purple-700 border border-purple-200'
+                      {/* Admissão */}
+                      <td className="p-3 text-center font-mono text-[11px] text-slate-600">
+                        {tenure.formattedAdmission}
+                      </td>
+
+                      {/* Tempo de Casa */}
+                      <td className="p-3 text-center">
+                        <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-extrabold font-mono ${
+                          tenure.bracket === '< 1 ano'
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                            : tenure.bracket === '> 10 anos'
+                            ? 'bg-amber-50 text-amber-900 border border-amber-200'
+                            : 'bg-slate-100 text-slate-800 border border-slate-200'
                         }`}>
-                          {emp.employmentGroup}
+                          {tenure.label}
                         </span>
                       </td>
 
@@ -995,4 +1650,3 @@ export const HeadcountAnalyticsTab: React.FC<HeadcountAnalyticsTabProps> = ({ em
     </div>
   );
 };
-

@@ -21,8 +21,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2010-02-01",
+    "status": "Ativo",
+    "birthDate": "1982-01-03"
   },
   {
     "prn": "155548",
@@ -46,8 +47,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-09-18",
+    "status": "Ativo",
+    "birthDate": "1996-07-20"
   },
   {
     "prn": "144352",
@@ -71,8 +73,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-05",
+    "status": "Ativo",
+    "birthDate": "1984-01-03"
   },
   {
     "prn": "164200",
@@ -96,8 +99,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-05-12",
+    "status": "Ativo",
+    "birthDate": "1982-07-28"
   },
   {
     "prn": "154605",
@@ -121,8 +125,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-06-05",
+    "status": "Ativo",
+    "birthDate": "1980-12-11"
   },
   {
     "prn": "162957",
@@ -146,8 +151,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-02-10",
+    "status": "Ativo",
+    "birthDate": "2004-02-22"
   },
   {
     "prn": "163215",
@@ -171,8 +177,9 @@
     "shiftCode": "K111009",
     "shiftName": "FS Estagiário 08:00-14:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-03-10",
+    "status": "Ativo",
+    "birthDate": "2004-08-02"
   },
   {
     "prn": "170991",
@@ -196,8 +203,9 @@
     "shiftCode": "K111012",
     "shiftName": "FS Aprendiz 08:00-12:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-14",
+    "status": "Ativo",
+    "birthDate": "2006-05-14"
   },
   {
     "prn": "103835",
@@ -221,8 +229,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1999-09-20",
+    "status": "Ativo",
+    "birthDate": "1977-04-07"
   },
   {
     "prn": "116646",
@@ -246,8 +255,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-05-05",
+    "status": "Ativo",
+    "birthDate": "1990-01-10"
   },
   {
     "prn": "110165",
@@ -271,8 +281,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2012-01-11",
+    "status": "Ativo",
+    "birthDate": "1985-05-24"
   },
   {
     "prn": "103820",
@@ -296,8 +307,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1998-10-07",
+    "status": "Ativo",
+    "birthDate": "1978-04-07"
   },
   {
     "prn": "170500",
@@ -321,8 +333,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-08-17",
+    "status": "Ativo",
+    "birthDate": "1987-03-24"
   },
   {
     "prn": "168557",
@@ -346,8 +359,9 @@
     "shiftCode": "K111066",
     "shiftName": "FS Estagiário 08:00-15:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-04-06",
+    "status": "Ativo",
+    "birthDate": "2006-06-10"
   },
   {
     "prn": "147798",
@@ -371,8 +385,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-01-17",
+    "status": "Ativo",
+    "birthDate": "1986-01-08"
   },
   {
     "prn": "166658",
@@ -396,8 +411,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-11-03",
+    "status": "Ativo",
+    "birthDate": "2001-12-22"
   },
   {
     "prn": "169042",
@@ -421,8 +437,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-04-22",
+    "status": "Ativo",
+    "birthDate": "2003-08-11"
   },
   {
     "prn": "146918",
@@ -446,8 +463,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-11-08",
+    "status": "Ativo",
+    "birthDate": "1989-04-17"
   },
   {
     "prn": "161709",
@@ -471,8 +489,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-11-04",
+    "status": "Ativo",
+    "birthDate": "1994-08-08"
   },
   {
     "prn": "115629",
@@ -496,8 +515,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-01-06",
+    "status": "Ativo",
+    "birthDate": "1986-10-30"
   },
   {
     "prn": "162956",
@@ -521,8 +541,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-02-10",
+    "status": "Ativo",
+    "birthDate": "1983-12-10"
   },
   {
     "prn": "152144",
@@ -546,8 +567,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-11-07",
+    "status": "Ativo",
+    "birthDate": "1982-10-20"
   },
   {
     "prn": "144349",
@@ -571,8 +593,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-05",
+    "status": "Ativo",
+    "birthDate": "1989-04-30"
   },
   {
     "prn": "126061",
@@ -596,8 +619,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-12-01",
+    "status": "Ativo",
+    "birthDate": "1987-05-05"
   },
   {
     "prn": "103993",
@@ -621,8 +645,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-01-03",
+    "status": "Ativo",
+    "birthDate": "1987-01-10"
   },
   {
     "prn": "166567",
@@ -646,8 +671,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-11-03",
+    "status": "Ativo",
+    "birthDate": "1990-11-30"
   },
   {
     "prn": "115632",
@@ -671,8 +697,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-01-06",
+    "status": "Ativo",
+    "birthDate": "1985-07-28"
   },
   {
     "prn": "166316",
@@ -696,8 +723,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-10-06",
+    "status": "Ativo",
+    "birthDate": "2004-05-13"
   },
   {
     "prn": "119348",
@@ -721,8 +749,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-03-02",
+    "status": "Ativo",
+    "birthDate": "1984-06-07"
   },
   {
     "prn": "167155",
@@ -746,8 +775,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-12-05",
+    "status": "Ativo",
+    "birthDate": "1993-05-23"
   },
   {
     "prn": "162199",
@@ -771,8 +801,9 @@
     "shiftCode": "K111058",
     "shiftName": "FS Fixo 6x2 22:30-06:00 D",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-06",
+    "status": "Ativo",
+    "birthDate": "1998-12-23"
   },
   {
     "prn": "134499",
@@ -796,8 +827,9 @@
     "shiftCode": "K111057",
     "shiftName": "FS Fixo 6x2 22:30-06:00 C",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2019-10-01",
+    "status": "Ativo",
+    "birthDate": "1999-11-12"
   },
   {
     "prn": "129822",
@@ -821,8 +853,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2018-02-05",
+    "status": "Ativo",
+    "birthDate": "1984-12-01"
   },
   {
     "prn": "152582",
@@ -846,8 +879,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-01-02",
+    "status": "Ativo",
+    "birthDate": "1991-12-29"
   },
   {
     "prn": "104044",
@@ -871,8 +905,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-08-01",
+    "status": "Ativo",
+    "birthDate": "1976-02-27"
   },
   {
     "prn": "145579",
@@ -896,8 +931,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-07-12",
+    "status": "Ativo",
+    "birthDate": "1974-09-05"
   },
   {
     "prn": "110792",
@@ -921,8 +957,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2012-04-02",
+    "status": "Ativo",
+    "birthDate": "1984-04-11"
   },
   {
     "prn": "170529",
@@ -946,8 +983,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-08-17",
+    "status": "Ativo",
+    "birthDate": "2004-11-01"
   },
   {
     "prn": "125282",
@@ -971,8 +1009,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-09-05",
+    "status": "Ativo",
+    "birthDate": "1976-12-09"
   },
   {
     "prn": "166293",
@@ -996,8 +1035,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-10-06",
+    "status": "Ativo",
+    "birthDate": "1987-12-05"
   },
   {
     "prn": "169579",
@@ -1021,8 +1061,9 @@
     "shiftCode": "K111066",
     "shiftName": "FS Estagiário 08:00-15:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-06-01",
+    "status": "Ativo",
+    "birthDate": "2000-04-17"
   },
   {
     "prn": "152660",
@@ -1046,8 +1087,9 @@
     "shiftCode": "K111057",
     "shiftName": "FS Fixo 6x2 22:30-06:00 C",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-01-02",
+    "status": "Ativo",
+    "birthDate": "1998-09-28"
   },
   {
     "prn": "165767",
@@ -1071,8 +1113,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-09-01",
+    "status": "Ativo",
+    "birthDate": "1988-10-14"
   },
   {
     "prn": "147597",
@@ -1096,8 +1139,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-01-04",
+    "status": "Ativo",
+    "birthDate": "1999-02-16"
   },
   {
     "prn": "144519",
@@ -1121,8 +1165,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-13",
+    "status": "Ativo",
+    "birthDate": "1982-04-18"
   },
   {
     "prn": "161952",
@@ -1146,8 +1191,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-12-02",
+    "status": "Ativo",
+    "birthDate": "1979-10-09"
   },
   {
     "prn": "155699",
@@ -1171,8 +1217,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-09-18",
+    "status": "Ativo",
+    "birthDate": "1995-03-19"
   },
   {
     "prn": "129637",
@@ -1196,8 +1243,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2018-01-03",
+    "status": "Ativo",
+    "birthDate": "1987-01-02"
   },
   {
     "prn": "120949",
@@ -1221,8 +1269,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-07-06",
+    "status": "Ativo",
+    "birthDate": "1989-06-09"
   },
   {
     "prn": "117029",
@@ -1246,8 +1295,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-06-16",
+    "status": "Ativo",
+    "birthDate": "1987-08-30"
   },
   {
     "prn": "126058",
@@ -1271,8 +1321,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-12-01",
+    "status": "Ativo",
+    "birthDate": "1986-11-12"
   },
   {
     "prn": "161854",
@@ -1296,8 +1347,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-11-18",
+    "status": "Ativo",
+    "birthDate": "1984-04-14"
   },
   {
     "prn": "168914",
@@ -1321,8 +1373,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-04-13",
+    "status": "Ativo",
+    "birthDate": "1981-03-11"
   },
   {
     "prn": "155341",
@@ -1346,8 +1399,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-08-14",
+    "status": "Ativo",
+    "birthDate": "1984-09-03"
   },
   {
     "prn": "111163",
@@ -1371,8 +1425,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2012-06-02",
+    "status": "Ativo",
+    "birthDate": "1993-05-05"
   },
   {
     "prn": "154392",
@@ -1396,8 +1451,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-05-15",
+    "status": "Ativo",
+    "birthDate": "1971-03-17"
   },
   {
     "prn": "103850",
@@ -1421,8 +1477,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2001-08-06",
+    "status": "Ativo",
+    "birthDate": "1974-05-14"
   },
   {
     "prn": "103866",
@@ -1446,8 +1503,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2004-08-16",
+    "status": "Ativo",
+    "birthDate": "1970-09-19"
   },
   {
     "prn": "144343",
@@ -1471,8 +1529,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-05",
+    "status": "Ativo",
+    "birthDate": "1997-11-20"
   },
   {
     "prn": "132265",
@@ -1496,8 +1555,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2018-12-10",
+    "status": "Ativo",
+    "birthDate": "1983-12-07"
   },
   {
     "prn": "103927",
@@ -1521,8 +1581,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2009-08-21",
+    "status": "Ativo",
+    "birthDate": "1983-12-10"
   },
   {
     "prn": "157830",
@@ -1546,8 +1607,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-03-18",
+    "status": "Ativo",
+    "birthDate": "1990-08-28"
   },
   {
     "prn": "170928",
@@ -1571,8 +1633,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-14",
+    "status": "Ativo",
+    "birthDate": "1983-05-11"
   },
   {
     "prn": "162195",
@@ -1596,8 +1659,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-06",
+    "status": "Ativo",
+    "birthDate": "1982-05-02"
   },
   {
     "prn": "103925",
@@ -1621,8 +1685,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2009-07-06",
+    "status": "Ativo",
+    "birthDate": "1974-09-14"
   },
   {
     "prn": "151383",
@@ -1646,8 +1711,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-09-12",
+    "status": "Ativo",
+    "birthDate": "1984-05-25"
   },
   {
     "prn": "103789",
@@ -1671,8 +1737,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1988-03-23",
+    "status": "Ativo",
+    "birthDate": "1969-05-15"
   },
   {
     "prn": "162284",
@@ -1696,8 +1763,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-06",
+    "status": "Ativo",
+    "birthDate": "1985-07-25"
   },
   {
     "prn": "152340",
@@ -1721,8 +1789,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-12-05",
+    "status": "Ativo",
+    "birthDate": "1989-01-23"
   },
   {
     "prn": "144424",
@@ -1746,8 +1815,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-05",
+    "status": "Ativo",
+    "birthDate": "1999-10-07"
   },
   {
     "prn": "171097",
@@ -1771,8 +1841,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-21",
+    "status": "Ativo",
+    "birthDate": "1981-06-21"
   },
   {
     "prn": "166887",
@@ -1796,8 +1867,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-11-17",
+    "status": "Ativo",
+    "birthDate": "1980-08-12"
   },
   {
     "prn": "144475",
@@ -1821,8 +1893,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-12",
+    "status": "Ativo",
+    "birthDate": "1988-08-19"
   },
   {
     "prn": "100828",
@@ -1846,8 +1919,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2001-07-11",
+    "status": "Ativo",
+    "birthDate": "1981-08-07"
   },
   {
     "prn": "122498",
@@ -1871,8 +1945,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-11-16",
+    "status": "Ativo",
+    "birthDate": "1989-06-09"
   },
   {
     "prn": "148462",
@@ -1896,8 +1971,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-03-14",
+    "status": "Ativo",
+    "birthDate": "1996-02-09"
   },
   {
     "prn": "155354",
@@ -1921,8 +1997,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-08-14",
+    "status": "Ativo",
+    "birthDate": "1980-10-26"
   },
   {
     "prn": "155880",
@@ -1946,8 +2023,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-10-09",
+    "status": "Ativo",
+    "birthDate": "1999-07-20"
   },
   {
     "prn": "167820",
@@ -1971,8 +2049,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-02-09",
+    "status": "Ativo",
+    "birthDate": "1983-04-10"
   },
   {
     "prn": "147846",
@@ -1996,8 +2075,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-02-02",
+    "status": "Ativo",
+    "birthDate": "1980-04-04"
   },
   {
     "prn": "103979",
@@ -2021,8 +2101,9 @@
     "shiftCode": "K111057",
     "shiftName": "FS Fixo 6x2 22:30-06:00 C",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2010-10-05",
+    "status": "Ativo",
+    "birthDate": "1984-07-07"
   },
   {
     "prn": "168919",
@@ -2046,8 +2127,9 @@
     "shiftCode": "K111013",
     "shiftName": "FS Aprendiz 13:00-17;00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-04-13",
+    "status": "Ativo",
+    "birthDate": "2007-07-15"
   },
   {
     "prn": "135987",
@@ -2071,8 +2153,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-04-09",
+    "status": "Ativo",
+    "birthDate": "1981-06-23"
   },
   {
     "prn": "146295",
@@ -2096,8 +2179,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-09-13",
+    "status": "Ativo",
+    "birthDate": "1986-01-03"
   },
   {
     "prn": "162185",
@@ -2121,8 +2205,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-06",
+    "status": "Ativo",
+    "birthDate": "1988-04-09"
   },
   {
     "prn": "114693",
@@ -2146,8 +2231,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2013-08-12",
+    "status": "Ativo",
+    "birthDate": "1983-04-27"
   },
   {
     "prn": "122724",
@@ -2171,8 +2257,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-12-04",
+    "status": "Ativo",
+    "birthDate": "1980-02-08"
   },
   {
     "prn": "103823",
@@ -2196,8 +2283,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1998-11-03",
+    "status": "Ativo",
+    "birthDate": "1971-01-07"
   },
   {
     "prn": "111569",
@@ -2221,8 +2309,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2012-09-11",
+    "status": "Ativo",
+    "birthDate": "1972-04-21"
   },
   {
     "prn": "125512",
@@ -2246,8 +2335,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-10-03",
+    "status": "Ativo",
+    "birthDate": "1993-10-22"
   },
   {
     "prn": "154360",
@@ -2271,8 +2361,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-05-15",
+    "status": "Ativo",
+    "birthDate": "1986-04-25"
   },
   {
     "prn": "119572",
@@ -2296,8 +2387,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-03-16",
+    "status": "Ativo",
+    "birthDate": "1986-10-10"
   },
   {
     "prn": "169559",
@@ -2321,8 +2413,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-06-01",
+    "status": "Ativo",
+    "birthDate": "1988-04-05"
   },
   {
     "prn": "151959",
@@ -2346,8 +2439,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-10-17",
+    "status": "Ativo",
+    "birthDate": "1998-06-01"
   },
   {
     "prn": "103785",
@@ -2371,8 +2465,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1985-09-11",
+    "status": "Ativo",
+    "birthDate": "1958-02-23"
   },
   {
     "prn": "167431",
@@ -2396,8 +2491,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-01-12",
+    "status": "Ativo",
+    "birthDate": "1993-01-19"
   },
   {
     "prn": "126020",
@@ -2421,8 +2517,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-12-01",
+    "status": "Ativo",
+    "birthDate": "1979-07-06"
   },
   {
     "prn": "103826",
@@ -2446,8 +2543,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1999-04-19",
+    "status": "Ativo",
+    "birthDate": "1979-02-28"
   },
   {
     "prn": "168049",
@@ -2471,8 +2569,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-03-09",
+    "status": "Ativo",
+    "birthDate": "1999-06-15"
   },
   {
     "prn": "169664",
@@ -2496,8 +2595,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-06-08",
+    "status": "Ativo",
+    "birthDate": "2000-01-25"
   },
   {
     "prn": "145319",
@@ -2521,8 +2621,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-06-14",
+    "status": "Ativo",
+    "birthDate": "1985-09-26"
   },
   {
     "prn": "144258",
@@ -2546,8 +2647,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-12",
+    "status": "Ativo",
+    "birthDate": "1986-10-01"
   },
   {
     "prn": "103811",
@@ -2571,8 +2673,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1995-05-03",
+    "status": "Ativo",
+    "birthDate": "1974-10-15"
   },
   {
     "prn": "170854",
@@ -2596,8 +2699,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-08",
+    "status": "Ativo",
+    "birthDate": "1991-09-23"
   },
   {
     "prn": "127341",
@@ -2621,8 +2725,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2017-03-13",
+    "status": "Ativo",
+    "birthDate": "1983-03-16"
   },
   {
     "prn": "168097",
@@ -2646,8 +2751,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-03-02",
+    "status": "Ativo",
+    "birthDate": "2005-02-16"
   },
   {
     "prn": "103821",
@@ -2671,8 +2777,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1998-10-13",
+    "status": "Ativo",
+    "birthDate": "1975-05-28"
   },
   {
     "prn": "126060",
@@ -2696,8 +2803,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-12-01",
+    "status": "Ativo",
+    "birthDate": "1987-01-18"
   },
   {
     "prn": "128976",
@@ -2721,8 +2829,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2017-09-15",
+    "status": "Ativo",
+    "birthDate": "1985-06-09"
   },
   {
     "prn": "155016",
@@ -2746,8 +2855,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-07-17",
+    "status": "Ativo",
+    "birthDate": "1987-01-15"
   },
   {
     "prn": "135758",
@@ -2771,8 +2881,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-03-09",
+    "status": "Ativo",
+    "birthDate": "1982-02-17"
   },
   {
     "prn": "129556",
@@ -2796,8 +2907,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2017-12-04",
+    "status": "Ativo",
+    "birthDate": "1994-11-21"
   },
   {
     "prn": "152203",
@@ -2821,8 +2933,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-11-07",
+    "status": "Ativo",
+    "birthDate": "1993-05-25"
   },
   {
     "prn": "104017",
@@ -2846,8 +2959,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-01-03",
+    "status": "Ativo",
+    "birthDate": "1981-11-22"
   },
   {
     "prn": "119345",
@@ -2871,8 +2985,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-03-02",
+    "status": "Ativo",
+    "birthDate": "1983-07-15"
   },
   {
     "prn": "163286",
@@ -2896,8 +3011,9 @@
     "shiftCode": "K111013",
     "shiftName": "FS Aprendiz 13:00-17;00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-03-10",
+    "status": "Ativo",
+    "birthDate": "2006-03-03"
   },
   {
     "prn": "103816",
@@ -2921,8 +3037,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1998-06-01",
+    "status": "Ativo",
+    "birthDate": "1969-03-20"
   },
   {
     "prn": "103788",
@@ -2946,8 +3063,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1987-01-05",
+    "status": "Ativo",
+    "birthDate": "1968-04-11"
   },
   {
     "prn": "115409",
@@ -2971,8 +3089,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2013-12-02",
+    "status": "Ativo",
+    "birthDate": "1983-02-19"
   },
   {
     "prn": "104052",
@@ -2996,8 +3115,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-09-05",
+    "status": "Ativo",
+    "birthDate": "1981-04-13"
   },
   {
     "prn": "103906",
@@ -3021,8 +3141,9 @@
     "shiftCode": "K111055",
     "shiftName": "FS Fixo 6x2 22:30-06:00 A",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2008-03-03",
+    "status": "Ativo",
+    "birthDate": "1985-11-13"
   },
   {
     "prn": "103830",
@@ -3046,8 +3167,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1999-06-02",
+    "status": "Ativo",
+    "birthDate": "1974-10-31"
   },
   {
     "prn": "103917",
@@ -3071,8 +3193,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2008-12-08",
+    "status": "Ativo",
+    "birthDate": "1986-11-24"
   },
   {
     "prn": "153188",
@@ -3096,8 +3219,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-02-06",
+    "status": "Ativo",
+    "birthDate": "1998-08-27"
   },
   {
     "prn": "170853",
@@ -3121,8 +3245,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-08",
+    "status": "Ativo",
+    "birthDate": "2006-09-04"
   },
   {
     "prn": "115594",
@@ -3146,8 +3271,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-01-06",
+    "status": "Ativo",
+    "birthDate": "1987-09-25"
   },
   {
     "prn": "117205",
@@ -3171,8 +3297,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-07-14",
+    "status": "Ativo",
+    "birthDate": "1988-11-23"
   },
   {
     "prn": "148682",
@@ -3196,8 +3323,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-04-04",
+    "status": "Ativo",
+    "birthDate": "1974-10-22"
   },
   {
     "prn": "167970",
@@ -3221,8 +3349,9 @@
     "shiftCode": "K111012",
     "shiftName": "FS Aprendiz 08:00-12:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-02-19",
+    "status": "Ativo",
+    "birthDate": "2004-12-29"
   },
   {
     "prn": "162181",
@@ -3246,8 +3375,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-06",
+    "status": "Ativo",
+    "birthDate": "2001-11-24"
   },
   {
     "prn": "103858",
@@ -3271,8 +3401,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2003-07-14",
+    "status": "Ativo",
+    "birthDate": "1982-10-27"
   },
   {
     "prn": "143002",
@@ -3296,8 +3427,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-12-07",
+    "status": "Ativo",
+    "birthDate": "1984-12-17"
   },
   {
     "prn": "144370",
@@ -3321,8 +3453,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-05",
+    "status": "Ativo",
+    "birthDate": "1995-11-02"
   },
   {
     "prn": "151999",
@@ -3346,8 +3479,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-10-17",
+    "status": "Ativo",
+    "birthDate": "1972-02-03"
   },
   {
     "prn": "162191",
@@ -3371,8 +3505,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-06",
+    "status": "Ativo",
+    "birthDate": "1992-01-28"
   },
   {
     "prn": "162469",
@@ -3396,8 +3531,9 @@
     "shiftCode": "K111012",
     "shiftName": "FS Aprendiz 08:00-12:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-13",
+    "status": "Ativo",
+    "birthDate": "2006-03-18"
   },
   {
     "prn": "145163",
@@ -3421,8 +3557,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-06-07",
+    "status": "Ativo",
+    "birthDate": "1988-12-29"
   },
   {
     "prn": "119342",
@@ -3446,8 +3583,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-03-02",
+    "status": "Ativo",
+    "birthDate": "1976-11-02"
   },
   {
     "prn": "103923",
@@ -3471,8 +3609,9 @@
     "shiftCode": "K111055",
     "shiftName": "FS Fixo 6x2 22:30-06:00 A",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2009-07-01",
+    "status": "Ativo",
+    "birthDate": "1980-12-10"
   },
   {
     "prn": "112775",
@@ -3496,8 +3635,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2013-01-07",
+    "status": "Ativo",
+    "birthDate": "1987-02-13"
   },
   {
     "prn": "122972",
@@ -3521,8 +3661,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-01-11",
+    "status": "Ativo",
+    "birthDate": "1985-10-12"
   },
   {
     "prn": "132668",
@@ -3546,8 +3687,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2019-02-04",
+    "status": "Ativo",
+    "birthDate": "1983-07-16"
   },
   {
     "prn": "103791",
@@ -3571,8 +3713,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1989-08-01",
+    "status": "Ativo",
+    "birthDate": "1958-02-10"
   },
   {
     "prn": "119349",
@@ -3596,8 +3739,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-03-02",
+    "status": "Ativo",
+    "birthDate": "1985-02-21"
   },
   {
     "prn": "161816",
@@ -3621,8 +3765,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-11-18",
+    "status": "Ativo",
+    "birthDate": "1984-01-27"
   },
   {
     "prn": "167754",
@@ -3646,8 +3791,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-02-09",
+    "status": "Ativo",
+    "birthDate": "2000-09-11"
   },
   {
     "prn": "131356",
@@ -3671,8 +3817,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2018-08-13",
+    "status": "Ativo",
+    "birthDate": "1987-05-18"
   },
   {
     "prn": "163150",
@@ -3696,8 +3843,9 @@
     "shiftCode": "K111009",
     "shiftName": "FS Estagiário 08:00-14:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-03-10",
+    "status": "Ativo",
+    "birthDate": "2004-03-23"
   },
   {
     "prn": "103834",
@@ -3721,8 +3869,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1999-09-03",
+    "status": "Ativo",
+    "birthDate": "1971-01-02"
   },
   {
     "prn": "114944",
@@ -3746,8 +3895,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2013-09-12",
+    "status": "Ativo",
+    "birthDate": "1983-12-20"
   },
   {
     "prn": "167120",
@@ -3771,8 +3921,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-12-05",
+    "status": "Ativo",
+    "birthDate": "1995-03-23"
   },
   {
     "prn": "103842",
@@ -3796,8 +3947,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2000-09-12",
+    "status": "Ativo",
+    "birthDate": "1981-10-31"
   },
   {
     "prn": "104034",
@@ -3821,8 +3973,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-04-01",
+    "status": "Ativo",
+    "birthDate": "1990-05-11"
   },
   {
     "prn": "149529",
@@ -3846,8 +3999,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-05-16",
+    "status": "Ativo",
+    "birthDate": "1993-12-04"
   },
   {
     "prn": "104021",
@@ -3871,8 +4025,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-02-01",
+    "status": "Ativo",
+    "birthDate": "1990-07-20"
   },
   {
     "prn": "103887",
@@ -3896,8 +4051,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2007-03-01",
+    "status": "Ativo",
+    "birthDate": "1986-08-09"
   },
   {
     "prn": "120812",
@@ -3921,8 +4077,9 @@
     "shiftCode": "K111058",
     "shiftName": "FS Fixo 6x2 22:30-06:00 D",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-07-01",
+    "status": "Ativo",
+    "birthDate": "1968-12-12"
   },
   {
     "prn": "142745",
@@ -3946,8 +4103,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-11-09",
+    "status": "Ativo",
+    "birthDate": "1991-09-10"
   },
   {
     "prn": "153844",
@@ -3971,8 +4129,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-03-20",
+    "status": "Ativo",
+    "birthDate": "1989-12-10"
   },
   {
     "prn": "103901",
@@ -3996,8 +4155,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2007-09-10",
+    "status": "Ativo",
+    "birthDate": "1985-07-02"
   },
   {
     "prn": "135743",
@@ -4021,8 +4181,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-10-05",
+    "status": "Ativo",
+    "birthDate": "1996-03-13"
   },
   {
     "prn": "103954",
@@ -4046,8 +4207,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2010-02-15",
+    "status": "Ativo",
+    "birthDate": "1983-04-14"
   },
   {
     "prn": "129858",
@@ -4071,8 +4233,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2018-02-14",
+    "status": "Ativo",
+    "birthDate": "1988-11-25"
   },
   {
     "prn": "119338",
@@ -4096,8 +4259,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-03-02",
+    "status": "Ativo",
+    "birthDate": "1985-05-10"
   },
   {
     "prn": "104055",
@@ -4121,8 +4285,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-09-06",
+    "status": "Ativo",
+    "birthDate": "1980-10-19"
   },
   {
     "prn": "115414",
@@ -4146,8 +4311,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2013-12-02",
+    "status": "Ativo",
+    "birthDate": "1985-10-08"
   },
   {
     "prn": "103987",
@@ -4171,8 +4337,9 @@
     "shiftCode": "K111058",
     "shiftName": "FS Fixo 6x2 22:30-06:00 D",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-01-02",
+    "status": "Ativo",
+    "birthDate": "1987-01-21"
   },
   {
     "prn": "163545",
@@ -4196,8 +4363,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-04-07",
+    "status": "Ativo",
+    "birthDate": "1998-10-10"
   },
   {
     "prn": "125132",
@@ -4221,8 +4389,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-08-08",
+    "status": "Ativo",
+    "birthDate": "1973-09-11"
   },
   {
     "prn": "168995",
@@ -4246,8 +4415,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-04-22",
+    "status": "Ativo",
+    "birthDate": "2001-11-16"
   },
   {
     "prn": "103833",
@@ -4271,8 +4441,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1999-08-02",
+    "status": "Ativo",
+    "birthDate": "1975-08-21"
   },
   {
     "prn": "111428",
@@ -4296,8 +4467,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2012-07-03",
+    "status": "Ativo",
+    "birthDate": "1989-10-06"
   },
   {
     "prn": "153334",
@@ -4321,8 +4493,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-02-13",
+    "status": "Ativo",
+    "birthDate": "1980-12-08"
   },
   {
     "prn": "103956",
@@ -4346,8 +4519,9 @@
     "shiftCode": "K111055",
     "shiftName": "FS Fixo 6x2 22:30-06:00 A",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2010-03-01",
+    "status": "Ativo",
+    "birthDate": "1986-06-20"
   },
   {
     "prn": "103932",
@@ -4371,8 +4545,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2009-10-05",
+    "status": "Ativo",
+    "birthDate": "1989-07-18"
   },
   {
     "prn": "128975",
@@ -4396,8 +4571,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2017-09-15",
+    "status": "Ativo",
+    "birthDate": "1991-02-21"
   },
   {
     "prn": "130799",
@@ -4421,8 +4597,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2018-06-18",
+    "status": "Ativo",
+    "birthDate": "1989-02-14"
   },
   {
     "prn": "112382",
@@ -4446,8 +4623,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2012-11-12",
+    "status": "Ativo",
+    "birthDate": "1989-02-20"
   },
   {
     "prn": "169279",
@@ -4471,8 +4649,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-05-11",
+    "status": "Ativo",
+    "birthDate": "1986-03-23"
   },
   {
     "prn": "113752",
@@ -4496,8 +4675,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2013-06-03",
+    "status": "Ativo",
+    "birthDate": "1982-07-24"
   },
   {
     "prn": "113273",
@@ -4521,8 +4701,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2013-03-11",
+    "status": "Ativo",
+    "birthDate": "1991-04-11"
   },
   {
     "prn": "103995",
@@ -4546,8 +4727,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-01-03",
+    "status": "Ativo",
+    "birthDate": "1980-03-19"
   },
   {
     "prn": "125412",
@@ -4571,8 +4753,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-10-03",
+    "status": "Ativo",
+    "birthDate": "1985-07-26"
   },
   {
     "prn": "162481",
@@ -4596,8 +4779,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-13",
+    "status": "Ativo",
+    "birthDate": "1994-02-28"
   },
   {
     "prn": "159471",
@@ -4621,8 +4805,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-07-08",
+    "status": "Ativo",
+    "birthDate": "1989-06-10"
   },
   {
     "prn": "103825",
@@ -4646,8 +4831,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1998-12-16",
+    "status": "Ativo",
+    "birthDate": "1962-03-04"
   },
   {
     "prn": "171104",
@@ -4671,8 +4857,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-21",
+    "status": "Ativo",
+    "birthDate": "1994-02-12"
   },
   {
     "prn": "169272",
@@ -4696,8 +4883,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-05-11",
+    "status": "Ativo",
+    "birthDate": "1991-10-21"
   },
   {
     "prn": "134881",
@@ -4721,8 +4909,9 @@
     "shiftCode": "K111032",
     "shiftName": "FS Fixo 6x1 07:00-15:40",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2019-12-09",
+    "status": "Ativo",
+    "birthDate": "1981-09-13"
   },
   {
     "prn": "103924",
@@ -4746,8 +4935,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2009-07-01",
+    "status": "Ativo",
+    "birthDate": "1983-08-26"
   },
   {
     "prn": "163544",
@@ -4771,8 +4961,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-04-07",
+    "status": "Ativo",
+    "birthDate": "1987-08-20"
   },
   {
     "prn": "103870",
@@ -4796,8 +4987,9 @@
     "shiftCode": "K111057",
     "shiftName": "FS Fixo 6x2 22:30-06:00 C",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2004-11-08",
+    "status": "Ativo",
+    "birthDate": "1978-10-19"
   },
   {
     "prn": "166797",
@@ -4821,8 +5013,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-11-21",
+    "status": "Ativo",
+    "birthDate": "1994-09-13"
   },
   {
     "prn": "152674",
@@ -4846,8 +5039,9 @@
     "shiftCode": "K111058",
     "shiftName": "FS Fixo 6x2 22:30-06:00 D",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-01-02",
+    "status": "Ativo",
+    "birthDate": "1990-01-23"
   },
   {
     "prn": "115416",
@@ -4871,8 +5065,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2013-12-02",
+    "status": "Ativo",
+    "birthDate": "1982-08-04"
   },
   {
     "prn": "146092",
@@ -4896,8 +5091,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-08-17",
+    "status": "Ativo",
+    "birthDate": "1989-02-21"
   },
   {
     "prn": "170720",
@@ -4921,8 +5117,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-01",
+    "status": "Ativo",
+    "birthDate": "1991-03-19"
   },
   {
     "prn": "155914",
@@ -4946,8 +5143,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-10-16",
+    "status": "Ativo",
+    "birthDate": "1992-01-23"
   },
   {
     "prn": "103837",
@@ -4971,8 +5169,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2000-01-03",
+    "status": "Ativo",
+    "birthDate": "1973-03-15"
   },
   {
     "prn": "167614",
@@ -4996,8 +5195,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-02-02",
+    "status": "Ativo",
+    "birthDate": "1984-09-30"
   },
   {
     "prn": "148019",
@@ -5021,8 +5221,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-02-07",
+    "status": "Ativo",
+    "birthDate": "1977-03-03"
   },
   {
     "prn": "103787",
@@ -5046,8 +5247,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1986-07-07",
+    "status": "Ativo",
+    "birthDate": "1967-06-23"
   },
   {
     "prn": "162341",
@@ -5071,8 +5273,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-06",
+    "status": "Ativo",
+    "birthDate": "1999-11-12"
   },
   {
     "prn": "136364",
@@ -5096,8 +5299,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-06-08",
+    "status": "Ativo",
+    "birthDate": "1988-06-09"
   },
   {
     "prn": "170721",
@@ -5121,8 +5325,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-01",
+    "status": "Ativo",
+    "birthDate": "1982-01-03"
   },
   {
     "prn": "167526",
@@ -5146,8 +5351,9 @@
     "shiftCode": "K111066",
     "shiftName": "FS Estagiário 08:00-15:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-01-19",
+    "status": "Ativo",
+    "birthDate": "2004-04-22"
   },
   {
     "prn": "103784",
@@ -5171,8 +5377,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1983-12-01",
+    "status": "Ativo",
+    "birthDate": "1956-08-08"
   },
   {
     "prn": "103829",
@@ -5196,8 +5403,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1999-06-02",
+    "status": "Ativo",
+    "birthDate": "1972-07-15"
   },
   {
     "prn": "103806",
@@ -5221,8 +5429,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1994-12-21",
+    "status": "Ativo",
+    "birthDate": "1970-03-18"
   },
   {
     "prn": "162343",
@@ -5246,8 +5455,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-06",
+    "status": "Ativo",
+    "birthDate": "1988-11-03"
   },
   {
     "prn": "115600",
@@ -5271,8 +5481,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-01-06",
+    "status": "Ativo",
+    "birthDate": "1989-01-15"
   },
   {
     "prn": "104004",
@@ -5296,8 +5507,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-01-03",
+    "status": "Ativo",
+    "birthDate": "1981-08-05"
   },
   {
     "prn": "163212",
@@ -5321,8 +5533,9 @@
     "shiftCode": "K111013",
     "shiftName": "FS Aprendiz 13:00-17;00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-03-10",
+    "status": "Ativo",
+    "birthDate": "2006-06-13"
   },
   {
     "prn": "152605",
@@ -5346,8 +5559,9 @@
     "shiftCode": "K111057",
     "shiftName": "FS Fixo 6x2 22:30-06:00 C",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-01-02",
+    "status": "Ativo",
+    "birthDate": "1982-04-10"
   },
   {
     "prn": "170989",
@@ -5371,8 +5585,9 @@
     "shiftCode": "K111012",
     "shiftName": "FS Aprendiz 08:00-12:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-14",
+    "status": "Ativo",
+    "birthDate": "2007-02-28"
   },
   {
     "prn": "171049",
@@ -5396,8 +5611,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-21",
+    "status": "Ativo",
+    "birthDate": "1994-07-02"
   },
   {
     "prn": "135744",
@@ -5421,8 +5637,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-03-09",
+    "status": "Ativo",
+    "birthDate": "1999-10-28"
   },
   {
     "prn": "163680",
@@ -5446,8 +5663,9 @@
     "shiftCode": "K111013",
     "shiftName": "FS Aprendiz 13:00-17;00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-04-07",
+    "status": "Ativo",
+    "birthDate": "2005-12-02"
   },
   {
     "prn": "129212",
@@ -5471,8 +5689,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2017-11-06",
+    "status": "Ativo",
+    "birthDate": "1984-05-31"
   },
   {
     "prn": "154628",
@@ -5496,8 +5715,9 @@
     "shiftCode": "K111055",
     "shiftName": "FS Fixo 6x2 22:30-06:00 A",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-06-05",
+    "status": "Ativo",
+    "birthDate": "1981-09-26"
   },
   {
     "prn": "166396",
@@ -5521,8 +5741,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-10-13",
+    "status": "Ativo",
+    "birthDate": "1978-01-13"
   },
   {
     "prn": "125769",
@@ -5546,8 +5767,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-11-01",
+    "status": "Ativo",
+    "birthDate": "1987-06-05"
   },
   {
     "prn": "146090",
@@ -5571,8 +5793,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-08-17",
+    "status": "Ativo",
+    "birthDate": "1981-07-25"
   },
   {
     "prn": "161080",
@@ -5596,8 +5819,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-09-02",
+    "status": "Ativo",
+    "birthDate": "1979-02-10"
   },
   {
     "prn": "129408",
@@ -5621,8 +5845,9 @@
     "shiftCode": "K111058",
     "shiftName": "FS Fixo 6x2 22:30-06:00 D",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2017-11-13",
+    "status": "Ativo",
+    "birthDate": "1979-08-25"
   },
   {
     "prn": "168814",
@@ -5646,8 +5871,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-04-13",
+    "status": "Ativo",
+    "birthDate": "1988-11-28"
   },
   {
     "prn": "119337",
@@ -5671,8 +5897,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-03-02",
+    "status": "Ativo",
+    "birthDate": "1993-05-09"
   },
   {
     "prn": "171232",
@@ -5696,8 +5923,9 @@
     "shiftCode": "K111066",
     "shiftName": "FS Estagiário 08:00-15:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-10-05",
+    "status": "Ativo",
+    "birthDate": "2000-08-19"
   },
   {
     "prn": "154545",
@@ -5721,8 +5949,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-06-05",
+    "status": "Ativo",
+    "birthDate": "1980-07-05"
   },
   {
     "prn": "167710",
@@ -5746,8 +5975,9 @@
     "shiftCode": "K111012",
     "shiftName": "FS Aprendiz 08:00-12:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-02-02",
+    "status": "Ativo",
+    "birthDate": "2007-09-22"
   },
   {
     "prn": "114940",
@@ -5771,8 +6001,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2013-09-12",
+    "status": "Ativo",
+    "birthDate": "1992-08-23"
   },
   {
     "prn": "155736",
@@ -5796,8 +6027,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-10-02",
+    "status": "Ativo",
+    "birthDate": "1995-01-13"
   },
   {
     "prn": "135935",
@@ -5821,8 +6053,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-04-01",
+    "status": "Ativo",
+    "birthDate": "1986-10-03"
   },
   {
     "prn": "115928",
@@ -5846,8 +6079,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-02-10",
+    "status": "Ativo",
+    "birthDate": "1972-06-24"
   },
   {
     "prn": "164960",
@@ -5871,8 +6105,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-07-07",
+    "status": "Ativo",
+    "birthDate": "2002-02-03"
   },
   {
     "prn": "103883",
@@ -5896,8 +6131,9 @@
     "shiftCode": "K111057",
     "shiftName": "FS Fixo 6x2 22:30-06:00 C",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2006-05-02",
+    "status": "Ativo",
+    "birthDate": "1972-08-10"
   },
   {
     "prn": "156794",
@@ -5922,7 +6158,8 @@
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
     "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "status": "Ativo",
+    "birthDate": "1993-12-19"
   },
   {
     "prn": "103818",
@@ -5946,8 +6183,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1998-09-14",
+    "status": "Ativo",
+    "birthDate": "1973-11-05"
   },
   {
     "prn": "100819",
@@ -5971,8 +6209,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2001-01-03",
+    "status": "Ativo",
+    "birthDate": "1980-09-17"
   },
   {
     "prn": "116729",
@@ -5996,8 +6235,9 @@
     "shiftCode": "K111058",
     "shiftName": "FS Fixo 6x2 22:30-06:00 D",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-05-05",
+    "status": "Ativo",
+    "birthDate": "1987-05-30"
   },
   {
     "prn": "136522",
@@ -6021,8 +6261,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-07-01",
+    "status": "Ativo",
+    "birthDate": "1997-10-24"
   },
   {
     "prn": "156840",
@@ -6046,8 +6287,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-01-08",
+    "status": "Ativo",
+    "birthDate": "1982-02-09"
   },
   {
     "prn": "144510",
@@ -6071,8 +6313,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-13",
+    "status": "Ativo",
+    "birthDate": "1989-01-11"
   },
   {
     "prn": "113751",
@@ -6096,8 +6339,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2013-06-03",
+    "status": "Ativo",
+    "birthDate": "1983-12-20"
   },
   {
     "prn": "116921",
@@ -6121,8 +6365,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-06-02",
+    "status": "Ativo",
+    "birthDate": "1987-07-01"
   },
   {
     "prn": "104036",
@@ -6146,8 +6391,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-04-01",
+    "status": "Ativo",
+    "birthDate": "1987-01-24"
   },
   {
     "prn": "128014",
@@ -6171,8 +6417,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2017-05-15",
+    "status": "Ativo",
+    "birthDate": "1977-12-04"
   },
   {
     "prn": "162089",
@@ -6196,8 +6443,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-12-02",
+    "status": "Ativo",
+    "birthDate": "2002-04-17"
   },
   {
     "prn": "168813",
@@ -6221,8 +6469,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-04-13",
+    "status": "Ativo",
+    "birthDate": "1991-01-11"
   },
   {
     "prn": "103921",
@@ -6246,8 +6495,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2009-07-01",
+    "status": "Ativo",
+    "birthDate": "1968-12-08"
   },
   {
     "prn": "159337",
@@ -6271,8 +6521,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-07-01",
+    "status": "Ativo",
+    "birthDate": "2001-09-13"
   },
   {
     "prn": "170724",
@@ -6296,8 +6547,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-01",
+    "status": "Ativo",
+    "birthDate": "2006-12-08"
   },
   {
     "prn": "171225",
@@ -6321,8 +6573,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-10-05",
+    "status": "Ativo",
+    "birthDate": "1989-02-23"
   },
   {
     "prn": "121716",
@@ -6346,8 +6599,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-09-08",
+    "status": "Ativo",
+    "birthDate": "1979-08-08"
   },
   {
     "prn": "104056",
@@ -6371,8 +6625,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-09-08",
+    "status": "Ativo",
+    "birthDate": "1975-07-27"
   },
   {
     "prn": "165759",
@@ -6396,8 +6651,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-09-01",
+    "status": "Ativo",
+    "birthDate": "1978-07-01"
   },
   {
     "prn": "152505",
@@ -6421,8 +6677,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-12-05",
+    "status": "Ativo",
+    "birthDate": "1991-03-29"
   },
   {
     "prn": "149401",
@@ -6446,8 +6703,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-05-09",
+    "status": "Ativo",
+    "birthDate": "1979-09-21"
   },
   {
     "prn": "126059",
@@ -6471,8 +6729,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-12-01",
+    "status": "Ativo",
+    "birthDate": "1976-07-20"
   },
   {
     "prn": "146277",
@@ -6496,8 +6755,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-09-13",
+    "status": "Ativo",
+    "birthDate": "1995-01-20"
   },
   {
     "prn": "122973",
@@ -6521,8 +6781,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-01-11",
+    "status": "Ativo",
+    "birthDate": "1986-06-09"
   },
   {
     "prn": "143741",
@@ -6546,8 +6807,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-03-01",
+    "status": "Ativo",
+    "birthDate": "1984-03-23"
   },
   {
     "prn": "146086",
@@ -6571,8 +6833,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-08-17",
+    "status": "Ativo",
+    "birthDate": "2000-06-25"
   },
   {
     "prn": "164425",
@@ -6596,8 +6859,9 @@
     "shiftCode": "K111012",
     "shiftName": "FS Aprendiz 08:00-12:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-06-02",
+    "status": "Ativo",
+    "birthDate": "2006-05-24"
   },
   {
     "prn": "162084",
@@ -6621,8 +6885,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-12-02",
+    "status": "Ativo",
+    "birthDate": "1992-02-12"
   },
   {
     "prn": "110423",
@@ -6646,8 +6911,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2012-02-06",
+    "status": "Ativo",
+    "birthDate": "1983-10-10"
   },
   {
     "prn": "163676",
@@ -6671,8 +6937,9 @@
     "shiftCode": "K111012",
     "shiftName": "FS Aprendiz 08:00-12:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-04-07",
+    "status": "Ativo",
+    "birthDate": "2006-05-29"
   },
   {
     "prn": "144359",
@@ -6696,8 +6963,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-05",
+    "status": "Ativo",
+    "birthDate": "1975-04-16"
   },
   {
     "prn": "103798",
@@ -6721,8 +6989,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1991-08-05",
+    "status": "Ativo",
+    "birthDate": "1970-10-27"
   },
   {
     "prn": "111265",
@@ -6746,8 +7015,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2012-07-17",
+    "status": "Ativo",
+    "birthDate": "1982-04-04"
   },
   {
     "prn": "122974",
@@ -6771,8 +7041,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-01-11",
+    "status": "Ativo",
+    "birthDate": "1993-01-16"
   },
   {
     "prn": "155688",
@@ -6796,8 +7067,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-09-18",
+    "status": "Ativo",
+    "birthDate": "1983-02-24"
   },
   {
     "prn": "115606",
@@ -6821,8 +7093,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-01-06",
+    "status": "Ativo",
+    "birthDate": "1973-05-25"
   },
   {
     "prn": "104008",
@@ -6846,8 +7119,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-01-03",
+    "status": "Ativo",
+    "birthDate": "1983-08-15"
   },
   {
     "prn": "147285",
@@ -6871,8 +7145,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-12-06",
+    "status": "Ativo",
+    "birthDate": "1993-11-27"
   },
   {
     "prn": "103882",
@@ -6896,8 +7171,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2006-02-01",
+    "status": "Ativo",
+    "birthDate": "1971-08-19"
   },
   {
     "prn": "143761",
@@ -6921,8 +7197,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-03-01",
+    "status": "Ativo",
+    "birthDate": "1985-03-09"
   },
   {
     "prn": "103872",
@@ -6946,8 +7223,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2004-11-22",
+    "status": "Ativo",
+    "birthDate": "1984-06-25"
   },
   {
     "prn": "169193",
@@ -6971,8 +7249,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-05-04",
+    "status": "Ativo",
+    "birthDate": "1994-10-12"
   },
   {
     "prn": "132650",
@@ -6996,8 +7275,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2019-02-04",
+    "status": "Ativo",
+    "birthDate": "1979-07-06"
   },
   {
     "prn": "171177",
@@ -7021,8 +7301,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-10-05",
+    "status": "Ativo",
+    "birthDate": "2000-03-16"
   },
   {
     "prn": "130618",
@@ -7046,8 +7327,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2018-05-14",
+    "status": "Ativo",
+    "birthDate": "1989-05-31"
   },
   {
     "prn": "154597",
@@ -7071,8 +7353,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-06-05",
+    "status": "Ativo",
+    "birthDate": "1994-06-20"
   },
   {
     "prn": "115625",
@@ -7096,8 +7379,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-01-06",
+    "status": "Ativo",
+    "birthDate": "1968-01-13"
   },
   {
     "prn": "112366",
@@ -7121,8 +7405,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2012-12-07",
+    "status": "Ativo",
+    "birthDate": "1992-04-05"
   },
   {
     "prn": "115643",
@@ -7146,8 +7431,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-01-06",
+    "status": "Ativo",
+    "birthDate": "1989-09-22"
   },
   {
     "prn": "136598",
@@ -7171,8 +7457,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-07-08",
+    "status": "Ativo",
+    "birthDate": "1984-02-09"
   },
   {
     "prn": "126019",
@@ -7196,8 +7483,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2016-12-01",
+    "status": "Ativo",
+    "birthDate": "1994-08-01"
   },
   {
     "prn": "122395",
@@ -7221,8 +7509,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-11-09",
+    "status": "Ativo",
+    "birthDate": "1984-04-09"
   },
   {
     "prn": "103839",
@@ -7246,8 +7535,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2000-06-01",
+    "status": "Ativo",
+    "birthDate": "1980-08-04"
   },
   {
     "prn": "167693",
@@ -7271,8 +7561,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-02-02",
+    "status": "Ativo",
+    "birthDate": "1990-04-03"
   },
   {
     "prn": "146091",
@@ -7296,8 +7587,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-08-17",
+    "status": "Ativo",
+    "birthDate": "1984-09-01"
   },
   {
     "prn": "159194",
@@ -7321,8 +7613,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2024-06-17",
+    "status": "Ativo",
+    "birthDate": "1983-02-08"
   },
   {
     "prn": "113272",
@@ -7346,8 +7639,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2013-03-15",
+    "status": "Ativo",
+    "birthDate": "1983-01-04"
   },
   {
     "prn": "166566",
@@ -7371,8 +7665,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-11-03",
+    "status": "Ativo",
+    "birthDate": "1994-08-28"
   },
   {
     "prn": "103913",
@@ -7396,8 +7691,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2008-10-13",
+    "status": "Ativo",
+    "birthDate": "1986-10-17"
   },
   {
     "prn": "136791",
@@ -7421,8 +7717,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-08-03",
+    "status": "Ativo",
+    "birthDate": "1978-09-12"
   },
   {
     "prn": "103780",
@@ -7446,8 +7743,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1977-04-13",
+    "status": "Ativo",
+    "birthDate": "1957-06-28"
   },
   {
     "prn": "103900",
@@ -7471,8 +7769,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2007-09-10",
+    "status": "Ativo",
+    "birthDate": "1982-07-23"
   },
   {
     "prn": "104005",
@@ -7496,8 +7795,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-01-03",
+    "status": "Ativo",
+    "birthDate": "1986-09-05"
   },
   {
     "prn": "167972",
@@ -7521,8 +7821,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-02-18",
+    "status": "Ativo",
+    "birthDate": "2003-10-27"
   },
   {
     "prn": "103909",
@@ -7546,8 +7847,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2008-05-12",
+    "status": "Ativo",
+    "birthDate": "1984-05-05"
   },
   {
     "prn": "154361",
@@ -7571,8 +7873,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-05-11",
+    "status": "Ativo",
+    "birthDate": "1988-09-24"
   },
   {
     "prn": "104046",
@@ -7596,8 +7899,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2011-08-01",
+    "status": "Ativo",
+    "birthDate": "1986-06-09"
   },
   {
     "prn": "171128",
@@ -7621,8 +7925,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-21",
+    "status": "Ativo",
+    "birthDate": "1984-10-08"
   },
   {
     "prn": "162804",
@@ -7646,8 +7951,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-02-03",
+    "status": "Ativo",
+    "birthDate": "1988-11-26"
   },
   {
     "prn": "167192",
@@ -7671,8 +7977,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-01-05",
+    "status": "Ativo",
+    "birthDate": "1990-12-03"
   },
   {
     "prn": "164528",
@@ -7696,8 +8003,9 @@
     "shiftCode": "K111012",
     "shiftName": "FS Aprendiz 08:00-12:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-06-02",
+    "status": "Ativo",
+    "birthDate": "2005-01-27"
   },
   {
     "prn": "165670",
@@ -7721,8 +8029,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-08-21",
+    "status": "Ativo",
+    "birthDate": "1985-02-03"
   },
   {
     "prn": "103786",
@@ -7746,8 +8055,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1985-09-24",
+    "status": "Ativo",
+    "birthDate": "1958-05-31"
   },
   {
     "prn": "168081",
@@ -7771,8 +8081,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-03-02",
+    "status": "Ativo",
+    "birthDate": "1986-05-01"
   },
   {
     "prn": "103934",
@@ -7796,8 +8107,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2009-10-05",
+    "status": "Ativo",
+    "birthDate": "1983-07-31"
   },
   {
     "prn": "103931",
@@ -7821,8 +8133,9 @@
     "shiftCode": "K111056",
     "shiftName": "FS Fixo 6x2 22:30-06:00 B",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2009-10-05",
+    "status": "Ativo",
+    "birthDate": "1979-12-03"
   },
   {
     "prn": "103890",
@@ -7846,8 +8159,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2007-05-03",
+    "status": "Ativo",
+    "birthDate": "1976-09-13"
   },
   {
     "prn": "103859",
@@ -7871,8 +8185,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2003-11-03",
+    "status": "Ativo",
+    "birthDate": "1976-10-17"
   },
   {
     "prn": "166314",
@@ -7896,8 +8211,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-10-06",
+    "status": "Ativo",
+    "birthDate": "1991-02-16"
   },
   {
     "prn": "147801",
@@ -7921,8 +8237,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-01-17",
+    "status": "Ativo",
+    "birthDate": "1988-08-19"
   },
   {
     "prn": "170990",
@@ -7946,8 +8263,9 @@
     "shiftCode": "K111012",
     "shiftName": "FS Aprendiz 08:00-12:00",
     "shiftCategory": "Outras Jornadas",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-09-14",
+    "status": "Ativo",
+    "birthDate": "2008-05-26"
   },
   {
     "prn": "103869",
@@ -7971,8 +8289,9 @@
     "shiftCode": "K111055",
     "shiftName": "FS Fixo 6x2 22:30-06:00 A",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2004-10-04",
+    "status": "Ativo",
+    "birthDate": "1977-07-03"
   },
   {
     "prn": "162200",
@@ -7996,8 +8315,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-06",
+    "status": "Ativo",
+    "birthDate": "1979-09-23"
   },
   {
     "prn": "131012",
@@ -8021,8 +8341,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2018-07-16",
+    "status": "Ativo",
+    "birthDate": "1988-01-18"
   },
   {
     "prn": "103937",
@@ -8046,8 +8367,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2010-01-11",
+    "status": "Ativo",
+    "birthDate": "1983-09-26"
   },
   {
     "prn": "169469",
@@ -8071,8 +8393,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-05-22",
+    "status": "Ativo",
+    "birthDate": "1991-10-14"
   },
   {
     "prn": "135986",
@@ -8096,8 +8419,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-04-09",
+    "status": "Ativo",
+    "birthDate": "1986-05-29"
   },
   {
     "prn": "148189",
@@ -8121,8 +8445,9 @@
     "shiftCode": "K111058",
     "shiftName": "FS Fixo 6x2 22:30-06:00 D",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-02-17",
+    "status": "Ativo",
+    "birthDate": "1994-05-19"
   },
   {
     "prn": "130152",
@@ -8146,8 +8471,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2018-03-15",
+    "status": "Ativo",
+    "birthDate": "1988-11-01"
   },
   {
     "prn": "122500",
@@ -8171,8 +8497,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-11-16",
+    "status": "Ativo",
+    "birthDate": "1980-08-24"
   },
   {
     "prn": "144081",
@@ -8196,8 +8523,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-03-15",
+    "status": "Ativo",
+    "birthDate": "1995-08-21"
   },
   {
     "prn": "131013",
@@ -8221,8 +8549,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2018-07-16",
+    "status": "Ativo",
+    "birthDate": "1992-08-15"
   },
   {
     "prn": "168941",
@@ -8246,8 +8575,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-04-22",
+    "status": "Ativo",
+    "birthDate": "1991-07-16"
   },
   {
     "prn": "103928",
@@ -8271,8 +8601,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2009-09-01",
+    "status": "Ativo",
+    "birthDate": "1977-10-04"
   },
   {
     "prn": "119000",
@@ -8296,8 +8627,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-02-04",
+    "status": "Ativo",
+    "birthDate": "1989-01-02"
   },
   {
     "prn": "165742",
@@ -8321,8 +8653,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-09-01",
+    "status": "Ativo",
+    "birthDate": "1986-02-26"
   },
   {
     "prn": "122496",
@@ -8346,8 +8679,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2015-11-16",
+    "status": "Ativo",
+    "birthDate": "1983-08-25"
   },
   {
     "prn": "164250",
@@ -8371,8 +8705,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-06-02",
+    "status": "Ativo",
+    "birthDate": "1993-10-28"
   },
   {
     "prn": "144314",
@@ -8396,8 +8731,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-01",
+    "status": "Ativo",
+    "birthDate": "1984-09-11"
   },
   {
     "prn": "154932",
@@ -8421,8 +8757,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-07-10",
+    "status": "Ativo",
+    "birthDate": "1979-01-18"
   },
   {
     "prn": "117033",
@@ -8446,8 +8783,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2014-06-16",
+    "status": "Ativo",
+    "birthDate": "1983-05-24"
   },
   {
     "prn": "132615",
@@ -8471,8 +8809,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2019-02-04",
+    "status": "Ativo",
+    "birthDate": "1993-03-03"
   },
   {
     "prn": "144356",
@@ -8496,8 +8835,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-04-05",
+    "status": "Ativo",
+    "birthDate": "2000-03-03"
   },
   {
     "prn": "167694",
@@ -8521,8 +8861,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-02-02",
+    "status": "Ativo",
+    "birthDate": "1983-09-30"
   },
   {
     "prn": "166013",
@@ -8546,8 +8887,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-09-15",
+    "status": "Ativo",
+    "birthDate": "1999-03-22"
   },
   {
     "prn": "147799",
@@ -8571,8 +8913,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2022-01-17",
+    "status": "Ativo",
+    "birthDate": "1994-06-30"
   },
   {
     "prn": "103827",
@@ -8596,8 +8939,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "1999-06-02",
+    "status": "Ativo",
+    "birthDate": "1972-09-18"
   },
   {
     "prn": "103884",
@@ -8621,8 +8965,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2006-05-02",
+    "status": "Ativo",
+    "birthDate": "1979-01-22"
   },
   {
     "prn": "168913",
@@ -8646,8 +8991,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2026-04-13",
+    "status": "Ativo",
+    "birthDate": "2000-08-26"
   },
   {
     "prn": "152764",
@@ -8671,8 +9017,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2023-01-09",
+    "status": "Ativo",
+    "birthDate": "1976-01-15"
   },
   {
     "prn": "146653",
@@ -8696,8 +9043,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2021-10-13",
+    "status": "Ativo",
+    "birthDate": "1971-02-02"
   },
   {
     "prn": "142761",
@@ -8721,8 +9069,9 @@
     "shiftCode": "K111008",
     "shiftName": "FS Fixo 6x1 22:30-06:00",
     "shiftCategory": "Turno C",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2020-11-09",
+    "status": "Ativo",
+    "birthDate": "1989-04-04"
   },
   {
     "prn": "111525",
@@ -8746,8 +9095,9 @@
     "shiftCode": "K111001",
     "shiftName": "FS 5x2 08:00-17:00",
     "shiftCategory": "Administrativo",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2012-08-01",
+    "status": "Ativo",
+    "birthDate": "1987-09-16"
   },
   {
     "prn": "128363",
@@ -8771,8 +9121,9 @@
     "shiftCode": "K111005",
     "shiftName": "FS Fixo 6x1 06:00-14:20",
     "shiftCategory": "Turno A",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2017-07-10",
+    "status": "Ativo",
+    "birthDate": "1996-02-26"
   },
   {
     "prn": "162178",
@@ -8796,8 +9147,9 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2025-01-06",
+    "status": "Ativo",
+    "birthDate": "1999-11-29"
   },
   {
     "prn": "103982",
@@ -8821,7 +9173,8 @@
     "shiftCode": "K111007",
     "shiftName": "FS Fixo 6x1 14:20-22:30",
     "shiftCategory": "Turno B",
-    "admissionDate": "2024-01-15",
-    "status": "Ativo"
+    "admissionDate": "2010-11-07",
+    "status": "Ativo",
+    "birthDate": "1973-06-30"
   }
 ]

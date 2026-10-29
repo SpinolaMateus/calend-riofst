@@ -50,15 +50,15 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
   // Estado principal de Colaboradores da Unidade Bahia (KBA1 / K111)
   const [employees, setEmployees] = useState<Employee[]>(() => {
     try {
-      const stored = localStorage.getItem('kba1_people_analytics_employees_v2');
+      const stored = localStorage.getItem('kba1_people_analytics_employees_v3');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].gender) {
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].gender && parsed[0].admissionDate) {
           return parsed;
         }
       }
       const initial = generateInitialBahiaEmployees();
-      localStorage.setItem('kba1_people_analytics_employees_v2', JSON.stringify(initial));
+      localStorage.setItem('kba1_people_analytics_employees_v3', JSON.stringify(initial));
       return initial;
     } catch {
       return generateInitialBahiaEmployees();
@@ -146,7 +146,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
   const saveEmployees = (data: Employee[]) => {
     setEmployees(data);
     try {
-      localStorage.setItem('kba1_people_analytics_employees_v2', JSON.stringify(data));
+      localStorage.setItem('kba1_people_analytics_employees_v3', JSON.stringify(data));
     } catch (e) {
       console.error(e);
     }
