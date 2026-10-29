@@ -5,7 +5,8 @@ import {
   Search, Filter, X, Download, FileSpreadsheet, Plus, 
   ArrowLeft, RefreshCw, Layers, ShieldCheck, ChevronRight,
   Info, Sparkles, UserCheck, ShieldAlert, Check, HelpCircle,
-  FolderTree, GitCommit, FileText, UploadCloud, Edit3, ArrowUpRight
+  FolderTree, GitCommit, FileText, UploadCloud, Edit3, ArrowUpRight,
+  Factory, Sliders, Menu
 } from 'lucide-react';
 import { 
   Employee, PeopleAnalyticsKPI, PeopleAnalyticsFilter, 
@@ -19,6 +20,12 @@ import {
 } from '../data/initialPeopleAnalytics';
 import * as XLSX from 'xlsx';
 import { copyElementAsImage, exportElementToPDF } from '../utils/exportUtils';
+import { ExecutiveOverviewTab } from './peopleAnalytics/ExecutiveOverviewTab';
+import { IndicatorsGGTab } from './peopleAnalytics/IndicatorsGGTab';
+import { AbsenteeismMovementsTab } from './peopleAnalytics/AbsenteeismMovementsTab';
+import { SectorsShiftsTab } from './peopleAnalytics/SectorsShiftsTab';
+import { AuditFormulasModal } from './peopleAnalytics/AuditFormulasModal';
+import { CalculationRulesModal } from './peopleAnalytics/CalculationRulesModal';
 
 interface PeopleAnalyticsViewProps {
   onBackToHome: () => void;
@@ -85,6 +92,11 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
     shiftCategory: 'all',
     searchTerm: '',
   });
+
+  // Modais de Governança e Regras
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [isCalculationRulesModalOpen, setIsCalculationRulesModalOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Modais e Diálogos
   const [selectedKPI, setSelectedKPI] = useState<PeopleAnalyticsKPI | null>(null);
@@ -492,792 +504,270 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
   };
 
   return (
-    <div id="people-analytics-capture-area" className="min-h-screen bg-[#F5F7FB] text-slate-800 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#f8f9ff] text-slate-800 flex font-sans">
       
       {/* ========================================================================= */}
-      {/* 1. CABEÇALHO EXECUTIVO — PEOPLE ANALYTICS BAHIA (KBA1 / K111) */}
+      {/* 1. SIDEBAR CORPORATIVA FIXA — KBA1 ANALYTICS */}
       {/* ========================================================================= */}
-      <header data-capture-ignore className="no-print bg-[#132F46] text-white border-b border-slate-700/80 sticky top-0 z-40 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
-          
-          {/* Título & Badges de Unidade */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onBackToHome}
-              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 border border-white/10"
-              title="Voltar ao Painel Geral de Módulos"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-                  People Analytics
-                  <span className="text-emerald-400 font-normal text-base">| Feira de Santana</span>
-                </h1>
-                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  Unidade Bahia • KBA1 / K111
-                </span>
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-xs transition-opacity"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#0a3641] text-white flex flex-col justify-between shadow-2xl transition-transform duration-200 lg:translate-x-0 ${
+        isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        <div className="flex flex-col flex-1 overflow-y-auto">
+          {/* Top Brand */}
+          <div className="p-5 border-b border-[#306576]/30">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-[#6ffbbe] shadow-sm">
+                <Factory className="w-6 h-6" />
               </div>
-              <p className="text-xs text-slate-300 flex items-center gap-2 mt-0.5">
-                <span>Base PAAH: Out/2026</span>
-                <span>•</span>
-                <span className="text-emerald-300 font-medium">353 PRNs Unidade Bahia</span>
-                <span>•</span>
-                <span className="text-slate-400">Qualidade de Dados: 100% Verificado</span>
-              </p>
-            </div>
-          </div>
-
-          {/* Botões de Ação Executiva */}
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <button
-              onClick={() => setActiveTab('data_entry')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-sm"
-            >
-              <UploadCloud className="w-4 h-4" />
-              <span>Importar / Lançar</span>
-            </button>
-
-            <button
-              onClick={exportToExcel}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-all"
-              title="Exportar dados filtrados para Excel"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-              <span className="hidden sm:inline">Exportar Excel</span>
-            </button>
-
-            <button
-              onClick={handleCopyAsImage}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-all"
-              title="Copiar relatório como imagem"
-            >
-              <Download className="w-4 h-4 text-sky-400" />
-              <span className="hidden sm:inline">Copiar Imagem</span>
-            </button>
-
-            <button
-              onClick={handlePrintPDF}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-all"
-              title="Imprimir ou salvar PDF"
-            >
-              <FileText className="w-4 h-4 text-amber-400" />
-              <span className="hidden sm:inline">Imprimir / PDF</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Barra de Navegação de Abas */}
-        <div className="bg-[#0e2436] px-4 sm:px-6 lg:px-8 border-t border-slate-700/60 overflow-x-auto no-scrollbar">
-          <div className="max-w-7xl mx-auto flex items-center gap-1 py-1.5 min-w-max text-xs">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'overview'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <BarChart3 className="w-3.5 h-3.5" />
-              Visão Geral
-            </button>
-
-            <button
-              onClick={() => setActiveTab('headcount')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'headcount'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Users className="w-3.5 h-3.5" />
-              Quadro de Pessoal ({metrics.total})
-            </button>
-
-            <button
-              onClick={() => setActiveTab('jobs_shifts')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'jobs_shifts'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Briefcase className="w-3.5 h-3.5" />
-              Cargos e Turnos
-            </button>
-
-            <button
-              onClick={() => setActiveTab('indicators')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'indicators'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <TrendingUp className="w-3.5 h-3.5" />
-              Indicadores G&G (9)
-            </button>
-
-            <button
-              onClick={() => setActiveTab('absenteeism')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'absenteeism'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5" />
-              Absenteísmo
-            </button>
-
-            <button
-              onClick={() => setActiveTab('movements')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'movements'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <TrendingDown className="w-3.5 h-3.5" />
-              Movimentações & Turnover
-            </button>
-
-            <button
-              onClick={() => setActiveTab('trainings')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'trainings'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Treinamento & Superar
-            </button>
-
-            <button
-              onClick={() => setActiveTab('action_plans')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'action_plans'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <AlertTriangle className="w-3.5 h-3.5" />
-              Alertas & Ações ({actionPlans.length})
-            </button>
-
-            <button
-              onClick={() => setActiveTab('data_entry')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'data_entry'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              Entrada de Dados
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* ========================================================================= */}
-      {/* 2. FILTROS GLOBAIS INTERDEPENDENTES */}
-      {/* ========================================================================= */}
-      <section data-capture-ignore className="no-print bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-3.5 shadow-2xs">
-        <div className="max-w-7xl mx-auto space-y-3">
-          
-          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-            {/* Campo de Busca Rápida */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Buscar por PRN, Nome, Cargo ou Centro de Custo..."
-                value={filters.searchTerm}
-                onChange={(e) => setFilters(f => ({ ...f, searchTerm: e.target.value }))}
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
-              />
-              {filters.searchTerm && (
-                <button
-                  onClick={() => setFilters(f => ({ ...f, searchTerm: '' }))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Seletores de Filtros */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 text-xs">
-              
-              {/* Vínculo */}
-              <select
-                value={filters.employmentGroup}
-                onChange={(e) => setFilters(f => ({ ...f, employmentGroup: e.target.value }))}
-                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-                <option value="all">Vínculo: Todos</option>
-                <option value="CLT">CLT ({metrics.clt})</option>
-                <option value="Aprendiz">Aprendiz ({metrics.aprendizes})</option>
-                <option value="Estagiário">Estagiário ({metrics.estagiarios})</option>
-              </select>
-
-              {/* Turno */}
-              <select
-                value={filters.shiftCategory}
-                onChange={(e) => setFilters(f => ({ ...f, shiftCategory: e.target.value }))}
-                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-                <option value="all">Turno: Todos</option>
-                <option value="Turno A">Turno A (Manhã: 88)</option>
-                <option value="Turno B">Turno B (Tarde: 84)</option>
-                <option value="Turno C">Turno C (Noite: 87)</option>
-                <option value="Administrativo">Administrativo (5x2: 74)</option>
-                <option value="Outras Jornadas">Outras Jornadas (20)</option>
-              </select>
-
-              {/* Macroárea */}
-              <select
-                value={filters.macroarea}
-                onChange={(e) => setFilters(f => ({ ...f, macroarea: e.target.value }))}
-                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer max-w-[160px] truncate"
-              >
-                <option value="all">Macroárea: Todas</option>
-                {filterOptions.macroareas.map(m => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
-
-              {/* Centro de Custo */}
-              <select
-                value={filters.costCenter}
-                onChange={(e) => setFilters(f => ({ ...f, costCenter: e.target.value }))}
-                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer max-w-[170px] truncate"
-              >
-                <option value="all">Centro de Custo: Todos</option>
-                {filterOptions.costCenters.map(cc => (
-                  <option key={cc} value={cc}>{cc}</option>
-                ))}
-              </select>
-
-              {/* Limpar Filtros */}
-              {activeFiltersCount > 0 && (
-                <button
-                  onClick={clearFilters}
-                  className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-semibold flex items-center gap-1 transition-colors whitespace-nowrap"
-                >
-                  <X className="w-3.5 h-3.5" />
-                  <span>Limpar ({activeFiltersCount})</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Chips dos Filtros Aplicados */}
-          {activeFiltersCount > 0 && (
-            <div className="flex items-center gap-2 flex-wrap text-[11px] pt-1">
-              <span className="text-slate-500 font-semibold flex items-center gap-1">
-                <Filter className="w-3 h-3" />
-                Filtros ativos:
-              </span>
-              {filters.employmentGroup !== 'all' && (
-                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200 flex items-center gap-1">
-                  Vínculo: {filters.employmentGroup}
-                  <X className="w-3 h-3 cursor-pointer" onClick={() => setFilters(f => ({ ...f, employmentGroup: 'all' }))} />
-                </span>
-              )}
-              {filters.shiftCategory !== 'all' && (
-                <span className="px-2 py-0.5 bg-indigo-50 text-indigo-800 rounded-md border border-indigo-200 flex items-center gap-1">
-                  Turno: {filters.shiftCategory}
-                  <X className="w-3 h-3 cursor-pointer" onClick={() => setFilters(f => ({ ...f, shiftCategory: 'all' }))} />
-                </span>
-              )}
-              {filters.macroarea !== 'all' && (
-                <span className="px-2 py-0.5 bg-sky-50 text-sky-800 rounded-md border border-sky-200 flex items-center gap-1">
-                  Macroárea: {filters.macroarea}
-                  <X className="w-3 h-3 cursor-pointer" onClick={() => setFilters(f => ({ ...f, macroarea: 'all' }))} />
-                </span>
-              )}
-              {filters.costCenter !== 'all' && (
-                <span className="px-2 py-0.5 bg-purple-50 text-purple-800 rounded-md border border-purple-200 flex items-center gap-1">
-                  CC: {filters.costCenter}
-                  <X className="w-3 h-3 cursor-pointer" onClick={() => setFilters(f => ({ ...f, costCenter: 'all' }))} />
-                </span>
-              )}
-              {filters.searchTerm && (
-                <span className="px-2 py-0.5 bg-amber-50 text-amber-800 rounded-md border border-amber-200 flex items-center gap-1">
-                  Termo: "{filters.searchTerm}"
-                  <X className="w-3 h-3 cursor-pointer" onClick={() => setFilters(f => ({ ...f, searchTerm: '' }))} />
-                </span>
-              )}
-            </div>
-          )}
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 3. CONTEÚDO PRINCIPAL DAS ABAS */}
-      {/* ========================================================================= */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-        {/* Cabeçalho Executivo Inteligente para Captura de Imagem e Impressão */}
-        <div className="capture-only hidden bg-white p-5 rounded-3xl border border-slate-200 mb-5 text-left shadow-xs">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-black text-slate-900 tracking-tight">
-                  People Analytics
-                  <span className="text-[#15877B] font-normal text-base"> | Feira de Santana</span>
-                </h2>
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-teal-50 text-[#15877B] border border-teal-200">
-                  Unidade Bahia • KBA1 / K111
-                </span>
+              <div>
+                <span className="text-base font-bold text-white tracking-tight block">KBA1 Analytics</span>
+                <span className="text-[10px] text-[#799fac] uppercase tracking-wider font-semibold">Papelão Ondulado</span>
               </div>
-              <p className="text-xs text-slate-600 font-medium mt-0.5">
-                Quadro de Pessoal & Performance Operacional • Competência: {filters.competence}
-              </p>
             </div>
-            <div className="text-right">
-              <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 bg-[#132F46] text-white rounded-xl shadow-xs">
-                {filteredEmployees.length} Registros Bahia
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* --------------------------------------------------------------------- */}
-        {/* ABA 1: VISÃO GERAL */}
-        {/* --------------------------------------------------------------------- */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
             
-            {/* LINHA SUPERIOR: KPIS DE QUADRO (CARD ELEGANTE CORPORATIVO) */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3.5">
+            <div className="bg-[#002028] px-3 py-2 rounded-lg flex items-center justify-between border border-[#306576]/40">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-white">KBA1 • Feira de Santana (BA)</span>
+              </div>
+              <span className="h-2 w-2 rounded-full bg-[#6ffbbe] animate-pulse" title="Sistema Conectado" />
+            </div>
+          </div>
+
+          {/* Nav links */}
+          <nav className="flex-1 p-3 space-y-1">
+            {[
+              { id: 'overview', label: 'Visão Executiva', icon: BarChart3 },
+              { id: 'headcount', label: `Quadro de Pessoal (${filteredEmployees.length})`, icon: Users },
+              { id: 'jobs_shifts', label: 'Setores & Turnos', icon: Clock },
+              { id: 'indicators', label: 'Indicadores G&G (9)', icon: TrendingUp },
+              { id: 'absenteeism', label: 'Absenteísmo & Movimentações', icon: TrendingDown },
+              { id: 'trainings', label: 'Treinamento & DHO', icon: Layers },
+              { id: 'action_plans', label: 'Inteligência Analítica', icon: AlertTriangle },
+              { id: 'data_entry', label: 'Entrada de Dados', icon: UploadCloud },
+            ].map((item) => {
+              const Icon = item.icon || BarChart3;
+              const isActive = activeTab === item.id || (item.id === 'absenteeism' && activeTab === 'movements');
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id as TabType);
+                    setIsMobileSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                    isActive
+                      ? 'bg-[#306576] text-white border-l-4 border-[#6ffbbe] shadow-sm'
+                      : 'text-[#a5cdda] hover:bg-[#306576]/40 hover:text-white'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0 text-[#6ffbbe]" />
+                  <span className="truncate">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom Sidebar Footer */}
+        <div className="p-4 border-t border-[#306576]/30 bg-[#002028]/60 space-y-2.5">
+          <div className="flex items-center justify-between text-[11px] text-[#799fac]">
+            <span>Competência: <strong className="text-white">{filters.competence}</strong></span>
+            <span className="text-[#6ffbbe] font-semibold">LGPD Auditada</span>
+          </div>
+          <button
+            onClick={onBackToHome}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-semibold border border-white/10 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Voltar ao Início</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* ========================================================================= */}
+      {/* 2. ÁREA PRINCIPAL COM HEADER EXECUTIVO & CONTEÚDO DAS ABAS */}
+      {/* ========================================================================= */}
+      <div className="flex-1 lg:ml-72 flex flex-col min-w-0 min-h-screen">
+        
+        {/* Top Header Bar */}
+        <header data-capture-ignore className="no-print bg-[#132F46] text-white border-b border-slate-700/80 sticky top-0 z-30 shadow-md">
+          <div className="px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <button
+                onClick={() => setIsMobileSidebarOpen(true)}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white lg:hidden"
+                title="Abrir Menu Lateral"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
               
-              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Total Cadastrado</span>
-                <div className="text-2xl font-black text-slate-900 mt-1">{metrics.total}</div>
-                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Unidade Bahia (KBA1)</div>
-              </div>
-
-              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Vínculo CLT</span>
-                <div className="text-2xl font-black text-indigo-600 mt-1">{metrics.clt}</div>
-                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">{((metrics.clt / (metrics.total || 1)) * 100).toFixed(1)}% do quadro</div>
-              </div>
-
-              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Aprendizes</span>
-                <div className="text-2xl font-black text-sky-600 mt-1">{metrics.aprendizes}</div>
-                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Programa Jovem Aprendiz</div>
-              </div>
-
-              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Estagiários</span>
-                <div className="text-2xl font-black text-purple-600 mt-1">{metrics.estagiarios}</div>
-                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Nível Superior / Técnico</div>
-              </div>
-
-              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Centros de Custo</span>
-                <div className="text-2xl font-black text-emerald-600 mt-1">{metrics.uniqueCC}</div>
-                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Estrutura Contábil</div>
-              </div>
-
-              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Locais / Setores</span>
-                <div className="text-2xl font-black text-slate-800 mt-1">{metrics.uniqueLocations}</div>
-                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Células Operacionais</div>
-              </div>
-
-              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Cargos Distintos</span>
-                <div className="text-2xl font-black text-slate-800 mt-1">{metrics.uniqueJobs}</div>
-                <div className="text-[11px] text-slate-500 mt-0.5 font-medium">Funções Fabris</div>
-              </div>
-
-            </div>
-
-            {/* LINHA INTERMEDIÁRIA: DISTRIBUIÇÃO POR TURNO (COLUNAS) */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-emerald-600" />
-                    Distribuição por Turno Cadastrado
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Proposta de categorização com base nas faixas horárias do PAAH (total {metrics.total} colaboradores).
-                  </p>
-                </div>
-                <span className="text-xs text-slate-400 font-medium">Clique para filtrar</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-                
-                {/* Turno A */}
-                <div 
-                  onClick={() => setFilters(f => ({ ...f, shiftCategory: f.shiftCategory === 'Turno A' ? 'all' : 'Turno A' }))}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                    filters.shiftCategory === 'Turno A'
-                      ? 'bg-amber-50/70 border-amber-300 ring-2 ring-amber-400'
-                      : 'bg-slate-50/60 border-slate-200 hover:border-amber-300 hover:bg-amber-50/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                      Turno A (Manhã)
-                    </span>
-                    <span className="font-mono text-slate-500">06:00-14:20</span>
-                  </div>
-                  <div className="mt-2 text-2xl font-black text-slate-900">
-                    {metrics.shiftDistribution['Turno A']}
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    {((metrics.shiftDistribution['Turno A'] / (metrics.total || 1)) * 100).toFixed(1)}% do quadro
-                  </p>
-                </div>
-
-                {/* Turno B */}
-                <div 
-                  onClick={() => setFilters(f => ({ ...f, shiftCategory: f.shiftCategory === 'Turno B' ? 'all' : 'Turno B' }))}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                    filters.shiftCategory === 'Turno B'
-                      ? 'bg-sky-50/70 border-sky-300 ring-2 ring-sky-400'
-                      : 'bg-slate-50/60 border-slate-200 hover:border-sky-300 hover:bg-sky-50/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-sky-500" />
-                      Turno B (Tarde)
-                    </span>
-                    <span className="font-mono text-slate-500">14:20-22:30</span>
-                  </div>
-                  <div className="mt-2 text-2xl font-black text-slate-900">
-                    {metrics.shiftDistribution['Turno B']}
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    {((metrics.shiftDistribution['Turno B'] / (metrics.total || 1)) * 100).toFixed(1)}% do quadro
-                  </p>
-                </div>
-
-                {/* Turno C */}
-                <div 
-                  onClick={() => setFilters(f => ({ ...f, shiftCategory: f.shiftCategory === 'Turno C' ? 'all' : 'Turno C' }))}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                    filters.shiftCategory === 'Turno C'
-                      ? 'bg-indigo-50/70 border-indigo-300 ring-2 ring-indigo-400'
-                      : 'bg-slate-50/60 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                      Turno C (Noite)
-                    </span>
-                    <span className="font-mono text-slate-500">22:30-06:00</span>
-                  </div>
-                  <div className="mt-2 text-2xl font-black text-slate-900">
-                    {metrics.shiftDistribution['Turno C']}
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    {((metrics.shiftDistribution['Turno C'] / (metrics.total || 1)) * 100).toFixed(1)}% do quadro
-                  </p>
-                </div>
-
-                {/* Administrativo */}
-                <div 
-                  onClick={() => setFilters(f => ({ ...f, shiftCategory: f.shiftCategory === 'Administrativo' ? 'all' : 'Administrativo' }))}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                    filters.shiftCategory === 'Administrativo'
-                      ? 'bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-400'
-                      : 'bg-slate-50/60 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                      Administrativo
-                    </span>
-                    <span className="font-mono text-slate-500">5x2 08:00-17:00</span>
-                  </div>
-                  <div className="mt-2 text-2xl font-black text-slate-900">
-                    {metrics.shiftDistribution['Administrativo']}
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    {((metrics.shiftDistribution['Administrativo'] / (metrics.total || 1)) * 100).toFixed(1)}% do quadro
-                  </p>
-                </div>
-
-                {/* Outras Jornadas */}
-                <div 
-                  onClick={() => setFilters(f => ({ ...f, shiftCategory: f.shiftCategory === 'Outras Jornadas' ? 'all' : 'Outras Jornadas' }))}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                    filters.shiftCategory === 'Outras Jornadas'
-                      ? 'bg-purple-50/70 border-purple-300 ring-2 ring-purple-400'
-                      : 'bg-slate-50/60 border-slate-200 hover:border-purple-300 hover:bg-purple-50/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
-                      Outras Jornadas
-                    </span>
-                    <span className="font-mono text-slate-500">Especiais</span>
-                  </div>
-                  <div className="mt-2 text-2xl font-black text-slate-900">
-                    {metrics.shiftDistribution['Outras Jornadas']}
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    Aprendizes, estágios, 07-15:40
-                  </p>
-                </div>
-
-              </div>
-            </div>
-
-            {/* GRID DUPLO: RANKING DE CENTROS DE CUSTO & CARGOS */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
-              {/* TOP CENTROS DE CUSTO */}
-              <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-indigo-600" />
-                      Principais Centros de Custo (Fotografia Inicial)
-                    </h3>
-                    <p className="text-xs text-slate-500">Distribuição do quadro por setor contábil fabril.</p>
-                  </div>
-                  <span className="text-xs font-bold text-indigo-600">{metrics.uniqueCC} Centros</span>
-                </div>
-
-                <div className="space-y-2.5">
-                  {metrics.sortedCostCenters.slice(0, 7).map((cc, i) => {
-                    const percent = (cc.count / (metrics.total || 1)) * 100;
-                    return (
-                      <div 
-                        key={cc.name}
-                        onClick={() => setFilters(f => ({ ...f, costCenter: f.costCenter === cc.name ? 'all' : cc.name }))}
-                        className="group p-2.5 rounded-xl hover:bg-slate-50 transition-all cursor-pointer border border-transparent hover:border-slate-200"
-                      >
-                        <div className="flex items-center justify-between text-xs font-semibold mb-1">
-                          <span className="text-slate-800 group-hover:text-indigo-600 flex items-center gap-2">
-                            <span className="text-slate-400 font-mono text-[11px]">#{i + 1}</span>
-                            {cc.name}
-                          </span>
-                          <span className="text-slate-900 font-mono font-bold">
-                            {cc.count} <span className="text-slate-400 font-normal">({percent.toFixed(1)}%)</span>
-                          </span>
-                        </div>
-                        <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                          <div 
-                            className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 group-hover:from-indigo-600 group-hover:to-purple-600 transition-all"
-                            style={{ width: `${percent}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* TOP CARGOS */}
-              <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-emerald-600" />
-                      Principais Cargos Operacionais
-                    </h3>
-                    <p className="text-xs text-slate-500">Concentração de funções no chão de fábrica.</p>
-                  </div>
-                  <span className="text-xs font-bold text-emerald-600">{metrics.uniqueJobs} Cargos</span>
-                </div>
-
-                <div className="space-y-2.5">
-                  {metrics.sortedJobs.slice(0, 7).map((job, i) => {
-                    const percent = (job.count / (metrics.total || 1)) * 100;
-                    return (
-                      <div 
-                        key={job.name}
-                        onClick={() => setFilters(f => ({ ...f, job: f.job === job.name ? 'all' : job.name }))}
-                        className="group p-2.5 rounded-xl hover:bg-slate-50 transition-all cursor-pointer border border-transparent hover:border-slate-200"
-                      >
-                        <div className="flex items-center justify-between text-xs font-semibold mb-1">
-                          <span className="text-slate-800 group-hover:text-emerald-600 flex items-center gap-2">
-                            <span className="text-slate-400 font-mono text-[11px]">#{i + 1}</span>
-                            {job.name}
-                          </span>
-                          <span className="text-slate-900 font-mono font-bold">
-                            {job.count} <span className="text-slate-400 font-normal">({percent.toFixed(1)}%)</span>
-                          </span>
-                        </div>
-                        <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                          <div 
-                            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 group-hover:from-emerald-600 group-hover:to-teal-700 transition-all"
-                            style={{ width: `${percent}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-            </div>
-
-            {/* LINHA DE PERFORMANCE: CARDS DOS 9 INDICADORES GENTE & GESTÃO */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-emerald-600" />
-                    Painel de Metas & Indicadores de Gente & Gestão
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Metas oficiais 1 / 3 / 5 da unidade Bahia. Clique em qualquer card para lançar realizado ou auditar.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="inline-flex items-center gap-1 text-slate-500">
-                    <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                    Sem dados realizados (não inventar)
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-lg sm:text-xl font-black tracking-tight text-white flex items-center gap-2">
+                    People Analytics
+                    <span className="text-[#6ffbbe] font-normal text-sm">| Feira de Santana</span>
+                  </h1>
+                  <span className="hidden sm:inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    KBA1 / K111
                   </span>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {kpis.map((kpi) => {
-                  const hasActual = kpi.actual !== null;
-                  return (
-                    <div
-                      key={kpi.id}
-                      onClick={() => {
-                        setSelectedKPI(kpi);
-                        setKpiActualInput(kpi.actual !== null ? String(kpi.actual) : '');
-                        setIsKPIModalOpen(true);
-                      }}
-                      className="p-4 rounded-2xl bg-slate-50/60 border border-slate-200/90 hover:border-emerald-300 hover:bg-emerald-50/20 transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-3 group"
-                    >
-                      <div>
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2 py-0.5 rounded-md bg-white border border-slate-200">
-                            {kpi.category}
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            {kpi.unit}
-                          </span>
-                        </div>
-                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors mt-2 leading-tight">
-                          {kpi.name}
-                        </h4>
-                        <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
-                          {kpi.description}
-                        </p>
-                      </div>
-
-                      <div className="space-y-2 pt-2 border-t border-slate-200/60">
-                        {/* Realizado */}
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500 font-medium">Realizado:</span>
-                          <span className={`font-mono font-bold ${hasActual ? 'text-slate-900 text-sm' : 'text-slate-400 italic'}`}>
-                            {hasActual ? `${kpi.actual}${kpi.unit}` : 'Sem dados realizados'}
-                          </span>
-                        </div>
-
-                        {/* Metas 1 / 3 / 5 */}
-                        <div className="grid grid-cols-3 gap-1 text-[11px] bg-white p-2 rounded-xl border border-slate-100 text-center font-mono">
-                          <div>
-                            <span className="text-slate-400 block text-[9px] uppercase">Meta 1</span>
-                            <span className="font-bold text-slate-700">{kpi.target1}{kpi.unit}</span>
-                          </div>
-                          <div>
-                            <span className="text-slate-400 block text-[9px] uppercase">Meta 3</span>
-                            <span className="font-bold text-slate-700">{kpi.target3}{kpi.unit}</span>
-                          </div>
-                          <div>
-                            <span className="text-emerald-600 block text-[9px] uppercase font-bold">Meta 5</span>
-                            <span className="font-bold text-emerald-700">{kpi.target5}{kpi.unit}</span>
-                          </div>
-                        </div>
-
-                        {/* Polaridade */}
-                        <div className="text-[10px] text-slate-500 flex items-center justify-between pt-0.5">
-                          <span>
-                            {kpi.polarity === 'higher_is_better' && '▲ Maior é melhor'}
-                            {kpi.polarity === 'lower_is_better' && '▼ Menor é melhor'}
-                            {kpi.polarity === 'to_validate' && '⚠️ Polaridade a validar'}
-                          </span>
-                          <span className="text-emerald-600 font-semibold group-hover:underline">Lançar / Auditar</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                <p className="text-xs text-slate-300 flex items-center gap-2 mt-0.5">
+                  <span>Competência: <strong>{filters.competence}</strong></span>
+                  <span>•</span>
+                  <span className="text-emerald-300 font-medium">{filteredEmployees.length} PRNs Ativos</span>
+                </p>
               </div>
             </div>
 
-            {/* OPORTUNIDADES DE AÇÃO E MOTOR DE RECOMENDAÇÕES */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                    Oportunidades de Ação & Insights Automáticos
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Motor de recomendações com regras transparentes sobre o extrato atual.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setIsNewActionModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-colors border border-indigo-200"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  Nova Ação
-                </button>
-              </div>
+            {/* Ações Rápidas */}
+            <div className="flex items-center gap-2 flex-wrap self-end md:self-auto">
+              <button
+                onClick={() => setIsAuditModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-all"
+                title="Auditar Regras & Fórmulas"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-[#6ffbbe]" />
+                <span className="hidden sm:inline">Auditar Metas</span>
+              </button>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {actionPlans.map(act => (
-                  <div key={act.id} className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200/80 space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-amber-900">{act.title}</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200">
-                        {act.priority} Prioridade
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-700">
-                      <strong>Escopo:</strong> {act.scope}
-                    </p>
-                    <p className="text-[11px] text-slate-600">
-                      <strong>Evidência:</strong> {act.evidence}
-                    </p>
-                    <p className="text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-100">
-                      <strong>Ação recomendada:</strong> {act.suggestedAction}
-                    </p>
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-                      <span>Responsável: <strong>{act.responsible}</strong></span>
-                      <span>Prazo: <strong>{act.deadline}</strong></span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <button
+                onClick={exportToExcel}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-all"
+                title="Exportar dados filtrados para Excel"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="hidden sm:inline">Excel</span>
+              </button>
+
+              <button
+                onClick={handleCopyAsImage}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-all"
+                title="Copiar relatório como imagem"
+              >
+                <Download className="w-3.5 h-3.5 text-sky-400" />
+                <span className="hidden sm:inline">Copiar Imagem</span>
+              </button>
+
+              <button
+                onClick={handlePrintPDF}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-all"
+                title="Imprimir ou salvar PDF"
+              >
+                <FileText className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">PDF</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setDataEntryTab('import');
+                  setActiveTab('data_entry');
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-sm"
+              >
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Importar</span>
+              </button>
             </div>
-
           </div>
-        )}
+        </header>
 
-        {/* --------------------------------------------------------------------- */}
-        {/* ABA 2: QUADRO DE PESSOAL (TABELA COM DRILL-DOWN E PAGINAÇÃO) */}
-        {/* --------------------------------------------------------------------- */}
-        {activeTab === 'headcount' && (
+        {/* Barra de Filtros Globais Interdependentes */}
+        <div data-capture-ignore className="no-print bg-white border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Competência */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500 font-semibold">Competência:</span>
+                <select
+                  value={filters.competence}
+                  onChange={e => setFilters(f => ({ ...f, competence: e.target.value }))}
+                  className="bg-[#eff4ff] border border-slate-200 text-[#0b1c30] rounded-lg px-2.5 py-1 font-semibold focus:outline-none focus:ring-1 focus:ring-[#306576]"
+                >
+                  <option value="10/2026">Outubro / 2026</option>
+                  <option value="09/2026">Setembro / 2026</option>
+                  <option value="08/2026">Agosto / 2026</option>
+                </select>
+              </div>
+
+              {/* Macroárea */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500 font-semibold">Macroárea:</span>
+                <select
+                  value={filters.macroarea}
+                  onChange={e => setFilters(f => ({ ...f, macroarea: e.target.value }))}
+                  className="bg-[#eff4ff] border border-slate-200 text-[#0b1c30] rounded-lg px-2.5 py-1 font-semibold focus:outline-none focus:ring-1 focus:ring-[#306576]"
+                >
+                  <option value="all">Todas as Macroáreas</option>
+                  <option value="Operação Fabril">Operação Fabril</option>
+                  <option value="Logística & Expedição">Logística & Expedição</option>
+                  <option value="Manutenção & Utilidades">Manutenção & Utilidades</option>
+                  <option value="Gente & Gestão & ADM">Gente & Gestão & ADM</option>
+                </select>
+              </div>
+
+              {/* Turno */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500 font-semibold">Turno:</span>
+                <select
+                  value={filters.shiftCategory}
+                  onChange={e => setFilters(f => ({ ...f, shiftCategory: e.target.value }))}
+                  className="bg-[#eff4ff] border border-slate-200 text-[#0b1c30] rounded-lg px-2.5 py-1 font-semibold focus:outline-none focus:ring-1 focus:ring-[#306576]"
+                >
+                  <option value="all">Todos os Turnos</option>
+                  <option value="Turno A">Turno 1 (06:00 - 14:20)</option>
+                  <option value="Turno B">Turno 2 (14:20 - 22:30)</option>
+                  <option value="Turno C">Turno 3 (22:30 - 06:00)</option>
+                  <option value="Administrativo">Administrativo (08:00 - 17:48)</option>
+                  <option value="Outras Jornadas">Outras Jornadas / Jovens</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#ecfdf5] text-[#047857] border border-[#a7f3d0]">
+                LGPD Auditada • Sigilo Fabril
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* CONTAINER CAPTURÁVEL DO CONTEÚDO */}
+        <main id="people-analytics-capture-area" className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+          
+          {/* CABEÇALHO EXECUTIVO APENAS PARA CAPTURA DE IMAGEM / PDF */}
+          <div data-capture-only className="hidden bg-white p-4 rounded-xl border border-slate-200 mb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-[#0b1c30]">People Analytics KBA1 • Relatório Oficial</h2>
+                <p className="text-xs text-slate-500">Unidade Bahia • Feira de Santana • Competência: {filters.competence}</p>
+              </div>
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#eff4ff] text-[#306576]">
+                KBA1-DHO-2024
+              </span>
+            </div>
+          </div>
+
+          {/* ABA 1: VISÃO EXECUTIVA */}
+          {activeTab === 'overview' && (
+            <ExecutiveOverviewTab
+              employees={filteredEmployees}
+              kpis={kpis}
+              onNavigateTab={setActiveTab}
+              onOpenAuditModal={() => setIsAuditModalOpen(true)}
+            />
+          )}
+
+          {/* ABA 2: QUADRO DE PESSOAL */}
+          {activeTab === 'headcount' && (
+                    
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
@@ -1365,251 +855,32 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
           </div>
         )}
 
-        {/* --------------------------------------------------------------------- */}
-        {/* ABA 3: CARGOS E TURNOS */}
-        {/* --------------------------------------------------------------------- */}
-        {activeTab === 'jobs_shifts' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                  <Briefcase className="w-4 h-4 text-emerald-600" />
-                  Matriz de Cargos vs. Turnos (Feira de Santana)
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Cruzamento da ocupação dos 66 cargos entre as escalas de trabalho fabris.
-                </p>
-              </div>
+          {/* ABA 3: SETORES & TURNOS */}
+          {activeTab === 'jobs_shifts' && (
+            <SectorsShiftsTab employees={filteredEmployees} />
+          )}
 
-              <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] border-b border-slate-200">
-                    <tr>
-                      <th className="p-3">Cargo Operacional</th>
-                      <th className="p-3 text-center bg-amber-50/50">Turno A</th>
-                      <th className="p-3 text-center bg-sky-50/50">Turno B</th>
-                      <th className="p-3 text-center bg-indigo-50/50">Turno C</th>
-                      <th className="p-3 text-center bg-emerald-50/50">Administrativo</th>
-                      <th className="p-3 text-center bg-purple-50/50">Outras Jornadas</th>
-                      <th className="p-3 text-center font-bold">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {metrics.sortedJobs.slice(0, 15).map((job) => {
-                      const inA = filteredEmployees.filter(e => e.jobTitle === job.name && e.shiftCategory === 'Turno A').length;
-                      const inB = filteredEmployees.filter(e => e.jobTitle === job.name && e.shiftCategory === 'Turno B').length;
-                      const inC = filteredEmployees.filter(e => e.jobTitle === job.name && e.shiftCategory === 'Turno C').length;
-                      const inAdm = filteredEmployees.filter(e => e.jobTitle === job.name && e.shiftCategory === 'Administrativo').length;
-                      const inOut = filteredEmployees.filter(e => e.jobTitle === job.name && e.shiftCategory === 'Outras Jornadas').length;
+          {/* ABA 4: INDICADORES G&G (OFICIAIS COM BENTO GRID E MATRIZ 1/3/5) */}
+          {activeTab === 'indicators' && (
+            <IndicatorsGGTab
+              kpis={kpis}
+              onOpenAuditModal={() => setIsAuditModalOpen(true)}
+              onEditKPI={(kpi) => {
+                setSelectedKPI(kpi);
+                setKpiActualInput(String(kpi.actual !== null ? kpi.actual : ''));
+                setIsKPIModalOpen(true);
+              }}
+            />
+          )}
 
-                      return (
-                        <tr key={job.name} className="hover:bg-slate-50 transition-colors">
-                          <td className="p-3 font-semibold text-slate-800">{job.name}</td>
-                          <td className="p-3 text-center font-mono text-slate-700">{inA || '—'}</td>
-                          <td className="p-3 text-center font-mono text-slate-700">{inB || '—'}</td>
-                          <td className="p-3 text-center font-mono text-slate-700">{inC || '—'}</td>
-                          <td className="p-3 text-center font-mono text-slate-700">{inAdm || '—'}</td>
-                          <td className="p-3 text-center font-mono text-slate-700">{inOut || '—'}</td>
-                          <td className="p-3 text-center font-mono font-bold text-slate-900 bg-slate-50">{job.count}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
+          {/* ABA 5 & 6: ABSENTEÍSMO & MOVIMENTAÇÕES */}
+          {(activeTab === 'absenteeism' || activeTab === 'movements') && (
+            <AbsenteeismMovementsTab />
+          )}
 
-        {/* --------------------------------------------------------------------- */}
-        {/* ABA 4: INDICADORES GENTE & GESTÃO (TABELA COMPLETA COM 9 KPIS) */}
-        {/* --------------------------------------------------------------------- */}
-        {activeTab === 'indicators' && (
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-emerald-600" />
-                  Quadro Completo dos 9 Indicadores de Gente & Gestão
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Metas 1 / 3 / 5 oficiais da Unidade Bahia. Os resultados realizados só aparecem quando lançados ou importados.
-                </p>
-              </div>
-
-              <button
-                onClick={() => {
-                  setDataEntryTab('manual');
-                  setManualFormType('kpi');
-                  setActiveTab('data_entry');
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-xs"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Lançar Realizado
-              </button>
-            </div>
-
-            <div className="overflow-x-auto rounded-2xl border border-slate-200">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
-                  <tr>
-                    <th className="p-3">Indicador</th>
-                    <th className="p-3">Categoria</th>
-                    <th className="p-3">Unidade</th>
-                    <th className="p-3 text-center font-bold text-slate-900 bg-slate-200/50">Realizado</th>
-                    <th className="p-3 text-center">Meta 1</th>
-                    <th className="p-3 text-center">Meta 3</th>
-                    <th className="p-3 text-center text-emerald-700">Meta 5</th>
-                    <th className="p-3 text-center">Polaridade</th>
-                    <th className="p-3">Responsável</th>
-                    <th className="p-3">Ação</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {kpis.map((kpi) => (
-                    <tr key={kpi.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="p-3">
-                        <span className="font-bold text-slate-900 block">{kpi.name}</span>
-                        <span className="text-[11px] text-slate-500 block max-w-sm">{kpi.description}</span>
-                      </td>
-                      <td className="p-3 font-medium text-slate-600">{kpi.category}</td>
-                      <td className="p-3 font-mono">{kpi.unit}</td>
-                      <td className="p-3 text-center font-mono font-bold bg-slate-50">
-                        {kpi.actual !== null ? (
-                          <span className="text-slate-900 font-bold">{kpi.actual}{kpi.unit}</span>
-                        ) : (
-                          <span className="text-slate-400 italic text-[11px]">Sem realizado</span>
-                        )}
-                      </td>
-                      <td className="p-3 text-center font-mono font-semibold">{kpi.target1}{kpi.unit}</td>
-                      <td className="p-3 text-center font-mono font-semibold">{kpi.target3}{kpi.unit}</td>
-                      <td className="p-3 text-center font-mono font-bold text-emerald-700">{kpi.target5}{kpi.unit}</td>
-                      <td className="p-3 text-center text-[11px]">
-                        {kpi.polarity === 'higher_is_better' && <span className="text-emerald-700 font-medium">Maior melhor</span>}
-                        {kpi.polarity === 'lower_is_better' && <span className="text-indigo-700 font-medium">Menor melhor</span>}
-                        {kpi.polarity === 'to_validate' && <span className="text-amber-700 font-medium">A validar</span>}
-                      </td>
-                      <td className="p-3 text-slate-600 text-[11px]">{kpi.responsible}</td>
-                      <td className="p-3">
-                        <button
-                          onClick={() => {
-                            setSelectedKPI(kpi);
-                            setKpiActualInput(kpi.actual !== null ? String(kpi.actual) : '');
-                            setIsKPIModalOpen(true);
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[11px] border border-emerald-200 transition-colors"
-                        >
-                          Lançar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* --------------------------------------------------------------------- */}
-        {/* ABA 5: ABSENTEÍSMO */}
-        {/* --------------------------------------------------------------------- */}
-        {activeTab === 'absenteeism' && (
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <Clock className="w-5 h-5 text-indigo-600" />
-                Painel de Absenteísmo — Gestão de Frequência & Horas
-              </h3>
-              <p className="text-xs text-slate-500">
-                Fórmula padrão: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600 font-mono">absenteísmo (%) = horas ausência ÷ horas programadas × 100</code>
-              </p>
-            </div>
-
-            {/* AVISO PEDAGÓGICO DE DADOS REAIS */}
-            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3 text-xs text-amber-900">
-              <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold">Sem dados realizados de horas de ausência no extrato PAAH fornecido</p>
-                <p className="mt-0.5 text-slate-600 leading-relaxed">
-                  Conforme a diretriz de integridade de People Analytics, valores de absenteísmo não são fabricados. Para apurar os percentuais deste mês, faça a importação da planilha complementar de ponto/horas ou lance manualmente na aba "Entrada de Dados".
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <span className="text-xs text-slate-500 font-semibold block">Absenteísmo Total (%)</span>
-                <div className="text-2xl font-black text-slate-400 mt-1">—</div>
-                <p className="text-[11px] text-slate-400 mt-0.5">Sem base de ponto</p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <span className="text-xs text-slate-500 font-semibold block">Horas de Ausência Elegíveis</span>
-                <div className="text-2xl font-black text-slate-400 mt-1">—</div>
-                <p className="text-[11px] text-slate-400 mt-0.5">Atestados e faltas justificadas</p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <span className="text-xs text-slate-500 font-semibold block">Horas Programadas</span>
-                <div className="text-2xl font-black text-slate-400 mt-1">56.480 h</div>
-                <p className="text-[11px] text-slate-500 mt-0.5">Estimativa baseada em 353 colaboradores</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* --------------------------------------------------------------------- */}
-        {/* ABA 6: MOVIMENTAÇÕES E TURNOVER */}
-        {/* --------------------------------------------------------------------- */}
-        {activeTab === 'movements' && (
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <TrendingDown className="w-5 h-5 text-indigo-600" />
-                Painel de Movimentações & Turnover
-              </h3>
-              <p className="text-xs text-slate-500">
-                Fórmula padrão: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600 font-mono">turnover (%) = desligamentos ÷ HC médio × 100</code>
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <span className="text-xs text-slate-500 font-semibold block">Meta Turnover (Nível 1)</span>
-                <div className="text-2xl font-black text-slate-900 mt-1">1,12%</div>
-                <p className="text-[11px] text-slate-500 mt-0.5">Meta oficial Bahia</p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <span className="text-xs text-slate-500 font-semibold block">Meta Turnover (Nível 3)</span>
-                <div className="text-2xl font-black text-slate-900 mt-1">1,10%</div>
-                <p className="text-[11px] text-slate-500 mt-0.5">Nível intermediário</p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <span className="text-xs text-slate-500 font-semibold block">Meta Turnover (Nível 5)</span>
-                <div className="text-2xl font-black text-emerald-700 mt-1">1,06%</div>
-                <p className="text-[11px] text-emerald-600 font-medium mt-0.5">Nível excelência</p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <span className="text-xs text-slate-500 font-semibold block">Turnover Realizado</span>
-                <div className="text-2xl font-black text-slate-400 mt-1">
-                  {kpis.find(k => k.id === 'turnover_unidade')?.actual !== null 
-                    ? `${kpis.find(k => k.id === 'turnover_unidade')?.actual}%` 
-                    : '—'}
-                </div>
-                <p className="text-[11px] text-slate-400 mt-0.5">Sem desligamentos lançados</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* --------------------------------------------------------------------- */}
-        {/* ABA 7: TREINAMENTO & SUPERAR */}
-        {/* --------------------------------------------------------------------- */}
-        {activeTab === 'trainings' && (
+          {/* ABA 7: TREINAMENTO & DHO */}
+          {activeTab === 'trainings' && (
+                    
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-6">
             <div>
               <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
@@ -1646,10 +917,9 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
           </div>
         )}
 
-        {/* --------------------------------------------------------------------- */}
-        {/* ABA 8: ALERTAS E PLANOS DE AÇÃO */}
-        {/* --------------------------------------------------------------------- */}
-        {activeTab === 'action_plans' && (
+          {/* ABA 8: INTELIGÊNCIA ANALÍTICA & PLANOS DE AÇÃO */}
+          {activeTab === 'action_plans' && (
+                    
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
@@ -1698,10 +968,9 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
           </div>
         )}
 
-        {/* --------------------------------------------------------------------- */}
-        {/* ABA 9: ENTRADA DE DADOS (DUAS ABAS OBRIGATÓRIAS: IMPORTAÇÃO & MANUAL) */}
-        {/* --------------------------------------------------------------------- */}
-        {activeTab === 'data_entry' && (
+          {/* ABA 9: ENTRADA DE DADOS & IMPORTAÇÃO EXCEL */}
+          {activeTab === 'data_entry' && (
+                    
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-6">
             
             {/* Seletor entre Importação e Lançamento Manual */}
@@ -2105,11 +1374,22 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
           </div>
         )}
 
-      </main>
+        </main>
+      </div>
 
       {/* ========================================================================= */}
-      {/* 4. MODAL PARA LANÇAR OU AUDITAR INDICADOR G&G */}
+      {/* MODAIS CORPORATIVOS DE GOVERNANÇA */}
       {/* ========================================================================= */}
+      <AuditFormulasModal
+        isOpen={isAuditModalOpen}
+        onClose={() => setIsAuditModalOpen(false)}
+      />
+
+      <CalculationRulesModal
+        isOpen={isCalculationRulesModalOpen}
+        onClose={() => setIsCalculationRulesModalOpen(false)}
+      />
+
       {isKPIModalOpen && selectedKPI && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
@@ -2331,4 +1611,5 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
 };
 
 export default PeopleAnalyticsView;
+
 

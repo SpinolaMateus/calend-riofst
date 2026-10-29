@@ -31,7 +31,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { copyElementAsImage, exportElementToPDF, exportToExcel, parseExcelFile } from './utils/exportUtils';
 import { 
   CheckCircle2, AlertCircle, Info, Home, 
-  Clock, Calendar as CalendarIcon, Shield, Cloud, BarChart3
+  Clock, Calendar as CalendarIcon, Shield, Cloud, BarChart3, Users
 } from 'lucide-react';
 import { CorporateEvent } from './types/calendar';
 import { useAdminAuth } from './services/AdminAuthContext';

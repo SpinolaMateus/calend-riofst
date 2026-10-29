@@ -1,0 +1,59 @@
+d hidden" id="modal-regras">
+<div class="bg-surface-container-lowest rounded-xl max-w-xl w-full p-space-lg shadow-xl relative animate-in fade-in zoom-in duration-150">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[24px]">tune</span>
+<h3 class="font-headline-lg text-headline-lg text-on-surface">Configurar Regras de Apuração</h3>
+</div>
+<button class="p-1 rounded text-outline hover:text-on-surface transition-colors" onclick="document.getElementById('modal-regras').classList.add('hidden')">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">
+        Defina os parâmetros de ponderação que regem o cálculo de absenteísmo para a planta KBA1. Alterações exigem aprovação da Gerência de RH e Operações.
+      </p>
+<form class="space-y-space-md" onsubmit="event.preventDefault(); alert('Parâmetros salvos com sucesso!'); document.getElementById('modal-regras').classList.add('hidden');">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface font-semibold mb-1">Meta Limite Contratual de Absenteísmo (%)</label>
+<input class="w-full px-3 py-2 rounded bg-surface-container-low text-body-md font-body-md text-on-surface border-none focus:ring-1 focus:ring-secondary" step="0.1" type="number" value="2.5"/>
+</div>
+<div class="space-y-2">
+<label class="block font-label-sm text-label-sm text-on-surface font-semibold">Eventos Computados na Taxa de Absenteísmo:</label>
+<label class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface cursor-pointer">
+<input checked="" class="rounded text-primary-container focus:ring-secondary" type="checkbox"/>
+<span>Atestados de Doença Comum (&lt; 15 dias)</span>
+</label>
+<label class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface cursor-pointer">
+<input checked="" class="rounded text-primary-container focus:ring-secondary" type="checkbox"/>
+<span>Faltas Injustificadas e Suspensões Disciplinares</span>
+</label>
+<label class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface cursor-pointer">
+<input checked="" class="rounded text-primary-container focus:ring-secondary" type="checkbox"/>
+<span>Atrasos acima de 15 minutos e Saídas Antecipadas</span>
+</label>
+<label class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface cursor-pointer">
+<input class="rounded text-primary-container focus:ring-secondary" type="checkbox"/>
+<span>Licença Maternidade / Paternidade (Desmarcado por padrão CLT)</span>
+</label>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface font-semibold mb-1">Gatilho de Alerta Bradford por Colaborador</label>
+<select class="w-full px-3 py-2 rounded bg-surface-container-low text-body-md font-body-md text-on-surface border-none focus:ring-1 focus:ring-secondary">
+<option>150 pontos (Padrão Industrial)</option>
+<option>100 pontos (Acompanhamento Rigoroso)</option>
+<option>200 pontos (Tolerância Estendida)</option>
+</select>
+</div>
+<div class="pt-space-sm flex items-center justify-end gap-space-sm">
+<button class="px-space-md py-2 rounded bg-surface-container-low text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors" onclick="document.getElementById('modal-regras').classList.add('hidden')" type="button">
+            Cancelar
+          </button>
+<button class="px-space-md py-2 rounded bg-primary-container text-on-primary font-label-md text-label-md hover:bg-secondary transition-colors" type="submit">
+            Salvar e Recalcular Base
+          </button>
+</div>
+</form>
+</div>
+</div>
+</div></main><footer class="w-full bg-surface-container-lowest px-gutter-desktop py-space-sm shadow-[0_-1px_6px_rgba(0,0,0,0.02)] flex flex-wrap items-center justify-between text-on-surface-variant font-label-sm text-label-sm"><div><span>Planta KBA1 Papelão Ondulado • Sistema Integrado de Inteligência em Pessoas</span></div><div class="flex items-center gap-space-md"><span class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-[14px] text-tertiary-container">cloud_done</span>Base PAAH: Sincronizada às 06:00 (Turno T1)</span><span>Versão 2.4.0-PRN</span></div></footer></div></body></html>
+

@@ -1,0 +1,2672 @@
+<USER_REQUEST>
+qunato aos modelos de pagina - <!-- Indicadores Gente & Gestão — People Analytics KBA1 -->
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"primary-fixed":"#c1e9f7","surface-container":"#e5eeff","error-container":"#ffdad6","on-tertiary":"#ffffff","on-error-container":"#93000a","on-primary-fixed":"#001f27","surface-container-low":"#eff4ff","outline-variant":"#c1c8cb","secondary-fixed":"#b6ebfe","surface-container-lowest":"#ffffff","on-secondary":"#ffffff","tertiary-fixed":"#6ffbbe","on-secondary-fixed":"#001f28","on-tertiary-fixed-variant":"#005236","inverse-surface":"#213145","secondary":"#306576","error":"#ba1a1a","tertiary-container":"#003925","on-surface":"#0b1c30","on-primary-container":"#799fac","secondary-fixed-dim":"#9acee1","secondary-container":"#b3e8fb","on-error":"#ffffff","inverse-primary":"#a5cdda","surface-variant":"#d3e4fe","on-background":"#0b1c30","outline":"#71787b","surface-container-high":"#dce9ff","surface-dim":"#cbdbf5","surface-tint":"#3e6470","on-primary-fixed-variant":"#254c57","primary-container":"#0a3641","surface":"#f8f9ff","tertiary":"#002114","on-surface-variant":"#41484a","tertiary-fixed-dim":"#4edea3","on-secondary-fixed-variant":"#114d5d","surface-bright":"#f8f9ff","primary":"#002028","primary-fixed-dim":"#a5cdda","inverse-on-surface":"#eaf1ff","on-primary":"#ffffff","on-tertiary-container":"#00ae79","background":"#f8f9ff","on-secondary-container":"#34697a","on-tertiary-fixed":"#002113","surface-container-highest":"#d3e4fe"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-md":"1rem","gutter":"1rem","gutter-desktop":"1.5rem","margin":"1rem","space-xs":"0.25rem","space-lg":"1.5rem","space-sm":"0.5rem","space-xl":"2rem","margin-desktop":"2rem"},"fontFamily":{"display-lg":["Inter"],"body-md":["Inter"],"label-lg":["Inter"],"metric-lg":["Inter"],"headline-md":["Inter"],"headline-lg":["Inter"],"label-sm":["Inter"],"body-lg":["Inter"],"metric-xl":["Inter"],"headline-sm":["Inter"],"body-sm":["Inter"],"label-md":["Inter"],"headline-xl":["Inter"]},"fontSize":{"display-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"label-lg":["14px",{"lineHeight":"20px","fontWeight":"500"}],"metric-lg":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-md":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-lg":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"metric-xl":["30px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["14px",{"lineHeight":"20px","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"headline-xl":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-72 bg-primary-container z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="px-space-lg pt-space-lg pb-space-md"><div class="flex items-center gap-space-sm mb-space-sm"><img alt="Logo KBA1 People Analytics" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XIikFUihlbFi2vjNhoJ57ZPYXdndSh0-WXc5Qr4d39ERi4-0g4tt7ulPQcIqG-7IU3aMmCZwSdu_YYiD5KS2OVEhl5zddaFhmpHL8qgUKqniyTlQKi8tIMHwmjMUE7xKAqBWlCTfj92osuHvDfOnklFLmXpXQyE-2gTTAu7e8EaCu5C17wDSeSQVNyjZjBaYbOkLFPq7euEa3GqQx92tm8wOdKg1MrtC2GoIsTL5HF"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-primary tracking-tight">KBA1 Analytics</span><span class="font-label-sm text-label-sm text-on-primary-container tracking-wider uppercase">Papelão Ondulado</span></div></div><div class="bg-primary px-space-sm py-space-xs rounded-lg flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]">factory</span><span class="font-label-sm text-label-sm text-on-primary">KBA1 - Feira de Santana / BA</span></div><span class="h-2 w-2 rounded-full bg-tertiary-fixed animate-pulse"></span></div></div><nav class="flex-1 px-space-sm py-space-xs space-y-1" data-active-classes="bg-secondary text-on-secondary font-headline-sm border-l-4 border-tertiary-fixed shadow-sm"><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="visao-executiva" href="#"><span class="material-symbols-outlined text-[20px]">query_stats</span><span class="font-label-md text-label-md">Visão Executiva</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="quadro-de-pessoal" href="#"><span class="material-symbols-outlined text-[20px]">groups</span><span class="font-label-md text-label-md">Quadro de Pessoal</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="setores-e-turnos" href="#"><span class="material-symbols-outlined text-[20px]">schedule</span><span class="font-label-md text-label-md">Setores & Turnos</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="indicadores-g-e-g" href="#"><span class="material-symbols-outlined text-[20px]">trending_up</span><span class="font-label-md text-label-md">Indicadores G&G</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="treinamento-e-dho" href="#"><span class="material-symbols-outlined text-[20px]">school</span><span class="font-label-md text-label-md">Treinamento & DHO</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="absenteismo-e-movimentacoes" href="#"><span class="material-symbols-outlined text-[20px]">transfer_within_a_station</span><span class="font-label-md text-label-md">Absenteísmo & Movimentações</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="inteligencia-analitica" href="#"><span class="material-symbols-outlined text-[20px]">psychology</span><span class="font-label-md text-label-md">Inteligência Analítica</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="entrada-de-dados" href="#"><span class="material-symbols-outlined text-[20px]">table_chart</span><span class="font-label-md text-label-md">Entrada de Dados</span></a></nav></div><div class="p-space-md m-space-sm bg-primary rounded-xl"><div class="flex items-center justify-between mb-space-xs"><span class="font-label-sm text-label-sm text-primary-fixed-dim flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-tertiary-fixed-dim">verified</span>Integridade KBA1</span><span class="font-label-sm text-label-sm text-tertiary-fixed font-bold">100% OK</span></div><div class="w-full bg-primary-container h-1 rounded-full overflow-hidden"><div class="bg-tertiary-fixed h-full w-full"></div></div><p class="font-body-sm text-body-sm text-outline-variant mt-2">Sincronizado via ERP Totvs • Turno T1</p></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-1.5 rounded-lg"><span class="material-symbols-outlined text-secondary text-[18px]">pin_drop</span><span class="font-label-md text-label-md text-on-surface font-semibold">KBA1 - Feira de Santana (BA)</span><span class="material-symbols-outlined text-outline text-[16px]">lock</span></div><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded-lg"><span class="material-symbols-outlined text-outline text-[18px]">calendar_month</span><span class="font-label-md text-label-md text-on-surface">Competência:</span><select class="bg-transparent font-label-md text-label-md text-secondary font-semibold focus:outline-none cursor-pointer"><option>Outubro / 2024</option><option>Setembro / 2024</option><option>Agosto / 2024</option></select></div><div class="hidden xl:flex items-center gap-1.5 bg-surface-container-low text-secondary px-space-sm py-1 rounded-full"><span class="material-symbols-outlined text-[14px] text-tertiary-container">verified_user</span><span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">LGPD Auditada</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-low p-1 rounded-lg"><button class="px-space-sm py-1 flex items-center gap-1 rounded font-label-sm text-label-sm text-secondary hover:bg-surface-container hover:text-on-surface transition-colors" title="Exportar Relatório Excel"><span class="material-symbols-outlined text-[16px]">description</span>XLSX</button><button class="px-space-sm py-1 flex items-center gap-1 rounded font-label-sm text-label-sm text-secondary hover:bg-surface-container hover:text-on-surface transition-colors" title="Exportar Relatório PDF"><span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>PDF</button></div><button class="relative p-2 rounded-lg text-secondary hover:bg-surface-container transition-colors" title="Notificações e Desvios"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span></button><div class="h-6 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm"><div class="flex flex-col text-right hidden sm:flex"><span class="font-label-md text-label-md text-on-surface font-semibold">Eng. Roberto Mendes</span><span class="font-label-sm text-label-sm text-on-surface-variant">Gerente de Planta • G&G</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl0sKN7n6Zmynx1nuPzjQC9nngSMxRbX9F9wckHmtAs52GyGf2iDBxYCQ8nLAbnEiGQvAO4LcrrYXWeGHs2lc64kvOFJHVP0HIyq653lyI0OhAIO0Mr-1rSG637rbRFPwhhdty0hYMX7Ol_e2cPd8WYjdk6U553ussz-VHS7lUBDDeVJJ-zgjbeveKiID9JvxOCg2eMnqzBOJLMpiEgL1-4FL4k1dQn0WtKEs3pEQ"/></div></div></header><main class="flex-1 w-full pt-16 px-gutter-desktop pb-margin-desktop bg-surface"><div class="flex flex-col w-full space-y-space-lg">
+<!-- TOPO: GOVERNANÇA & FILTROS ESTRATÉGICOS -->
+<section class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+<div class="space-y-space-xs">
+<div class="flex items-center gap-space-xs text-secondary font-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Planta Industrial KBA1 • Governança Corporativa de Gente</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight">
+        Painel de Indicadores de Gente & Gestão — Matriz Oficial de Metas
+      </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+        Acompanhamento por Nível de Entrega: <strong class="text-on-surface font-semibold">Meta 1 (Básica)</strong> | <strong class="text-secondary font-semibold">Meta 3 (Esperada)</strong> | <strong class="text-tertiary-container font-semibold">Meta 5 (Excelência)</strong>.
+      </p>
+</div>
+<!-- Ações de Governança -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<button class="h-9 px-space-md bg-surface-container-low hover:bg-surface-container text-secondary font-label-md rounded-lg flex items-center gap-space-xs transition-colors" id="btnAuditarFormulas">
+<span class="material-symbols-outlined text-[18px]">functions</span>
+<span>Auditar Fórmulas</span>
+</button>
+<div class="relative inline-block text-left">
+<button class="h-9 px-space-md bg-primary-container text-on-primary hover:bg-secondary font-label-md rounded-lg flex items-center gap-space-xs transition-colors shadow-sm" id="btnExportarMatriz">
+<span class="material-symbols-outlined text-[18px]">ios_share</span>
+<span>Exportar Matriz</span>
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</div>
+</div>
+</section>
+<!-- BARRA DE FILTROS & INTEGRIDADE -->
+<section class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-space-md">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm flex-1">
+<!-- Competência -->
+<div class="bg-surface-container-low px-space-sm py-1.5 rounded-lg flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[18px]">calendar_today</span>
+<div class="flex flex-col flex-1">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Competência</span>
+<select class="bg-transparent font-label-md text-label-md text-on-surface font-semibold focus:outline-none cursor-pointer">
+<option selected="">Maio / 2024</option>
+<option>Abril / 2024</option>
+<option>Março / 2024</option>
+<option>Fevereiro / 2024</option>
+</select>
+</div>
+</div>
+<!-- Macroárea -->
+<div class="bg-surface-container-low px-space-sm py-1.5 rounded-lg flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[18px]">account_tree</span>
+<div class="flex flex-col flex-1">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Macroárea Fabril</span>
+<select class="bg-transparent font-label-md text-label-md text-on-surface font-semibold focus:outline-none cursor-pointer" id="filtroArea">
+<option value="todas">Todas as Unidades (Geral KBA1)</option>
+<option value="onduladeira">Linha Onduladeira</option>
+<option value="conversao">Linhas de Conversão / FFG</option>
+<option value="logistica">Expedição e Logística</option>
+<option value="suporte">Manutenção & Qualidade</option>
+</select>
+</div>
+</div>
+<!-- Responsável -->
+<div class="bg-surface-container-low px-space-sm py-1.5 rounded-lg flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[18px]">person</span>
+<div class="flex flex-col flex-1">
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Líder / Responsável</span>
+<select class="bg-transparent font-label-md text-label-md text-on-surface font-semibold focus:outline-none cursor-pointer" id="filtroResponsavel">
+<option value="todos">Todos os Responsáveis</option>
+<option value="mariana">Mariana Valadares (G&G)</option>
+<option value="thiago">Thiago Andrade (BP Industrial)</option>
+<option value="bianca">Bianca Rios (DHO / SESMT)</option>
+<option value="gerencia">Gerência Industrial</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Tag de Regra e Status do Semáforo -->
+<div class="flex items-center gap-space-sm self-end xl:self-center bg-surface-container-low px-space-md py-2 rounded-lg">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-[#10b981]"></span>
+<span class="font-label-sm text-on-surface-variant">Meta Atingida</span>
+</div>
+<div class="flex items-center gap-1.5 ml-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></span>
+<span class="font-label-sm text-on-surface-variant">Atenção</span>
+</div>
+<div class="flex items-center gap-1.5 ml-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#ef4444]"></span>
+<span class="font-label-sm text-on-surface-variant">Desvio Crítico</span>
+</div>
+<div class="flex items-center gap-1.5 ml-2">
+<span class="w-2.5 h-2.5 rounded-full bg-outline-variant"></span>
+<span class="font-label-sm text-on-surface-variant">Sem Dados / N.A.</span>
+</div>
+</div>
+</section>
+<!-- RESUMO ESTRATÉGICO DOS 9 INDICADORES (KPI TILES RESUMIDOS) -->
+<section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-space-sm">
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
+<span class="font-label-sm text-on-surface-variant block truncate">Indicadores Oficiais</span>
+<span class="font-metric-lg text-metric-lg text-primary font-bold">9</span>
+<span class="font-label-sm text-[11px] text-secondary">Matriz 100% Homologada</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
+<span class="font-label-sm text-on-surface-variant block truncate">Meta 5 Superada</span>
+<span class="font-metric-lg text-metric-lg text-[#047857] font-bold">3 <span class="text-sm font-normal text-on-surface-variant">/ 9</span></span>
+<span class="font-label-sm text-[11px] text-[#047857]">Nível Excelência</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
+<span class="font-label-sm text-on-surface-variant block truncate">Meta 3 Cumprida</span>
+<span class="font-metric-lg text-metric-lg text-[#047857] font-bold">4 <span class="text-sm font-normal text-on-surface-variant">/ 9</span></span>
+<span class="font-label-sm text-[11px] text-[#047857]">Padrão Esperado</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
+<span class="font-label-sm text-on-surface-variant block truncate">Em Atenção / Risco</span>
+<span class="font-metric-lg text-metric-lg text-[#b45309] font-bold">1 <span class="text-sm font-normal text-on-surface-variant">/ 9</span></span>
+<span class="font-label-sm text-[11px] text-[#b45309]">H.E. Operacional</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
+<span class="font-label-sm text-on-surface-variant block truncate">Desvio Crítico</span>
+<span class="font-metric-lg text-metric-lg text-[#b91c1c] font-bold">0 <span class="text-sm font-normal text-on-surface-variant">/ 9</span></span>
+<span class="font-label-sm text-[11px] text-[#047857]">Conformidade Geral</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
+<span class="font-label-sm text-on-surface-variant block truncate">Ciclos Periódicos</span>
+<span class="font-metric-lg text-metric-lg text-outline font-bold">1 <span class="text-sm font-normal text-on-surface-variant">/ 9</span></span>
+<span class="font-label-sm text-[11px] text-outline">Sem Apuração no Mês</span>
+</div>
+</section>
+<!-- BENTO GRID DE CARDS ANALÍTICOS DETALHADOS (OS 9 INDICADORES) -->
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-space-md">
+<!-- CARD 1: Taxa de Absenteísmo Global (%) -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-space-xs mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<span class="font-label-sm text-secondary font-bold tracking-wider uppercase">01 • Absenteísmo</span>
+</div>
+<span class="px-2 py-0.5 rounded text-label-sm font-medium bg-[#ecfdf5] text-[#065f46]">
+            Meta 3 Atingida
+          </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+          Taxa de Absenteísmo Global
+        </h2>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm mt-0.5">
+<span>Mariana Valadares (G&G)</span>
+<span class="font-medium text-secondary">Unidade: %</span>
+</div>
+<!-- Valor Principal Realizado -->
+<div class="mt-space-md flex items-baseline justify-between">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-metric-xl text-metric-xl font-bold text-on-surface">2,40%</span>
+<span class="font-label-sm text-[#065f46] font-semibold flex items-center">
+<span class="material-symbols-outlined text-[16px]">arrow_drop_down</span> -0,10 p.p. vs M3
+            </span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-outline block">Tendência 6M</span>
+<span class="font-label-sm font-semibold text-on-surface">Em queda (-0,4 p.p.)</span>
+</div>
+</div>
+<!-- Mini Sparkline SVG -->
+<div class="mt-space-sm h-12 w-full flex items-end">
+<svg class="w-full h-10 overflow-visible" preserveaspectratio="none" viewbox="0 0 240 40">
+<path d="M 0 32 L 48 28 L 96 18 L 144 22 L 192 12 L 240 12" fill="none" stroke="#10b981" stroke-linecap="round" stroke-width="2.5"></path>
+<circle cx="240" cy="12" fill="#10b981" r="3.5"></circle>
+</svg>
+</div>
+</div>
+<!-- Réguas de Metas 1, 3 e 5 -->
+<div class="mt-space-md pt-space-sm bg-surface-container-low p-space-sm rounded-lg space-y-1.5">
+<div class="flex items-center justify-between font-label-sm">
+<span class="text-on-surface-variant">Meta 1 (Básica): <strong class="text-on-surface font-semibold">3,00%</strong></span>
+<span class="text-secondary font-semibold">Meta 3 (Esperada): 2,50%</span>
+<span class="text-tertiary-container font-semibold">Meta 5 (Excelência): 1,80%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden flex">
+<div class="bg-[#10b981] h-full" style="width: 82%;"></div>
+</div>
+<span class="font-body-sm text-[11px] text-outline block text-right">Histórico: 2.8 → 2.7 → 2.5 → 2.6 → 2.4 → 2.4%</span>
+</div>
+</article>
+<!-- CARD 2: Total de Horas de Ausência (Horas) -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-space-xs mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<span class="font-label-sm text-secondary font-bold tracking-wider uppercase">02 • Ausências</span>
+</div>
+<span class="px-2 py-0.5 rounded text-label-sm font-medium bg-[#ecfdf5] text-[#065f46]">
+            Favorável (-110h)
+          </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+          Total de Horas de Ausência
+        </h2>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm mt-0.5">
+<span>Mariana Valadares (G&G)</span>
+<span class="font-medium text-secondary">Unidade: Horas</span>
+</div>
+<div class="mt-space-md flex items-baseline justify-between">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-metric-xl text-metric-xl font-bold text-on-surface">1.840h</span>
+<span class="font-label-sm text-[#065f46] font-semibold flex items-center">
+<span class="material-symbols-outlined text-[16px]">arrow_drop_down</span> -110h vs M3
+            </span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-outline block">Impacto Planta</span>
+<span class="font-label-sm font-semibold text-on-surface">Abaixo do teto crítico</span>
+</div>
+</div>
+<div class="mt-space-sm h-12 w-full flex items-end">
+<svg class="w-full h-10 overflow-visible" preserveaspectratio="none" viewbox="0 0 240 40">
+<path d="M 0 35 L 48 30 L 96 26 L 144 28 L 192 18 L 240 14" fill="none" stroke="#10b981" stroke-linecap="round" stroke-width="2.5"></path>
+<circle cx="240" cy="14" fill="#10b981" r="3.5"></circle>
+</svg>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-low p-space-sm rounded-lg space-y-1.5">
+<div class="flex items-center justify-between font-label-sm">
+<span class="text-on-surface-variant">M1: <strong class="text-on-surface">2.300h</strong></span>
+<span class="text-secondary font-semibold">M3: 1.950h</span>
+<span class="text-tertiary-container font-semibold">M5: 1.400h</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#10b981] h-full" style="width: 78%;"></div>
+</div>
+<span class="font-body-sm text-[11px] text-outline block text-right">Inclui atestados médicos, atrasos legais e faltas</span>
+</div>
+</article>
+<!-- CARD 3: Horas Extras sobre Folha Operacional (%) -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-space-xs mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+<span class="font-label-sm text-[#b45309] font-bold tracking-wider uppercase">03 • Horas Extras</span>
+</div>
+<span class="px-2 py-0.5 rounded text-label-sm font-medium bg-[#fffbeb] text-[#92400e]">
+            Atenção (+0,15 p.p.)
+          </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+          H.E. sobre Folha Operacional
+        </h2>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm mt-0.5">
+<span>Gerência Industrial / G&G</span>
+<span class="font-medium text-secondary">Unidade: %</span>
+</div>
+<div class="mt-space-md flex items-baseline justify-between">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-metric-xl text-metric-xl font-bold text-on-surface">4,15%</span>
+<span class="font-label-sm text-[#b45309] font-semibold flex items-center">
+<span class="material-symbols-outlined text-[16px]">arrow_drop_up</span> +0,15 p.p. vs M3
+            </span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-outline block">Status</span>
+<span class="font-label-sm font-semibold text-[#b45309]">Entre Meta 1 e Meta 3</span>
+</div>
+</div>
+<div class="mt-space-sm h-12 w-full flex items-end">
+<svg class="w-full h-10 overflow-visible" preserveaspectratio="none" viewbox="0 0 240 40">
+<path d="M 0 10 L 48 15 L 96 22 L 144 18 L 192 25 L 240 28" fill="none" stroke="#f59e0b" stroke-linecap="round" stroke-width="2.5"></path>
+<circle cx="240" cy="28" fill="#f59e0b" r="3.5"></circle>
+</svg>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-low p-space-sm rounded-lg space-y-1.5">
+<div class="flex items-center justify-between font-label-sm">
+<span class="text-on-surface-variant">M1: <strong class="text-on-surface">5,50%</strong></span>
+<span class="text-secondary font-semibold">M3: 4,00%</span>
+<span class="text-tertiary-container font-semibold">M5: 3,00%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#f59e0b] h-full" style="width: 65%;"></div>
+</div>
+<span class="font-body-sm text-[11px] text-outline block text-right">Pressão pontual no Turno T3 (Onduladeira KBA1)</span>
+</div>
+</article>
+<!-- CARD 4: Índice de Turnover / Rotatividade (%) -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-space-xs mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<span class="font-label-sm text-secondary font-bold tracking-wider uppercase">04 • Rotatividade</span>
+</div>
+<span class="px-2 py-0.5 rounded text-label-sm font-medium bg-[#ecfdf5] text-[#065f46]">
+            Favorável (-0,27 p.p.)
+          </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+          Índice de Turnover Global
+        </h2>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm mt-0.5">
+<span>Thiago Andrade (BP Industrial)</span>
+<span class="font-medium text-secondary">Unidade: %</span>
+</div>
+<div class="mt-space-md flex items-baseline justify-between">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-metric-xl text-metric-xl font-bold text-on-surface">1,23%</span>
+<span class="font-label-sm text-[#065f46] font-semibold flex items-center">
+<span class="material-symbols-outlined text-[16px]">arrow_drop_down</span> -0,27 p.p. vs M3
+            </span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-outline block">Efetivo Base</span>
+<span class="font-label-sm font-semibold text-on-surface">487 colaboradores</span>
+</div>
+</div>
+<div class="mt-space-sm h-12 w-full flex items-end">
+<svg class="w-full h-10 overflow-visible" preserveaspectratio="none" viewbox="0 0 240 40">
+<path d="M 0 30 L 48 24 L 96 20 L 144 15 L 192 16 L 240 10" fill="none" stroke="#10b981" stroke-linecap="round" stroke-width="2.5"></path>
+<circle cx="240" cy="10" fill="#10b981" r="3.5"></circle>
+</svg>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-low p-space-sm rounded-lg space-y-1.5">
+<div class="flex items-center justify-between font-label-sm">
+<span class="text-on-surface-variant">M1: <strong class="text-on-surface">2,00%</strong></span>
+<span class="text-secondary font-semibold">M3: 1,50%</span>
+<span class="text-tertiary-container font-semibold">M5: 1,00%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#10b981] h-full" style="width: 88%;"></div>
+</div>
+<span class="font-body-sm text-[11px] text-outline block text-right">6 desligamentos totais apurados em Maio/24</span>
+</div>
+</article>
+<!-- CARD 5: Admissões no Mês (Headcount) -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-space-xs mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<span class="font-label-sm text-secondary font-bold tracking-wider uppercase">05 • Admissões</span>
+</div>
+<span class="px-2 py-0.5 rounded text-label-sm font-medium bg-[#ecfdf5] text-[#065f46]">
+            100% Planejado
+          </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+          Admissões e Contratações
+        </h2>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm mt-0.5">
+<span>Thiago Andrade (R&S)</span>
+<span class="font-medium text-secondary">Unidade: Headcount</span>
+</div>
+<div class="mt-space-md flex items-baseline justify-between">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-metric-xl text-metric-xl font-bold text-on-surface">8</span>
+<span class="font-label-sm text-on-surface-variant">admitidos</span>
+<span class="font-label-sm text-[#065f46] font-semibold flex items-center ml-1">
+              (Meta 3 atingida)
+            </span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-outline block">SLA de Reposição</span>
+<span class="font-label-sm font-semibold text-on-surface">22 dias médios</span>
+</div>
+</div>
+<div class="mt-space-sm h-12 w-full flex items-end">
+<svg class="w-full h-10 overflow-visible" preserveaspectratio="none" viewbox="0 0 240 40">
+<path d="M 0 20 L 48 24 L 96 16 L 144 20 L 192 14 L 240 16" fill="none" stroke="#10b981" stroke-linecap="round" stroke-width="2.5"></path>
+<circle cx="240" cy="16" fill="#10b981" r="3.5"></circle>
+</svg>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-low p-space-sm rounded-lg space-y-1.5">
+<div class="flex items-center justify-between font-label-sm">
+<span class="text-on-surface-variant">M1: <strong class="text-on-surface">Plan. 10</strong></span>
+<span class="text-secondary font-semibold">M3: Plan. 8</span>
+<span class="text-tertiary-container font-semibold">M5: Plan. 8</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#10b981] h-full" style="width: 100%;"></div>
+</div>
+<span class="font-body-sm text-[11px] text-outline block text-right">Reposição exata do turnover e expansão técnica</span>
+</div>
+</article>
+<!-- CARD 6: Desligamentos no Mês (Headcount com motivo) -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-space-xs mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<span class="font-label-sm text-secondary font-bold tracking-wider uppercase">06 • Desligamentos</span>
+</div>
+<span class="px-2 py-0.5 rounded text-label-sm font-medium bg-[#ecfdf5] text-[#065f46]">
+            Sob Controle
+          </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+          Desligamentos e Motivos
+        </h2>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm mt-0.5">
+<span>Thiago Andrade (BP Industrial)</span>
+<span class="font-medium text-secondary">Unidade: Headcount</span>
+</div>
+<div class="mt-space-md flex items-baseline justify-between">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-metric-xl text-metric-xl font-bold text-on-surface">6</span>
+<span class="font-label-sm text-on-surface-variant">demissões</span>
+<span class="font-label-sm text-[#065f46] font-semibold flex items-center ml-1">
+              ≤ M3 (Máx 7)
+            </span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-outline block">Abertura</span>
+<span class="font-label-sm font-semibold text-on-surface">4 Volunt. / 2 Involunt.</span>
+</div>
+</div>
+<div class="mt-space-sm h-12 w-full flex items-end">
+<svg class="w-full h-10 overflow-visible" preserveaspectratio="none" viewbox="0 0 240 40">
+<path d="M 0 14 L 48 18 L 96 14 L 144 26 L 192 20 L 240 18" fill="none" stroke="#10b981" stroke-linecap="round" stroke-width="2.5"></path>
+<circle cx="240" cy="18" fill="#10b981" r="3.5"></circle>
+</svg>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-low p-space-sm rounded-lg space-y-1.5">
+<div class="flex items-center justify-between font-label-sm">
+<span class="text-on-surface-variant">M1: <strong class="text-on-surface">Máx 10</strong></span>
+<span class="text-secondary font-semibold">M3: Máx 7</span>
+<span class="text-tertiary-container font-semibold">M5: Máx 5</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#10b981] h-full" style="width: 85%;"></div>
+</div>
+<span class="font-body-sm text-[11px] text-outline block text-right">Entrevistas de desligamento: 100% auditadas</span>
+</div>
+</article>
+<!-- CARD 7: Média de Horas de Treinamento por Colaborador -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-space-xs mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<span class="font-label-sm text-secondary font-bold tracking-wider uppercase">07 • Capacitação DHO</span>
+</div>
+<span class="px-2 py-0.5 rounded text-label-sm font-medium bg-[#ecfdf5] text-[#065f46]">
+            Superou Meta 3 (+0,80h)
+          </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+          Horas de Treinamento / Colab.
+        </h2>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm mt-0.5">
+<span>Bianca Rios (DHO)</span>
+<span class="font-medium text-secondary">Unidade: Horas/Homem</span>
+</div>
+<div class="mt-space-md flex items-baseline justify-between">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-metric-xl text-metric-xl font-bold text-on-surface">4,80h</span>
+<span class="font-label-sm text-[#065f46] font-semibold flex items-center">
+<span class="material-symbols-outlined text-[16px]">arrow_drop_up</span> +0,80h vs M3
+            </span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-outline block">Quase Meta 5</span>
+<span class="font-label-sm font-semibold text-tertiary-container">96% da M5 (5,0h)</span>
+</div>
+</div>
+<div class="mt-space-sm h-12 w-full flex items-end">
+<svg class="w-full h-10 overflow-visible" preserveaspectratio="none" viewbox="0 0 240 40">
+<path d="M 0 30 L 48 26 L 96 22 L 144 16 L 192 12 L 240 6" fill="none" stroke="#10b981" stroke-linecap="round" stroke-width="2.5"></path>
+<circle cx="240" cy="6" fill="#10b981" r="3.5"></circle>
+</svg>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-low p-space-sm rounded-lg space-y-1.5">
+<div class="flex items-center justify-between font-label-sm">
+<span class="text-on-surface-variant">M1: <strong class="text-on-surface">3,5h</strong></span>
+<span class="text-secondary font-semibold">M3: 4,0h</span>
+<span class="text-tertiary-container font-semibold">M5: 5,0h</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#10b981] h-full" style="width: 95%;"></div>
+</div>
+<span class="font-body-sm text-[11px] text-outline block text-right">Intensificação das trilhas de operação de onduladeira</span>
+</div>
+</article>
+<!-- CARD 8: Treinamentos Legais e Normas Regulamentadoras (NRs) -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-space-xs mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<span class="font-label-sm text-secondary font-bold tracking-wider uppercase">08 • Compliance NRs</span>
+</div>
+<span class="px-2 py-0.5 rounded text-label-sm font-medium bg-[#ecfdf5] text-[#065f46]">
+            Conforme (+0,20 p.p.)
+          </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+          Treinamentos Legais & NRs
+        </h2>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm mt-0.5">
+<span>Bianca Rios / SESMT</span>
+<span class="font-medium text-secondary">Unidade: % Cobertura</span>
+</div>
+<div class="mt-space-md flex items-baseline justify-between">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-metric-xl text-metric-xl font-bold text-on-surface">98,20%</span>
+<span class="font-label-sm text-[#065f46] font-semibold flex items-center">
+<span class="material-symbols-outlined text-[16px]">arrow_drop_up</span> +0,20 p.p. vs M3
+            </span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-outline block">Vencimentos 30d</span>
+<span class="font-label-sm font-semibold text-on-surface">Zero NRs vencidas</span>
+</div>
+</div>
+<div class="mt-space-sm h-12 w-full flex items-end">
+<svg class="w-full h-10 overflow-visible" preserveaspectratio="none" viewbox="0 0 240 40">
+<path d="M 0 16 L 48 18 L 96 12 L 144 14 L 192 10 L 240 8" fill="none" stroke="#10b981" stroke-linecap="round" stroke-width="2.5"></path>
+<circle cx="240" cy="8" fill="#10b981" r="3.5"></circle>
+</svg>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-low p-space-sm rounded-lg space-y-1.5">
+<div class="flex items-center justify-between font-label-sm">
+<span class="text-on-surface-variant">M1: <strong class="text-on-surface">95,0%</strong></span>
+<span class="text-secondary font-semibold">M3: 98,0%</span>
+<span class="text-tertiary-container font-semibold">M5: 100,0%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-[#10b981] h-full" style="width: 98%;"></div>
+</div>
+<span class="font-body-sm text-[11px] text-outline block text-right">NR-12 (Máquinas), NR-11 (Movimentação) e NR-35</span>
+</div>
+</article>
+<!-- CARD 9: Aderência à Avaliação de Competências (REGRA RESTRITA: DADO NÃO APURADO / SEM DADOS) -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-space-xs mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+<span class="font-label-sm text-outline font-bold tracking-wider uppercase">09 • Avaliação & Liderança</span>
+</div>
+<span class="px-2 py-0.5 rounded text-label-sm font-medium bg-[#f1f5f9] text-[#475569]">
+            Ciclo Semestral
+          </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+          Avaliação de Competências
+        </h2>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm mt-0.5">
+<span>Bianca Rios (DHO)</span>
+<span class="font-medium text-secondary">Unidade: % Ciclos</span>
+</div>
+<!-- Exibição Estrita de Dado Inexistente: Traço '-' e Tag Sem dados -->
+<div class="mt-space-md flex items-baseline justify-between">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-metric-xl text-metric-xl font-bold text-outline">-</span>
+<span class="font-label-sm text-outline italic">
+              Não apurado nesta competência
+            </span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-outline block">Próxima Coleta</span>
+<span class="font-label-sm font-semibold text-secondary">Julho / 2024</span>
+</div>
+</div>
+<!-- Placeholder neutro de periodicidade -->
+<div class="mt-space-sm h-12 w-full flex items-center justify-center bg-surface-container-low rounded">
+<span class="font-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">hourglass_empty</span>
+            Apuração programada semestralmente
+          </span>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm bg-surface-container-low p-space-sm rounded-lg space-y-1.5">
+<div class="flex items-center justify-between font-label-sm">
+<span class="text-outline">M1: 85,0%</span>
+<span class="text-outline">M3: 92,0%</span>
+<span class="text-outline">M5: 98,0%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-outline-variant h-full" style="width: 0%;"></div>
+</div>
+<span class="font-body-sm text-[11px] text-outline block text-right">Governança: Não forçar 0 ou fictícios</span>
+</div>
+</article>
+</section>
+<!-- TABELA CONSOLIDADA EXECUTIVA DA MATRIZ OFICIAL -->
+<section class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<div class="px-space-lg py-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm bg-surface-container-low">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-semibold flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary">table_view</span>
+          Matriz Consolidada dos 9 Indicadores Corporativos
+        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Visão tabulada com réguas de metas, realizado apurado e sinalização de semáforo corporativo.
+        </p>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-on-surface-variant font-medium">Ordem:</span>
+<span class="px-2 py-1 bg-surface-container-lowest text-secondary font-label-sm font-semibold rounded">
+          Prioridade Estratégica G&G
+        </span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-md text-on-surface">
+<thead class="bg-surface-container-lowest font-label-sm text-on-surface-variant uppercase tracking-wider text-[11px]">
+<tr>
+<th class="py-3 px-space-md font-semibold">Indicador & Responsável</th>
+<th class="py-3 px-space-sm font-semibold text-center">Unid.</th>
+<th class="py-3 px-space-sm font-semibold text-right">Meta 1 (Básica)</th>
+<th class="py-3 px-space-sm font-semibold text-right text-secondary">Meta 3 (Padrão)</th>
+<th class="py-3 px-space-sm font-semibold text-right text-tertiary-container">Meta 5 (Desafio)</th>
+<th class="py-3 px-space-sm font-semibold text-right">Realizado (Mai/24)</th>
+<th class="py-3 px-space-sm font-semibold text-right">GAP vs Meta 3</th>
+<th class="py-3 px-space-md font-semibold text-center">Status Semântico</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low font-label-md text-label-md">
+<!-- Linha 1 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<div>
+<span class="font-semibold text-on-surface block">Taxa de Absenteísmo Global</span>
+<span class="font-body-sm text-[11px] text-outline">Mariana Valadares • G&G</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-center text-outline font-medium">%</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-on-surface">3,00%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-secondary">2,50%</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-tertiary-container font-semibold">1,80%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-bold text-on-surface">2,40%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-[#047857]">-0,10 p.p.</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-semibold bg-[#ecfdf5] text-[#065f46]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span> Meta 3 Cumprida
+              </span>
+</td>
+</tr>
+<!-- Linha 2 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<div>
+<span class="font-semibold text-on-surface block">Total de Horas de Ausência</span>
+<span class="font-body-sm text-[11px] text-outline">Mariana Valadares • G&G</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-center text-outline font-medium">Horas</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-on-surface">2.300h</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-secondary">1.950h</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-tertiary-container font-semibold">1.400h</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-bold text-on-surface">1.840h</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-[#047857]">-110h</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-semibold bg-[#ecfdf5] text-[#065f46]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span> Meta 3 Cumprida
+              </span>
+</td>
+</tr>
+<!-- Linha 3 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#f59e0b]"></span>
+<div>
+<span class="font-semibold text-on-surface block">Horas Extras s/ Folha Operacional</span>
+<span class="font-body-sm text-[11px] text-outline">Gerência Industrial / G&G</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-center text-outline font-medium">%</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-on-surface">5,50%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-secondary">4,00%</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-tertiary-container font-semibold">3,00%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-bold text-on-surface">4,15%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-[#b45309]">+0,15 p.p.</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-semibold bg-[#fffbeb] text-[#92400e]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span> Atenção (Desvio Leve)
+              </span>
+</td>
+</tr>
+<!-- Linha 4 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<div>
+<span class="font-semibold text-on-surface block">Índice de Turnover / Rotatividade</span>
+<span class="font-body-sm text-[11px] text-outline">Thiago Andrade • BP Industrial</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-center text-outline font-medium">%</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-on-surface">2,00%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-secondary">1,50%</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-tertiary-container font-semibold">1,00%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-bold text-on-surface">1,23%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-[#047857]">-0,27 p.p.</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-semibold bg-[#ecfdf5] text-[#065f46]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span> Meta 3 Cumprida
+              </span>
+</td>
+</tr>
+<!-- Linha 5 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<div>
+<span class="font-semibold text-on-surface block">Admissões no Mês</span>
+<span class="font-body-sm text-[11px] text-outline">Thiago Andrade • R&S</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-center text-outline font-medium">Headcount</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-on-surface">10</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-secondary">8</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-tertiary-container font-semibold">8</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-bold text-on-surface">8</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-[#047857]">0 (Exato)</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-semibold bg-[#ecfdf5] text-[#065f46]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span> Plano Cumprido
+              </span>
+</td>
+</tr>
+<!-- Linha 6 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<div>
+<span class="font-semibold text-on-surface block">Desligamentos no Mês</span>
+<span class="font-body-sm text-[11px] text-outline">Thiago Andrade • BP Industrial</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-center text-outline font-medium">Headcount</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-on-surface">≤ 10</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-secondary">≤ 7</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-tertiary-container font-semibold">≤ 5</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-bold text-on-surface">6</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-[#047857]">-1 (Favorável)</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-semibold bg-[#ecfdf5] text-[#065f46]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span> Limite Respeitado
+              </span>
+</td>
+</tr>
+<!-- Linha 7 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<div>
+<span class="font-semibold text-on-surface block">Média Horas Treinamento / Colaborador</span>
+<span class="font-body-sm text-[11px] text-outline">Bianca Rios • DHO</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-center text-outline font-medium">H/Homem</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-on-surface">3,50h</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-secondary">4,00h</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-tertiary-container font-semibold">5,00h</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-bold text-on-surface">4,80h</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-[#047857]">+0,80h</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-semibold bg-[#ecfdf5] text-[#065f46]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span> Superou Meta 3
+              </span>
+</td>
+</tr>
+<!-- Linha 8 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-[#10b981]"></span>
+<div>
+<span class="font-semibold text-on-surface block">Treinamentos Legais & NRs</span>
+<span class="font-body-sm text-[11px] text-outline">Bianca Rios • SESMT</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-center text-outline font-medium">% Cobertura</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-on-surface">95,0%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-secondary">98,0%</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-tertiary-container font-semibold">100,0%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-bold text-on-surface">98,20%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-[#047857]">+0,20 p.p.</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-semibold bg-[#ecfdf5] text-[#065f46]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10b981]"></span> Compliance OK
+              </span>
+</td>
+</tr>
+<!-- Linha 9: DADOS NÃO APURADOS (REGRA ESTRITA: TRAÇO '-' E TAG CINZA) -->
+<tr class="hover:bg-surface-container-low/60 transition-colors bg-surface-container-low/30">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+<div>
+<span class="font-semibold text-on-surface block">Aderência à Avaliação de Competências</span>
+<span class="font-body-sm text-[11px] text-outline">Bianca Rios • DHO</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-center text-outline font-medium">% Ciclos</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-outline">85,0%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-semibold text-outline">92,0%</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-outline font-semibold">98,0%</td>
+<td class="py-3 px-space-sm text-right tabular-nums font-bold text-outline">-</td>
+<td class="py-3 px-space-sm text-right tabular-nums text-outline italic">-</td>
+<td class="py-3 px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-medium bg-[#f1f5f9] text-[#475569]">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span> Não apurado nesta competência
+              </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- NOTA DE RODAPÉ DA MATRIZ -->
+<div class="p-space-sm bg-surface-container-low/50 flex flex-col sm:flex-row items-center justify-between text-outline font-body-sm text-[11px]">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">info</span>
+<span>A apuração da Avaliação de Competências é semestral (próximo fechamento em Julho/2024).</span>
+</div>
+<div>
+<span>Último recálculo: 31/05/2024 23:59 • Auditoria Interna KBA1</span>
+</div>
+</div>
+</section>
+<!-- MODAL / DRAWER DE AUDITORIA DE FÓRMULAS (INTERAÇÃO CLIENT-SIDE) -->
+<div class="fixed inset-0 bg-[#0a3641]/40 backdrop-blur-sm z-50 hidden items-center justify-center p-space-md" id="modalAuditoria">
+<div class="bg-surface-container-lowest max-w-2xl w-full rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-150">
+<div class="p-space-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[24px]">verified_user</span>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Auditoria de Fórmulas e Regras de Negócio</h3>
+<span class="font-label-sm text-on-surface-variant">Manual Oficial de Métricas G&G • Norma KBA1-DHO-2024</span>
+</div>
+</div>
+<button class="p-1 rounded-lg text-outline hover:bg-surface-container hover:text-on-surface" id="btnFecharModal">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-space-lg space-y-space-md max-h-[716px] overflow-y-auto">
+<div class="p-space-sm bg-surface-container-low rounded-lg space-y-1">
+<span class="font-label-sm font-semibold text-secondary">01 • Taxa de Absenteísmo Global (%)</span>
+<p class="font-body-sm text-on-surface">
+<strong>Fórmula:</strong> <code>(Total Horas de Ausência / Horas Homem Trabalhadas Teóricas) × 100</code>.<br/>
+            Considera faltas injustificadas, atestados CID e suspensões. Não deduz DSR.
+          </p>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded-lg space-y-1">
+<span class="font-label-sm font-semibold text-secondary">03 • Horas Extras s/ Folha Operacional (%)</span>
+<p class="font-body-sm text-on-surface">
+<strong>Fórmula:</strong> <code>(Total de H.E. 50% + 100% / Total de Horas Normais Trabalhadas) × 100</code>.<br/>
+            Apurado diretamente via espelho de ponto eletrônico Totvs do Turno T1, T2 e T3.
+          </p>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded-lg space-y-1">
+<span class="font-label-sm font-semibold text-secondary">04 • Índice de Turnover Global (%)</span>
+<p class="font-body-sm text-on-surface">
+<strong>Fórmula:</strong> <code>((Admissões + Desligamentos) / 2) / Headcount Médio Ativo × 100</code>.<br/>
+            Base KBA1 de 487 colaboradores ativos em 31/05/2024.
+          </p>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded-lg space-y-1">
+<span class="font-label-sm font-semibold text-secondary">09 • Avaliação de Competências (Periodicidade Semestral)</span>
+<p class="font-body-sm text-on-surface">
+<strong>Regra Estrita de Governança:</strong> Métrica de ciclo semestral. Nas competências intermitentes exibe-se <code>'-'</code> (Sem dados), sendo terminantemente vedada a imputação de 0% ou estimativas aleatórias.
+          </p>
+</div>
+</div>
+<div class="p-space-md bg-surface-container-low flex justify-end">
+<button class="h-9 px-space-md bg-primary-container text-on-primary font-label-md rounded-lg hover:bg-secondary transition-colors" id="btnFecharModalBottom">
+          Fechar Auditoria
+        </button>
+</div>
+</div>
+</div>
+<!-- SCRIPT PARA INTERAÇÕES LEVES -->
+<script>
+    (function () {
+      const modal = document.getElementById('modalAuditoria');
+      const btnOpen = document.getElementById('btnAuditarFormulas');
+      const btnClose = document.getElementById('btnFecharModal');
+      const btnCloseBottom = document.getElementById('btnFecharModalBottom');
+      const btnExport = document.getElementById('btnExportarMatriz');
+
+      function openModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      if (btnOpen) btnOpen.addEventListener('click', openModal);
+      if (btnClose) btnClose.addEventListener('click', closeModal);
+      if (btnCloseBottom) btnCloseBottom.addEventListener('click', closeModal);
+
+      if (modal) {
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) closeModal();
+        });
+      }
+
+      if (btnExport) {
+        btnExport.addEventListener('click', function () {
+          const originalText = btnExport.innerHTML;
+          btnExport.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span> Gerando PDF...';
+          setTimeout(function () {
+            btnExport.innerHTML = originalText;
+            alert('Matriz Oficial dos 9 Indicadores exportada com sucesso (KBA1_G&G_Maio2024.xlsx / .pdf).');
+          }, 800);
+        });
+      }
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest px-gutter-desktop py-space-sm shadow-[0_-1px_6px_rgba(0,0,0,0.02)] flex flex-wrap items-center justify-between text-on-surface-variant font-label-sm text-label-sm"><div><span>Planta KBA1 Papelão Ondulado • Sistema Integrado de Inteligência em Pessoas</span></div><div class="flex items-center gap-space-md"><span class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-[14px] text-tertiary-container">cloud_done</span>Base PAAH: Sincronizada às 06:00 (Turno T1)</span><span>Versão 2.4.0-PRN</span></div></footer></div></body></html>
+
+<!-- Absenteísmo & Movimentações — People Analytics KBA1 -->
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"primary-fixed":"#c1e9f7","surface-container":"#e5eeff","error-container":"#ffdad6","on-tertiary":"#ffffff","on-error-container":"#93000a","on-primary-fixed":"#001f27","surface-container-low":"#eff4ff","outline-variant":"#c1c8cb","secondary-fixed":"#b6ebfe","surface-container-lowest":"#ffffff","on-secondary":"#ffffff","tertiary-fixed":"#6ffbbe","on-secondary-fixed":"#001f28","on-tertiary-fixed-variant":"#005236","inverse-surface":"#213145","secondary":"#306576","error":"#ba1a1a","tertiary-container":"#003925","on-surface":"#0b1c30","on-primary-container":"#799fac","secondary-fixed-dim":"#9acee1","secondary-container":"#b3e8fb","on-error":"#ffffff","inverse-primary":"#a5cdda","surface-variant":"#d3e4fe","on-background":"#0b1c30","outline":"#71787b","surface-container-high":"#dce9ff","surface-dim":"#cbdbf5","surface-tint":"#3e6470","on-primary-fixed-variant":"#254c57","primary-container":"#0a3641","surface":"#f8f9ff","tertiary":"#002114","on-surface-variant":"#41484a","tertiary-fixed-dim":"#4edea3","on-secondary-fixed-variant":"#114d5d","surface-bright":"#f8f9ff","primary":"#002028","primary-fixed-dim":"#a5cdda","inverse-on-surface":"#eaf1ff","on-primary":"#ffffff","on-tertiary-container":"#00ae79","background":"#f8f9ff","on-secondary-container":"#34697a","on-tertiary-fixed":"#002113","surface-container-highest":"#d3e4fe"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-md":"1rem","gutter":"1rem","gutter-desktop":"1.5rem","margin":"1rem","space-xs":"0.25rem","space-lg":"1.5rem","space-sm":"0.5rem","space-xl":"2rem","margin-desktop":"2rem"},"fontFamily":{"display-lg":["Inter"],"body-md":["Inter"],"label-lg":["Inter"],"metric-lg":["Inter"],"headline-md":["Inter"],"headline-lg":["Inter"],"label-sm":["Inter"],"body-lg":["Inter"],"metric-xl":["Inter"],"headline-sm":["Inter"],"body-sm":["Inter"],"label-md":["Inter"],"headline-xl":["Inter"]},"fontSize":{"display-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"label-lg":["14px",{"lineHeight":"20px","fontWeight":"500"}],"metric-lg":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-md":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-lg":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"metric-xl":["30px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["14px",{"lineHeight":"20px","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"headline-xl":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-72 bg-primary-container z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="px-space-lg pt-space-lg pb-space-md"><div class="flex items-center gap-space-sm mb-space-sm"><img alt="Logo KBA1 People Analytics" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XIikFUihlbFi2vjNhoJ57ZPYXdndSh0-WXc5Qr4d39ERi4-0g4tt7ulPQcIqG-7IU3aMmCZwSdu_YYiD5KS2OVEhl5zddaFhmpHL8qgUKqniyTlQKi8tIMHwmjMUE7xKAqBWlCTfj92osuHvDfOnklFLmXpXQyE-2gTTAu7e8EaCu5C17wDSeSQVNyjZjBaYbOkLFPq7euEa3GqQx92tm8wOdKg1MrtC2GoIsTL5HF"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-primary tracking-tight">KBA1 Analytics</span><span class="font-label-sm text-label-sm text-on-primary-container tracking-wider uppercase">Papelão Ondulado</span></div></div><div class="bg-primary px-space-sm py-space-xs rounded-lg flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]">factory</span><span class="font-label-sm text-label-sm text-on-primary">KBA1 - Feira de Santana / BA</span></div><span class="h-2 w-2 rounded-full bg-tertiary-fixed animate-pulse"></span></div></div><nav class="flex-1 px-space-sm py-space-xs space-y-1" data-active-classes="bg-secondary text-on-secondary font-headline-sm border-l-4 border-tertiary-fixed shadow-sm"><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="visao-executiva" href="#"><span class="material-symbols-outlined text-[20px]">query_stats</span><span class="font-label-md text-label-md">Visão Executiva</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="quadro-de-pessoal" href="#"><span class="material-symbols-outlined text-[20px]">groups</span><span class="font-label-md text-label-md">Quadro de Pessoal</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="setores-e-turnos" href="#"><span class="material-symbols-outlined text-[20px]">schedule</span><span class="font-label-md text-label-md">Setores &amp; Turnos</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="indicadores-g-e-g" href="#"><span class="material-symbols-outlined text-[20px]">trending_up</span><span class="font-label-md text-label-md">Indicadores G&amp;G</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="treinamento-e-dho" href="#"><span class="material-symbols-outlined text-[20px]">school</span><span class="font-label-md text-label-md">Treinamento &amp; DHO</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="absenteismo-e-movimentacoes" href="#"><span class="material-symbols-outlined text-[20px]">transfer_within_a_station</span><span class="font-label-md text-label-md">Absenteísmo &amp; Movimentações</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="inteligencia-analitica" href="#"><span class="material-symbols-outlined text-[20px]">psychology</span><span class="font-label-md text-label-md">Inteligência Analítica</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="entrada-de-dados" href="#"><span class="material-symbols-outlined text-[20px]">table_chart</span><span class="font-label-md text-label-md">Entrada de Dados</span></a></nav></div><div class="p-space-md m-space-sm bg-primary rounded-xl"><div class="flex items-center justify-between mb-space-xs"><span class="font-label-sm text-label-sm text-primary-fixed-dim flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-tertiary-fixed-dim">verified</span>Integridade KBA1</span><span class="font-label-sm text-label-sm text-tertiary-fixed font-bold">100% OK</span></div><div class="w-full bg-primary-container h-1 rounded-full overflow-hidden"><div class="bg-tertiary-fixed h-full w-full"></div></div><p class="font-body-sm text-body-sm text-outline-variant mt-2">Sincronizado via ERP Totvs • Turno T1</p></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-1.5 rounded-lg"><span class="material-symbols-outlined text-secondary text-[18px]">pin_drop</span><span class="font-label-md text-label-md text-on-surface font-semibold">KBA1 - Feira de Santana (BA)</span><span class="material-symbols-outlined text-outline text-[16px]">lock</span></div><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded-lg"><span class="material-symbols-outlined text-outline text-[18px]">calendar_month</span><span class="font-label-md text-label-md text-on-surface">Competência:</span><select class="bg-transparent font-label-md text-label-md text-secondary font-semibold focus:outline-none cursor-pointer"><option>Outubro / 2024</option><option>Setembro / 2024</option><option>Agosto / 2024</option></select></div><div class="hidden xl:flex items-center gap-1.5 bg-surface-container-low text-secondary px-space-sm py-1 rounded-full"><span class="material-symbols-outlined text-[14px] text-tertiary-container">verified_user</span><span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">LGPD Auditada</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-low p-1 rounded-lg"><button class="px-space-sm py-1 flex items-center gap-1 rounded font-label-sm text-label-sm text-secondary hover:bg-surface-container hover:text-on-surface transition-colors" title="Exportar Relatório Excel"><span class="material-symbols-outlined text-[16px]">description</span>XLSX</button><button class="px-space-sm py-1 flex items-center gap-1 rounded font-label-sm text-label-sm text-secondary hover:bg-surface-container hover:text-on-surface transition-colors" title="Exportar Relatório PDF"><span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>PDF</button></div><button class="relative p-2 rounded-lg text-secondary hover:bg-surface-container transition-colors" title="Notificações e Desvios"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span></button><div class="h-6 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm"><div class="flex flex-col text-right hidden sm:flex"><span class="font-label-md text-label-md text-on-surface font-semibold">Eng. Roberto Mendes</span><span class="font-label-sm text-label-sm text-on-surface-variant">Gerente de Planta • G&amp;G</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl0sKN7n6Zmynx1nuPzjQC9nngSMxRbX9F9wckHmtAs52GyGf2iDBxYCQ8nLAbnEiGQvAO4LcrrYXWeGHs2lc64kvOFJHVP0HIyq653lyI0OhAIO0Mr-1rSG637rbRFPwhhdty0hYMX7Ol_e2cPd8WYjdk6U553ussz-VHS7lUBDDeVJJ-zgjbeveKiID9JvxOCg2eMnqzBOJLMpiEgL1-4FL4k1dQn0WtKEs3pEQ"/></div></div></header><main class="flex-1 w-full pt-16 px-gutter-desktop pb-margin-desktop bg-surface"><div class="flex flex-col w-full">
+<script>
+    (function () {
+      const navLinks = document.querySelectorAll('aside nav a');
+      navLinks.forEach((link) => {
+        if (link.getAttribute('data-path') === 'absenteismo-e-movimentacoes') {
+          link.className =
+            'flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg bg-secondary text-on-secondary font-headline-sm border-l-4 border-tertiary-fixed shadow-sm transition-colors group';
+          const icon = link.querySelector('.material-symbols-outlined');
+          if (icon) {
+            icon.style.fontVariationSettings = "'FILL' 1";
+          }
+        } else {
+          link.classList.remove(
+            'bg-secondary',
+            'text-on-secondary',
+            'font-headline-sm',
+            'border-l-4',
+            'border-tertiary-fixed',
+            'shadow-sm'
+          );
+        }
+      });
+    })();
+  </script>
+<!-- Subheader Operational Actions & Context -->
+<section class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md mb-space-lg">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Gente &amp; Gestão Industrial</span>
+<span class="text-outline-variant font-label-sm text-label-sm">•</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Unidade KBA1 Ondulado</span>
+<span class="text-outline-variant font-label-sm text-label-sm">•</span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-tertiary-container bg-surface-container px-2 py-0.5 rounded">
+<span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span>
+          Auditoria Médica Concluída
+        </span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Painel de Absenteísmo &amp; Movimentações</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Indicadores de disponibilidade fabril, dinâmica de turnos e fluxo de carreira técnica.</p>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm">
+<button class="px-space-md py-2 rounded bg-surface-container-low text-on-surface hover:bg-surface-container transition-colors shadow-sm flex items-center gap-2 font-label-md text-label-md" onclick="document.getElementById('modal-regras').classList.remove('hidden')">
+<span class="material-symbols-outlined text-[18px] text-secondary">tune</span>
+<span>Configurar Regras de Apuração</span>
+</button>
+<button class="px-space-md py-2 rounded bg-primary-container text-on-primary hover:bg-secondary transition-colors shadow-sm flex items-center gap-2 font-label-md text-label-md" onclick="alert('Exportando base sanitizada e anonimizada de CID-10 conforme resolução CFM &amp; LGPD...')">
+<span class="material-symbols-outlined text-[18px] text-tertiary-fixed-dim">health_and_safety</span>
+<span>Exportar CID-10 e Atestados</span>
+</button>
+</div>
+</section>
+<!-- 1. Executive Summary & KPIs -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-md mb-space-lg">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Taxa Geral de Absenteísmo</span>
+<span class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[16px]">percent</span>
+</span>
+</div>
+<div class="my-space-xs">
+<div class="flex items-baseline gap-2">
+<span class="font-metric-xl text-metric-xl text-on-surface">2,40%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">/ mês</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-on-tertiary-container font-semibold">
+<span class="material-symbols-outlined text-[14px]">trending_down</span> Meta ≤ 2,50%
+        </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">-0,18 p.p. vs Set</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-tertiary-container"></div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Horas Ausência no Mês</span>
+<span class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[16px]">timelapse</span>
+</span>
+</div>
+<div class="my-space-xs">
+<div class="flex items-baseline gap-1">
+<span class="font-metric-xl text-metric-xl text-on-surface">1.840</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant font-normal">horas</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-label-sm text-label-sm text-secondary font-medium">Equivalente a 10,4 colab. dia</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">488 ativos</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-secondary"></div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Índice Bradford Médio</span>
+<span class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary" title="Fórmula B = S² x D (Frequência vs Duração)">
+<span class="material-symbols-outlined text-[16px]">info</span>
+</span>
+</div>
+<div class="my-space-xs">
+<div class="flex items-baseline gap-2">
+<span class="font-metric-xl text-metric-xl text-on-surface">84</span>
+<span class="font-label-md text-label-md text-on-surface-variant">pts</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-on-primary-fixed-variant font-semibold">
+          Baixo Impacto Global
+        </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">&lt; 150 padrão</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-on-primary-fixed-variant"></div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Movimentações Internas</span>
+<span class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[16px]">sync_alt</span>
+</span>
+</div>
+<div class="my-space-xs">
+<div class="flex items-baseline gap-1">
+<span class="font-metric-xl text-metric-xl text-on-surface">12</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant font-normal">atos</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs font-label-sm text-label-sm">
+<span class="text-on-tertiary-container font-semibold">8 Promoções</span>
+<span class="text-on-surface-variant">4 Remanej. Turno</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-tertiary-fixed-dim"></div>
+</div>
+<!-- KPI 5 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Turnover Global KBA1</span>
+<span class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[16px]">exit_to_app</span>
+</span>
+</div>
+<div class="my-space-xs">
+<div class="flex items-baseline gap-2">
+<span class="font-metric-xl text-metric-xl text-on-surface">1,23%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">(6 deslig.)</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs font-label-sm text-label-sm">
+<span class="text-secondary font-medium">4 Voluntários</span>
+<span class="text-on-surface-variant">2 Involuntários</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-outline"></div>
+</div>
+</section>
+<!-- 2. Analytical Charts: 12-Month Trend & Operational Breakdown -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-space-lg">
+<!-- Main Historic Evolution Chart -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-md">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Evolução Histórica Comparativa (12 Meses)</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Curva de Absenteísmo real vs Turnover acumulado vs Meta contratada KBA1 (2,50%)</p>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span>Absenteísmo</span>
+</div>
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<span class="w-3 h-3 rounded-full bg-primary-fixed-dim"></span>
+<span>Turnover</span>
+</div>
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<span class="w-3 h-0.5 bg-error"></span>
+<span>Meta Limite (2,5%)</span>
+</div>
+</div>
+</div>
+<!-- SVG Visualization Chart -->
+<div class="w-full h-64 relative flex flex-col justify-end pt-4 pb-2">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 720 200">
+<defs>
+<lineargradient id="areaGradientAbs" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#306576" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#306576" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Horizontal Reference Gridlines -->
+<line stroke="#E5EEFF" stroke-width="1" x1="0" x2="720" y1="20" y2="20"></line>
+<line stroke="#E5EEFF" stroke-width="1" x1="0" x2="720" y1="70" y2="70"></line>
+<line stroke="#E5EEFF" stroke-width="1" x1="0" x2="720" y1="120" y2="120"></line>
+<line stroke="#E5EEFF" stroke-width="1" x1="0" x2="720" y1="170" y2="170"></line>
+<!-- Target Line 2.50% (mapped to y=88) -->
+<line stroke="#ba1a1a" stroke-dasharray="4 4" stroke-width="1.5" x1="0" x2="720" y1="88" y2="88"></line>
+<text fill="#ba1a1a" font-size="10" font-weight="600" text-anchor="end" x="680" y="82">Meta 2,50%</text>
+<!-- Turnover Bar Columns (12 months) -->
+<!-- X points: Nov(30), Dez(90), Jan(150), Fev(210), Mar(270), Abr(330), Mai(390), Jun(450), Jul(510), Ago(570), Set(630), Out(690) -->
+<rect fill="#c1e9f7" height="25" rx="2" width="16" x="22" y="145"></rect>
+<rect fill="#c1e9f7" height="30" rx="2" width="16" x="82" y="140"></rect>
+<rect fill="#c1e9f7" height="38" rx="2" width="16" x="142" y="132"></rect>
+<rect fill="#c1e9f7" height="32" rx="2" width="16" x="202" y="138"></rect>
+<rect fill="#c1e9f7" height="28" rx="2" width="16" x="262" y="142"></rect>
+<rect fill="#c1e9f7" height="35" rx="2" width="16" x="322" y="135"></rect>
+<rect fill="#c1e9f7" height="22" rx="2" width="16" x="382" y="148"></rect>
+<rect fill="#c1e9f7" height="30" rx="2" width="16" x="442" y="140"></rect>
+<rect fill="#c1e9f7" height="40" rx="2" width="16" x="502" y="130"></rect>
+<rect fill="#c1e9f7" height="26" rx="2" width="16" x="562" y="144"></rect>
+<rect fill="#c1e9f7" height="23" rx="2" width="16" x="622" y="147"></rect>
+<rect fill="#c1e9f7" height="24" rx="2" width="16" x="682" y="146"></rect>
+<!-- Absenteísmo Area + Curve Line -->
+<!-- Data Points: Nov:2.7%(80), Dez:2.9%(72), Jan:3.1%(62), Fev:2.8%(76), Mar:2.6%(84), Abr:2.4%(92), Mai:2.3%(96), Jun:2.6%(84), Jul:2.8%(76), Ago:2.7%(80), Set:2.58%(85), Out:2.40%(92) -->
+<polygon fill="url(#areaGradientAbs)" points="30,80 90,72 150,62 210,76 270,84 330,92 390,96 450,84 510,76 570,80 630,85 690,92 690,170 30,170"></polygon>
+<path d="M 30 80 L 90 72 L 150 62 L 210 76 L 270 84 L 330 92 L 390 96 L 450 84 L 510 76 L 570 80 L 630 85 L 690 92" fill="none" stroke="#306576" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<!-- Highlight current point Outubro -->
+<circle cx="690" cy="92" fill="#306576" r="5" stroke="#ffffff" stroke-width="2"></circle>
+<text fill="#002028" font-size="11" font-weight="700" text-anchor="middle" x="690" y="78">2,40%</text>
+<!-- Markers on past points -->
+<circle cx="150" cy="62" fill="#ba1a1a" r="3.5"></circle>
+<text fill="#ba1a1a" font-size="10" font-weight="600" text-anchor="middle" x="150" y="52">3,1% (Pico Jan)</text>
+</svg>
+<!-- X Axis Labels -->
+<div class="flex justify-between text-on-surface-variant font-label-sm text-label-sm pt-2">
+<span>Nov/23</span>
+<span>Dez</span>
+<span>Jan/24</span>
+<span>Fev</span>
+<span>Mar</span>
+<span>Abr</span>
+<span>Mai</span>
+<span>Jun</span>
+<span>Jul</span>
+<span>Ago</span>
+<span>Set</span>
+<span class="font-bold text-on-surface">Out/24</span>
+</div>
+</div>
+<!-- Historical Insight Sub-bar -->
+<div class="mt-space-md p-space-sm rounded-lg bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-tertiary-container">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface">
+<strong>Tendência de Estabilidade Operacional:</strong> Terceiro mês consecutivo em conformidade abaixo da meta corporativa de 2,50%.
+          </span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary uppercase font-semibold">PAAH Validado</span>
+</div>
+</div>
+<!-- Shifts & Operational Departments Comparison Split -->
+<div class="lg:col-span-4 flex flex-col gap-space-md">
+<!-- Turnos -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm">
+<div class="flex items-center justify-between mb-space-sm">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Absenteísmo por Turno</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ciclo circadiano &amp; escalas</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">routine</span>
+</div>
+<div class="space-y-space-sm">
+<!-- T1 -->
+<div>
+<div class="flex justify-between items-center text-label-sm font-label-sm mb-1">
+<span class="text-on-surface font-medium">T1 • Matutino (06h - 14h)</span>
+<span class="font-bold text-on-tertiary-container">1,8% • Normal</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-on-tertiary-container h-full rounded-full" style="width: 36%;"></div>
+</div>
+</div>
+<!-- T2 -->
+<div>
+<div class="flex justify-between items-center text-label-sm font-label-sm mb-1">
+<span class="text-on-surface font-medium">T2 • Vespertino (14h - 22h)</span>
+<span class="font-bold text-secondary">2,4% • Regular</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 48%;"></div>
+</div>
+</div>
+<!-- T3 (Atenção) -->
+<div class="p-2 rounded-lg bg-surface-container-low">
+<div class="flex justify-between items-center text-label-sm font-label-sm mb-1">
+<span class="text-on-surface font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-error">warning</span>
+                T3 • Noturno (22h - 06h)
+              </span>
+<span class="font-bold text-error">3,7% • Alerta</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden mb-1">
+<div class="bg-error h-full rounded-full" style="width: 74%;"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Sinalizado por fadiga e estresse circadiano na Conversão.</p>
+</div>
+</div>
+</div>
+<!-- Setores Fabris -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm">
+<div class="flex items-center justify-between mb-space-sm">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Índice por Área Fabril</h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Concentração no chão de fábrica</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">precision_manufacturing</span>
+</div>
+<div class="space-y-2.5">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface font-medium">Conversão &amp; Flexografia</span>
+<span class="font-bold text-error">3,1%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-error h-full" style="width: 62%;"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface font-medium">Onduladeira KBA1</span>
+<span class="font-bold text-secondary">2,8%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 56%;"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface font-medium">Expedição &amp; Logística</span>
+<span class="font-bold text-on-tertiary-container">1,9%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-on-tertiary-container h-full" style="width: 38%;"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface font-medium">Manutenção Geral</span>
+<span class="font-bold text-on-tertiary-container">1,4%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-on-tertiary-container h-full" style="width: 28%;"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface font-medium">Administrativo &amp; Apoio</span>
+<span class="font-bold text-on-tertiary-container">0,9%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-on-tertiary-container h-full" style="width: 18%;"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Tipologia de Afastamentos & Causas (LGPD & Sigilo Médico) -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-space-lg">
+<!-- Donut/Distribution Breakdown -->
+<div class="lg:col-span-6 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-md">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Distribuição de Horas de Ausência</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Classificação legal e temporal de perdas de jornada (Total: 1.840h)</p>
+</div>
+<span class="material-symbols-outlined text-secondary text-[22px]">donut_large</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md items-center my-space-xs">
+<!-- SVG Donut Chart -->
+<div class="relative flex items-center justify-center">
+<svg class="w-44 h-44 -rotate-90 transform" viewbox="0 0 100 100">
+<!-- Background track -->
+<circle cx="50" cy="50" fill="transparent" r="38" stroke="#eff4ff" stroke-width="14"></circle>
+<!-- Slice 1: Curta Duração (46%) -> 238.76 circumference -> 46% = 109.8 -->
+<circle cx="50" cy="50" fill="transparent" r="38" stroke="#0a3641" stroke-dasharray="109.8 238.76" stroke-dashoffset="0" stroke-width="14"></circle>
+<!-- Slice 2: >3 dias (28%) -> 28% = 66.85 -->
+<circle cx="50" cy="50" fill="transparent" r="38" stroke="#306576" stroke-dasharray="66.85 238.76" stroke-dashoffset="-109.8" stroke-width="14"></circle>
+<!-- Slice 3: Atrasos/Saídas (14%) -> 14% = 33.42 -->
+<circle cx="50" cy="50" fill="transparent" r="38" stroke="#a5cdda" stroke-dasharray="33.42 238.76" stroke-dashoffset="-176.65" stroke-width="14"></circle>
+<!-- Slice 4: Faltas Não Justificadas (12%) -> 12% = 28.65 -->
+<circle cx="50" cy="50" fill="transparent" r="38" stroke="#ba1a1a" stroke-dasharray="28.65 238.76" stroke-dashoffset="-210.07" stroke-width="14"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+<span class="font-headline-xl text-headline-xl text-on-surface">1.840</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Horas Totais</span>
+</div>
+</div>
+<!-- Legend and breakdown details -->
+<div class="space-y-3 font-label-md text-label-md">
+<div class="flex items-center justify-between p-1.5 rounded bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded bg-primary-container"></span>
+<span class="text-on-surface">Atestados &lt; 3 dias</span>
+</div>
+<span class="font-bold text-on-surface">46% (846h)</span>
+</div>
+<div class="flex items-center justify-between p-1.5 rounded bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded bg-secondary"></span>
+<span class="text-on-surface">Atestados &gt; 3 dias</span>
+</div>
+<span class="font-bold text-on-surface">28% (515h)</span>
+</div>
+<div class="flex items-center justify-between p-1.5 rounded bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded bg-inverse-primary"></span>
+<span class="text-on-surface">Atrasos &amp; Saídas</span>
+</div>
+<span class="font-bold text-on-surface">14% (258h)</span>
+</div>
+<div class="flex items-center justify-between p-1.5 rounded bg-error-container/40">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded bg-error"></span>
+<span class="text-on-error-container font-semibold">Faltas Injustificadas</span>
+</div>
+<span class="font-bold text-error">12% (221h)</span>
+</div>
+</div>
+</div>
+<div class="mt-space-sm pt-space-xs flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Fonte: Sistema Ponto Eletrônico &amp; Medicina Ocupacional KBA1</span>
+<span class="font-semibold text-secondary">Aderência Folha: 99,4%</span>
+</div>
+</div>
+<!-- CID-10 Aggregated Clusters (Strict LGPD compliant) -->
+<div class="lg:col-span-6 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-md">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface">Causas Médicas Primárias (Capítulos CID-10)</h2>
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container text-on-primary-fixed-variant uppercase font-semibold">LGPD Agregado</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Distribuição epidemiológica por morbidade fabril em outubro</p>
+</div>
+<span class="material-symbols-outlined text-secondary text-[22px]">medical_services</span>
+</div>
+<div class="space-y-space-md">
+<!-- CID 1: Osteomusculares (M00-M99) -->
+<div>
+<div class="flex justify-between items-center mb-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Capítulo XIII: Doenças osteomusculares e tecido conjuntivo</span>
+<span class="px-1.5 py-0.2 rounded text-label-sm font-label-sm bg-surface-container text-secondary font-mono">CID M00-M99</span>
+</div>
+<span class="font-bold text-on-surface font-label-md text-label-md">34%</span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 34%;"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Foco ergonômico: Ajuste de esteiras e elevação pneumática na alimentação das impressoras flexográficas.</p>
+</div>
+<!-- CID 2: Respiratórias (J00-J99) -->
+<div>
+<div class="flex justify-between items-center mb-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Capítulo X: Doenças do aparelho respiratório</span>
+<span class="px-1.5 py-0.2 rounded text-label-sm font-label-sm bg-surface-container text-secondary font-mono">CID J00-J99</span>
+</div>
+<span class="font-bold text-on-surface font-label-md text-label-md">26%</span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 26%;"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Síndromes gripais sazonais e afecções rinofaríngeas comuns à região de Feira de Santana.</p>
+</div>
+<!-- CID 3: Causas Externas (S00-T98) -->
+<div>
+<div class="flex justify-between items-center mb-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Capítulo XIX: Causas externas e acidentes fora do trabalho</span>
+<span class="px-1.5 py-0.2 rounded text-label-sm font-label-sm bg-surface-container text-secondary font-mono">CID S00-T98</span>
+</div>
+<span class="font-bold text-on-surface font-label-md text-label-md">12%</span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary-fixed-dim h-full rounded-full" style="width: 12%;"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Entorses em deslocamento domicílio-trabalho e práticas esportivas amadoras de fim de semana.</p>
+</div>
+<!-- CID 4: Outros agrupados -->
+<div>
+<div class="flex justify-between items-center mb-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Demais Capítulos Médicos Agrupados</span>
+<span class="px-1.5 py-0.2 rounded text-label-sm font-label-sm bg-surface-container text-on-surface-variant font-mono">Diversos</span>
+</div>
+<span class="font-bold text-on-surface font-label-md text-label-md">28%</span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-outline-variant h-full rounded-full" style="width: 28%;"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Gastroenterites, oftalmologia básica e consultas odontológicas preventivas abonadas.</p>
+</div>
+</div>
+<div class="mt-space-md p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">verified_user</span>
+          Proteção de Dados: Identificação individual blindada sob Resolução CFM 1.851/08
+        </span>
+<span class="font-label-sm text-label-sm font-semibold text-secondary">SESMT KBA1</span>
+</div>
+</div>
+</section>
+<!-- 4. Table of Internal Movements & Promotions -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm mb-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-md">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface">Painel de Movimentações Internas &amp; Promoções Operacionais</h2>
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container text-on-tertiary-container font-semibold">12 Eventos em Out/24</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Mobilidade horizontal e vertical de colaboradores da planta KBA1</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="relative">
+<span class="material-symbols-outlined text-outline text-[18px] absolute left-3 top-2.5">search</span>
+<input class="pl-9 pr-3 py-1.5 text-body-sm font-body-sm bg-surface-container-low rounded border-none focus:outline-none focus:ring-1 focus:ring-secondary w-64 text-on-surface" placeholder="Filtrar por colaborador ou cargo..." type="text"/>
+</div>
+<button class="px-space-sm py-1.5 rounded bg-surface-container-low text-secondary font-label-sm text-label-sm hover:bg-surface-container flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+<span>Filtros</span>
+</button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-2.5 px-3 rounded-l">Colaborador / Matrícula</th>
+<th class="py-2.5 px-3">Cargo de Origem</th>
+<th class="py-2.5 px-3">Novo Cargo Designado</th>
+<th class="py-2.5 px-3">Setor Fabril</th>
+<th class="py-2.5 px-3">Tipo de Movimento</th>
+<th class="py-2.5 px-3">Motivação Formalizada</th>
+<th class="py-2.5 px-3 rounded-r text-right">Data de Efeito</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm text-on-surface">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<span class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-sm text-label-sm font-semibold">AS</span>
+<div>
+<span class="font-semibold block text-on-surface">Ailton Santos da Silva</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">MAT-10482 • Turno T1</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">Auxiliar de Produção</td>
+<td class="py-3 px-3 font-semibold text-on-surface">Operador de Onduladeira I</td>
+<td class="py-3 px-3">Onduladeira</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container text-on-tertiary-container font-semibold">
+<span class="material-symbols-outlined text-[14px]">upgrade</span> Promoção
+              </span>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">Mérito Técnico pós-treinamento ENK (Nota 9,8)</td>
+<td class="py-3 px-3 text-right font-mono font-label-sm text-label-sm">01/10/2024</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<span class="w-7 h-7 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm font-semibold">ML</span>
+<div>
+<span class="font-semibold block text-on-surface">Marcos Lima Oliveira</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">MAT-09823 • Turno T2</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">Operador de Flexo Jr</td>
+<td class="py-3 px-3 font-semibold text-on-surface">Operador de Impressora Plena</td>
+<td class="py-3 px-3">Conversão / Flexo</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container text-on-tertiary-container font-semibold">
+<span class="material-symbols-outlined text-[14px]">upgrade</span> Promoção
+              </span>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">Substituição planejada por realocação</td>
+<td class="py-3 px-3 text-right font-mono font-label-sm text-label-sm">05/10/2024</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<span class="w-7 h-7 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-label-sm text-label-sm font-semibold">RF</span>
+<div>
+<span class="font-semibold block text-on-surface">Rodrigo F. Albuquerque</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">MAT-08112 • De T3 para T1</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">Mecânico Industrial II</td>
+<td class="py-3 px-3 font-semibold text-on-surface">Mecânico Industrial II</td>
+<td class="py-3 px-3">Manutenção Geral</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container text-secondary font-medium">
+<span class="material-symbols-outlined text-[14px]">sync_alt</span> Transferência
+              </span>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">Adequação ergonômica de turno solicitada pelo SESMT</td>
+<td class="py-3 px-3 text-right font-mono font-label-sm text-label-sm">10/10/2024</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<span class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-sm text-label-sm font-semibold">TB</span>
+<div>
+<span class="font-semibold block text-on-surface">Tiago Barbosa Souza</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">MAT-11204 • Turno T1</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">Ajudante de Paletização</td>
+<td class="py-3 px-3 font-semibold text-on-surface">Conferente de Carga</td>
+<td class="py-3 px-3">Expedição &amp; Logística</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container text-on-tertiary-container font-semibold">
+<span class="material-symbols-outlined text-[14px]">upgrade</span> Promoção
+              </span>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">Cobertura de vaga decorrente de aposentadoria</td>
+<td class="py-3 px-3 text-right font-mono font-label-sm text-label-sm">15/10/2024</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<span class="w-7 h-7 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm font-semibold">CS</span>
+<div>
+<span class="font-semibold block text-on-surface">Cleber Santana Pinheiro</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">MAT-07340 • Turno T2</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">Líder de Linha Flexo</td>
+<td class="py-3 px-3 font-semibold text-on-surface">Supervisor de Turno Interino</td>
+<td class="py-3 px-3">Conversão / Flexo</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container text-on-tertiary-container font-semibold">
+<span class="material-symbols-outlined text-[14px]">upgrade</span> Promoção
+              </span>
+</td>
+<td class="py-3 px-3 text-on-surface-variant">Mérito e liderança no programa de redução de refugo</td>
+<td class="py-3 px-3 text-right font-mono font-label-sm text-label-sm">20/10/2024</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-space-md pt-space-xs flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm text-on-surface-variant font-label-sm text-label-sm">
+<span>Mostrando 5 de 12 registros de movimentação homologados</span>
+<div class="flex items-center gap-2">
+<button class="px-2.5 py-1 rounded bg-surface-container-low text-secondary hover:bg-surface-container">Anterior</button>
+<button class="px-2.5 py-1 rounded bg-primary-container text-on-primary">1</button>
+<button class="px-2.5 py-1 rounded bg-surface-container-low text-secondary hover:bg-surface-container">2</button>
+<button class="px-2.5 py-1 rounded bg-surface-container-low text-secondary hover:bg-surface-container">Próximo</button>
+</div>
+</div>
+</section>
+<!-- 5. Mathematical Transparency & Formula Block -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm mb-space-sm">
+<div class="flex items-center gap-space-sm mb-space-md">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">functions</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Critérios Normativos &amp; Memória de Cálculo Matemático</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Homologado pelo Comitê Central de Gente &amp; Gestão da Unidade KBA1</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md">
+<!-- Formula Absenteísmo -->
+<div class="p-space-md rounded-lg bg-surface-container-low">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Fórmula de Absenteísmo</span>
+<span class="material-symbols-outlined text-outline text-[16px]">calculate</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container-lowest font-mono font-label-md text-label-md text-on-surface mb-2 shadow-xs">
+          Taxa (%) = [ H_ausentes ÷ ( E_médio × C_prevista ) ] × 100
+        </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Onde: <strong>H_ausentes</strong> = 1.840h; <strong>E_médio</strong> = 488 operadores; <strong>C_prevista</strong> = 157,2h médias no período. Resultado apurado: <strong>2,40%</strong>.
+        </p>
+</div>
+<!-- Regra de Horas Abonadas vs Injustificadas -->
+<div class="p-space-md rounded-lg bg-surface-container-low">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Abonos vs Faltas Injustificadas</span>
+<span class="material-symbols-outlined text-outline text-[16px]">rule</span>
+</div>
+<div class="space-y-1.5 font-body-sm text-body-sm text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span><strong>Atestados Médicos (Abonados):</strong> Entram no cômputo da perda de jornada porém não incidem em DSR financeiro.</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span><strong>Faltas Não Justificadas:</strong> Geram glosa de DSR e ativam plano corretivo no Índice Bradford (&gt;2 ocorrências).</span>
+</div>
+</div>
+</div>
+<!-- Bradford Formula & Protocol -->
+<div class="p-space-md rounded-lg bg-surface-container-low">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Índice Bradford (Fator B)</span>
+<span class="material-symbols-outlined text-outline text-[16px]">ssid_chart</span>
+</div>
+<div class="p-2.5 rounded bg-surface-container-lowest font-mono font-label-md text-label-md text-on-surface mb-2 shadow-xs">
+          B = S² × D (Instâncias ao Quadrado × Dias)
+        </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Prioriza frequência de ausências curtas sobre afastamentos longos contínuos. Média atual KBA1 de <strong>84</strong> situa a planta em nível verde de baixo impacto operacional.
+        </p>
+</div>
+</div>
+</section>
+<!-- Modal: Configuração de Regras de Apuração -->
+<div class="fixed inset-0 z-50 bg-primary-container/40 backdrop-blur-xs flex items-center justify-center p-space-md hidden" id="modal-regras">
+<div class="bg-surface-container-lowest rounded-xl max-w-xl w-full p-space-lg shadow-xl relative animate-in fade-in zoom-in duration-150">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[24px]">tune</span>
+<h3 class="font-headline-lg text-headline-lg text-on-surface">Configurar Regras de Apuração</h3>
+</div>
+<button class="p-1 rounded text-outline hover:text-on-surface transition-colors" onclick="document.getElementById('modal-regras').classList.add('hidden')">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">
+        Defina os parâmetros de ponderação que regem o cálculo de absenteísmo para a planta KBA1. Alterações exigem aprovação da Gerência de RH e Operações.
+      </p>
+<form class="space-y-space-md" onsubmit="event.preventDefault(); alert('Parâmetros salvos com sucesso!'); document.getElementById('modal-regras').classList.add('hidden');">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface font-semibold mb-1">Meta Limite Contratual de Absenteísmo (%)</label>
+<input class="w-full px-3 py-2 rounded bg-surface-container-low text-body-md font-body-md text-on-surface border-none focus:ring-1 focus:ring-secondary" step="0.1" type="number" value="2.5"/>
+</div>
+<div class="space-y-2">
+<label class="block font-label-sm text-label-sm text-on-surface font-semibold">Eventos Computados na Taxa de Absenteísmo:</label>
+<label class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface cursor-pointer">
+<input checked="" class="rounded text-primary-container focus:ring-secondary" type="checkbox"/>
+<span>Atestados de Doença Comum (&lt; 15 dias)</span>
+</label>
+<label class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface cursor-pointer">
+<input checked="" class="rounded text-primary-container focus:ring-secondary" type="checkbox"/>
+<span>Faltas Injustificadas e Suspensões Disciplinares</span>
+</label>
+<label class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface cursor-pointer">
+<input checked="" class="rounded text-primary-container focus:ring-secondary" type="checkbox"/>
+<span>Atrasos acima de 15 minutos e Saídas Antecipadas</span>
+</label>
+<label class="flex items-center gap-2 text-body-sm font-body-sm text-on-surface cursor-pointer">
+<input class="rounded text-primary-container focus:ring-secondary" type="checkbox"/>
+<span>Licença Maternidade / Paternidade (Desmarcado por padrão CLT)</span>
+</label>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface font-semibold mb-1">Gatilho de Alerta Bradford por Colaborador</label>
+<select class="w-full px-3 py-2 rounded bg-surface-container-low text-body-md font-body-md text-on-surface border-none focus:ring-1 focus:ring-secondary">
+<option>150 pontos (Padrão Industrial)</option>
+<option>100 pontos (Acompanhamento Rigoroso)</option>
+<option>200 pontos (Tolerância Estendida)</option>
+</select>
+</div>
+<div class="pt-space-sm flex items-center justify-end gap-space-sm">
+<button class="px-space-md py-2 rounded bg-surface-container-low text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors" onclick="document.getElementById('modal-regras').classList.add('hidden')" type="button">
+            Cancelar
+          </button>
+<button class="px-space-md py-2 rounded bg-primary-container text-on-primary font-label-md text-label-md hover:bg-secondary transition-colors" type="submit">
+            Salvar e Recalcular Base
+          </button>
+</div>
+</form>
+</div>
+</div>
+</div></main><footer class="w-full bg-surface-container-lowest px-gutter-desktop py-space-sm shadow-[0_-1px_6px_rgba(0,0,0,0.02)] flex flex-wrap items-center justify-between text-on-surface-variant font-label-sm text-label-sm"><div><span>Planta KBA1 Papelão Ondulado • Sistema Integrado de Inteligência em Pessoas</span></div><div class="flex items-center gap-space-md"><span class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-[14px] text-tertiary-container">cloud_done</span>Base PAAH: Sincronizada às 06:00 (Turno T1)</span><span>Versão 2.4.0-PRN</span></div></footer></div></body></html>
+
+<!-- Visão Executiva — People Analytics KBA1 -->
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"primary-fixed":"#c1e9f7","surface-container":"#e5eeff","error-container":"#ffdad6","on-tertiary":"#ffffff","on-error-container":"#93000a","on-primary-fixed":"#001f27","surface-container-low":"#eff4ff","outline-variant":"#c1c8cb","secondary-fixed":"#b6ebfe","surface-container-lowest":"#ffffff","on-secondary":"#ffffff","tertiary-fixed":"#6ffbbe","on-secondary-fixed":"#001f28","on-tertiary-fixed-variant":"#005236","inverse-surface":"#213145","secondary":"#306576","error":"#ba1a1a","tertiary-container":"#003925","on-surface":"#0b1c30","on-primary-container":"#799fac","secondary-fixed-dim":"#9acee1","secondary-container":"#b3e8fb","on-error":"#ffffff","inverse-primary":"#a5cdda","surface-variant":"#d3e4fe","on-background":"#0b1c30","outline":"#71787b","surface-container-high":"#dce9ff","surface-dim":"#cbdbf5","surface-tint":"#3e6470","on-primary-fixed-variant":"#254c57","primary-container":"#0a3641","surface":"#f8f9ff","tertiary":"#002114","on-surface-variant":"#41484a","tertiary-fixed-dim":"#4edea3","on-secondary-fixed-variant":"#114d5d","surface-bright":"#f8f9ff","primary":"#002028","primary-fixed-dim":"#a5cdda","inverse-on-surface":"#eaf1ff","on-primary":"#ffffff","on-tertiary-container":"#00ae79","background":"#f8f9ff","on-secondary-container":"#34697a","on-tertiary-fixed":"#002113","surface-container-highest":"#d3e4fe"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-md":"1rem","gutter":"1rem","gutter-desktop":"1.5rem","margin":"1rem","space-xs":"0.25rem","space-lg":"1.5rem","space-sm":"0.5rem","space-xl":"2rem","margin-desktop":"2rem"},"fontFamily":{"display-lg":["Inter"],"body-md":["Inter"],"label-lg":["Inter"],"metric-lg":["Inter"],"headline-md":["Inter"],"headline-lg":["Inter"],"label-sm":["Inter"],"body-lg":["Inter"],"metric-xl":["Inter"],"headline-sm":["Inter"],"body-sm":["Inter"],"label-md":["Inter"],"headline-xl":["Inter"]},"fontSize":{"display-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"label-lg":["14px",{"lineHeight":"20px","fontWeight":"500"}],"metric-lg":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-md":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-lg":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"metric-xl":["30px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["14px",{"lineHeight":"20px","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"headline-xl":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-72 bg-primary-container z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="px-space-lg pt-space-lg pb-space-md"><div class="flex items-center gap-space-sm mb-space-sm"><img alt="Logo KBA1 People Analytics" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XIikFUihlbFi2vjNhoJ57ZPYXdndSh0-WXc5Qr4d39ERi4-0g4tt7ulPQcIqG-7IU3aMmCZwSdu_YYiD5KS2OVEhl5zddaFhmpHL8qgUKqniyTlQKi8tIMHwmjMUE7xKAqBWlCTfj92osuHvDfOnklFLmXpXQyE-2gTTAu7e8EaCu5C17wDSeSQVNyjZjBaYbOkLFPq7euEa3GqQx92tm8wOdKg1MrtC2GoIsTL5HF"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-primary tracking-tight">KBA1 Analytics</span><span class="font-label-sm text-label-sm text-on-primary-container tracking-wider uppercase">Papelão Ondulado</span></div></div><div class="bg-primary px-space-sm py-space-xs rounded-lg flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]">factory</span><span class="font-label-sm text-label-sm text-on-primary">KBA1 - Feira de Santana / BA</span></div><span class="h-2 w-2 rounded-full bg-tertiary-fixed animate-pulse"></span></div></div><nav class="flex-1 px-space-sm py-space-xs space-y-1" data-active-classes="bg-secondary text-on-secondary font-headline-sm border-l-4 border-tertiary-fixed shadow-sm"><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="visao-executiva" href="#"><span class="material-symbols-outlined text-[20px]">query_stats</span><span class="font-label-md text-label-md">Visão Executiva</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="quadro-de-pessoal" href="#"><span class="material-symbols-outlined text-[20px]">groups</span><span class="font-label-md text-label-md">Quadro de Pessoal</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="setores-e-turnos" href="#"><span class="material-symbols-outlined text-[20px]">schedule</span><span class="font-label-md text-label-md">Setores & Turnos</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="indicadores-g-e-g" href="#"><span class="material-symbols-outlined text-[20px]">trending_up</span><span class="font-label-md text-label-md">Indicadores G&G</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="treinamento-e-dho" href="#"><span class="material-symbols-outlined text-[20px]">school</span><span class="font-label-md text-label-md">Treinamento & DHO</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="absenteismo-e-movimentacoes" href="#"><span class="material-symbols-outlined text-[20px]">transfer_within_a_station</span><span class="font-label-md text-label-md">Absenteísmo & Movimentações</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="inteligencia-analitica" href="#"><span class="material-symbols-outlined text-[20px]">psychology</span><span class="font-label-md text-label-md">Inteligência Analítica</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="entrada-de-dados" href="#"><span class="material-symbols-outlined text-[20px]">table_chart</span><span class="font-label-md text-label-md">Entrada de Dados</span></a></nav></div><div class="p-space-md m-space-sm bg-primary rounded-xl"><div class="flex items-center justify-between mb-space-xs"><span class="font-label-sm text-label-sm text-primary-fixed-dim flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-tertiary-fixed-dim">verified</span>Integridade KBA1</span><span class="font-label-sm text-label-sm text-tertiary-fixed font-bold">100% OK</span></div><div class="w-full bg-primary-container h-1 rounded-full overflow-hidden"><div class="bg-tertiary-fixed h-full w-full"></div></div><p class="font-body-sm text-body-sm text-outline-variant mt-2">Sincronizado via ERP Totvs • Turno T1</p></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-1.5 rounded-lg"><span class="material-symbols-outlined text-secondary text-[18px]">pin_drop</span><span class="font-label-md text-label-md text-on-surface font-semibold">KBA1 - Feira de Santana (BA)</span><span class="material-symbols-outlined text-outline text-[16px]">lock</span></div><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded-lg"><span class="material-symbols-outlined text-outline text-[18px]">calendar_month</span><span class="font-label-md text-label-md text-on-surface">Competência:</span><select class="bg-transparent font-label-md text-label-md text-secondary font-semibold focus:outline-none cursor-pointer"><option>Outubro / 2024</option><option>Setembro / 2024</option><option>Agosto / 2024</option></select></div><div class="hidden xl:flex items-center gap-1.5 bg-surface-container-low text-secondary px-space-sm py-1 rounded-full"><span class="material-symbols-outlined text-[14px] text-tertiary-container">verified_user</span><span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">LGPD Auditada</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-low p-1 rounded-lg"><button class="px-space-sm py-1 flex items-center gap-1 rounded font-label-sm text-label-sm text-secondary hover:bg-surface-container hover:text-on-surface transition-colors" title="Exportar Relatório Excel"><span class="material-symbols-outlined text-[16px]">description</span>XLSX</button><button class="px-space-sm py-1 flex items-center gap-1 rounded font-label-sm text-label-sm text-secondary hover:bg-surface-container hover:text-on-surface transition-colors" title="Exportar Relatório PDF"><span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>PDF</button></div><button class="relative p-2 rounded-lg text-secondary hover:bg-surface-container transition-colors" title="Notificações e Desvios"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span></button><div class="h-6 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm"><div class="flex flex-col text-right hidden sm:flex"><span class="font-label-md text-label-md text-on-surface font-semibold">Eng. Roberto Mendes</span><span class="font-label-sm text-label-sm text-on-surface-variant">Gerente de Planta • G&G</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl0sKN7n6Zmynx1nuPzjQC9nngSMxRbX9F9wckHmtAs52GyGf2iDBxYCQ8nLAbnEiGQvAO4LcrrYXWeGHs2lc64kvOFJHVP0HIyq653lyI0OhAIO0Mr-1rSG637rbRFPwhhdty0hYMX7Ol_e2cPd8WYjdk6U553ussz-VHS7lUBDDeVJJ-zgjbeveKiID9JvxOCg2eMnqzBOJLMpiEgL1-4FL4k1dQn0WtKEs3pEQ"/></div></div></header><main class="flex-1 w-full pt-16 px-gutter-desktop pb-margin-desktop bg-surface"><div class="flex flex-col w-full space-y-space-lg">
+<!-- Top Context Header & Filter Bar -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold">Painel Consolidado de Planta</span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Ciclo PAAH Industrial</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface mt-0.5">Visão Executiva de Gente & Gestão</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Unidade KBA1 — Feira de Santana / BA • Fábrica de Papelão Ondulado</p>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<button class="h-10 px-space-md bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-lg flex items-center gap-2 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-error">picture_as_pdf</span>
+<span>Exportar Relatório Executivo (PDF)</span>
+</button>
+<button class="h-10 px-space-md bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-lg flex items-center gap-2 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-tertiary-container">table_view</span>
+<span>Exportar Base (Excel)</span>
+</button>
+<button class="h-10 px-space-md bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md rounded-lg flex items-center gap-2 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-tertiary-fixed">sync</span>
+<span>Atualizar Dados PAAH</span>
+</button>
+</div>
+</div>
+<!-- Quick Filters Filter Row -->
+<div class="pt-space-sm bg-surface-container-low/60 p-space-md rounded-xl flex flex-wrap items-center gap-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">tune</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Filtros Operacionais:</span>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm flex-1">
+<!-- Competência -->
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-3 py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Mês/Ano:</span>
+<select class="bg-transparent font-label-md text-label-md text-on-surface font-semibold focus:outline-none cursor-pointer">
+<option selected="">Maio / 2024</option>
+<option>Abril / 2024</option>
+<option>Março / 2024</option>
+</select>
+</div>
+<!-- Macroárea -->
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-3 py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Macroárea:</span>
+<select class="bg-transparent font-label-md text-label-md text-on-surface font-semibold focus:outline-none cursor-pointer">
+<option selected="">Todas as Áreas</option>
+<option>Onduladeira</option>
+<option>Conversão & Acabamento</option>
+<option>Logística & Expedição</option>
+<option>Manutenção & Utilidades</option>
+<option>Qualidade & Segurança</option>
+<option>Administração & G&G</option>
+</select>
+</div>
+<!-- Turno -->
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-3 py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Turno:</span>
+<select class="bg-transparent font-label-md text-label-md text-on-surface font-semibold focus:outline-none cursor-pointer">
+<option selected="">Todos os Turnos</option>
+<option>T1 (Manhã)</option>
+<option>T2 (Tarde)</option>
+<option>T3 (Noite)</option>
+<option>ADM (Geral)</option>
+</select>
+</div>
+<!-- Status -->
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-3 py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Status:</span>
+<select class="bg-transparent font-label-md text-label-md text-on-surface font-semibold focus:outline-none cursor-pointer">
+<option selected="">Ativos (Em Folha)</option>
+<option>Afastados Previdenciários</option>
+<option>Férias Programadas</option>
+<option>Histórico Geral</option>
+</select>
+</div>
+</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1 ml-auto">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">done_all</span>
+<span>Base Total Carregada (487)</span>
+</div>
+</div>
+</section>
+<!-- 5 Management Structure Cards (Headcount & Org Structure) -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-md">
+<!-- Card 1: Efetivo Total -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute right-0 top-0 w-24 h-24 bg-primary-fixed/30 rounded-bl-full pointer-events-none transition-transform group-hover:scale-110"></div>
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold">Efetivo Total KBA1</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">badge</span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="font-metric-xl text-metric-xl text-on-surface">487</span>
+<span class="font-label-sm text-label-sm text-tertiary-container bg-tertiary-fixed/30 px-1.5 py-0.5 rounded font-bold flex items-center">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +4 mês
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Colaboradores ativos na planta</p>
+</div>
+<div class="mt-4 pt-3 bg-surface-container-low/40 rounded-lg p-2 space-y-1">
+<div class="flex justify-between items-center font-label-sm text-label-sm">
+<span class="text-on-surface-variant">CLT Direto</span>
+<span class="font-semibold text-on-surface">452 (92,8%)</span>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Terceirizados</span>
+<span class="font-semibold text-on-surface">23 (4,7%)</span>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Aprendizes/Estágio</span>
+<span class="font-semibold text-on-surface">12 (2,5%)</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Centros de Custo & Setores -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold">Centros de Custo & Áreas</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">account_tree</span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="font-metric-xl text-metric-xl text-on-surface">18</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant font-normal">CCs Totais</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">14 Setores Industriais e Apoio</p>
+</div>
+<div class="mt-4 pt-3 bg-surface-container-low/40 rounded-lg p-2 space-y-2">
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1">
+<span class="text-on-surface-variant">Produção (Fábrica)</span>
+<span class="font-semibold text-on-surface">11 Centros</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 78%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1">
+<span class="text-on-surface-variant">Suporte & Corporativo</span>
+<span class="font-semibold text-on-surface">7 Centros</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 22%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3: Cargos Mapeados -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold">Cargos Mapeados</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">assignment_ind</span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="font-metric-xl text-metric-xl text-on-surface">64</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary-container px-1.5 py-0.5 rounded font-semibold">100% CBO</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Cargos ativos e descritos</p>
+</div>
+<div class="mt-4 pt-3 bg-surface-container-low/40 rounded-lg p-2 space-y-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Operador Onduladeira I/II/III</span>
+<span class="font-semibold text-on-surface">68 colab.</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Ajudante Produção Industrial</span>
+<span class="font-semibold text-on-surface">94 colab.</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Operador Impressora Flexo</span>
+<span class="font-semibold text-on-surface">42 colab.</span>
+</div>
+</div>
+</div>
+<!-- Card 4: Liderança & Gestores -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold">Liderança & Gestores</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">supervisor_account</span>
+</div>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="font-metric-xl text-metric-xl text-on-surface">28</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant font-normal">Líderes</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Média: 17,4 colab. / gestor</p>
+</div>
+<div class="mt-4 pt-3 bg-surface-container-low/40 rounded-lg p-2">
+<div class="flex justify-between items-center mb-1 font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Span of Control Ideal</span>
+<span class="font-semibold text-tertiary-container">Faixa Recomendada (1:15 a 1:20)</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden flex">
+<div class="bg-tertiary-container h-full" style="width: 87%"></div>
+<div class="bg-secondary-fixed h-full" style="width: 13%"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2 text-right">04 Coordenadores • 24 Supervisores</p>
+</div>
+</div>
+<!-- Card 5: Distribuição por Turno -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold">Distribuição por Turno</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">schedule</span>
+</div>
+<div class="flex items-baseline gap-1 mt-2">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">4 Escalas</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Operacionais</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Operação contínua 24/7</p>
+</div>
+<div class="mt-3 pt-2 bg-surface-container-low/40 rounded-lg p-2 space-y-1">
+<div class="flex justify-between items-center font-label-sm text-label-sm">
+<span class="flex items-center gap-1 text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> T1 (06h - 14h)
+          </span>
+<span class="font-bold text-on-surface">164 (33,7%)</span>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm">
+<span class="flex items-center gap-1 text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span> T2 (14h - 22h)
+          </span>
+<span class="font-bold text-on-surface">152 (31,2%)</span>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm">
+<span class="flex items-center gap-1 text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-surface-tint"></span> T3 (22h - 06h)
+          </span>
+<span class="font-bold text-on-surface">118 (24,2%)</span>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm">
+<span class="flex items-center gap-1 text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-outline"></span> ADM Geral
+          </span>
+<span class="font-bold text-on-surface">53 (10,9%)</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 3: Integrated 5 Key People Analytics Indicators (Semantics Green/Yellow/Red) -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-2">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Painel de 5 Indicadores Estratégicos de Gente & Gestão</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Avaliação executiva com base em metas industriais KBA1 (Meta 1, Meta 3 e Meta 5)</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 rounded bg-tertiary-fixed/30 text-tertiary-container font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-tertiary-container"></span> 4 Metas Atingidas
+        </span>
+<span class="px-2.5 py-1 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> 1 Em Atenção
+        </span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-md pt-2">
+<!-- Indicador 1: Absenteísmo -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Taxa de Absenteísmo</span>
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed/40 text-tertiary-container font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Verde
+          </span>
+</div>
+<div class="my-3">
+<div class="flex items-baseline gap-1">
+<span class="font-metric-xl text-metric-xl text-on-surface">2,4%</span>
+<span class="font-label-sm text-label-sm text-tertiary-container font-semibold">Realizado</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Total: 1.840h ausentes</p>
+</div>
+<!-- Escala de Metas -->
+<div class="space-y-1.5 pt-2 bg-surface-container-lowest p-2 rounded-lg">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>M1: 3,0%</span>
+<span class="font-medium text-secondary">M3: 2,5%</span>
+<span>M5: 1,8%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full" style="width: 80%"></div>
+</div>
+<div class="font-label-sm text-label-sm text-tertiary-container font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">arrow_downward</span> 0,1 p.p. melhor que M3
+          </div>
+</div>
+</div>
+<!-- Indicador 2: Turnover Mensal -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Turnover Mensal</span>
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed/40 text-tertiary-container font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Verde
+          </span>
+</div>
+<div class="my-3">
+<div class="flex items-baseline gap-1">
+<span class="font-metric-xl text-metric-xl text-on-surface">1,2%</span>
+<span class="font-label-sm text-label-sm text-tertiary-container font-semibold">Realizado</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">6 demissões • 8 admissões</p>
+</div>
+<!-- Escala de Metas -->
+<div class="space-y-1.5 pt-2 bg-surface-container-lowest p-2 rounded-lg">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>M1: 2,0%</span>
+<span class="font-medium text-secondary">M3: 1,5%</span>
+<span>M5: 1,0%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full" style="width: 75%"></div>
+</div>
+<div class="font-label-sm text-label-sm text-tertiary-container font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check</span> Dentro da faixa executiva M3
+          </div>
+</div>
+</div>
+<!-- Indicador 3: Horas de Treinamento -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Treinamento / Colab.</span>
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed/40 text-tertiary-container font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Verde
+          </span>
+</div>
+<div class="my-3">
+<div class="flex items-baseline gap-1">
+<span class="font-metric-xl text-metric-xl text-on-surface">4,8h</span>
+<span class="font-label-sm text-label-sm text-tertiary-container font-semibold">/colaborador</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">2.338h totais no mês</p>
+</div>
+<!-- Escala de Metas -->
+<div class="space-y-1.5 pt-2 bg-surface-container-lowest p-2 rounded-lg">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>M1: 3,5h</span>
+<span class="font-medium text-secondary">M3: 4,0h</span>
+<span>M5: 5,0h</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full" style="width: 96%"></div>
+</div>
+<div class="font-label-sm text-label-sm text-tertiary-container font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> Supera meta M3 em +20%
+          </div>
+</div>
+</div>
+<!-- Indicador 4: Treinamentos Legais -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Aderência NRs Legais</span>
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed/40 text-tertiary-container font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Verde
+          </span>
+</div>
+<div class="my-3">
+<div class="flex items-baseline gap-1">
+<span class="font-metric-xl text-metric-xl text-on-surface">98,2%</span>
+<span class="font-label-sm text-label-sm text-tertiary-container font-semibold">Conformidade</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">NR-12, NR-11 & NR-35 em dia</p>
+</div>
+<!-- Escala de Metas -->
+<div class="space-y-1.5 pt-2 bg-surface-container-lowest p-2 rounded-lg">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>M1: 95%</span>
+<span class="font-medium text-secondary">M3: 98%</span>
+<span>M5: 100%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full" style="width: 98%"></div>
+</div>
+<div class="font-label-sm text-label-sm text-tertiary-container font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span> Matriz legal auditada
+          </div>
+</div>
+</div>
+<!-- Indicador 5: Horas Extras / BH -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface">H. Extras / Folha</span>
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">warning</span> Amarelo
+          </span>
+</div>
+<div class="my-3">
+<div class="flex items-baseline gap-1">
+<span class="font-metric-xl text-metric-xl text-on-surface">4,1%</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">Realizado</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Custo adicional: R$ 42,8k</p>
+</div>
+<!-- Escala de Metas -->
+<div class="space-y-1.5 pt-2 bg-surface-container-lowest p-2 rounded-lg">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>M1: 5,5%</span>
+<span class="font-medium text-secondary">M3: 4,0%</span>
+<span>M5: 3,0%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 72%"></div>
+</div>
+<div class="font-label-sm text-label-sm text-error font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning_amber</span> +0,1 p.p. acima do teto M3
+          </div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 4: Interactive Executive Charts Grid (A, B, and C) -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Gráfico A: Evolução do Efetivo vs Capacidade Operacional (Últimos 12 meses) - 7 cols -->
+<div class="lg:col-span-7 bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-2">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Evolução do Efetivo vs. Capacidade Operacional</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Histórico de 12 meses • Jun/2023 a Mai/2024 (Planta KBA1)</p>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-primary"></span> Ind. Fábrica</span>
+<span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-secondary"></span> ADM Apoio</span>
+<span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-tertiary-container border-b border-dashed border-tertiary-container"></span> Meta PAAH</span>
+</div>
+</div>
+<!-- SVG Chart Canvas Container -->
+<div class="relative w-full h-64 my-2">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 680 230">
+<!-- Background Grid lines -->
+<line class="text-surface-container" stroke="currentColor" stroke-width="1" x1="40" x2="660" y1="20" y2="20"></line>
+<line class="text-surface-container" stroke="currentColor" stroke-width="1" x1="40" x2="660" y1="65" y2="65"></line>
+<line class="text-surface-container" stroke="currentColor" stroke-width="1" x1="40" x2="660" y1="110" y2="110"></line>
+<line class="text-surface-container" stroke="currentColor" stroke-width="1" x1="40" x2="660" y1="155" y2="155"></line>
+<line class="text-surface-container" stroke="currentColor" stroke-width="1" x1="40" x2="660" y1="200" y2="200"></line>
+<!-- Y-Axis Labels -->
+<text class="fill-outline text-[10px] font-mono" text-anchor="end" x="32" y="24">520</text>
+<text class="fill-outline text-[10px] font-mono" text-anchor="end" x="32" y="69">490</text>
+<text class="fill-outline text-[10px] font-mono" text-anchor="end" x="32" y="114">460</text>
+<text class="fill-outline text-[10px] font-mono" text-anchor="end" x="32" y="159">430</text>
+<text class="fill-outline text-[10px] font-mono" text-anchor="end" x="32" y="204">400</text>
+<!-- Meta PAAH Target Line (Constant/Slight step around 485) -->
+<polyline class="text-tertiary-container" fill="none" points="60,78 115,78 170,78 225,75 280,75 335,75 390,72 445,72 500,72 555,70 610,70 650,70" stroke="currentColor" stroke-dasharray="4,4" stroke-width="1.5"></polyline>
+<!-- Industrial Headcount Area Fill & Line -->
+<defs>
+<lineargradient id="indGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0a3641" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#0a3641" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<polygon fill="url(#indGradient)" points="60,98 115,92 170,95 225,86 280,82 335,84 390,78 445,76 500,75 555,72 610,69 650,67 650,200 60,200"></polygon>
+<polyline class="text-primary-container" fill="none" points="60,98 115,92 170,95 225,86 280,82 335,84 390,78 445,76 500,75 555,72 610,69 650,67" stroke="currentColor" stroke-width="2.5"></polyline>
+<!-- ADM Headcount Line -->
+<polyline class="text-secondary" fill="none" points="60,185 115,183 170,184 225,182 280,181 335,180 390,179 445,178 500,178 555,176 610,175 650,174" stroke="currentColor" stroke-width="2"></polyline>
+<!-- Highlighting the Current Month Data Point (Mai/24) -->
+<circle class="fill-primary-container" cx="650" cy="67" r="4.5"></circle>
+<circle class="fill-none stroke-primary-container" cx="650" cy="67" r="8" stroke-width="1.5"></circle>
+<circle class="fill-secondary" cx="650" cy="174" r="3.5"></circle>
+<!-- X-Axis Months Labels -->
+<text class="fill-outline text-[10px]" text-anchor="middle" x="60" y="218">Jun</text>
+<text class="fill-outline text-[10px]" text-anchor="middle" x="115" y="218">Jul</text>
+<text class="fill-outline text-[10px]" text-anchor="middle" x="170" y="218">Ago</text>
+<text class="fill-outline text-[10px]" text-anchor="middle" x="225" y="218">Set</text>
+<text class="fill-outline text-[10px]" text-anchor="middle" x="280" y="218">Out</text>
+<text class="fill-outline text-[10px]" text-anchor="middle" x="335" y="218">Nov</text>
+<text class="fill-outline text-[10px]" text-anchor="middle" x="390" y="218">Dez</text>
+<text class="fill-outline text-[10px]" text-anchor="middle" x="445" y="218">Jan</text>
+<text class="fill-outline text-[10px]" text-anchor="middle" x="500" y="218">Fev</text>
+<text class="fill-outline text-[10px]" text-anchor="middle" x="555" y="218">Mar</text>
+<text class="fill-outline text-[10px]" text-anchor="middle" x="610" y="218">Abr</text>
+<text class="fill-primary font-bold text-[10px]" text-anchor="middle" x="650" y="218">Mai/24</text>
+</svg>
+</div>
+<div class="mt-2 pt-2 bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">verified</span>
+          Ocupação de capacidade: <strong>99,4% da Meta Homologada (490)</strong>
+</span>
+<span class="font-semibold text-primary">Turnover Acumulado 12M: 14,8%</span>
+</div>
+</div>
+<!-- Gráfico B: Composição do Efetivo por Macroárea Industrial - 5 cols -->
+<div class="lg:col-span-5 bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-space-sm">
+<h3 class="font-headline-md text-headline-md text-on-surface">Composição por Macroárea</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded font-semibold">487 Efetivos</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Concentração nos fluxos de produção de papelão ondulado</p>
+<!-- Horizontal Bars List -->
+<div class="space-y-3">
+<!-- Conversão/Acabamento -->
+<div>
+<div class="flex justify-between items-center font-label-sm text-label-sm mb-1">
+<span class="font-semibold text-on-surface">Conversão & Acabamento</span>
+<span class="text-on-surface font-mono">158 colab. <strong class="text-secondary">(32,4%)</strong></span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full transition-all duration-500" style="width: 32.4%"></div>
+</div>
+</div>
+<!-- Onduladeira -->
+<div>
+<div class="flex justify-between items-center font-label-sm text-label-sm mb-1">
+<span class="font-semibold text-on-surface">Onduladeira (Corrugator)</span>
+<span class="text-on-surface font-mono">142 colab. <strong class="text-secondary">(29,2%)</strong></span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full transition-all duration-500" style="width: 29.2%"></div>
+</div>
+</div>
+<!-- Logística & Expedição -->
+<div>
+<div class="flex justify-between items-center font-label-sm text-label-sm mb-1">
+<span class="font-semibold text-on-surface">Logística & Expedição</span>
+<span class="text-on-surface font-mono">68 colab. <strong class="text-secondary">(14,0%)</strong></span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-secondary-fixed-dim h-full rounded-full transition-all duration-500" style="width: 14.0%"></div>
+</div>
+</div>
+<!-- Manutenção & Utilidades -->
+<div>
+<div class="flex justify-between items-center font-label-sm text-label-sm mb-1">
+<span class="font-semibold text-on-surface">Manutenção & Utilidades (Caldeiras)</span>
+<span class="text-on-surface font-mono">54 colab. <strong class="text-secondary">(11,1%)</strong></span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-surface-tint h-full rounded-full transition-all duration-500" style="width: 11.1%"></div>
+</div>
+</div>
+<!-- Administração & G&G -->
+<div>
+<div class="flex justify-between items-center font-label-sm text-label-sm mb-1">
+<span class="font-semibold text-on-surface">Administração & G&G</span>
+<span class="text-on-surface font-mono">39 colab. <strong class="text-secondary">(8,0%)</strong></span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-outline-variant h-full rounded-full transition-all duration-500" style="width: 8.0%"></div>
+</div>
+</div>
+<!-- Qualidade & Segurança -->
+<div>
+<div class="flex justify-between items-center font-label-sm text-label-sm mb-1">
+<span class="font-semibold text-on-surface">Qualidade & Segurança (SESMT)</span>
+<span class="text-on-surface font-mono">26 colab. <strong class="text-secondary">(5,3%)</strong></span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-outline h-full rounded-full transition-all duration-500" style="width: 5.3%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant font-medium">Core Operacional Fabril:</span>
+<span class="font-bold text-primary">368 colaboradores (75,6% do efetivo KBA1)</span>
+</div>
+</div>
+<!-- Gráfico C: Matriz Comparativa de Turnos (Absenteísmo vs Horas Extras) - Full 12 cols -->
+<div class="lg:col-span-12 bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-2">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Matriz Comparativa de Turnos • Onduladeira vs. Conversão</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Cruzamento de Taxa de Absenteísmo (%) e Índice de Horas Extras (%) por Escala de Trabalho</p>
+</div>
+<div class="flex items-center gap-3 font-label-sm text-label-sm">
+<span class="flex items-center gap-1 text-on-surface-variant"><span class="w-3 h-3 rounded bg-tertiary-fixed-dim"></span> Absenteísmo Realizado</span>
+<span class="flex items-center gap-1 text-on-surface-variant"><span class="w-3 h-3 rounded bg-secondary"></span> Horas Extras (%)</span>
+<span class="flex items-center gap-1 text-error"><span class="w-2 h-2 rounded-full bg-error"></span> Alerta Operacional</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-space-md pt-2">
+<!-- Turno T1 Onduladeira -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">T1 • Onduladeira</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">48 colab.</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Manhã (06h - 14h)</p>
+</div>
+<div class="my-4 space-y-2">
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Absenteísmo</span>
+<span class="font-bold text-tertiary-container">1,8%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full" style="width: 36%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Horas Extras</span>
+<span class="font-bold text-secondary">2,9%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 58%"></div>
+</div>
+</div>
+</div>
+<span class="text-center py-1 rounded bg-tertiary-fixed/30 text-tertiary-container font-label-sm text-label-sm font-semibold">Excelente Equilíbrio</span>
+</div>
+<!-- Turno T2 Onduladeira -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">T2 • Onduladeira</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">48 colab.</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Tarde (14h - 22h)</p>
+</div>
+<div class="my-4 space-y-2">
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Absenteísmo</span>
+<span class="font-bold text-tertiary-container">2,2%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full" style="width: 44%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Horas Extras</span>
+<span class="font-bold text-secondary">3,4%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 68%"></div>
+</div>
+</div>
+</div>
+<span class="text-center py-1 rounded bg-tertiary-fixed/30 text-tertiary-container font-label-sm text-label-sm font-semibold">Meta Cumprida</span>
+</div>
+<!-- Turno T3 Onduladeira (ALERTA) -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 right-0 w-8 h-8 bg-error/15 rounded-bl-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-error text-[16px]">priority_high</span>
+</div>
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">T3 • Onduladeira</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">46 colab.</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Noite (22h - 06h)</p>
+</div>
+<div class="my-4 space-y-2">
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Absenteísmo</span>
+<span class="font-bold text-error">3,8%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 76%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Horas Extras</span>
+<span class="font-bold text-error">5,8%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 88%"></div>
+</div>
+</div>
+</div>
+<span class="text-center py-1 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-bold">Desvio Noturno</span>
+</div>
+<!-- Turno T1 Conversão -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">T1 • Conversão</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">56 colab.</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Manhã (06h - 14h)</p>
+</div>
+<div class="my-4 space-y-2">
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Absenteísmo</span>
+<span class="font-bold text-tertiary-container">2,0%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full" style="width: 40%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Horas Extras</span>
+<span class="font-bold text-secondary">3,6%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 72%"></div>
+</div>
+</div>
+</div>
+<span class="text-center py-1 rounded bg-tertiary-fixed/30 text-tertiary-container font-label-sm text-label-sm font-semibold">Meta Cumprida</span>
+</div>
+<!-- Turno T2 Conversão -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">T2 • Conversão</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">54 colab.</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Tarde (14h - 22h)</p>
+</div>
+<div class="my-4 space-y-2">
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Absenteísmo</span>
+<span class="font-bold text-tertiary-container">2,3%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full" style="width: 46%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Horas Extras</span>
+<span class="font-bold text-secondary">4,2%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 74%"></div>
+</div>
+</div>
+</div>
+<span class="text-center py-1 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">Atenção H. Extra</span>
+</div>
+<!-- Turno T3 Conversão (ALERTA) -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 right-0 w-8 h-8 bg-error/15 rounded-bl-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-error text-[16px]">priority_high</span>
+</div>
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface">T3 • Conversão</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">48 colab.</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Noite (22h - 06h)</p>
+</div>
+<div class="my-4 space-y-2">
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Absenteísmo</span>
+<span class="font-bold text-error">3,2%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 64%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[11px] font-mono mb-0.5">
+<span class="text-on-surface-variant">Horas Extras</span>
+<span class="font-bold text-error">5,1%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 82%"></div>
+</div>
+</div>
+</div>
+<span class="text-center py-1 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-bold">Gargalo de Cobertura</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 5: Top 5 Sectors with Deviations Table & Action Matrix -->
+<section class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-2">
+<div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface">Top 5 Setores com Maior Desvio de Indicadores</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Matriz de priorização para intervenção e alinhamento operacional de Gente & Gestão</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-1 rounded">5 Desvios Mapeados</span>
+<button class="px-3 py-1 bg-surface-container-low hover:bg-surface-container text-on-surface rounded font-label-sm text-label-sm flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[16px]">filter_list</span> Filtrar Ações
+        </button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm">
+<th class="py-2.5 px-3 rounded-l-lg">Setor / Centro de Custo</th>
+<th class="py-2.5 px-3">Turno</th>
+<th class="py-2.5 px-3">Indicador em Desvio</th>
+<th class="py-2.5 px-3 text-right">Realizado</th>
+<th class="py-2.5 px-3 text-right">Meta (M3)</th>
+<th class="py-2.5 px-3 text-right">Desvio Relativo</th>
+<th class="py-2.5 px-3 text-center">Status</th>
+<th class="py-2.5 px-3 rounded-r-lg">Ação Recomendada de G&G</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Row 1: Onduladeira T3 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-3 font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">precision_manufacturing</span>
+<span>Onduladeira • Linha 01</span>
+</td>
+<td class="py-3 px-3 text-on-surface-variant font-mono">T3 (Noturno)</td>
+<td class="py-3 px-3 text-on-surface font-medium">Horas Extras / Dobras</td>
+<td class="py-3 px-3 text-right font-mono font-bold text-error">5,8%</td>
+<td class="py-3 px-3 text-right font-mono text-on-surface-variant">4,0%</td>
+<td class="py-3 px-3 text-right font-mono text-error font-semibold">+45,0%</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-bold">Desvio Crítico</span>
+</td>
+<td class="py-3 px-3 text-on-surface font-medium">
+              Contratação de 2 operadores corrugadores reserva para contingência de folga.
+            </td>
+</tr>
+<!-- Row 2: Conversão T3 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-3 font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">layers</span>
+<span>Conversão • Flexo Impressão</span>
+</td>
+<td class="py-3 px-3 text-on-surface-variant font-mono">T3 (Noturno)</td>
+<td class="py-3 px-3 text-on-surface font-medium">Taxa de Absenteísmo</td>
+<td class="py-3 px-3 text-right font-mono font-bold text-error">3,8%</td>
+<td class="py-3 px-3 text-right font-mono text-on-surface-variant">2,5%</td>
+<td class="py-3 px-3 text-right font-mono text-error font-semibold">+52,0%</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-bold">Desvio Crítico</span>
+</td>
+<td class="py-3 px-3 text-on-surface font-medium">
+              Ação conjunta SESMT e Assistência Social: auditoria de atestados osteomusculares.
+            </td>
+</tr>
+<!-- Row 3: Manutenção Mecânica -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-3 font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">build</span>
+<span>Manutenção Mecânica & Elétrica</span>
+</td>
+<td class="py-3 px-3 text-on-surface-variant font-mono">Geral / T1-T2</td>
+<td class="py-3 px-3 text-on-surface font-medium">Horas de Treinamento</td>
+<td class="py-3 px-3 text-right font-mono font-bold text-secondary">2,1h</td>
+<td class="py-3 px-3 text-right font-mono text-on-surface-variant">4,0h</td>
+<td class="py-3 px-3 text-right font-mono text-secondary font-semibold">-47,5%</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">Atenção</span>
+</td>
+<td class="py-3 px-3 text-on-surface font-medium">
+              Reprogramar módulo NR-35 (Trabalho em Altura) represado por paradas de máquina.
+            </td>
+</tr>
+<!-- Row 4: Expedição & Logística -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-3 font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">local_shipping</span>
+<span>Expedição • Carregamento</span>
+</td>
+<td class="py-3 px-3 text-on-surface-variant font-mono">T2 (Tarde)</td>
+<td class="py-3 px-3 text-on-surface font-medium">Banco de Horas Positivo</td>
+<td class="py-3 px-3 text-right font-mono font-bold text-secondary">4,7%</td>
+<td class="py-3 px-3 text-right font-mono text-on-surface-variant">4,0%</td>
+<td class="py-3 px-3 text-right font-mono text-secondary font-semibold">+17,5%</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">Atenção</span>
+</td>
+<td class="py-3 px-3 text-on-surface font-medium">
+              Nivelamento de escala no pico de expedição de caixas agrícolas (Quinta/Sexta).
+            </td>
+</tr>
+<!-- Row 5: Acabamento & Paletização -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-3 font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">inventory_2</span>
+<span>Acabamento • Paletizadora Automática</span>
+</td>
+<td class="py-3 px-3 text-on-surface-variant font-mono">T1 (Manhã)</td>
+<td class="py-3 px-3 text-on-surface font-medium">Turnover Espontâneo</td>
+<td class="py-3 px-3 text-right font-mono font-bold text-secondary">2,4%</td>
+<td class="py-3 px-3 text-right font-mono text-on-surface-variant">1,5%</td>
+<td class="py-3 px-3 text-right font-mono text-secondary font-semibold">+60,0%</td>
+<td class="py-3 px-3 text-center">
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">Atenção</span>
+</td>
+<td class="py-3 px-3 text-on-surface font-medium">
+              Entrevistas de retenção com operadores de entrada; revisão do plano de integração.
+            </td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Action Bar / Quick Resolution -->
+<div class="mt-space-md pt-space-md bg-surface-container-low/40 rounded-xl p-space-md flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
+</div>
+<div>
+<span class="font-label-md text-label-md text-on-surface font-bold block">Plano de Contingência T3 • Planta KBA1</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Reunião de alinhamento com a Gerência de Planta agendada para 05/06/2024 às 09:00</span>
+</div>
+</div>
+<button class="h-9 px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm rounded-lg flex items-center justify-center gap-1.5 transition-colors self-start md:self-auto">
+<span>Abrir Chamado G&G</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- Legal & Data Integrity Note Footer -->
+<footer class="p-space-md bg-surface-container-low rounded-xl flex flex-col sm:flex-row items-center justify-between gap-2 text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">verified_user</span>
+<span>Fonte de dados: <strong>Relatório PAAH Consolidado</strong> • Competência fechada em <strong>31/05/2024</strong></span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="inline-block w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+<span>Conformidade LGPD Ativa (Visualização agregada autorizada • Gerência KBA1)</span>
+</div>
+</footer>
+</div>
+<script>
+  // Simple micro-interaction for visual feedback on select filters
+  document.querySelectorAll('select').forEach(select => {
+    select.addEventListener('change', () => {
+      const originalBg = select.parentElement.className;
+      select.parentElement.classList.add('ring-2', 'ring-secondary-fixed');
+      setTimeout(() => {
+        select.parentElement.classList.remove('ring-2', 'ring-secondary-fixed');
+      }, 700);
+    });
+  });
+</script></main><footer class="w-full bg-surface-container-lowest px-gutter-desktop py-space-sm shadow-[0_-1px_6px_rgba(0,0,0,0.02)] flex flex-wrap items-center justify-between text-on-surface-variant font-label-sm text-label-sm"><div><span>Planta KBA1 Papelão Ondulado • Sistema Integrado de Inteligência em Pessoas</span></div><div class="flex items-center gap-space-md"><span class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-[14px] text-tertiary-container">cloud_done</span>Base PAAH: Sincronizada às 06:00 (Turno T1)</span><span>Versão 2.4.0-PRN</span></div></footer></div></body></html>
+
+<!-- Setores & Turnos — People Analytics KBA1 -->
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"primary-fixed":"#c1e9f7","surface-container":"#e5eeff","error-container":"#ffdad6","on-tertiary":"#ffffff","on-error-container":"#93000a","on-primary-fixed":"#001f27","surface-container-low":"#eff4ff","outline-variant":"#c1c8cb","secondary-fixed":"#b6ebfe","surface-container-lowest":"#ffffff","on-secondary":"#ffffff","tertiary-fixed":"#6ffbbe","on-secondary-fixed":"#001f28","on-tertiary-fixed-variant":"#005236","inverse-surface":"#213145","secondary":"#306576","error":"#ba1a1a","tertiary-container":"#003925","on-surface":"#0b1c30","on-primary-container":"#799fac","secondary-fixed-dim":"#9acee1","secondary-container":"#b3e8fb","on-error":"#ffffff","inverse-primary":"#a5cdda","surface-variant":"#d3e4fe","on-background":"#0b1c30","outline":"#71787b","surface-container-high":"#dce9ff","surface-dim":"#cbdbf5","surface-tint":"#3e6470","on-primary-fixed-variant":"#254c57","primary-container":"#0a3641","surface":"#f8f9ff","tertiary":"#002114","on-surface-variant":"#41484a","tertiary-fixed-dim":"#4edea3","on-secondary-fixed-variant":"#114d5d","surface-bright":"#f8f9ff","primary":"#002028","primary-fixed-dim":"#a5cdda","inverse-on-surface":"#eaf1ff","on-primary":"#ffffff","on-tertiary-container":"#00ae79","background":"#f8f9ff","on-secondary-container":"#34697a","on-tertiary-fixed":"#002113","surface-container-highest":"#d3e4fe"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-md":"1rem","gutter":"1rem","gutter-desktop":"1.5rem","margin":"1rem","space-xs":"0.25rem","space-lg":"1.5rem","space-sm":"0.5rem","space-xl":"2rem","margin-desktop":"2rem"},"fontFamily":{"display-lg":["Inter"],"body-md":["Inter"],"label-lg":["Inter"],"metric-lg":["Inter"],"headline-md":["Inter"],"headline-lg":["Inter"],"label-sm":["Inter"],"body-lg":["Inter"],"metric-xl":["Inter"],"headline-sm":["Inter"],"body-sm":["Inter"],"label-md":["Inter"],"headline-xl":["Inter"]},"fontSize":{"display-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"label-lg":["14px",{"lineHeight":"20px","fontWeight":"500"}],"metric-lg":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-md":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-lg":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"metric-xl":["30px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["14px",{"lineHeight":"20px","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"headline-xl":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-72 bg-primary-container z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="px-space-lg pt-space-lg pb-space-md"><div class="flex items-center gap-space-sm mb-space-sm"><img alt="Logo KBA1 People Analytics" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XIikFUihlbFi2vjNhoJ57ZPYXdndSh0-WXc5Qr4d39ERi4-0g4tt7ulPQcIqG-7IU3aMmCZwSdu_YYiD5KS2OVEhl5zddaFhmpHL8qgUKqniyTlQKi8tIMHwmjMUE7xKAqBWlCTfj92osuHvDfOnklFLmXpXQyE-2gTTAu7e8EaCu5C17wDSeSQVNyjZjBaYbOkLFPq7euEa3GqQx92tm8wOdKg1MrtC2GoIsTL5HF"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-primary tracking-tight">KBA1 Analytics</span><span class="font-label-sm text-label-sm text-on-primary-container tracking-wider uppercase">Papelão Ondulado</span></div></div><div class="bg-primary px-space-sm py-space-xs rounded-lg flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]">factory</span><span class="font-label-sm text-label-sm text-on-primary">KBA1 - Feira de Santana / BA</span></div><span class="h-2 w-2 rounded-full bg-tertiary-fixed animate-pulse"></span></div></div><nav class="flex-1 px-space-sm py-space-xs space-y-1" data-active-classes="bg-secondary text-on-secondary font-headline-sm border-l-4 border-tertiary-fixed shadow-sm"><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="visao-executiva" href="#"><span class="material-symbols-outlined text-[20px]">query_stats</span><span class="font-label-md text-label-md">Visão Executiva</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="quadro-de-pessoal" href="#"><span class="material-symbols-outlined text-[20px]">groups</span><span class="font-label-md text-label-md">Quadro de Pessoal</span></a><a class="flex items-center gap-space-sm px-space-sm py-2.5 rounded-lg text-primary-fixed-dim hover:bg-secondary hover:text-on-secondary transition-colors group" data-path="setores-e-turnos" href="#"><span class="material-symbols-outlined text-[20px]">schedule</span><span cla
+<truncated 241680 bytes>
+
+NOTE: The output was truncated because it was too long. Use a more targeted query or a smaller range to get the information you need.

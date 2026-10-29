@@ -605,7 +605,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
           </div>
           <div className="text-right">
             <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 bg-indigo-600 text-white rounded-xl shadow-xs">
-              {filteredActions.length} Ações Mapeadas
+              {filteredItems.length} Ações Mapeadas
             </span>
           </div>
         </div>

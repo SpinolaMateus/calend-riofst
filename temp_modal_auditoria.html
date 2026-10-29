@@ -1,0 +1,93 @@
+space-md" id="modalAuditoria">
+<div class="bg-surface-container-lowest max-w-2xl w-full rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-150">
+<div class="p-space-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[24px]">verified_user</span>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Auditoria de Fórmulas e Regras de Negócio</h3>
+<span class="font-label-sm text-on-surface-variant">Manual Oficial de Métricas G&G • Norma KBA1-DHO-2024</span>
+</div>
+</div>
+<button class="p-1 rounded-lg text-outline hover:bg-surface-container hover:text-on-surface" id="btnFecharModal">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-space-lg space-y-space-md max-h-[716px] overflow-y-auto">
+<div class="p-space-sm bg-surface-container-low rounded-lg space-y-1">
+<span class="font-label-sm font-semibold text-secondary">01 • Taxa de Absenteísmo Global (%)</span>
+<p class="font-body-sm text-on-surface">
+<strong>Fórmula:</strong> <code>(Total Horas de Ausência / Horas Homem Trabalhadas Teóricas) × 100</code>.<br/>
+            Considera faltas injustificadas, atestados CID e suspensões. Não deduz DSR.
+          </p>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded-lg space-y-1">
+<span class="font-label-sm font-semibold text-secondary">03 • Horas Extras s/ Folha Operacional (%)</span>
+<p class="font-body-sm text-on-surface">
+<strong>Fórmula:</strong> <code>(Total de H.E. 50% + 100% / Total de Horas Normais Trabalhadas) × 100</code>.<br/>
+            Apurado diretamente via espelho de ponto eletrônico Totvs do Turno T1, T2 e T3.
+          </p>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded-lg space-y-1">
+<span class="font-label-sm font-semibold text-secondary">04 • Índice de Turnover Global (%)</span>
+<p class="font-body-sm text-on-surface">
+<strong>Fórmula:</strong> <code>((Admissões + Desligamentos) / 2) / Headcount Médio Ativo × 100</code>.<br/>
+            Base KBA1 de 487 colaboradores ativos em 31/05/2024.
+          </p>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded-lg space-y-1">
+<span class="font-label-sm font-semibold text-secondary">09 • Avaliação de Competências (Periodicidade Semestral)</span>
+<p class="font-body-sm text-on-surface">
+<strong>Regra Estrita de Governança:</strong> Métrica de ciclo semestral. Nas competências intermitentes exibe-se <code>'-'</code> (Sem dados), sendo terminantemente vedada a imputação de 0% ou estimativas aleatórias.
+          </p>
+</div>
+</div>
+<div class="p-space-md bg-surface-container-low flex justify-end">
+<button class="h-9 px-space-md bg-primary-container text-on-primary font-label-md rounded-lg hover:bg-secondary transition-colors" id="btnFecharModalBottom">
+          Fechar Auditoria
+        </button>
+</div>
+</div>
+</div>
+<!-- SCRIPT PARA INTERAÇÕES LEVES -->
+<script>
+    (function () {
+      const modal = document.getElementById('modalAuditoria');
+      const btnOpen = document.getElementById('btnAuditarFormulas');
+      const btnClose = document.getElementById('btnFecharModal');
+      const btnCloseBottom = document.getElementById('btnFecharModalBottom');
+      const btnExport = document.getElementById('btnExportarMatriz');
+
+      function openModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      if (btnOpen) btnOpen.addEventListener('click', openModal);
+      if (btnClose) btnClose.addEventListener('click', closeModal);
+      if (btnCloseBottom) btnCloseBottom.addEventListener('click', closeModal);
+
+      if (modal) {
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) closeModal();
+        });
+      }
+
+      if (btnExport) {
+        btnExport.addEventListener('click', function () {
+          const originalText = btnExport.innerHTML;
+          btnExport.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span> Gerando PDF...';
+          setTimeout(function () {
+            btnExport.innerHTML = originalText;
+            alert('Matriz Oficial dos 9 Indicadores exportada com sucesso (KBA1_G&G_Maio2024.xlsx / .pdf).');
+          }, 800);
+        });
+      }
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest px-gutter-desktop py-space-sm shadow-[0_-1px_6px_rgba(0,0,0,0.02)] flex flex-wrap items-center justify-between text-on-surface-variant font-label-sm text-label-sm"><div><span>Planta KBA1 Papelão Ondulado • Sistema Integrado de Inteligência em Pessoas</span></div><div class="flex items-center gap-space-md"><span class="flex items-center gap-1 text-on-surface-variant"><span class="material-symbols-outlined text-[14px] text-tertiary-container">cloud_done</span>Base PAAH: Sincronizada às 06:00 (Turno T1)</span><span>Versão 2.4.0-PRN</span></div></footer></div></body></html>
+

@@ -1,0 +1,40 @@
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 720 200">
+<defs>
+<lineargradient id="areaGradientAbs" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#306576" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#306576" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Horizontal Reference Gridlines -->
+<line stroke="#E5EEFF" stroke-width="1" x1="0" x2="720" y1="20" y2="20"></line>
+<line stroke="#E5EEFF" stroke-width="1" x1="0" x2="720" y1="70" y2="70"></line>
+<line stroke="#E5EEFF" stroke-width="1" x1="0" x2="720" y1="120" y2="120"></line>
+<line stroke="#E5EEFF" stroke-width="1" x1="0" x2="720" y1="170" y2="170"></line>
+<!-- Target Line 2.50% (mapped to y=88) -->
+<line stroke="#ba1a1a" stroke-dasharray="4 4" stroke-width="1.5" x1="0" x2="720" y1="88" y2="88"></line>
+<text fill="#ba1a1a" font-size="10" font-weight="600" text-anchor="end" x="680" y="82">Meta 2,50%</text>
+<!-- Turnover Bar Columns (12 months) -->
+<!-- X points: Nov(30), Dez(90), Jan(150), Fev(210), Mar(270), Abr(330), Mai(390), Jun(450), Jul(510), Ago(570), Set(630), Out(690) -->
+<rect fill="#c1e9f7" height="25" rx="2" width="16" x="22" y="145"></rect>
+<rect fill="#c1e9f7" height="30" rx="2" width="16" x="82" y="140"></rect>
+<rect fill="#c1e9f7" height="38" rx="2" width="16" x="142" y="132"></rect>
+<rect fill="#c1e9f7" height="32" rx="2" width="16" x="202" y="138"></rect>
+<rect fill="#c1e9f7" height="28" rx="2" width="16" x="262" y="142"></rect>
+<rect fill="#c1e9f7" height="35" rx="2" width="16" x="322" y="135"></rect>
+<rect fill="#c1e9f7" height="22" rx="2" width="16" x="382" y="148"></rect>
+<rect fill="#c1e9f7" height="30" rx="2" width="16" x="442" y="140"></rect>
+<rect fill="#c1e9f7" height="40" rx="2" width="16" x="502" y="130"></rect>
+<rect fill="#c1e9f7" height="26" rx="2" width="16" x="562" y="144"></rect>
+<rect fill="#c1e9f7" height="23" rx="2" width="16" x="622" y="147"></rect>
+<rect fill="#c1e9f7" height="24" rx="2" width="16" x="682" y="146"></rect>
+<!-- Absenteísmo Area + Curve Line -->
+<!-- Data Points: Nov:2.7%(80), Dez:2.9%(72), Jan:3.1%(62), Fev:2.8%(76), Mar:2.6%(84), Abr:2.4%(92), Mai:2.3%(96), Jun:2.6%(84), Jul:2.8%(76), Ago:2.7%(80), Set:2.58%(85), Out:2.40%(92) -->
+<polygon fill="url(#areaGradientAbs)" points="30,80 90,72 150,62 210,76 270,84 330,92 390,96 450,84 510,76 570,80 630,85 690,92 690,170 30,170"></polygon>
+<path d="M 30 80 L 90 72 L 150 62 L 210 76 L 270 84 L 330 92 L 390 96 L 450 84 L 510 76 L 570 80 L 630 85 L 690 92" fill="none" stroke="#306576" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<!-- Highlight current point Outubro -->
+<circle cx="690" cy="92" fill="#306576" r="5" stroke="#ffffff" stroke-width="2"></circle>
+<text fill="#002028" font-size="11" font-weight="700" text-anchor="middle" x="690" y="78">2,40%</text>
+<!-- Markers on past points -->
+<circle cx="150" cy="62" fill="#ba1a1a" r="3.5"></circle>
+<text fill="#ba1a1a" font-size="10" font-weight="600" text-anchor="middle" x="150" y="52">3,1% (Pico Jan)</text>
+</svg>

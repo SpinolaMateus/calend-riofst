@@ -1,0 +1,361 @@
+return (
+    <div id="people-analytics-capture-area" className="min-h-screen bg-[#F5F7FB] text-slate-800 flex flex-col font-sans">
+      
+      {/* ========================================================================= */}
+      {/* 1. CABEÇALHO EXECUTIVO — PEOPLE ANALYTICS BAHIA (KBA1 / K111) */}
+      {/* ========================================================================= */}
+      <header data-capture-ignore className="no-print bg-[#132F46] text-white border-b border-slate-700/80 sticky top-0 z-40 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+          
+          {/* Título & Badges de Unidade */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onBackToHome}
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 border border-white/10"
+              title="Voltar ao Painel Geral de Módulos"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                  People Analytics
+                  <span className="text-emerald-400 font-normal text-base">| Feira de Santana</span>
+                </h1>
+                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Unidade Bahia • KBA1 / K111
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 flex items-center gap-2 mt-0.5">
+                <span>Base PAAH: Out/2026</span>
+                <span>•</span>
+                <span className="text-emerald-300 font-medium">353 PRNs Unidade Bahia</span>
+                <span>•</span>
+                <span className="text-slate-400">Qualidade de Dados: 100% Verificado</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Botões de Ação Executiva */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <button
+              onClick={() => setActiveTab('data_entry')}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-sm"
+            >
+              <UploadCloud className="w-4 h-4" />
+              <span>Importar / Lançar</span>
+            </button>
+
+            <button
+              onClick={exportToExcel}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-all"
+              title="Exportar dados filtrados para Excel"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+              <span className="hidden sm:inline">Exportar Excel</span>
+            </button>
+
+            <button
+              onClick={handleCopyAsImage}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-all"
+              title="Copiar relatório como imagem"
+            >
+              <Download className="w-4 h-4 text-sky-400" />
+              <span className="hidden sm:inline">Copiar Imagem</span>
+            </button>
+
+            <button
+              onClick={handlePrintPDF}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-all"
+              title="Imprimir ou salvar PDF"
+            >
+              <FileText className="w-4 h-4 text-amber-400" />
+              <span className="hidden sm:inline">Imprimir / PDF</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Barra de Navegação de Abas */}
+        <div className="bg-[#0e2436] px-4 sm:px-6 lg:px-8 border-t border-slate-700/60 overflow-x-auto no-scrollbar">
+          <div className="max-w-7xl mx-auto flex items-center gap-1 py-1.5 min-w-max text-xs">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'overview'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              Visão Geral
+            </button>
+
+            <button
+              onClick={() => setActiveTab('headcount')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'headcount'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" />
+              Quadro de Pessoal ({metrics.total})
+            </button>
+
+            <button
+              onClick={() => setActiveTab('jobs_shifts')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'jobs_shifts'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Briefcase className="w-3.5 h-3.5" />
+              Cargos e Turnos
+            </button>
+
+            <button
+              onClick={() => setActiveTab('indicators')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'indicators'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              Indicadores G&G (9)
+            </button>
+
+            <button
+              onClick={() => setActiveTab('absenteeism')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'absenteeism'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              Absenteísmo
+            </button>
+
+            <button
+              onClick={() => setActiveTab('movements')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'movements'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <TrendingDown className="w-3.5 h-3.5" />
+              Movimentações & Turnover
+            </button>
+
+            <button
+              onClick={() => setActiveTab('trainings')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'trainings'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Treinamento & Superar
+            </button>
+
+            <button
+              onClick={() => setActiveTab('action_plans')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'action_plans'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              Alertas & Ações ({actionPlans.length})
+            </button>
+
+            <button
+              onClick={() => setActiveTab('data_entry')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'data_entry'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              Entrada de Dados
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ========================================================================= */}
+      {/* 2. FILTROS GLOBAIS INTERDEPENDENTES */}
+      {/* ========================================================================= */}
+      <section data-capture-ignore className="no-print bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-3.5 shadow-2xs">
+        <div className="max-w-7xl mx-auto space-y-3">
+          
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+            {/* Campo de Busca Rápida */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Buscar por PRN, Nome, Cargo ou Centro de Custo..."
+                value={filters.searchTerm}
+                onChange={(e) => setFilters(f => ({ ...f, searchTerm: e.target.value }))}
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+              />
+              {filters.searchTerm && (
+                <button
+                  onClick={() => setFilters(f => ({ ...f, searchTerm: '' }))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Seletores de Filtros */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 text-xs">
+              
+              {/* Vínculo */}
+              <select
+                value={filters.employmentGroup}
+                onChange={(e) => setFilters(f => ({ ...f, employmentGroup: e.target.value }))}
+                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <option value="all">Vínculo: Todos</option>
+                <option value="CLT">CLT ({metrics.clt})</option>
+                <option value="Aprendiz">Aprendiz ({metrics.aprendizes})</option>
+                <option value="Estagiário">Estagiário ({metrics.estagiarios})</option>
+              </select>
+
+              {/* Turno */}
+              <select
+                value={filters.shiftCategory}
+                onChange={(e) => setFilters(f => ({ ...f, shiftCategory: e.target.value }))}
+                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <option value="all">Turno: Todos</option>
+                <option value="Turno A">Turno A (Manhã: 88)</option>
+                <option value="Turno B">Turno B (Tarde: 84)</option>
+                <option value="Turno C">Turno C (Noite: 87)</option>
+                <option value="Administrativo">Administrativo (5x2: 74)</option>
+                <option value="Outras Jornadas">Outras Jornadas (20)</option>
+              </select>
+
+              {/* Macroárea */}
+              <select
+                value={filters.macroarea}
+                onChange={(e) => setFilters(f => ({ ...f, macroarea: e.target.value }))}
+                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer max-w-[160px] truncate"
+              >
+                <option value="all">Macroárea: Todas</option>
+                {filterOptions.macroareas.map(m => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+
+              {/* Centro de Custo */}
+              <select
+                value={filters.costCenter}
+                onChange={(e) => setFilters(f => ({ ...f, costCenter: e.target.value }))}
+                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer max-w-[170px] truncate"
+              >
+                <option value="all">Centro de Custo: Todos</option>
+                {filterOptions.costCenters.map(cc => (
+                  <option key={cc} value={cc}>{cc}</option>
+                ))}
+              </select>
+
+              {/* Limpar Filtros */}
+              {activeFiltersCount > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-semibold flex items-center gap-1 transition-colors whitespace-nowrap"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Limpar ({activeFiltersCount})</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Chips dos Filtros Aplicados */}
+          {activeFiltersCount > 0 && (
+            <div className="flex items-center gap-2 flex-wrap text-[11px] pt-1">
+              <span className="text-slate-500 font-semibold flex items-center gap-1">
+                <Filter className="w-3 h-3" />
+                Filtros ativos:
+              </span>
+              {filters.employmentGroup !== 'all' && (
+                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200 flex items-center gap-1">
+                  Vínculo: {filters.employmentGroup}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setFilters(f => ({ ...f, employmentGroup: 'all' }))} />
+                </span>
+              )}
+              {filters.shiftCategory !== 'all' && (
+                <span className="px-2 py-0.5 bg-indigo-50 text-indigo-800 rounded-md border border-indigo-200 flex items-center gap-1">
+                  Turno: {filters.shiftCategory}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setFilters(f => ({ ...f, shiftCategory: 'all' }))} />
+                </span>
+              )}
+              {filters.macroarea !== 'all' && (
+                <span className="px-2 py-0.5 bg-sky-50 text-sky-800 rounded-md border border-sky-200 flex items-center gap-1">
+                  Macroárea: {filters.macroarea}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setFilters(f => ({ ...f, macroarea: 'all' }))} />
+                </span>
+              )}
+              {filters.costCenter !== 'all' && (
+                <span className="px-2 py-0.5 bg-purple-50 text-purple-800 rounded-md border border-purple-200 flex items-center gap-1">
+                  CC: {filters.costCenter}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setFilters(f => ({ ...f, costCenter: 'all' }))} />
+                </span>
+              )}
+              {filters.searchTerm && (
+                <span className="px-2 py-0.5 bg-amber-50 text-amber-800 rounded-md border border-amber-200 flex items-center gap-1">
+                  Termo: "{filters.searchTerm}"
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setFilters(f => ({ ...f, searchTerm: '' }))} />
+                </span>
+              )}
+            </div>
+          )}
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 3. CONTEÚDO PRINCIPAL DAS ABAS */}
+      {/* ========================================================================= */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        {/* Cabeçalho Executivo Inteligente para Captura de Imagem e Impressão */}
+        <div className="capture-only hidden bg-white p-5 rounded-3xl border border-slate-200 mb-5 text-left shadow-xs">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                  People Analytics
+                  <span className="text-[#15877B] font-normal text-base"> | Feira de Santana</span>
+                </h2>
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-teal-50 text-[#15877B] border border-teal-200">
+                  Unidade Bahia • KBA1 / K111
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 font-medium mt-0.5">
+                Quadro de Pessoal & Performance Operacional • Competência: {filters.competence}
+              </p>
+            </div>
+            <div className="text-right">
+              <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 bg-[#132F46] text-white rounded-xl shadow-xs">
+                {filteredEmployees.length} Registros Bahia
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* --------------------------------------------------------------------- */}
+        {/* ABA 1: VISÃO GERAL */}
+        {/* --------------------------------------------------------------------- */}
+        
