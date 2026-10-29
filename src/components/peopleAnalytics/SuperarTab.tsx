@@ -2,30 +2,40 @@ import React, { useState } from 'react';
 import { 
   Award, CheckCircle2, AlertTriangle, Clock, TrendingUp, 
   HelpCircle, Sparkles, Filter, ChevronRight, FileText, 
-  Edit3, BarChart2, ShieldCheck, Flame, BookOpen
+  Edit3, BarChart2, ShieldCheck, Flame, BookOpen, Calendar,
+  Table, RefreshCw, Check
 } from 'lucide-react';
 import { 
   SuperarAudit, SuperarMonthlyIndicator, SeloPremise,
-  SUPERAR_AUDITS_INITIAL, SUPERAR_INDICATORS_INITIAL, SELO_PREMISES_INITIAL 
+  SUPERAR_AUDITS_2026, SUPERAR_INDICATORS_2026, SELO_PREMISES_INITIAL,
+  generateAutoDiagnosis
 } from '../../data/superarInitialData';
+import { SuperarTableEditModal } from './SuperarTableEditModal';
 
 interface SuperarTabProps {
   onOpenDataEntry?: () => void;
-  audits?: SuperarAudit[];
-  indicators?: SuperarMonthlyIndicator[];
-  onUpdateIndicatorMonth?: (indicatorId: string, month: string, value: number) => void;
-  onUpdateAuditMonth?: (auditId: string, month: string, value: number) => void;
+  year: number;
+  onYearChange: (year: number) => void;
+  audits: SuperarAudit[];
+  indicators: SuperarMonthlyIndicator[];
+  onSaveYearData: (year: number, indicators: SuperarMonthlyIndicator[], audits: SuperarAudit[]) => void;
 }
 
 const MONTHS_LIST = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
 
 export const SuperarTab: React.FC<SuperarTabProps> = ({ 
   onOpenDataEntry,
-  audits = SUPERAR_AUDITS_INITIAL,
-  indicators = SUPERAR_INDICATORS_INITIAL,
+  year,
+  onYearChange,
+  audits,
+  indicators,
+  onSaveYearData,
 }) => {
   const [selectedAlavanca, setSelectedAlavanca] = useState<string>('all');
   const [expandedNotesId, setExpandedNotesId] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editingNoteText, setEditingNoteText] = useState<string>('');
 
   // Filtragem por Alavanca
   const filteredIndicators = indicators.filter(ind => {
@@ -63,35 +73,91 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
     return 'bg-[#fca5a5] text-[#7f1d1d] font-bold border border-rose-300';
   };
 
+  // Salvar nota individual
+  const handleSaveIndividualNote = (indId: string, note: string) => {
+    const updated = indicators.map(i => i.id === indId ? { ...i, notes: note } : i);
+    onSaveYearData(year, updated, audits);
+    setEditingNoteId(null);
+  };
+
+  // Gerar diagnóstico individual no card
+  const handleGenerateIndividualDiag = (indId: string) => {
+    const ind = indicators.find(i => i.id === indId);
+    if (!ind) return;
+    const diag = generateAutoDiagnosis(ind, year);
+    handleSaveIndividualNote(indId, diag);
+  };
+
   return (
     <div className="space-y-6">
       
       {/* ========================================================================= */}
-      {/* 1. CABEÇALHO DO PROGRAMA SUPERAR COM CARDS EXECUTIVOS */}
+      {/* 1. CABEÇALHO DO PROGRAMA SUPERAR COM SELETOR DE ANO E BOTÃO DE EDIÇÃO */}
       {/* ========================================================================= */}
       <div className="bg-gradient-to-r from-[#0a3641] to-[#134e5e] rounded-3xl p-6 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 border border-[#306576]">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#6ffbbe]/20 text-[#6ffbbe] text-xs font-bold uppercase tracking-wider mb-2 border border-[#6ffbbe]/30">
-            <Award className="w-3.5 h-3.5" />
-            Pilar Educação & Treinamento (ET) • Selo Bronze
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#6ffbbe]/20 text-[#6ffbbe] text-xs font-bold uppercase tracking-wider border border-[#6ffbbe]/30">
+              <Award className="w-3.5 h-3.5" />
+              Pilar Educação & Treinamento (ET) • Selo Bronze
+            </span>
+
+            {/* SELETOR DE ANO: 2026 vs 2027 */}
+            <div className="inline-flex items-center rounded-xl bg-black/25 p-0.5 border border-white/20">
+              <button
+                onClick={() => onYearChange(2026)}
+                className={`px-3 py-1 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 ${
+                  year === 2026
+                    ? 'bg-[#6ffbbe] text-[#002028] shadow-xs'
+                    : 'text-[#c1e9f7] hover:text-white'
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                Ciclo 2026 (Oficial)
+              </button>
+              <button
+                onClick={() => onYearChange(2027)}
+                className={`px-3 py-1 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 ${
+                  year === 2027
+                    ? 'bg-[#6ffbbe] text-[#002028] shadow-xs'
+                    : 'text-[#c1e9f7] hover:text-white'
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                Ciclo 2027 (Planejamento)
+              </button>
+            </div>
           </div>
-          <h2 className="text-2xl font-black tracking-tight text-white">
-            Programa Superar — Klabin Bahia (KBA1)
+
+          <h2 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+            Programa Superar — Klabin Bahia (KBA1) • Ciclo {year}
           </h2>
           <p className="text-xs text-[#c1e9f7] max-w-2xl mt-1 leading-relaxed">
-            Acompanhamento mensal de metas, auditorias metodológicas de selo e passo, confirmação de processo e alavancas estratégicas de Moral, Segurança e Custos.
+            {year === 2026 
+              ? 'Acompanhamento oficial de metas realizadas (Jan a Set), auditorias do selo e alavancas estratégicas.'
+              : 'Estrutura de metas planejadas e baseline para o próximo ciclo de certificação da fábrica.'}
           </p>
         </div>
 
-        {onOpenDataEntry && (
+        {/* Botão de Edição em Grade / Janela */}
+        <div className="flex items-center gap-2 shrink-0 self-start md:self-auto flex-wrap">
           <button
-            onClick={onOpenDataEntry}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6ffbbe] text-[#002028] font-black text-xs hover:bg-[#4edea3] transition-all shadow-md shrink-0 self-start md:self-auto"
+            onClick={() => setIsEditModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6ffbbe] text-[#002028] font-black text-xs hover:bg-[#4edea3] transition-all shadow-md"
           >
-            <Edit3 className="w-4 h-4" />
-            Atualizar Dados Manualmente
+            <Table className="w-4 h-4" />
+            Editar em Tabela / Grade
           </button>
-        )}
+          {onOpenDataEntry && (
+            <button
+              onClick={onOpenDataEntry}
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all"
+            >
+              <Edit3 className="w-4 h-4" />
+              Lançamento Rápido
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -106,12 +172,16 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
               Auto Avaliação Selo
             </span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-3xl font-black text-[#0b1c30]">96,0%</span>
+              <span className="text-3xl font-black text-[#0b1c30]">
+                {typeof audits[4]?.media === 'number' ? `${audits[4].media}%` : audits[4]?.media || '96,0%'}
+              </span>
               <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                Meta 92%
+                Meta {audits[4]?.meta || '92%'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Jan, Fev e Mar em superação</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {year === 2026 ? 'Jan, Fev e Mar em superação' : 'Planejado para 2027'}
+            </p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
             <CheckCircle2 className="w-6 h-6" />
@@ -125,12 +195,16 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
               Auditoria de Selo
             </span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-3xl font-black text-[#0a3641]">95,8%</span>
+              <span className="text-3xl font-black text-[#0a3641]">
+                {typeof audits[1]?.media === 'number' ? `${audits[1].media}%` : audits[1]?.media || '95,8%'}
+              </span>
               <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                Meta 92%
+                Meta {audits[1]?.meta || '92%'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Selo Bronze Aprovado (+3.8%)</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {year === 2026 ? 'Selo Bronze Aprovado (+3.8%)' : 'Rumo ao Selo Prata'}
+            </p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-[#0a3641] text-[#6ffbbe] flex items-center justify-center shadow-xs">
             <Award className="w-6 h-6" />
@@ -144,12 +218,16 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
               Confirmação de Processo
             </span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-3xl font-black text-[#0b1c30]">4,6</span>
+              <span className="text-3xl font-black text-[#0b1c30]">
+                {typeof audits[3]?.media === 'number' ? audits[3].media : audits[3]?.media || '4,6'}
+              </span>
               <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                Meta 5,0
+                Meta {audits[3]?.meta || '5,0'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Evolução: 3.8 Jan &rarr; 4.6 Mar</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {year === 2026 ? 'Evolução: 3.8 Jan → 4.6 Mar' : 'Foco em 5.0 pontos'}
+            </p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
             <ShieldCheck className="w-6 h-6" />
@@ -163,12 +241,16 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
               Auditoria de Passo
             </span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-3xl font-black text-[#0b1c30]">91,0%</span>
+              <span className="text-3xl font-black text-[#0b1c30]">
+                {typeof audits[0]?.media === 'number' ? `${audits[0].media}%` : audits[0]?.media || '91,0%'}
+              </span>
               <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                Meta 92% (-1%)
+                Meta {audits[0]?.meta || '92%'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Plano de ação em andamento</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {year === 2026 ? 'Plano de ação em andamento' : 'Meta alinhada para 94%'}
+            </p>
           </div>
           <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
             <Clock className="w-6 h-6" />
@@ -184,7 +266,7 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-[#0b1c30] flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            Critérios & Premissas Obrigatórias para Concessão do Selo Bronze (Pilar ET)
+            Critérios & Premissas Obrigatórias para Concessão do Selo Bronze (Pilar ET) • Ciclo {year}
           </h3>
           <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
             4 de 4 Premissas Atendidas (100%)
@@ -217,10 +299,15 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-[#0b1c30]">Auditorias & Avaliações Superar</h3>
+            <h3 className="text-sm font-bold text-[#0b1c30]">Auditorias & Avaliações Superar ({year})</h3>
             <p className="text-xs text-slate-500">Métricas de conformidade de processos, passos e maturidade do pilar</p>
           </div>
-          <span className="text-xs font-mono font-semibold text-slate-400">Ciclo 2026</span>
+          <button
+            onClick={() => setIsEditModalOpen(true)}
+            className="text-xs font-bold text-[#306576] hover:underline flex items-center gap-1"
+          >
+            <Edit3 className="w-3.5 h-3.5" /> Editar Auditorias
+          </button>
         </div>
 
         <div className="overflow-x-auto">
@@ -271,7 +358,7 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-[#0b1c30]">
-                Painel Oficial de Indicadores Mensais — Pilar Educação & Treinamento
+                Painel Oficial de Indicadores Mensais — Pilar Educação & Treinamento ({year})
               </h3>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0a3641] text-[#6ffbbe]">
                 Oficial Superar
@@ -282,19 +369,30 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
             </p>
           </div>
 
-          {/* Filtro por Alavanca */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500">Alavanca:</span>
-            <select
-              value={selectedAlavanca}
-              onChange={(e) => setSelectedAlavanca(e.target.value)}
-              className="px-2.5 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-[#f8f9ff] text-slate-700 focus:outline-none"
+          <div className="flex items-center gap-3">
+            {/* Filtro por Alavanca */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500">Alavanca:</span>
+              <select
+                value={selectedAlavanca}
+                onChange={(e) => setSelectedAlavanca(e.target.value)}
+                className="px-2.5 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-[#f8f9ff] text-slate-700 focus:outline-none"
+              >
+                <option value="all">Todas as Alavancas</option>
+                <option value="moral">Moral (6)</option>
+                <option value="segurança">Segurança (2)</option>
+                <option value="custo">Custo (1)</option>
+              </select>
+            </div>
+
+            {/* Botão de Edição Rápida da Tabela */}
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-[#0a3641] hover:bg-[#134e5e] text-[#6ffbbe] text-xs font-black transition-all flex items-center gap-1.5 shadow-xs"
             >
-              <option value="all">Todas as Alavancas</option>
-              <option value="moral">Moral (6)</option>
-              <option value="segurança">Segurança (2)</option>
-              <option value="custo">Custo (1)</option>
-            </select>
+              <Table className="w-3.5 h-3.5" />
+              Editar Grade
+            </button>
           </div>
         </div>
 
@@ -402,7 +500,7 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
           <div>
             <h3 className="text-sm font-bold text-[#0b1c30]">
-              Matriz de Alavancas Superar & Pontuação do Selo Bronze (Pilar ET)
+              Matriz de Alavancas Superar & Pontuação do Selo Bronze (Pilar ET) • Ciclo {year}
             </h3>
             <p className="text-xs text-slate-500">
               Classificação por alavanca de resultado, grau de maturidade e comparação com realizado histórico 2025
@@ -425,7 +523,7 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
                 <th className="py-3 px-2 text-center bg-amber-50/60 font-bold">Mínimo Aceitável</th>
                 <th className="py-3 px-2 text-center bg-slate-100 font-bold">Meta (Grau)</th>
                 <th className="py-3 px-2 text-center bg-purple-50 font-bold">Superação</th>
-                <th className="py-3 px-3 text-center bg-emerald-50 text-emerald-900 font-black">Média Atual (2026)</th>
+                <th className="py-3 px-3 text-center bg-emerald-50 text-emerald-900 font-black">Média ({year})</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -477,34 +575,111 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
       {/* 7. DIAGNÓSTICOS TÉCNICOS & MEMORIAIS QUALITATIVOS (NOTAS DO PILAR ET) */}
       {/* ========================================================================= */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
-        <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-          <BookOpen className="w-5 h-5 text-[#306576]" />
-          <div>
-            <h3 className="text-sm font-bold text-[#0b1c30]">
-              Diagnósticos Qualitativos & Pareceres Técnicos dos Educadores
-            </h3>
-            <p className="text-xs text-slate-500">
-              Registros e recomendações operacionais extraídos da planilha oficial para o plano de ação KBA1
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-[#306576]" />
+            <div>
+              <h3 className="text-sm font-bold text-[#0b1c30]">
+                Diagnósticos Qualitativos & Pareceres Técnicos dos Educadores ({year})
+              </h3>
+              <p className="text-xs text-slate-500">
+                Análises de causa raiz, status operacional e planos de ação para cada um dos indicadores
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const updated = indicators.map(i => ({
+                  ...i,
+                  notes: generateAutoDiagnosis(i, year)
+                }));
+                onSaveYearData(year, updated, audits);
+              }}
+              className="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold transition-all flex items-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Atualizar Diagnósticos com IA
+            </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {indicators.filter(i => i.notes).map(item => (
-            <div key={item.id} className="p-4 rounded-xl border border-slate-200/80 bg-[#f8f9ff] space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#0b1c30]">{item.name}</span>
-                <span className="text-[10px] font-bold text-[#306576] bg-sky-50 px-2 py-0.5 rounded-full border border-sky-100">
+          {indicators.map(item => (
+            <div key={item.id} className="p-4 rounded-xl border border-slate-200/80 bg-[#f8f9ff] space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold text-[#0b1c30] leading-tight">{item.name}</span>
+                <span className="text-[10px] font-bold text-[#306576] bg-sky-50 px-2 py-0.5 rounded-full border border-sky-100 shrink-0">
                   {item.alavanca}
                 </span>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed italic bg-white p-3 rounded-lg border border-slate-100">
-                "{item.notes}"
-              </p>
+
+              {editingNoteId === item.id ? (
+                <div className="space-y-2">
+                  <textarea
+                    rows={3}
+                    value={editingNoteText}
+                    onChange={(e) => setEditingNoteText(e.target.value)}
+                    className="w-full p-2.5 rounded-lg border border-indigo-300 text-xs text-slate-800 bg-white focus:outline-none"
+                  />
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => setEditingNoteId(null)}
+                      className="px-2.5 py-1 text-xs text-slate-600 rounded border border-slate-200 hover:bg-slate-100"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={() => handleSaveIndividualNote(item.id, editingNoteText)}
+                      className="px-3 py-1 text-xs font-bold text-white bg-[#0a3641] rounded hover:bg-[#134e5e]"
+                    >
+                      Salvar Nota
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-700 leading-relaxed italic bg-white p-3 rounded-lg border border-slate-100">
+                  "{item.notes || 'Sem diagnóstico cadastrado para este indicador.'}"
+                </p>
+              )}
+
+              <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px]">
+                <span className="text-slate-400 font-medium">Média {year}: <strong>{item.media}{item.unit === '%' ? '%' : ''}</strong></span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setEditingNoteId(item.id);
+                      setEditingNoteText(item.notes || '');
+                    }}
+                    className="text-[#306576] hover:underline font-semibold"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleGenerateIndividualDiag(item.id)}
+                    className="text-purple-700 hover:underline font-bold flex items-center gap-1"
+                  >
+                    <Sparkles className="w-3 h-3" /> Auto-Gerar
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* MODAL DE EDIÇÃO EM TABELA / GRADE COMPLETA */}
+      <SuperarTableEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        year={year}
+        indicators={indicators}
+        audits={audits}
+        onSave={(updatedIndicators, updatedAudits) => {
+          onSaveYearData(year, updatedIndicators, updatedAudits);
+        }}
+      />
 
     </div>
   );

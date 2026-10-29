@@ -40,7 +40,100 @@ export interface SeloPremise {
   status: 'atendida' | 'em_andamento' | 'gap';
 }
 
-export const SUPERAR_AUDITS_INITIAL: SuperarAudit[] = [
+export function calculateIndicatorMedia(months: { [month: string]: number | null }): number {
+  const filled = Object.values(months).filter(v => v !== null && v !== undefined && typeof v === 'number') as number[];
+  if (filled.length === 0) return 0;
+  const sum = filled.reduce((acc, curr) => acc + curr, 0);
+  return Number((sum / filled.length).toFixed(1));
+}
+
+// Gerador automático de Diagnóstico Técnico Operacional para os Indicadores
+export function generateAutoDiagnosis(ind: SuperarMonthlyIndicator, year: number = 2026): string {
+  const media = calculateIndicatorMedia(ind.months);
+  const filledMonths = Object.entries(ind.months).filter(([_, v]) => v !== null && v !== undefined);
+  
+  if (filledMonths.length === 0) {
+    return `Ciclo ${year}: Indicador em fase de planejamento e baseline. Metas fixadas em Meta 1: ${ind.meta1}${ind.unit === '%' ? '%' : ''}, Meta 3: ${ind.meta3}${ind.unit === '%' ? '%' : ''} e Meta 5: ${ind.meta5}${ind.unit === '%' ? '%' : ''}.`;
+  }
+
+  const lastMonthEntry = filledMonths[filledMonths.length - 1];
+  const lastMonthName = lastMonthEntry[0];
+  const lastMonthVal = lastMonthEntry[1] as number;
+
+  let statusText = '';
+  let gapOrSuperacao = '';
+
+  if (ind.polarity === 'lower_is_better') {
+    if (media <= ind.meta5) {
+      statusText = `excelência com superação contínua da Meta 5 (${ind.meta5})`;
+      gapOrSuperacao = `Resultado médio de ${media} ${ind.unit} supera o patamar de superação estipulado.`;
+    } else if (media <= ind.meta3) {
+      statusText = `atendimento pleno da Meta 3 (${ind.meta3})`;
+      gapOrSuperacao = `Resultado médio de ${media} ${ind.unit} dentro do planejado para a unidade.`;
+    } else if (media <= ind.meta1) {
+      statusText = `zona de atenção próxima à Meta 1 (${ind.meta1})`;
+      gapOrSuperacao = `Resultado médio de ${media} ${ind.unit} necessita de plano de contenção para convergir à Meta 3.`;
+    } else {
+      statusText = `desvio crítico acima da tolerância máxima (${ind.meta1})`;
+      gapOrSuperacao = `Resultado médio de ${media} ${ind.unit} requer aplicação imediata de análise de causa raiz.`;
+    }
+  } else {
+    if (media >= ind.meta5) {
+      statusText = `nível máximo de superação da Meta 5 (${ind.meta5}%)`;
+      gapOrSuperacao = `Média realizada de ${media}% consolida o indicador como referência corporativa no Pilar ET.`;
+    } else if (media >= ind.meta3) {
+      statusText = `conformidade com a Meta 3 planejada (${ind.meta3}%)`;
+      gapOrSuperacao = `Média realizada de ${media}% atende integralmente aos critérios do Selo Bronze.`;
+    } else if (media >= ind.meta1) {
+      statusText = `nível de tolerância da Meta 1 (${ind.meta1}%)`;
+      gapOrSuperacao = `Média realizada de ${media}% indica estabilidade mínima, porém com GAP para a Meta 3.`;
+    } else {
+      statusText = `GAP em relação à Meta 1 (${ind.meta1}%)`;
+      gapOrSuperacao = `Média realizada de ${media}% aponta defasagem de ${(ind.meta1 - media).toFixed(1)} p.p.`;
+    }
+  }
+
+  // Complementos específicos baseados na identidade do indicador
+  let specificAdvice = '';
+  switch (ind.id) {
+    case 'habilidade_piloto':
+      specificAdvice = `Mapeamento DTO consolidado via tablet operacional. Recomenda-se acompanhamento presencial na troca de turno entre T1, T2 e T3.`;
+      break;
+    case 'conhecimento_unidade':
+      specificAdvice = `Necessário gerenciar a liberação de carga horária para temas corporativos e evitar inclusões em lote que diluam a curva de adesão.`;
+      break;
+    case 'conhecimento_pilares':
+      specificAdvice = `Revisão do catálogo de 30 temas do Superar, eliminando trilhas extensas (+24h) sem aderência direta à rotina fabril de Feira de Santana.`;
+      break;
+    case 'obrigatorios_portal_enk':
+      specificAdvice = `Manter a prática de 100% de conclusão prévia na integração antes do acesso às linhas operacionais.`;
+      break;
+    case 'instrutores_internos':
+      specificAdvice = `Manutenção da rede de multiplicadores internos de linha. Recomendado planejamento anual de reciclagem didática.`;
+      break;
+    case 'jornada_lideranca':
+      specificAdvice = `Sustentar engajamento contínuo dos supervisores e coordenadores nas ações da jornada até o fechamento do ciclo.`;
+      break;
+    case 'perdas_mao_de_obra':
+      specificAdvice = `Padronização do memorial de cálculo técnico junto ao Educador Corporativo e expansão das ferramentas TWTTP e HERCA.`;
+      break;
+    case 'requisitos_legais':
+      specificAdvice = `Monitoramento antecipado de vencimentos de NRs e reciclagens compulsórias para mitigar passivos de segurança.`;
+      break;
+    case 'turnover':
+      specificAdvice = `Intensificar plano de retenção nos primeiros 90 dias de contratação e monitoramento das escalas de turnos noturnos.`;
+      break;
+    default:
+      specificAdvice = `Acompanhamento quinzenal em reunião de comitê de pilar com a liderança imediata.`;
+  }
+
+  return `Diagnóstico Ciclo ${year}: O indicador opera em ${statusText}. ${gapOrSuperacao} Último mês apurado (${lastMonthName}): ${lastMonthVal}${ind.unit === '%' ? '%' : ''}. Ação recomendada: ${specificAdvice}`;
+}
+
+// ============================================================================
+// DADOS DO CICLO 2026 (OFICIAL DA PLANILHA)
+// ============================================================================
+export const SUPERAR_AUDITS_2026: SuperarAudit[] = [
   {
     id: 'aud_passo',
     name: 'AUDITORIA DE PASSO',
@@ -103,7 +196,7 @@ export const SUPERAR_AUDITS_INITIAL: SuperarAudit[] = [
   }
 ];
 
-export const SUPERAR_INDICATORS_INITIAL: SuperarMonthlyIndicator[] = [
+export const SUPERAR_INDICATORS_2026: SuperarMonthlyIndicator[] = [
   {
     id: 'habilidade_piloto',
     name: 'Atendimento da matriz de habilidade por função (Piloto)',
@@ -339,6 +432,90 @@ export const SUPERAR_INDICATORS_INITIAL: SuperarMonthlyIndicator[] = [
     }
   }
 ];
+
+// ============================================================================
+// DADOS DO CICLO 2027 (PLANEJAMENTO & PROJEÇÕES PARA O PRÓXIMO ANO)
+// ============================================================================
+export const SUPERAR_AUDITS_2027: SuperarAudit[] = [
+  {
+    id: 'aud_passo_2027',
+    name: 'AUDITORIA DE PASSO',
+    meta: '94%',
+    metaNumeric: 94,
+    months: {
+      JAN: null, FEV: null, MAR: null, ABR: null, MAI: null, JUN: null,
+      JUL: null, AGO: null, SET: null, OUT: null, NOV: null, DEZ: null
+    },
+    media: 'Planejado',
+    unit: '%'
+  },
+  {
+    id: 'aud_selo_2027',
+    name: 'AUDITORIA DE SELO',
+    meta: '95%',
+    metaNumeric: 95,
+    months: {
+      JAN: null, FEV: null, MAR: null, ABR: null, MAI: null, JUN: null,
+      JUL: null, AGO: null, SET: null, OUT: null, NOV: null, DEZ: null
+    },
+    media: 'Planejado',
+    unit: '%'
+  },
+  {
+    id: 'aud_pilar_2027',
+    name: 'AUDITORIA DE PILAR',
+    meta: '95%',
+    metaNumeric: 95,
+    months: {
+      JAN: null, FEV: null, MAR: null, ABR: null, MAI: null, JUN: null,
+      JUL: null, AGO: null, SET: null, OUT: null, NOV: null, DEZ: null
+    },
+    media: 'Planejado',
+    unit: '%'
+  },
+  {
+    id: 'conf_processo_2027',
+    name: 'CONFIRMAÇÃO DE PROCESSO',
+    meta: '5.0',
+    metaNumeric: 5.0,
+    months: {
+      JAN: null, FEV: null, MAR: null, ABR: null, MAI: null, JUN: null,
+      JUL: null, AGO: null, SET: null, OUT: null, NOV: null, DEZ: null
+    },
+    media: 'Planejado',
+    unit: 'pontos'
+  },
+  {
+    id: 'auto_avaliacao_2027',
+    name: 'AUTO AVALIAÇÃO',
+    meta: '95%',
+    metaNumeric: 95,
+    months: {
+      JAN: null, FEV: null, MAR: null, ABR: null, MAI: null, JUN: null,
+      JUL: null, AGO: null, SET: null, OUT: null, NOV: null, DEZ: null
+    },
+    media: 'Planejado',
+    unit: '%'
+  }
+];
+
+export const SUPERAR_INDICATORS_2027: SuperarMonthlyIndicator[] = SUPERAR_INDICATORS_2026.map(ind => ({
+  ...ind,
+  meta1: ind.polarity === 'lower_is_better' ? ind.meta1 : Math.min(100, Number((ind.meta1 * 1.02).toFixed(1))),
+  meta3: ind.polarity === 'lower_is_better' ? ind.meta3 : Math.min(100, Number((ind.meta3 * 1.02).toFixed(1))),
+  meta5: ind.polarity === 'lower_is_better' ? ind.meta5 : Math.min(100, Number((ind.meta5 * 1.01).toFixed(1))),
+  months: {
+    JAN: null, FEV: null, MAR: null, ABR: null, MAI: null, JUN: null,
+    JUL: null, AGO: null, SET: null, OUT: null, NOV: null, DEZ: null
+  },
+  media: 0,
+  acumulado: '0.0',
+  notes: `Planejamento 2027: Meta ajustada para consolidação do Selo Prata/Ouro na Unidade Bahia.`
+}));
+
+// Fallbacks de compatibilidade
+export const SUPERAR_AUDITS_INITIAL = SUPERAR_AUDITS_2026;
+export const SUPERAR_INDICATORS_INITIAL = SUPERAR_INDICATORS_2026;
 
 export const SELO_PREMISES_INITIAL: SeloPremise[] = [
   {

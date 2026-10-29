@@ -30,7 +30,8 @@ import { AuditFormulasModal } from './peopleAnalytics/AuditFormulasModal';
 import { CalculationRulesModal } from './peopleAnalytics/CalculationRulesModal';
 import { SuperarTab } from './peopleAnalytics/SuperarTab';
 import { 
-  SUPERAR_AUDITS_INITIAL, SUPERAR_INDICATORS_INITIAL, 
+  SUPERAR_AUDITS_2026, SUPERAR_INDICATORS_2026, 
+  SUPERAR_AUDITS_2027, SUPERAR_INDICATORS_2027,
   SuperarAudit, SuperarMonthlyIndicator 
 } from '../data/superarInitialData';
 
@@ -91,41 +92,56 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
     }
   });
 
-  // Estado das Auditorias e Indicadores do Programa Superar
-  const [superarIndicators, setSuperarIndicators] = useState<SuperarMonthlyIndicator[]>(() => {
+  // Estado das Auditorias e Indicadores do Programa Superar organizados por Ano (2026 e 2027)
+  const [superarYear, setSuperarYear] = useState<number>(2026);
+  const [superarDataByYear, setSuperarDataByYear] = useState<{
+    [year: number]: {
+      indicators: SuperarMonthlyIndicator[];
+      audits: SuperarAudit[];
+    };
+  }>(() => {
     try {
-      const stored = localStorage.getItem('kba1_superar_indicators_v1');
-      return stored ? JSON.parse(stored) : SUPERAR_INDICATORS_INITIAL;
+      const stored2026Ind = localStorage.getItem('kba1_superar_indicators_2026');
+      const stored2027Ind = localStorage.getItem('kba1_superar_indicators_2027');
+      const stored2026Aud = localStorage.getItem('kba1_superar_audits_2026');
+      const stored2027Aud = localStorage.getItem('kba1_superar_audits_2027');
+
+      return {
+        2026: {
+          indicators: stored2026Ind ? JSON.parse(stored2026Ind) : SUPERAR_INDICATORS_2026,
+          audits: stored2026Aud ? JSON.parse(stored2026Aud) : SUPERAR_AUDITS_2026,
+        },
+        2027: {
+          indicators: stored2027Ind ? JSON.parse(stored2027Ind) : SUPERAR_INDICATORS_2027,
+          audits: stored2027Aud ? JSON.parse(stored2027Aud) : SUPERAR_AUDITS_2027,
+        }
+      };
     } catch {
-      return SUPERAR_INDICATORS_INITIAL;
+      return {
+        2026: { indicators: SUPERAR_INDICATORS_2026, audits: SUPERAR_AUDITS_2026 },
+        2027: { indicators: SUPERAR_INDICATORS_2027, audits: SUPERAR_AUDITS_2027 },
+      };
     }
   });
 
-  const [superarAudits, setSuperarAudits] = useState<SuperarAudit[]>(() => {
-    try {
-      const stored = localStorage.getItem('kba1_superar_audits_v1');
-      return stored ? JSON.parse(stored) : SUPERAR_AUDITS_INITIAL;
-    } catch {
-      return SUPERAR_AUDITS_INITIAL;
-    }
-  });
+  const currentSuperarIndicators = superarDataByYear[superarYear]?.indicators || SUPERAR_INDICATORS_2026;
+  const currentSuperarAudits = superarDataByYear[superarYear]?.audits || SUPERAR_AUDITS_2026;
 
-  const saveSuperarIndicators = (data: SuperarMonthlyIndicator[]) => {
-    setSuperarIndicators(data);
-    try {
-      localStorage.setItem('kba1_superar_indicators_v1', JSON.stringify(data));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const saveSuperarAudits = (data: SuperarAudit[]) => {
-    setSuperarAudits(data);
-    try {
-      localStorage.setItem('kba1_superar_audits_v1', JSON.stringify(data));
-    } catch (e) {
-      console.error(e);
-    }
+  const saveSuperarYearData = (y: number, inds: SuperarMonthlyIndicator[], auds: SuperarAudit[]) => {
+    setSuperarDataByYear(prev => {
+      const next = {
+        ...prev,
+        [y]: { indicators: inds, audits: auds }
+      };
+      try {
+        localStorage.setItem(`kba1_superar_indicators_${y}`, JSON.stringify(inds));
+        localStorage.setItem(`kba1_superar_audits_${y}`, JSON.stringify(auds));
+      } catch (e) {
+        console.error(e);
+      }
+      return next;
+    });
+    showToast(`Dados do Ciclo ${y} salvos com sucesso!`);
   };
 
   // Mapeamento de Macroáreas
@@ -919,41 +935,18 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
             />
           )}
 
-          {/* ABA SUPERAR: PROGRAMA SUPERAR OFICIAL */}
+          {/* ABA SUPERAR: PROGRAMA SUPERAR OFICIAL COM CICLOS 2026 E 2027 */}
           {activeTab === 'superar' && (
             <SuperarTab
+              year={superarYear}
+              onYearChange={(y) => setSuperarYear(y)}
+              audits={currentSuperarAudits}
+              indicators={currentSuperarIndicators}
+              onSaveYearData={saveSuperarYearData}
               onOpenDataEntry={() => {
                 setActiveTab('data_entry');
                 setDataEntryTab('manual');
                 setManualFormType('superar');
-              }}
-              audits={superarAudits}
-              indicators={superarIndicators}
-              onUpdateIndicatorMonth={(indId, m, val) => {
-                const updated = superarIndicators.map(item => {
-                  if (item.id === indId) {
-                    const months = { ...item.months, [m]: val };
-                    const filled = Object.values(months).filter(v => v !== null && v !== undefined) as number[];
-                    const media = filled.length > 0 ? Number((filled.reduce((a, b) => a + b, 0) / filled.length).toFixed(1)) : 0;
-                    return { ...item, months, media };
-                  }
-                  return item;
-                });
-                saveSuperarIndicators(updated);
-                showToast(`Indicador atualizado para o mês ${m}!`);
-              }}
-              onUpdateAuditMonth={(audId, m, val) => {
-                const updated = superarAudits.map(item => {
-                  if (item.id === audId) {
-                    const months = { ...item.months, [m]: val };
-                    const filled = Object.values(months).filter(v => v !== null && v !== undefined && typeof v === 'number') as number[];
-                    const media = filled.length > 0 ? Number((filled.reduce((a, b) => a + b, 0) / filled.length).toFixed(1)) : 0;
-                    return { ...item, months, media };
-                  }
-                  return item;
-                });
-                saveSuperarAudits(updated);
-                showToast(`Auditoria atualizada para o mês ${m}!`);
               }}
             />
           )}
@@ -1227,23 +1220,48 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                 {manualFormType === 'superar' && (
                   <div className="space-y-6">
                     <div className="bg-[#eff4ff] p-5 rounded-2xl border border-[#cbd5e1] space-y-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
                         <div>
                           <h5 className="font-bold text-sm text-[#0b1c30] flex items-center gap-2">
                             <Award className="w-4 h-4 text-emerald-600" />
-                            Lançar / Atualizar Mês de Indicador Superar
+                            Lançar / Atualizar Mês de Indicador Superar ({superarYear})
                           </h5>
                           <p className="text-xs text-slate-500">
                             Atualize a realização mensal dos 9 indicadores do Pilar ET (Educação e Treinamento)
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setActiveTab('superar')}
-                          className="px-3 py-1.5 text-xs font-bold text-[#306576] bg-white rounded-lg border border-slate-200 hover:bg-slate-50 self-start sm:self-auto shadow-2xs"
-                        >
-                          Ir para Aba Superar &rarr;
-                        </button>
+                        
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {/* Seletor de Ano no Formulário */}
+                          <div className="inline-flex rounded-xl bg-slate-200/80 p-0.5 border border-slate-300">
+                            <button
+                              type="button"
+                              onClick={() => setSuperarYear(2026)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all ${
+                                superarYear === 2026 ? 'bg-[#0a3641] text-[#6ffbbe] shadow-xs' : 'text-slate-700'
+                              }`}
+                            >
+                              2026 (Atual)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setSuperarYear(2027)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all ${
+                                superarYear === 2027 ? 'bg-[#0a3641] text-[#6ffbbe] shadow-xs' : 'text-slate-700'
+                              }`}
+                            >
+                              2027 (Planejamento)
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab('superar')}
+                            className="px-3 py-1.5 text-xs font-bold text-[#306576] bg-white rounded-lg border border-slate-200 hover:bg-slate-50 shadow-2xs"
+                          >
+                            Ir para Aba Superar &rarr;
+                          </button>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
@@ -1255,7 +1273,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                             onChange={(e) => {
                               const indId = e.target.value;
                               setSelectedSuperarIndId(indId);
-                              const ind = superarIndicators.find(i => i.id === indId);
+                              const ind = currentSuperarIndicators.find(i => i.id === indId);
                               if (ind) {
                                 const v = ind.months[selectedSuperarMonth];
                                 setSuperarValInput(v !== null && v !== undefined ? String(v) : '');
@@ -1264,7 +1282,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                             }}
                             className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#306576]"
                           >
-                            {superarIndicators.map(i => (
+                            {currentSuperarIndicators.map(i => (
                               <option key={i.id} value={i.id}>
                                 {i.name} (Meta 1: {i.meta1}{i.unit === '%' ? '%' : ''} | Meta 3: {i.meta3}{i.unit === '%' ? '%' : ''})
                               </option>
@@ -1280,7 +1298,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                             onChange={(e) => {
                               const m = e.target.value;
                               setSelectedSuperarMonth(m);
-                              const ind = superarIndicators.find(i => i.id === selectedSuperarIndId);
+                              const ind = currentSuperarIndicators.find(i => i.id === selectedSuperarIndId);
                               if (ind) {
                                 const v = ind.months[m];
                                 setSuperarValInput(v !== null && v !== undefined ? String(v) : '');
@@ -1289,7 +1307,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                             className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#306576]"
                           >
                             {['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'].map(m => (
-                              <option key={m} value={m}>{m} / 2026</option>
+                              <option key={m} value={m}>{m} / {superarYear}</option>
                             ))}
                           </select>
                         </div>
@@ -1330,7 +1348,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                               alert('Por favor informe um valor numérico válido.');
                               return;
                             }
-                            const updated = superarIndicators.map(item => {
+                            const updated = currentSuperarIndicators.map(item => {
                               if (item.id === selectedSuperarIndId) {
                                 const months = { ...item.months, [selectedSuperarMonth]: num };
                                 const filled = Object.values(months).filter(v => v !== null && v !== undefined) as number[];
@@ -1340,13 +1358,12 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                               }
                               return item;
                             });
-                            saveSuperarIndicators(updated);
-                            showToast(`Indicador atualizado para ${selectedSuperarMonth}: ${num}!`);
+                            saveSuperarYearData(superarYear, updated, currentSuperarAudits);
                           }}
                           className="px-5 py-2.5 bg-[#0a3641] hover:bg-[#134e5e] text-[#6ffbbe] font-black text-xs rounded-xl shadow-xs transition-colors flex items-center gap-2"
                         >
                           <CheckCircle2 className="w-4 h-4" />
-                          Gravar e Atualizar Superar
+                          Gravar no Ciclo {superarYear}
                         </button>
                       </div>
                     </div>
@@ -1355,7 +1372,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
                       <div>
                         <h5 className="font-bold text-xs text-slate-800 uppercase tracking-wider">
-                          Atualizar Auditorias & Avaliações Superar
+                          Atualizar Auditorias & Avaliações Superar ({superarYear})
                         </h5>
                         <p className="text-[11px] text-slate-500">
                           Auditoria de Passo, Auditoria de Selo, Confirmação de Processo e Auto Avaliação
@@ -1370,7 +1387,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                             onChange={e => setSelectedSuperarAuditId(e.target.value)}
                             className="w-full p-2 bg-white border border-slate-200 rounded-xl font-medium"
                           >
-                            {superarAudits.map(a => (
+                            {currentSuperarAudits.map(a => (
                               <option key={a.id} value={a.id}>{a.name} (Meta: {a.meta})</option>
                             ))}
                           </select>
@@ -1384,7 +1401,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                             className="w-full p-2 bg-white border border-slate-200 rounded-xl font-bold"
                           >
                             {['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'].map(m => (
-                              <option key={m} value={m}>{m}</option>
+                              <option key={m} value={m}>{m} / {superarYear}</option>
                             ))}
                           </select>
                         </div>
@@ -1410,7 +1427,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                               alert('Por favor informe um valor numérico válido.');
                               return;
                             }
-                            const updated = superarAudits.map(item => {
+                            const updated = currentSuperarAudits.map(item => {
                               if (item.id === selectedSuperarAuditId) {
                                 const months = { ...item.months, [selectedSuperarAuditMonth]: num };
                                 const filled = Object.values(months).filter(v => v !== null && v !== undefined && typeof v === 'number') as number[];
@@ -1419,12 +1436,11 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                               }
                               return item;
                             });
-                            saveSuperarAudits(updated);
-                            showToast(`Auditoria atualizada para ${selectedSuperarAuditMonth}: ${num}!`);
+                            saveSuperarYearData(superarYear, currentSuperarIndicators, updated);
                           }}
                           className="px-4 py-2 bg-[#306576] hover:bg-[#0a3641] text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
                         >
-                          Gravar Auditoria
+                          Gravar Auditoria no Ciclo {superarYear}
                         </button>
                       </div>
                     </div>
