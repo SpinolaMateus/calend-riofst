@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   AreaDefinition, 
   IntegrationSession, 
@@ -27,6 +27,7 @@ import { UnitSettingsModal } from './components/UnitSettingsModal';
 import { HomeScreen } from './components/HomeScreen';
 import { CorporateCalendarView } from './components/CorporateCalendarView';
 import { ConnectivityModal } from './components/ConnectivityModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { copyElementAsImage, exportElementToPDF, exportToExcel, parseExcelFile } from './utils/exportUtils';
 import { 
   CheckCircle2, AlertCircle, Info, Home, 
@@ -44,6 +45,7 @@ import {
   upsertIntegrationSessionToSupabase,
   deleteIntegrationSessionFromSupabase,
   subscribeToIntegrationSessions,
+  syncIntegrationToSupabase,
 } from './services/supabaseClient';
 import { FormationsDashboard } from './components/FormationsDashboard';
 import { StatusTrackingView } from './components/StatusTrackingView';
@@ -93,6 +95,8 @@ export default function App() {
     return INTEGRATION_AUDIENCES.find((audience) => audience.id === saved)?.id || 'geral';
   });
 
+  const hasAutoBackedUpRef = useRef(false);
+
   // Modals & Popups
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [sessionToEdit, setSessionToEdit] = useState<IntegrationSession | null>(null);
@@ -131,101 +135,115 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    const applyCloudStatuses = async () => {
-      const { data, error } = await fetchIntegrationStatusesFromSupabase();
-      if (cancelled) return;
-      if (error) {
-        console.error('Could not load integration activity statuses from Supabase', error);
-        setIsStatusSyncReady(false);
-        setStatusSyncMessage(
-          /does not exist|schema cache|could not find the table/i.test(error.message)
-            ? 'Ative os status compartilhados: abra Vercel & Supabase, copie o SQL atualizado e execute-o no SQL Editor do Supabase.'
-            : 'Não foi possível conectar ao Supabase para carregar os status compartilhados.',
-        );
-        return;
-      }
-      if (!data) return;
-      setIsStatusSyncReady(true);
-      setStatusSyncMessage('');
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-      setSessions((current) => {
-        return current.map((session) => (
-          Object.prototype.hasOwnProperty.call(data, session.id)
-            ? { ...session, isCompleted: data[session.id] }
-            : session
-        ));
-      });
+    const applyCloudStatuses = async () => {
+      try {
+        const { data, error } = await fetchIntegrationStatusesFromSupabase();
+        if (cancelled) return;
+        if (error) {
+          console.error('Could not load integration activity statuses from Supabase', error);
+          setIsStatusSyncReady(false);
+          setStatusSyncMessage(
+            /does not exist|schema cache|could not find the table/i.test(error.message)
+              ? 'Ative os status compartilhados: abra Vercel & Supabase, copie o SQL atualizado e execute-o no SQL Editor do Supabase.'
+              : 'Não foi possível conectar ao Supabase para carregar os status compartilhados.',
+          );
+          return;
+        }
+        if (!data) return;
+        setIsStatusSyncReady(true);
+        setStatusSyncMessage('');
+
+        setSessions((current) => {
+          return current.map((session) => (
+            Object.prototype.hasOwnProperty.call(data, session.id)
+              ? { ...session, isCompleted: data[session.id] }
+              : session
+          ));
+        });
+      } catch (err) {
+        console.error('Error applying cloud statuses:', err);
+      }
     };
+
     const unsubscribeFromStatusChanges = subscribeToIntegrationStatusChanges(() => {
       void applyCloudStatuses();
     });
 
     const loadCloudData = async () => {
-      const [sessionsResult, statusesResult] = await Promise.all([
-        fetchIntegrationFromSupabase(),
-        fetchIntegrationStatusesFromSupabase(),
-      ]);
-      if (cancelled) return;
-      if (sessionsResult.error) {
-        console.error('Could not load integration schedule from Supabase', sessionsResult.error);
-      }
-      if (statusesResult.error) {
-        console.error('Could not load integration activity statuses from Supabase', statusesResult.error);
-        setIsStatusSyncReady(false);
-        setStatusSyncMessage(
-          /does not exist|schema cache|could not find the table/i.test(statusesResult.error.message)
-            ? 'Ative os status compartilhados: abra Vercel & Supabase, copie o SQL atualizado e execute-o no SQL Editor do Supabase.'
-            : 'Não foi possível conectar ao Supabase para carregar os status compartilhados.',
-        );
-      } else {
-        setIsStatusSyncReady(true);
-        setStatusSyncMessage('');
-      }
-      const cloudStatuses = statusesResult.data ?? {};
-      if (!sessionsResult.data?.length && !Object.keys(cloudStatuses).length) {
-        // If Supabase table is empty, auto-backup current sessions to cloud
-        setSessions((current) => {
-          if (current.length > 0) {
-            void syncIntegrationToSupabase(current);
+      try {
+        const [sessionsResult, statusesResult] = await Promise.all([
+          fetchIntegrationFromSupabase(),
+          fetchIntegrationStatusesFromSupabase(),
+        ]);
+        if (cancelled) return;
+        if (sessionsResult.error) {
+          console.error('Could not load integration schedule from Supabase', sessionsResult.error);
+        }
+        if (statusesResult.error) {
+          console.error('Could not load integration activity statuses from Supabase', statusesResult.error);
+          setIsStatusSyncReady(false);
+          setStatusSyncMessage(
+            /does not exist|schema cache|could not find the table/i.test(statusesResult.error.message)
+              ? 'Ative os status compartilhados: abra Vercel & Supabase, copie o SQL atualizado e execute-o no SQL Editor do Supabase.'
+              : 'Não foi possível conectar ao Supabase para carregar os status compartilhados.',
+          );
+        } else {
+          setIsStatusSyncReady(true);
+          setStatusSyncMessage('');
+        }
+
+        const cloudStatuses = statusesResult.data ?? {};
+        const cloudSessions = sessionsResult.data ?? [];
+
+        if (cloudSessions.length > 0) {
+          setSessions((current) => {
+            const merged = new Map(current.map((session) => [session.id, session]));
+            for (const session of cloudSessions) {
+              const previous = merged.get(session.id);
+              merged.set(session.id, syncSessionTimeAndCH({
+                ...session,
+                audience: session.audience || 'geral',
+                isCompleted: Object.prototype.hasOwnProperty.call(cloudStatuses, session.id)
+                  ? cloudStatuses[session.id]
+                  : previous?.isCompleted ?? session.isCompleted ?? false,
+              }));
+            }
+            return Array.from(merged.values()).map((session) => (
+              Object.prototype.hasOwnProperty.call(cloudStatuses, session.id)
+                ? { ...session, isCompleted: cloudStatuses[session.id] }
+                : session
+            ));
+          });
+        } else if (!hasAutoBackedUpRef.current) {
+          // Se a nuvem estiver vazia na primeira vez, fazer upload inicial seguro
+          hasAutoBackedUpRef.current = true;
+          if (sessions.length > 0) {
+            void syncIntegrationToSupabase(sessions);
           }
-          return current;
-        });
-        return;
+        }
+      } catch (err) {
+        console.error('Failed to load cloud data safely:', err);
       }
-
-      setSessions((current) => {
-        const merged = new Map(current.map((session) => [session.id, session]));
-        for (const session of sessionsResult.data ?? []) {
-          const previous = merged.get(session.id);
-          merged.set(session.id, syncSessionTimeAndCH({
-            ...session,
-            audience: session.audience || 'geral',
-            isCompleted: Object.prototype.hasOwnProperty.call(cloudStatuses, session.id)
-              ? cloudStatuses[session.id]
-              : previous?.isCompleted ?? session.isCompleted ?? false,
-          }));
-        }
-
-        // Auto-backup any local sessions not yet in the cloud
-        const cloudIds = new Set((sessionsResult.data ?? []).map((s) => s.id));
-        const unsynced = current.filter((s) => !cloudIds.has(s.id));
-        if (unsynced.length > 0) {
-          void syncIntegrationToSupabase(unsynced);
-        }
-
-        return Array.from(merged.values()).map((session) => (
-          Object.prototype.hasOwnProperty.call(cloudStatuses, session.id)
-            ? { ...session, isCompleted: cloudStatuses[session.id] }
-            : session
-        ));
-      });
     };
+
+    const debouncedLoadCloudData = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        void loadCloudData();
+      }, 1000);
+    };
+
     const unsubscribeFromSessionChanges = subscribeToIntegrationSessions(() => {
-      void loadCloudData();
+      debouncedLoadCloudData();
     });
+
     void loadCloudData();
+
     return () => {
       cancelled = true;
+      if (debounceTimer) clearTimeout(debounceTimer);
       unsubscribeFromStatusChanges();
       unsubscribeFromSessionChanges();
     };
@@ -677,17 +695,19 @@ export default function App() {
       {/* ========================================================================= */}
       {activeApp === 'home' && (
         <main className="flex-1">
-          <HomeScreen
-            unitInfo={unitInfo}
-            onSelectIntegration={() => setActiveApp('integration')}
-            onSelectCalendar={() => setActiveApp('calendar')}
-            onSelectFormations={() => setActiveApp('formations')}
-            onSelectActionPlan={() => setActiveApp('action_plan')}
-            integrationEventsCount={sessions.length}
-            calendarEventsCount={calendarEventsCount}
-            onOpenAdminAccess={() => requestAdminAccess()}
-            isAdmin={isAdmin}
-          />
+          <ErrorBoundary moduleName="Tela Inicial do Portal">
+            <HomeScreen
+              unitInfo={unitInfo}
+              onSelectIntegration={() => setActiveApp('integration')}
+              onSelectCalendar={() => setActiveApp('calendar')}
+              onSelectFormations={() => setActiveApp('formations')}
+              onSelectActionPlan={() => setActiveApp('action_plan')}
+              integrationEventsCount={sessions.length}
+              calendarEventsCount={calendarEventsCount}
+              onOpenAdminAccess={() => requestAdminAccess()}
+              isAdmin={isAdmin}
+            />
+          </ErrorBoundary>
         </main>
       )}
 
@@ -695,101 +715,103 @@ export default function App() {
       {/* SCREEN 2: CRONOGRAMA DE INTEGRAÇÃO (MODULE 1) */}
       {/* ========================================================================= */}
       {activeApp === 'integration' && (
-        <div id="integration-capture-content" className="bg-slate-100/70">
-          <Header
-            unitInfo={unitInfo}
-            viewMode={viewMode}
-            onChangeViewMode={setViewMode}
-            selectedDay={selectedDay}
-            onSelectDay={setSelectedDay}
-            availableDays={availableDays}
-            selectedAudience={selectedAudience}
-            audienceCounts={audienceCounts}
-            onSelectAudience={(audience) => {
-              setSelectedAudience(audience);
-              setSelectedDay('all');
-            }}
-            onOpenNewSession={() => handleAddNewSession()}
-            onExportPDF={handleExportPDF}
-            onPrintPDF={handlePrintPDF}
-            onCopyAsImage={handleCopyScheduleAsImage}
-            isCopyingImage={isCopyingImage}
-            onExportExcel={handleExportExcel}
-            onImportExcel={handleImportExcel}
-            onOpenAreaManager={() => {
-              if (isAdmin) setIsAreaManagerOpen(true);
-              else requestAdminAccess(() => setIsAreaManagerOpen(true));
-            }}
-            onOpenUnitSettings={() => {
-              if (isAdmin) setIsUnitSettingsOpen(true);
-              else requestAdminAccess(() => setIsUnitSettingsOpen(true));
-            }}
-            onResetDefault={handleResetDefault}
-            isExportingPDF={isExportingPDF}
-            onSyncCloud={handleSyncAllIntegrationToCloud}
-            isCloudSyncing={isCloudSyncing}
-          />
+        <ErrorBoundary moduleName="Cronograma de Integração">
+          <div id="integration-capture-content" className="bg-slate-100/70">
+            <Header
+              unitInfo={unitInfo}
+              viewMode={viewMode}
+              onChangeViewMode={setViewMode}
+              selectedDay={selectedDay}
+              onSelectDay={setSelectedDay}
+              availableDays={availableDays}
+              selectedAudience={selectedAudience}
+              audienceCounts={audienceCounts}
+              onSelectAudience={(audience) => {
+                setSelectedAudience(audience);
+                setSelectedDay('all');
+              }}
+              onOpenNewSession={() => handleAddNewSession()}
+              onExportPDF={handleExportPDF}
+              onPrintPDF={handlePrintPDF}
+              onCopyAsImage={handleCopyScheduleAsImage}
+              isCopyingImage={isCopyingImage}
+              onExportExcel={handleExportExcel}
+              onImportExcel={handleImportExcel}
+              onOpenAreaManager={() => {
+                if (isAdmin) setIsAreaManagerOpen(true);
+                else requestAdminAccess(() => setIsAreaManagerOpen(true));
+              }}
+              onOpenUnitSettings={() => {
+                if (isAdmin) setIsUnitSettingsOpen(true);
+                else requestAdminAccess(() => setIsUnitSettingsOpen(true));
+              }}
+              onResetDefault={handleResetDefault}
+              isExportingPDF={isExportingPDF}
+              onSyncCloud={handleSyncAllIntegrationToCloud}
+              isCloudSyncing={isCloudSyncing}
+            />
 
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div id="printable-content" className="print-container">
-              <div className="hidden print:block mb-4 border-b pb-3 text-left">
-                <h1 className="text-xl font-bold uppercase">{unitInfo.unitName}</h1>
-                <p className="text-xs text-slate-700 font-medium">
-                  {unitInfo.cohortName} — {unitInfo.period}
-                </p>
-                <p className="text-[10px] text-slate-500">
-                  Local: {unitInfo.locationDefault} • Contato: {unitInfo.contactPerson}
-                </p>
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              <div id="printable-content" className="print-container">
+                <div className="hidden print:block mb-4 border-b pb-3 text-left">
+                  <h1 className="text-xl font-bold uppercase">{unitInfo.unitName}</h1>
+                  <p className="text-xs text-slate-700 font-medium">
+                    {unitInfo.cohortName} — {unitInfo.period}
+                  </p>
+                  <p className="text-[10px] text-slate-500">
+                    Local: {unitInfo.locationDefault} • Contato: {unitInfo.contactPerson}
+                  </p>
+                </div>
+
+                {viewMode === 'timeline' && (
+                  <VisualTimelineView
+                    sessions={audienceSessions}
+                    areas={areas}
+                    selectedDay={selectedDay}
+                    onUpdateSession={handleUpdateSession}
+                    onDeleteSession={handleDeleteSession}
+                    onDuplicateSession={handleDuplicateSession}
+                    onEditSession={handleEditSession}
+                    onAddNewSession={handleAddNewSession}
+                  />
+                )}
+
+                {viewMode === 'table' && (
+                  <TableScheduleView
+                    sessions={audienceSessions}
+                    areas={areas}
+                    selectedDay={selectedDay}
+                    onUpdateSession={handleUpdateSession}
+                    onDeleteSession={handleDeleteSession}
+                    onDuplicateSession={handleDuplicateSession}
+                    onEditSession={handleEditSession}
+                    onAddNewSession={handleAddNewSession}
+                  />
+                )}
+
+                {viewMode === 'status' && (
+                  <StatusTrackingView
+                    sessions={audienceSessions}
+                    selectedDay={selectedDay}
+                    syncMessage={statusSyncMessage}
+                    isSyncReady={isStatusSyncReady}
+                    onToggleStatus={handleToggleSessionStatus}
+                  />
+                )}
+
+                {viewMode === 'display' && (
+                  <PresentationView
+                    sessions={audienceSessions}
+                    areas={areas}
+                    unitInfo={unitInfo}
+                    selectedDay={selectedDay}
+                    onEditSession={handleEditSession}
+                  />
+                )}
               </div>
-
-              {viewMode === 'timeline' && (
-                <VisualTimelineView
-                  sessions={audienceSessions}
-                  areas={areas}
-                  selectedDay={selectedDay}
-                  onUpdateSession={handleUpdateSession}
-                  onDeleteSession={handleDeleteSession}
-                  onDuplicateSession={handleDuplicateSession}
-                  onEditSession={handleEditSession}
-                  onAddNewSession={handleAddNewSession}
-                />
-              )}
-
-              {viewMode === 'table' && (
-                <TableScheduleView
-                  sessions={audienceSessions}
-                  areas={areas}
-                  selectedDay={selectedDay}
-                  onUpdateSession={handleUpdateSession}
-                  onDeleteSession={handleDeleteSession}
-                  onDuplicateSession={handleDuplicateSession}
-                  onEditSession={handleEditSession}
-                  onAddNewSession={handleAddNewSession}
-                />
-              )}
-
-              {viewMode === 'status' && (
-                <StatusTrackingView
-                  sessions={audienceSessions}
-                  selectedDay={selectedDay}
-                  syncMessage={statusSyncMessage}
-                  isSyncReady={isStatusSyncReady}
-                  onToggleStatus={handleToggleSessionStatus}
-                />
-              )}
-
-              {viewMode === 'display' && (
-                <PresentationView
-                  sessions={audienceSessions}
-                  areas={areas}
-                  unitInfo={unitInfo}
-                  selectedDay={selectedDay}
-                  onEditSession={handleEditSession}
-                />
-              )}
-            </div>
-          </main>
-        </div>
+            </main>
+          </div>
+        </ErrorBoundary>
       )}
 
       {/* ========================================================================= */}
@@ -797,22 +819,30 @@ export default function App() {
       {/* ========================================================================= */}
       {activeApp === 'calendar' && (
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <CorporateCalendarView
-            onBackToHome={() => setActiveApp('home')}
-            onGoToIntegration={() => setActiveApp('integration')}
-            onEventsChange={setCalendarEvents}
-          />
+          <ErrorBoundary moduleName="Calendário Corporativo">
+            <CorporateCalendarView
+              onBackToHome={() => setActiveApp('home')}
+              onGoToIntegration={() => setActiveApp('integration')}
+              onEventsChange={setCalendarEvents}
+            />
+          </ErrorBoundary>
         </main>
       )}
 
-      {activeApp === 'formations' && <FormationsDashboard />}
+      {activeApp === 'formations' && (
+        <ErrorBoundary moduleName="Dashboard de Formações">
+          <FormationsDashboard />
+        </ErrorBoundary>
+      )}
 
       {/* ========================================================================= */}
       {/* SCREEN 4: ACTION PLAN (GANTT MODEL) */}
       {/* ========================================================================= */}
       {activeApp === 'action_plan' && (
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <ActionPlanGanttView onBackToHome={() => setActiveApp('home')} />
+          <ErrorBoundary moduleName="Plano de Ação (Gantt)">
+            <ActionPlanGanttView onBackToHome={() => setActiveApp('home')} />
+          </ErrorBoundary>
         </main>
       )}
 
