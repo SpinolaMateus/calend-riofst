@@ -23,6 +23,9 @@ import { copyElementAsImage, exportElementToPDF } from '../utils/exportUtils';
 import { ExecutiveOverviewTab } from './peopleAnalytics/ExecutiveOverviewTab';
 import { HeadcountAnalyticsTab } from './peopleAnalytics/HeadcountAnalyticsTab';
 import { IndicatorsGGTab } from './peopleAnalytics/IndicatorsGGTab';
+import { DeliveriesAndVacanciesTab } from './peopleAnalytics/DeliveriesAndVacanciesTab';
+import { INITIAL_JOB_VACANCIES, INITIAL_GG_DELIVERABLES } from '../data/initialDeliveriesData';
+import { JobVacancy, GGDeliverable } from '../types/peopleAnalytics';
 import { AbsenteeismMovementsTab } from './peopleAnalytics/AbsenteeismMovementsTab';
 import { SectorsShiftsTab } from './peopleAnalytics/SectorsShiftsTab';
 import { FormationsDashboard } from './FormationsDashboard';
@@ -89,6 +92,26 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
       return stored ? JSON.parse(stored) : INITIAL_ACTION_PLANS;
     } catch {
       return INITIAL_ACTION_PLANS;
+    }
+  });
+
+  // Estado das Vagas Abertas por Fases (R&S)
+  const [vacancies, setVacancies] = useState<JobVacancy[]>(() => {
+    try {
+      const stored = localStorage.getItem('kba1_gg_job_positions_v1');
+      return stored ? JSON.parse(stored) : INITIAL_JOB_VACANCIES;
+    } catch {
+      return INITIAL_JOB_VACANCIES;
+    }
+  });
+
+  // Estado dos Entregáveis Estratégicos de G&G
+  const [deliverables, setDeliverables] = useState<GGDeliverable[]>(() => {
+    try {
+      const stored = localStorage.getItem('kba1_gg_deliverables_v1');
+      return stored ? JSON.parse(stored) : INITIAL_GG_DELIVERABLES;
+    } catch {
+      return INITIAL_GG_DELIVERABLES;
     }
   });
 
@@ -238,6 +261,26 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const saveVacancies = (data: JobVacancy[]) => {
+    setVacancies(data);
+    try {
+      localStorage.setItem('kba1_gg_job_positions_v1', JSON.stringify(data));
+    } catch (e) {
+      console.error(e);
+    }
+    showToast('Vagas atualizadas com sucesso!');
+  };
+
+  const saveDeliverables = (data: GGDeliverable[]) => {
+    setDeliverables(data);
+    try {
+      localStorage.setItem('kba1_gg_deliverables_v1', JSON.stringify(data));
+    } catch (e) {
+      console.error(e);
+    }
+    showToast('Entregáveis G&G atualizados com sucesso!');
   };
 
   // =========================================================================
@@ -692,7 +735,7 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
               { id: 'overview', label: 'Visão Executiva', icon: BarChart3 },
               { id: 'headcount', label: `Quadro de Pessoal (${filteredEmployees.length})`, icon: Users },
               { id: 'jobs_shifts', label: 'Setores & Turnos', icon: Clock },
-              { id: 'indicators', label: 'Indicadores G&G (9)', icon: TrendingUp },
+              { id: 'indicators', label: `Status Entregas & Vagas (${vacancies.filter(v => v.stage !== 'Admitido' && v.stage !== 'Cancelada').length})`, icon: Briefcase },
               { id: 'superar', label: 'Programa Superar', icon: Award },
               { id: 'absenteeism', label: 'Absenteísmo & Movimentações', icon: TrendingDown },
               { id: 'trainings', label: 'Treinamento & DHO', icon: Layers },
@@ -922,16 +965,14 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
             <SectorsShiftsTab employees={filteredEmployees} />
           )}
 
-          {/* ABA 4: INDICADORES G&G (OFICIAIS COM BENTO GRID E MATRIZ 1/3/5) */}
+          {/* ABA 4: STATUS DE ENTREGAS & VAGAS ABERTAS (R&S E ENTREGÁVEIS G&G) */}
           {activeTab === 'indicators' && (
-            <IndicatorsGGTab
-              kpis={kpis}
-              onOpenAuditModal={() => setIsAuditModalOpen(true)}
-              onEditKPI={(kpi) => {
-                setSelectedKPI(kpi);
-                setKpiActualInput(String(kpi.actual !== null ? kpi.actual : ''));
-                setIsKPIModalOpen(true);
-              }}
+            <DeliveriesAndVacanciesTab
+              vacancies={vacancies}
+              deliverables={deliverables}
+              employees={employees}
+              onSaveVacancies={saveVacancies}
+              onSaveDeliverables={saveDeliverables}
             />
           )}
 

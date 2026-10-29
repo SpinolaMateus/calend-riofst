@@ -96,3 +96,62 @@ export interface ExcelImportSummary {
   importDate: string;
 }
 
+// =========================================================================
+// MÓDULO: STATUS DE ENTREGAS & VAGAS ABERTAS (R&S E ENTREGÁVEIS G&G)
+// =========================================================================
+
+export type JobVacantStage = 
+  | 'RP' 
+  | 'Shortlist' 
+  | 'Entrevista' 
+  | 'Exames Médicos' 
+  | 'Integração' 
+  | 'Admitido' 
+  | 'Cancelada';
+
+export type JobVacantPriority = 'Normal' | 'Alta' | 'Urgente';
+
+export type JobVacantReason = 'Substituição' | 'Aumento de Quadro' | 'Licença/Afastamento';
+
+export interface JobVacancy {
+  id: string;
+  code: string; // Ex: RP-2026-012
+  jobTitle: string;
+  locationName: string; // Setor fabril
+  macroarea: string;
+  shiftCategory: ShiftCategory;
+  manager: string;
+  reason: JobVacantReason;
+  priority: JobVacantPriority;
+  stage: JobVacantStage;
+  openDate: string; // YYYY-MM-DD
+  slaTargetDays: number; // Ex: 30 dias para operacionais, 45 para técnicos
+  stageDates: {
+    rpDate?: string;
+    shortlistDate?: string;
+    interviewDate?: string;
+    medicalExamDate?: string;
+    integrationDate?: string;
+    closedDate?: string;
+  };
+  finalCandidateName?: string;
+  notes?: string;
+}
+
+export type DeliverableStatus = 'Planejado' | 'Em Andamento' | 'Concluído' | 'Em Risco' | 'Atrasado';
+
+export interface GGDeliverable {
+  id: string;
+  code: string; // Ex: ENT-2026-05
+  title: string;
+  category: 'Recrutamento & Seleção' | 'DHO & Treinamento' | 'Clima & Engajamento' | 'Relações Trabalhistas' | 'SSMA & Saúde Ocupacional';
+  scope: string; // Ex: Fábrica Toda, Onduladeira, Turno C
+  responsible: string;
+  targetDate: string; // YYYY-MM-DD
+  completedDate?: string;
+  status: DeliverableStatus;
+  progressPct: number; // 0 - 100
+  notes?: string;
+}
+
+
