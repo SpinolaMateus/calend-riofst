@@ -66,13 +66,14 @@ export const VisualTimelineView: React.FC<VisualTimelineViewProps> = ({
 
   // Helper colors
   const getAreaColor = (areaName: string, customColor?: string) => {
-    if (customColor) return customColor;
-    const found = areas.find((a) => a.name.toLowerCase() === areaName.toLowerCase());
-    return found ? found.bgColor : '#64748b';
+    const clean = (areaName || '').trim().toUpperCase();
+    const found = areas.find((a) => a.name.trim().toUpperCase() === clean);
+    return found ? found.bgColor : customColor || '#64748b';
   };
 
   const getAreaTextColor = (areaName: string) => {
-    const found = areas.find((a) => a.name.toLowerCase() === areaName.toLowerCase());
+    const clean = (areaName || '').trim().toUpperCase();
+    const found = areas.find((a) => a.name.trim().toUpperCase() === clean);
     return found ? found.textColor : '#ffffff';
   };
 

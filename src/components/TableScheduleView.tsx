@@ -3,7 +3,7 @@ import {
   Edit2, Copy, Trash2, Search, Filter, 
   ChevronDown, Plus, Check, ArrowUpDown, 
   Trash, ArrowUp, ArrowDown, Scissors, ClipboardList,
-  GripVertical, Calendar, Palette, X
+  GripVertical, Calendar, Palette, X, ArrowLeft, Layers, AlertCircle
 } from 'lucide-react';
 import { AreaDefinition, IntegrationSession } from '../types/schedule';
 import { 
@@ -22,6 +22,13 @@ interface TableScheduleViewProps {
   onEditSession: (session: IntegrationSession) => void;
   onAddNewSession: (dia?: number) => void;
   onReorderSessions?: (reorderedSessions: IntegrationSession[]) => void;
+  onSaveAreaCategory?: (
+    areaId: string,
+    updatedData: { name: string; bgColor: string; textColor: string; oldName?: string }
+  ) => void;
+  onCreateAreaCategory?: (newArea: AreaDefinition, applyToSessionId?: string) => void;
+  onDeleteAreaCategory?: (areaId: string) => void;
+  onOpenAreaManager?: () => void;
 }
 
 export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
@@ -34,6 +41,10 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
   onEditSession,
   onAddNewSession,
   onReorderSessions,
+  onSaveAreaCategory,
+  onCreateAreaCategory,
+  onDeleteAreaCategory,
+  onOpenAreaManager,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAreaFilter, setSelectedAreaFilter] = useState<string>('all');
@@ -44,22 +55,26 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
 
-  // Quick Area & Color Popover state
+  // Quick Area & Category Manager Popover state
   const [areaPopover, setAreaPopover] = useState<{
     visible: boolean;
     x: number;
     y: number;
     session: IntegrationSession | null;
+    mode: 'select' | 'edit' | 'create';
+    targetAreaId?: string;
   }>({
     visible: false,
     x: 0,
     y: 0,
     session: null,
+    mode: 'select',
   });
 
-  const [popoverCustomArea, setPopoverCustomArea] = useState('');
-  const [popoverCustomBg, setPopoverCustomBg] = useState('#6b21a8');
-  const [popoverCustomText, setPopoverCustomText] = useState('#ffffff');
+  const [popoverAreaName, setPopoverAreaName] = useState('');
+  const [popoverAreaBg, setPopoverAreaBg] = useState('#6b21a8');
+  const [popoverAreaText, setPopoverAreaText] = useState('#ffffff');
+  const [popoverOldName, setPopoverOldName] = useState('');
   const areaPopoverRef = useRef<HTMLDivElement | null>(null);
 
   // Selected row state (like selecting row 4 in Excel)
@@ -118,9 +133,16 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
     };
   }, [selectedRowId, sessions, editingCell, onDeleteSession]);
 
-  // Helper to get area styling
-  const getAreaDef = (areaName: string) => {
-    return areas.find((a) => a.name.toLowerCase() === areaName.toLowerCase());
+  // Helper to get area styling from registered categories
+  const getAreaDef = (areaName: string): AreaDefinition | undefined => {
+    if (!areaName) return undefined;
+    const clean = areaName.trim().toUpperCase();
+    const exact = areas.find((a) => a.name.trim().toUpperCase() === clean);
+    if (exact) return exact;
+    return areas.find((a) => {
+      const aClean = a.name.trim().toUpperCase();
+      return clean.includes(aClean) || aClean.includes(clean);
+    });
   };
 
   // Filter and automatically group/sort sessions strictly by Day and Time
@@ -460,41 +482,9 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                 const areaDef = getAreaDef(s.area);
                 const isSelected = selectedRowId === s.id;
 
-                // Specific Area Colors matching the image exactly or customColor override
-                let areaBg = s.customColor || '#ffffff';
-                let areaColor = '#ffffff';
-
-                if (!s.customColor) {
-                  const upperArea = (s.area || '').toUpperCase();
-                  if (upperArea.includes('GENTE E GESTÃO')) {
-                    areaBg = '#6b21a8';
-                    areaColor = '#ffffff';
-                  } else if (upperArea.includes('FACILITIES')) {
-                    areaBg = '#2563eb';
-                    areaColor = '#ffffff';
-                  } else if (upperArea.includes('SAÚDE')) {
-                    areaBg = '#00c04b';
-                    areaColor = '#ffffff';
-                  } else if (upperArea.includes('SEGURANÇA')) {
-                    areaBg = '#f59e0b';
-                    areaColor = '#000000';
-                  } else if (upperArea.includes('SUPERAR')) {
-                    areaBg = '#384354';
-                    areaColor = '#ffffff';
-                  } else if (upperArea.includes('PRODUÇÃO')) {
-                    areaBg = '#e45b17';
-                    areaColor = '#ffffff';
-                  } else if (upperArea.includes('QUALIDADE')) {
-                    areaBg = '#c2410c';
-                    areaColor = '#ffffff';
-                  } else if (upperArea.includes('TI')) {
-                    areaBg = '#ffffff';
-                    areaColor = '#000000';
-                  } else if (areaDef) {
-                    areaBg = areaDef.bgColor;
-                    areaColor = areaDef.textColor;
-                  }
-                }
+                // Estilo da Categoria de Área (ou customColor se houver)
+                const areaBg = areaDef?.bgColor || s.customColor || '#384354';
+                const areaColor = areaDef?.textColor || '#ffffff';
 
                 // If lunch, the entire row is solid black with white text!
                 if (isLunch) {
@@ -739,27 +729,30 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                       )}
                     </td>
 
-                    {/* ÁREA: Full-cell colored block with interactive quick selector and color picker */}
+                    {/* ÁREA: Full-cell colored block with interactive category manager */}
                     <td 
                       onClick={(e) => {
                         e.stopPropagation();
                         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                        const currentDef = getAreaDef(s.area);
                         setAreaPopover({
                           visible: true,
                           x: rect.left,
-                          y: rect.bottom + window.scrollY,
+                          y: rect.bottom,
                           session: s,
+                          mode: 'select',
                         });
-                        setPopoverCustomArea(s.area);
-                        setPopoverCustomBg(areaBg || '#6b21a8');
-                        setPopoverCustomText(areaColor || '#ffffff');
+                        setPopoverAreaName(s.area || '');
+                        setPopoverOldName(s.area || '');
+                        setPopoverAreaBg(currentDef?.bgColor || areaBg);
+                        setPopoverAreaText(currentDef?.textColor || areaColor);
                       }}
                       className="py-1.5 px-1.5 text-center border-r border-black font-bold uppercase text-[10.5px] tracking-wide select-none cursor-pointer hover:brightness-110 relative group shadow-2xs"
                       style={{
                         backgroundColor: areaBg,
                         color: areaColor,
                       }}
-                      title="Clique para trocar o nome da Área ou personalizar a cor desta linha"
+                      title="Clique para selecionar, cadastrar ou editar categorias de área"
                     >
                       <div className="flex items-center justify-center gap-1">
                         <span className="truncate">{s.area}</span>
@@ -1050,148 +1043,387 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* QUICK AREA & COLOR PICKER POPOVER                                        */}
+      {/* GERENCIADOR DE CATEGORIAS DE ÁREA (CADASTRO, EDIÇÃO, EXCLUSÃO E SELEÇÃO)  */}
       {/* ========================================================================= */}
       {areaPopover.visible && areaPopover.session && (
         <div
           ref={areaPopoverRef}
-          className="fixed z-50 bg-white border border-slate-300 rounded-2xl shadow-2xl p-3.5 w-72 text-xs font-sans animate-in fade-in zoom-in-95"
+          className="fixed z-50 bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 w-84 text-xs font-sans animate-in fade-in zoom-in-95"
           style={{
-            top: `${Math.min(window.innerHeight - 340, Math.max(10, areaPopover.y - window.scrollY))}px`,
-            left: `${Math.min(window.innerWidth - 300, Math.max(10, areaPopover.x))}px`,
+            top: `${Math.min(window.innerHeight - 440, Math.max(10, areaPopover.y - window.scrollY))}px`,
+            left: `${Math.min(window.innerWidth - 350, Math.max(10, areaPopover.x))}px`,
           }}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between pb-2 border-b border-slate-200 mb-2.5">
-            <div className="flex items-center gap-1.5 font-bold text-slate-800">
-              <Palette className="w-4 h-4 text-indigo-600" />
-              <span>Editar Área e Cor da Linha</span>
-            </div>
-            <button
-              onClick={() => setAreaPopover((p) => ({ ...p, visible: false }))}
-              className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          {/* MODO 1: SELEÇÃO RÁPIDA & LISTAGEM COM AÇÕES DE EDIÇÃO/EXCLUSÃO */}
+          {areaPopover.mode === 'select' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <div className="flex items-center gap-1.5 font-bold text-slate-800 text-sm">
+                  <Layers className="w-4 h-4 text-indigo-600" />
+                  <span>Categorias de Área</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAreaPopover((p) => ({ ...p, visible: false }))}
+                  className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
 
-          <div className="space-y-3">
-            {/* Quick Preset Areas */}
-            <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                Escolher Área Existente:
-              </label>
-              <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto pr-1">
-                {[
-                  { name: 'GENTE E GESTÃO', bg: '#6b21a8', text: '#ffffff' },
-                  { name: 'FACILITIES', bg: '#2563eb', text: '#ffffff' },
-                  { name: 'SAÚDE', bg: '#00c04b', text: '#ffffff' },
-                  { name: 'SEGURANÇA', bg: '#f59e0b', text: '#000000' },
-                  { name: 'SUPERAR', bg: '#384354', text: '#ffffff' },
-                  { name: 'PRODUÇÃO', bg: '#e45b17', text: '#ffffff' },
-                  { name: 'QUALIDADE', bg: '#c2410c', text: '#ffffff' },
-                  { name: 'TI', bg: '#0284c7', text: '#ffffff' },
-                  ...areas.filter((a) => !['GENTE E GESTÃO', 'FACILITIES', 'SAÚDE', 'SEGURANÇA', 'SUPERAR', 'PRODUÇÃO', 'QUALIDADE', 'TI'].includes(a.name.toUpperCase())).map((a) => ({
-                    name: a.name,
-                    bg: a.bgColor,
-                    text: a.textColor,
-                  })),
-                ].map((item, idx) => (
+              <div className="bg-slate-50 p-2 rounded-lg border border-slate-200 text-[11px] text-slate-600">
+                <span className="font-semibold text-slate-800">Atividade atual:</span>{' '}
+                <span className="italic">{areaPopover.session.tema || 'Sem tema'}</span>
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  Clique na área para aplicar nesta linha, ou use ✏️/🗑️ para editar ou excluir a categoria.
+                </p>
+              </div>
+
+              {/* Botão Cadastrar Nova Área */}
+              <button
+                type="button"
+                onClick={() => {
+                  setAreaPopover((p) => ({ ...p, mode: 'create' }));
+                  setPopoverAreaName('');
+                  setPopoverAreaBg('#6b21a8');
+                  setPopoverAreaText('#ffffff');
+                }}
+                className="w-full py-2 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 border border-indigo-200 transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" /> + Cadastrar Nova Área
+              </button>
+
+              {/* Lista de Áreas Cadastradas */}
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                  Áreas Disponíveis ({areas.length}):
+                </label>
+                <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                  {areas.map((a) => {
+                    const count = sessions.filter(
+                      (item) => (item.area || '').trim().toUpperCase() === a.name.trim().toUpperCase()
+                    ).length;
+                    const isCurrent = (areaPopover.session?.area || '').trim().toUpperCase() === a.name.trim().toUpperCase();
+
+                    return (
+                      <div
+                        key={a.id}
+                        className={`flex items-center justify-between p-1 rounded-xl border transition-all ${
+                          isCurrent ? 'border-indigo-500 bg-indigo-50/40 ring-1 ring-indigo-500/30' : 'border-slate-200 hover:border-slate-300 bg-white'
+                        }`}
+                      >
+                        {/* Botão Selecionar Área para a linha atual */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (areaPopover.session) {
+                              onUpdateSession({
+                                ...areaPopover.session,
+                                area: a.name,
+                                customColor: undefined,
+                              });
+                              setAreaPopover((p) => ({ ...p, visible: false }));
+                            }
+                          }}
+                          className="flex-1 flex items-center gap-2 py-1 px-2 rounded-lg text-left truncate transition-transform active:scale-[0.98] cursor-pointer"
+                          title={`Aplicar "${a.name}" a esta linha`}
+                        >
+                          <span
+                            className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase truncate shadow-2xs border border-black/10 shrink-0"
+                            style={{ backgroundColor: a.bgColor, color: a.textColor }}
+                          >
+                            {a.name}
+                          </span>
+                          <span className="text-[10px] font-semibold text-slate-400">
+                            ({count} {count === 1 ? 'linha' : 'linhas'})
+                          </span>
+                          {isCurrent && (
+                            <Check className="w-3.5 h-3.5 text-indigo-600 ml-auto shrink-0" />
+                          )}
+                        </button>
+
+                        {/* Ações da Categoria: Editar e Excluir */}
+                        <div className="flex items-center gap-0.5 pl-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAreaPopover((p) => ({
+                                ...p,
+                                mode: 'edit',
+                                targetAreaId: a.id,
+                              }));
+                              setPopoverAreaName(a.name);
+                              setPopoverOldName(a.name);
+                              setPopoverAreaBg(a.bgColor);
+                              setPopoverAreaText(a.textColor);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                            title={`Editar categoria "${a.name}" (atualizar todas as ${count} linhas)`}
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (confirm(`Deseja excluir a categoria "${a.name}"? ${count} atividade(s) associadas serão movidas para "OUTROS".`)) {
+                                onDeleteAreaCategory?.(a.id);
+                              }
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                            title={`Excluir categoria "${a.name}"`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Botão para Gerenciador Central */}
+              {onOpenAreaManager && (
+                <div className="pt-1 border-t border-slate-100 text-center">
                   <button
-                    key={idx}
                     type="button"
                     onClick={() => {
-                      if (areaPopover.session) {
-                        const updated: IntegrationSession = {
-                          ...areaPopover.session,
-                          area: item.name,
-                          customColor: item.bg,
-                        };
-                        onUpdateSession(updated);
-                        setAreaPopover((p) => ({ ...p, visible: false }));
-                      }
+                      setAreaPopover((p) => ({ ...p, visible: false }));
+                      onOpenAreaManager();
                     }}
-                    className="px-2 py-1.5 rounded-lg text-[10px] font-bold text-left truncate transition-transform hover:scale-[1.02] shadow-2xs border border-black/10"
-                    style={{
-                      backgroundColor: item.bg,
-                      color: item.text,
-                    }}
-                    title={`Aplicar ${item.name}`}
+                    className="text-[11px] text-slate-500 hover:text-indigo-600 font-semibold inline-flex items-center gap-1 cursor-pointer"
                   >
-                    {item.name}
+                    <Palette className="w-3 h-3" /> Abrir Gerenciador Completo de Cores
                   </button>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
+          )}
 
-            {/* Custom Name & Custom Color */}
-            <div className="border-t border-slate-200 pt-2.5 space-y-2">
+          {/* MODO 2: EDITAR CATEGORIA (PROPAGA PARA TODAS AS LINHAS) */}
+          {areaPopover.mode === 'edit' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setAreaPopover((p) => ({ ...p, mode: 'select' }))}
+                  className="flex items-center gap-1 text-slate-500 hover:text-slate-800 text-xs font-semibold cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" /> Voltar
+                </button>
+                <div className="font-bold text-slate-800 text-xs uppercase">Editar Categoria</div>
+                <button
+                  type="button"
+                  onClick={() => setAreaPopover((p) => ({ ...p, visible: false }))}
+                  className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Aviso de impacto em lote */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="text-[11px] text-amber-900 leading-tight">
+                  <span className="font-bold">Atenção:</span> Qualquer mudança no nome ou na cor atualizará{' '}
+                  <span className="font-bold underline">
+                    todas as {sessions.filter((s) => (s.area || '').trim().toUpperCase() === popoverOldName.trim().toUpperCase()).length} atividades
+                  </span>{' '}
+                  desta área na tabela!
+                </div>
+              </div>
+
               <div>
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
-                  Ou Digitar Novo Nome de Área:
+                  Nome da Categoria:
                 </label>
                 <input
                   type="text"
-                  value={popoverCustomArea}
-                  onChange={(e) => setPopoverCustomArea(e.target.value.toUpperCase())}
-                  placeholder="EX: LOGÍSTICA, MANUTENÇÃO..."
-                  className="w-full px-2 py-1 text-xs border border-slate-300 rounded-lg font-bold uppercase focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 focus:outline-hidden"
+                  value={popoverAreaName}
+                  onChange={(e) => setPopoverAreaName(e.target.value.toUpperCase())}
+                  placeholder="EX: GENTE E GESTÃO"
+                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg font-bold uppercase focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 focus:outline-hidden"
                 />
               </div>
 
               <div>
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
-                  Personalizar Cor de Fundo:
+                  Cor de Fundo:
                 </label>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mb-2">
                   <input
                     type="color"
-                    value={popoverCustomBg}
-                    onChange={(e) => setPopoverCustomBg(e.target.value)}
-                    className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
+                    value={popoverAreaBg}
+                    onChange={(e) => setPopoverAreaBg(e.target.value)}
+                    className="w-9 h-9 rounded-lg cursor-pointer border border-slate-300 p-0.5"
                     title="Selecione a cor de fundo"
                   />
+                  {/* Prévia da Categoria */}
                   <div
-                    className="flex-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-center truncate border border-black/10"
+                    className="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold text-center truncate border border-black/10 shadow-2xs"
                     style={{
-                      backgroundColor: popoverCustomBg,
-                      color: popoverCustomText,
+                      backgroundColor: popoverAreaBg,
+                      color: popoverAreaText,
                     }}
                   >
-                    {popoverCustomArea || 'Prévia da Área'}
+                    {popoverAreaName || 'Prévia da Área'}
                   </div>
+                </div>
+
+                {/* Paleta rápida de cores sugeridas */}
+                <div className="flex flex-wrap gap-1">
+                  {[
+                    '#6b21a8', '#2563eb', '#00c04b', '#f59e0b', 
+                    '#384354', '#e45b17', '#c2410c', '#0284c7', 
+                    '#dc2626', '#000000'
+                  ].map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setPopoverAreaBg(color)}
+                      className="w-5 h-5 rounded-full border border-black/20 hover:scale-110 transition-transform shadow-2xs cursor-pointer"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
                 </div>
               </div>
 
               <div className="flex items-center justify-between pt-1">
                 <button
                   type="button"
-                  onClick={() => setPopoverCustomText((prev) => (prev === '#ffffff' ? '#000000' : '#ffffff'))}
-                  className="text-[10px] font-semibold text-slate-500 hover:text-slate-800 underline"
+                  onClick={() => setPopoverAreaText((prev) => (prev === '#ffffff' ? '#000000' : '#ffffff'))}
+                  className="text-[11px] font-semibold text-slate-600 hover:text-slate-900 underline cursor-pointer"
                 >
-                  Texto: {popoverCustomText === '#ffffff' ? 'Branco' : 'Preto'}
+                  Texto: {popoverAreaText === '#ffffff' ? 'Branco' : 'Preto'}
                 </button>
 
                 <button
                   type="button"
                   onClick={() => {
-                    if (areaPopover.session && popoverCustomArea.trim()) {
-                      const updated: IntegrationSession = {
-                        ...areaPopover.session,
-                        area: popoverCustomArea.trim(),
-                        customColor: popoverCustomBg,
-                      };
-                      onUpdateSession(updated);
-                      setAreaPopover((p) => ({ ...p, visible: false }));
+                    if (areaPopover.targetAreaId && popoverAreaName.trim()) {
+                      onSaveAreaCategory?.(areaPopover.targetAreaId, {
+                        name: popoverAreaName.trim().toUpperCase(),
+                        bgColor: popoverAreaBg,
+                        textColor: popoverAreaText,
+                        oldName: popoverOldName,
+                      });
+                      setAreaPopover((p) => ({ ...p, mode: 'select' }));
                     }
                   }}
-                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-xs transition-colors"
+                  className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
                 >
-                  Salvar Área & Cor
+                  Salvar em Todas as Linhas
                 </button>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* MODO 3: CADASTRAR NOVA CATEGORIA */}
+          {areaPopover.mode === 'create' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setAreaPopover((p) => ({ ...p, mode: 'select' }))}
+                  className="flex items-center gap-1 text-slate-500 hover:text-slate-800 text-xs font-semibold cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" /> Voltar
+                </button>
+                <div className="font-bold text-slate-800 text-xs uppercase">Nova Categoria</div>
+                <button
+                  type="button"
+                  onClick={() => setAreaPopover((p) => ({ ...p, visible: false }))}
+                  className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Nome da Nova Área:
+                </label>
+                <input
+                  type="text"
+                  value={popoverAreaName}
+                  onChange={(e) => setPopoverAreaName(e.target.value.toUpperCase())}
+                  placeholder="EX: LOGÍSTICA, ENGENHARIA..."
+                  autoFocus
+                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg font-bold uppercase focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 focus:outline-hidden"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Cor de Fundo:
+                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="color"
+                    value={popoverAreaBg}
+                    onChange={(e) => setPopoverAreaBg(e.target.value)}
+                    className="w-9 h-9 rounded-lg cursor-pointer border border-slate-300 p-0.5"
+                    title="Selecione a cor de fundo"
+                  />
+                  <div
+                    className="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold text-center truncate border border-black/10 shadow-2xs"
+                    style={{
+                      backgroundColor: popoverAreaBg,
+                      color: popoverAreaText,
+                    }}
+                  >
+                    {popoverAreaName || 'Prévia da Nova Área'}
+                  </div>
+                </div>
+
+                {/* Paleta rápida de cores sugeridas */}
+                <div className="flex flex-wrap gap-1">
+                  {[
+                    '#6b21a8', '#2563eb', '#00c04b', '#f59e0b', 
+                    '#384354', '#e45b17', '#c2410c', '#0284c7', 
+                    '#dc2626', '#000000'
+                  ].map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setPopoverAreaBg(color)}
+                      className="w-5 h-5 rounded-full border border-black/20 hover:scale-110 transition-transform shadow-2xs cursor-pointer"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={() => setPopoverAreaText((prev) => (prev === '#ffffff' ? '#000000' : '#ffffff'))}
+                  className="text-[11px] font-semibold text-slate-600 hover:text-slate-900 underline cursor-pointer"
+                >
+                  Texto: {popoverAreaText === '#ffffff' ? 'Branco' : 'Preto'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (popoverAreaName.trim()) {
+                      const newArea: AreaDefinition = {
+                        id: `area-${Date.now()}`,
+                        name: popoverAreaName.trim().toUpperCase(),
+                        bgColor: popoverAreaBg,
+                        textColor: popoverAreaText,
+                      };
+                      onCreateAreaCategory?.(newArea, areaPopover.session?.id);
+                      setAreaPopover((p) => ({ ...p, visible: false }));
+                    }
+                  }}
+                  className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
+                >
+                  Cadastrar e Aplicar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

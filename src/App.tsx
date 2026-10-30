@@ -428,6 +428,174 @@ export default function App() {
     });
   };
 
+  // Cadastrar nova categoria de área
+  const handleCreateAreaCategory = (newArea: AreaDefinition, applyToSessionId?: string) => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => handleCreateAreaCategory(newArea, applyToSessionId));
+      return;
+    }
+    const cleanName = newArea.name.trim().toUpperCase();
+    const areaToAdd: AreaDefinition = {
+      ...newArea,
+      name: cleanName,
+      id: newArea.id || `area-${Date.now()}`,
+    };
+
+    setAreas((prev) => {
+      const exists = prev.some((a) => a.name.trim().toUpperCase() === cleanName);
+      if (exists) {
+        return prev.map((a) => (a.name.trim().toUpperCase() === cleanName ? areaToAdd : a));
+      }
+      return [...prev, areaToAdd];
+    });
+
+    if (applyToSessionId) {
+      setSessions((prev) =>
+        prev.map((s) => {
+          if (s.id === applyToSessionId) {
+            const updated = { ...s, area: cleanName, customColor: undefined };
+            void upsertIntegrationSessionToSupabase(updated);
+            return updated;
+          }
+          return s;
+        })
+      );
+      showToast(`Área "${cleanName}" cadastrada e aplicada com sucesso!`);
+    } else {
+      showToast(`Área "${cleanName}" cadastrada no sistema!`);
+    }
+  };
+
+  // Editar categoria de área existente e propagar para TODAS as atividades daquela área
+  const handleUpdateAreaCategory = (
+    areaId: string,
+    updatedData: { name: string; bgColor: string; textColor: string; oldName?: string }
+  ) => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => handleUpdateAreaCategory(areaId, updatedData));
+      return;
+    }
+
+    const cleanName = updatedData.name.trim().toUpperCase();
+    const oldName = (updatedData.oldName || updatedData.name).trim().toUpperCase();
+
+    // 1. Atualizar registro em areas
+    setAreas((prev) =>
+      prev.map((a) =>
+        a.id === areaId
+          ? { ...a, name: cleanName, bgColor: updatedData.bgColor, textColor: updatedData.textColor }
+          : a
+      )
+    );
+
+    // 2. Propagar para todas as sessões que compartilham essa área
+    let affectedCount = 0;
+    const updatedSessions = sessions.map((s) => {
+      const sArea = (s.area || '').trim().toUpperCase();
+      if (sArea === oldName || sArea === cleanName) {
+        affectedCount++;
+        return {
+          ...s,
+          area: cleanName,
+          customColor: undefined, // remove customColor individual para herdar a cor da categoria
+        };
+      }
+      return s;
+    });
+
+    if (affectedCount > 0) {
+      setSessions(updatedSessions);
+      setIsCloudSyncing(true);
+      void syncIntegrationToSupabase(updatedSessions).then(({ error }) => {
+        setIsCloudSyncing(false);
+        if (error) console.error('Error syncing updated area sessions to Supabase', error);
+      });
+      showToast(`Categoria "${cleanName}" salva! ${affectedCount} atividade(s) atualizadas simultaneamente.`);
+    } else {
+      showToast(`Categoria "${cleanName}" atualizada com sucesso!`);
+    }
+  };
+
+  // Excluir categoria de área
+  const handleDeleteAreaCategory = (areaId: string) => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => handleDeleteAreaCategory(areaId));
+      return;
+    }
+
+    const targetArea = areas.find((a) => a.id === areaId);
+    if (!targetArea) return;
+
+    setAreas((prev) => prev.filter((a) => a.id !== areaId));
+
+    const targetName = targetArea.name.trim().toUpperCase();
+    let affectedCount = 0;
+    const updatedSessions = sessions.map((s) => {
+      if ((s.area || '').trim().toUpperCase() === targetName) {
+        affectedCount++;
+        return {
+          ...s,
+          area: 'OUTROS',
+          customColor: undefined,
+        };
+      }
+      return s;
+    });
+
+    if (affectedCount > 0) {
+      setSessions(updatedSessions);
+      setIsCloudSyncing(true);
+      void syncIntegrationToSupabase(updatedSessions).then(({ error }) => {
+        setIsCloudSyncing(false);
+      });
+      showToast(`Área "${targetArea.name}" excluída. ${affectedCount} atividade(s) movidas para "OUTROS".`);
+    } else {
+      showToast(`Área "${targetArea.name}" excluída.`);
+    }
+  };
+
+  // Salvar tudo do AreaManagerModal
+  const handleSaveAllAreas = (updatedAreas: AreaDefinition[], renameMap?: Record<string, string>) => {
+    setAreas(updatedAreas);
+
+    let affectedCount = 0;
+    const updatedSessions = sessions.map((s) => {
+      const sArea = (s.area || '').trim().toUpperCase();
+      let changed = false;
+      let newAreaName = s.area;
+
+      if (renameMap && renameMap[sArea]) {
+        newAreaName = renameMap[sArea];
+        changed = true;
+      }
+
+      if (s.customColor) {
+        changed = true;
+      }
+
+      if (changed) {
+        affectedCount++;
+        return {
+          ...s,
+          area: newAreaName,
+          customColor: undefined,
+        };
+      }
+      return s;
+    });
+
+    if (affectedCount > 0) {
+      setSessions(updatedSessions);
+      setIsCloudSyncing(true);
+      void syncIntegrationToSupabase(updatedSessions).then(({ error }) => {
+        setIsCloudSyncing(false);
+      });
+      showToast(`Paleta salva! ${affectedCount} atividade(s) sincronizadas.`);
+    } else {
+      showToast('Paleta de cores e áreas atualizada com sucesso!');
+    }
+  };
+
   const handleEditSession = (session: IntegrationSession) => {
     if (!hasAdminAccess()) {
       requestAdminAccess(() => handleEditSession(session));
@@ -860,6 +1028,13 @@ export default function App() {
                     onEditSession={handleEditSession}
                     onAddNewSession={handleAddNewSession}
                     onReorderSessions={handleReorderSessions}
+                    onSaveAreaCategory={handleUpdateAreaCategory}
+                    onCreateAreaCategory={handleCreateAreaCategory}
+                    onDeleteAreaCategory={handleDeleteAreaCategory}
+                    onOpenAreaManager={() => {
+                      if (isAdmin) setIsAreaManagerOpen(true);
+                      else requestAdminAccess(() => setIsAreaManagerOpen(true));
+                    }}
                   />
                 )}
 
@@ -974,16 +1149,15 @@ export default function App() {
         isOpen={isAreaManagerOpen}
         onClose={() => setIsAreaManagerOpen(false)}
         areas={areas}
-        onSaveAreas={(updatedAreas) => {
+        sessions={sessions}
+        onSaveAreas={(updatedAreas, renameMap) => {
           if (!hasAdminAccess()) {
             requestAdminAccess(() => {
-              setAreas(updatedAreas);
-              showToast('Paleta de cores e áreas atualizada com sucesso!');
+              handleSaveAllAreas(updatedAreas, renameMap);
             });
             return;
           }
-          setAreas(updatedAreas);
-          showToast('Paleta de cores e áreas atualizada com sucesso!');
+          handleSaveAllAreas(updatedAreas, renameMap);
         }}
       />
 
