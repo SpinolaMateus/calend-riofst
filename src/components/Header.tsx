@@ -3,7 +3,7 @@ import {
   FileDown, Printer, FileSpreadsheet, Upload, Copy,
   Palette, Settings, RotateCcw, Plus, Calendar, 
   Tv, Table as TableIcon, Clock, ChevronDown, ListChecks,
-  Cloud, Save, RefreshCw, CheckCircle2
+  Cloud, Save, RefreshCw, CheckCircle2, Camera
 } from 'lucide-react';
 import { INTEGRATION_AUDIENCES, IntegrationAudience, UnitInfo, ViewMode } from '../types/schedule';
 
@@ -124,11 +124,11 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onCopyAsImage}
             disabled={isCopyingImage}
             data-capture-ignore
-            className="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-50"
-            title="Copiar a agenda completa como imagem"
+            className="px-3.5 py-2 bg-slate-900 hover:bg-black active:scale-95 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm border border-slate-700 transition-all disabled:opacity-50"
+            title="Tirar print completo de toda a tabela (copia para área de transferência e baixa PNG)"
           >
-            <Copy className="w-4 h-4" />
-            {isCopyingImage ? 'Capturando...' : 'Copiar como imagem'}
+            <Camera className="w-4 h-4 text-sky-400" />
+            <span>{isCopyingImage ? 'Tirando Print...' : 'Tirar Print'}</span>
           </button>
 
           {/* New Activity Button */}

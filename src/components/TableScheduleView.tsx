@@ -359,10 +359,10 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
       {/* ========================================================================= */}
       <div 
         id="print-table-section" 
-        className="bg-white border-2 border-black shadow-md overflow-hidden print-container select-text"
+        className="bg-white border-2 border-black shadow-md overflow-x-auto print-container select-text"
       >
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-xs font-sans">
+        <div className="min-w-[1050px] w-full">
+          <table className="w-full table-auto border-collapse text-xs font-sans">
             {/* Table Header: Solid Black with Excel Dropdown Buttons */}
             <thead>
               <tr className="bg-black text-white font-bold tracking-wider uppercase text-[11px] divide-x divide-slate-600 border-b-2 border-black select-none">

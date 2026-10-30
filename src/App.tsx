@@ -805,8 +805,8 @@ export default function App() {
               isCloudSyncing={isCloudSyncing}
             />
 
-            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              <div id="printable-content" className="print-container bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/90 shadow-2xs">
+            <main className="flex-1 max-w-[1400px] w-full mx-auto px-2 sm:px-4 lg:px-6 py-6">
+              <div id="printable-content" className="print-container bg-white p-3 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs overflow-x-auto">
                 {/* Cabeçalho Executivo Inteligente para Captura de Imagem e Impressão */}
                 <div className="capture-only hidden border-b border-slate-200 pb-3 mb-4 text-left">
                   <div className="flex items-center justify-between">
