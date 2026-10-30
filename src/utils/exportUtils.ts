@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { toPng, toBlob, toCanvas } from 'html-to-image';
 import * as XLSX from 'xlsx';
 import { IntegrationAudience, INTEGRATION_AUDIENCES, IntegrationSession, UnitInfo } from '../types/schedule';
 import { formatTimeRange } from './timeUtils';
@@ -349,6 +350,47 @@ export interface CopyImageResult {
 }
 
 /**
+ * Captura elemento usando o motor nativo SVG/foreignObject de html-to-image.
+ * É 100% imune a erros de lab(), oklch() do Tailwind v4 e suporta renderização total.
+ */
+async function captureViaHtmlToImage(element: HTMLElement): Promise<Blob | null> {
+  const filter = (node: HTMLElement) => {
+    if (!node.classList) return true;
+    if (
+      node.hasAttribute?.('data-capture-ignore') ||
+      node.classList.contains('no-print') ||
+      node.classList.contains('capture-ignore')
+    ) {
+      return false;
+    }
+    return true;
+  };
+
+  // Garante que elementos marcados com capture-only fiquem visíveis durante a captura
+  const captureOnlyElements = element.querySelectorAll<HTMLElement>('.capture-only');
+  captureOnlyElements.forEach((el) => {
+    el.style.setProperty('display', 'block', 'important');
+    el.style.setProperty('visibility', 'visible', 'important');
+  });
+
+  try {
+    const blob = await toBlob(element, {
+      quality: 0.98,
+      pixelRatio: 2,
+      backgroundColor: '#ffffff',
+      filter: filter as any,
+    });
+    return blob;
+  } finally {
+    // Reverter estilos temporários
+    captureOnlyElements.forEach((el) => {
+      el.style.removeProperty('display');
+      el.style.removeProperty('visibility');
+    });
+  }
+}
+
+/**
  * Copies an element as an image to the clipboard. If browser permissions or user activation block clipboard writing,
  * automatically falls back to downloading the PNG image so the user never fails to get their capture.
  */
@@ -356,17 +398,37 @@ export async function copyElementAsImage(
   elementOrId: string | HTMLElement,
   downloadFallbackName: string = 'captura_agenda'
 ): Promise<CopyImageResult> {
-  const canvas = await captureElementToCanvas(elementOrId);
+  const element = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
+  if (!element) {
+    throw new Error('Não foi possível localizar o elemento para captura.');
+  }
 
-  const blob = await new Promise<Blob | null>((resolve) => {
-    canvas.toBlob((b) => resolve(b), 'image/png');
-  });
+  let blob: Blob | null = null;
+
+  // Tentativa primária: html-to-image (suporta Tailwind 4, sem erro de lab/oklch)
+  try {
+    blob = await captureViaHtmlToImage(element);
+  } catch (err) {
+    console.warn('html-to-image capture fallback to canvas:', err);
+  }
+
+  // Fallback secundário: html2canvas
+  if (!blob) {
+    try {
+      const canvas = await captureElementToCanvas(element);
+      blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((b) => resolve(b), 'image/png');
+      });
+    } catch (canvasErr) {
+      console.error('html2canvas also failed:', canvasErr);
+    }
+  }
 
   if (!blob) {
     throw new Error('O navegador não conseguiu processar a imagem.');
   }
 
-  // 1. Try to write directly to system clipboard
+  // 1. Tentar gravar na área de transferência
   if (navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
     try {
       await navigator.clipboard.write([
@@ -378,7 +440,7 @@ export async function copyElementAsImage(
     }
   }
 
-  // 2. Fallback: Automatically download the PNG image file
+  // 2. Fallback: Download automático do arquivo PNG
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -398,11 +460,20 @@ export async function downloadElementAsImage(
   elementOrId: string | HTMLElement,
   downloadName: string = 'captura_calendario'
 ): Promise<void> {
-  const canvas = await captureElementToCanvas(elementOrId);
+  const element = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
+  if (!element) {
+    throw new Error('Não foi possível localizar o elemento para captura.');
+  }
 
-  const blob = await new Promise<Blob | null>((resolve) => {
-    canvas.toBlob((b) => resolve(b), 'image/png');
-  });
+  let blob: Blob | null = null;
+  try {
+    blob = await captureViaHtmlToImage(element);
+  } catch {
+    const canvas = await captureElementToCanvas(element);
+    blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((b) => resolve(b), 'image/png');
+    });
+  }
 
   if (!blob) {
     throw new Error('Não foi possível gerar a imagem.');
@@ -425,11 +496,29 @@ export async function exportElementToPDF(
   elementOrId: string | HTMLElement,
   fileName: string = 'cronograma-integracao.pdf'
 ): Promise<void> {
-  const canvas = await captureElementToCanvas(elementOrId);
+  const element = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
+  if (!element) {
+    throw new Error('Não foi possível localizar o elemento para PDF.');
+  }
 
-  const imgData = canvas.toDataURL('image/png');
-  const imgWidth = canvas.width;
-  const imgHeight = canvas.height;
+  let imgData = '';
+  let imgWidth = 1200;
+  let imgHeight = 800;
+
+  try {
+    imgData = await toPng(element, {
+      quality: 0.98,
+      pixelRatio: 2,
+      backgroundColor: '#ffffff',
+    });
+    imgWidth = element.scrollWidth || 1200;
+    imgHeight = element.scrollHeight || 800;
+  } catch {
+    const canvas = await captureElementToCanvas(element);
+    imgData = canvas.toDataURL('image/png');
+    imgWidth = canvas.width;
+    imgHeight = canvas.height;
+  }
 
   // Determine orientation (landscape if width > height)
   const isLandscape = imgWidth > imgHeight;
