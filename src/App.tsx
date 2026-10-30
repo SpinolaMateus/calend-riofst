@@ -325,11 +325,34 @@ export default function App() {
     }
     const synced = syncSessionTimeAndCH(updated);
     setSessions((prev) => prev.map((s) => (s.id === synced.id ? synced : s)));
+    showToast(`Atividade salva com sucesso! (Dia ${synced.dia})`);
     setIsCloudSyncing(true);
     void upsertIntegrationSessionToSupabase(synced).then(({ error }) => {
       setIsCloudSyncing(false);
       if (error) {
         console.error('Could not update session in Supabase', error);
+      }
+    });
+  };
+
+  const handleReorderSessions = (reorderedAudienceSessions: IntegrationSession[]) => {
+    if (!hasAdminAccess()) {
+      requestAdminAccess(() => handleReorderSessions(reorderedAudienceSessions));
+      return;
+    }
+
+    setSessions((prev) => {
+      // Manter as sessões das outras audiências e substituir as da audiência atual na nova ordem
+      const others = prev.filter((s) => (s.audience || 'geral') !== selectedAudience);
+      return [...others, ...reorderedAudienceSessions];
+    });
+
+    showToast('Ordem das atividades atualizada e salva!');
+    setIsCloudSyncing(true);
+    void syncIntegrationToSupabase(reorderedAudienceSessions).then(({ error }) => {
+      setIsCloudSyncing(false);
+      if (error) {
+        console.error('Could not sync reordered sessions to Supabase', error);
       }
     });
   };
@@ -832,6 +855,7 @@ export default function App() {
                     onDuplicateSession={handleDuplicateSession}
                     onEditSession={handleEditSession}
                     onAddNewSession={handleAddNewSession}
+                    onReorderSessions={handleReorderSessions}
                   />
                 )}
 
