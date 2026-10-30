@@ -168,3 +168,28 @@ export function isSessionUpcoming(startTime: string): boolean {
   const start = timeToMinutes(startTime);
   return start > currentMinutes;
 }
+
+/**
+ * Ordena sessões rigorosamente por Dia crescente e depois por Horário de Início (startMins).
+ * Isso garante que nenhuma atividade fique espalhada ou fora de ordem cronológica.
+ */
+export function sortSessionsByDayAndTime<T extends { dia: number; startTime: string; endTime?: string; id?: string }>(
+  sessionsList: T[]
+): T[] {
+  return [...sessionsList].sort((a, b) => {
+    // 1º critério: Dia (Dia 1 antes de Dia 2, Dia 2 antes de Dia 3...)
+    if (a.dia !== b.dia) {
+      return a.dia - b.dia;
+    }
+    // 2º critério: Horário de Início em minutos
+    const aStart = timeToMinutes(a.startTime);
+    const bStart = timeToMinutes(b.startTime);
+    if (aStart !== bStart) {
+      return aStart - bStart;
+    }
+    // 3º critério: Horário de Fim (se houver empate de início)
+    const aEnd = timeToMinutes(a.endTime || '');
+    const bEnd = timeToMinutes(b.endTime || '');
+    return aEnd - bEnd;
+  });
+}

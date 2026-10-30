@@ -8,7 +8,8 @@ import {
 import { AreaDefinition, IntegrationSession } from '../types/schedule';
 import { 
   parseTimeRange, calculateCH, formatTimeRange, 
-  chToMinutes, minutesToTime, timeToMinutes, syncSessionTimeAndCH 
+  chToMinutes, minutesToTime, timeToMinutes, syncSessionTimeAndCH,
+  sortSessionsByDayAndTime
 } from '../utils/timeUtils';
 
 interface TableScheduleViewProps {
@@ -100,24 +101,26 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
     return areas.find((a) => a.name.toLowerCase() === areaName.toLowerCase());
   };
 
-  // Filter sessions
-  const filteredSessions = sessions.filter((s) => {
-    if (selectedDay !== 'all' && s.dia !== Number(selectedDay)) return false;
-    if (selectedAreaFilter !== 'all' && s.area.toLowerCase() !== selectedAreaFilter.toLowerCase()) return false;
-    if (!searchQuery.trim()) return true;
+  // Filter and automatically group/sort sessions strictly by Day and Time
+  const filteredSessions = sortSessionsByDayAndTime(
+    sessions.filter((s) => {
+      if (selectedDay !== 'all' && s.dia !== Number(selectedDay)) return false;
+      if (selectedAreaFilter !== 'all' && s.area.toLowerCase() !== selectedAreaFilter.toLowerCase()) return false;
+      if (!searchQuery.trim()) return true;
 
-    const query = searchQuery.toLowerCase();
-    return (
-      s.tema.toLowerCase().includes(query) ||
-      s.responsavel.toLowerCase().includes(query) ||
-      s.area.toLowerCase().includes(query) ||
-      s.local.toLowerCase().includes(query) ||
-      s.codigo.toLowerCase().includes(query) ||
-      s.entregavel.toLowerCase().includes(query) ||
-      s.prn.toLowerCase().includes(query) ||
-      (s.horarioText || '').toLowerCase().includes(query)
-    );
-  });
+      const query = searchQuery.toLowerCase();
+      return (
+        s.tema.toLowerCase().includes(query) ||
+        s.responsavel.toLowerCase().includes(query) ||
+        s.area.toLowerCase().includes(query) ||
+        s.local.toLowerCase().includes(query) ||
+        s.codigo.toLowerCase().includes(query) ||
+        s.entregavel.toLowerCase().includes(query) ||
+        s.prn.toLowerCase().includes(query) ||
+        (s.horarioText || '').toLowerCase().includes(query)
+      );
+    })
+  );
 
   const handleStartInlineEdit = (s: IntegrationSession, field: keyof IntegrationSession) => {
     setEditingCell({ id: s.id, field });

@@ -36,7 +36,7 @@ import {
 import { CorporateEvent } from './types/calendar';
 import { useAdminAuth } from './services/AdminAuthContext';
 import { ActionPlanGanttView } from './components/ActionPlanGanttView';
-import { syncSessionTimeAndCH } from './utils/timeUtils';
+import { syncSessionTimeAndCH, sortSessionsByDayAndTime } from './utils/timeUtils';
 import {
   fetchIntegrationFromSupabase,
   fetchIntegrationStatusesFromSupabase,
@@ -324,8 +324,12 @@ export default function App() {
       return;
     }
     const synced = syncSessionTimeAndCH(updated);
-    setSessions((prev) => prev.map((s) => (s.id === synced.id ? synced : s)));
-    showToast(`Atividade salva com sucesso! (Dia ${synced.dia})`);
+    setSessions((prev) => {
+      const updatedList = prev.map((s) => (s.id === synced.id ? synced : s));
+      // Re-ordenar automaticamente e agrupar por Dia e Horário para não misturar nunca
+      return sortSessionsByDayAndTime(updatedList);
+    });
+    showToast(`Atividade salva e agrupada no Dia ${synced.dia}!`);
     setIsCloudSyncing(true);
     void upsertIntegrationSessionToSupabase(synced).then(({ error }) => {
       setIsCloudSyncing(false);
@@ -342,9 +346,9 @@ export default function App() {
     }
 
     setSessions((prev) => {
-      // Manter as sessões das outras audiências e substituir as da audiência atual na nova ordem
+      // Manter as sessões das outras audiências e substituir as da audiência atual na nova ordem, sempre ordenadas por dia
       const others = prev.filter((s) => (s.audience || 'geral') !== selectedAudience);
-      return [...others, ...reorderedAudienceSessions];
+      return sortSessionsByDayAndTime([...others, ...reorderedAudienceSessions]);
     });
 
     showToast('Ordem das atividades atualizada e salva!');
