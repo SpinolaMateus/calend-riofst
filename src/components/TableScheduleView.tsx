@@ -364,118 +364,68 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
         id="print-table-section" 
         className="bg-white border-2 border-black shadow-md overflow-x-auto print-container select-text"
       >
-        <div className="min-w-[1050px] w-full">
-          <table className="w-full table-auto border-collapse text-xs font-sans">
+        <div className="w-full">
+          <table className="w-full border-collapse text-xs font-sans table-auto">
             {/* Table Header: Solid Black with Excel Dropdown Buttons */}
             <thead>
               <tr className="bg-black text-white font-bold tracking-wider uppercase text-[11px] divide-x divide-slate-600 border-b-2 border-black select-none">
                 {/* Excel Row Index Header (#) */}
-                <th className="py-2 px-1.5 w-10 text-center bg-slate-900 border-r border-slate-700 text-slate-300 text-[10px]">
+                <th className="py-1.5 px-1 w-9 text-center bg-slate-900 border-r border-slate-700 text-slate-300 text-[10px]">
                   #
                 </th>
 
                 {/* DIA */}
-                <th className="py-2 px-2 w-14 text-center bg-black">
-                  <div className="flex items-center justify-center gap-1">
-                    <span>DIA</span>
-                    <span className="inline-flex items-center justify-center w-3.5 h-3.5 bg-white text-black rounded-[2px] shadow-2xs">
-                      <ChevronDown className="w-2.5 h-2.5" />
-                    </span>
-                  </div>
+                <th className="py-1.5 px-1 w-12 text-center bg-black">
+                  <span>DIA</span>
                 </th>
 
                 {/* HORÁRIO */}
-                <th className="py-2 px-2 min-w-[125px] text-center bg-black">
-                  <div className="flex items-center justify-center gap-1">
-                    <span>HORÁRIO</span>
-                    <span className="inline-flex items-center justify-center w-3.5 h-3.5 bg-white text-black rounded-[2px] shadow-2xs">
-                      <ChevronDown className="w-2.5 h-2.5" />
-                    </span>
-                  </div>
+                <th className="py-1.5 px-1.5 text-center bg-black whitespace-nowrap">
+                  <span>HORÁRIO</span>
                 </th>
 
                 {/* CH */}
-                <th className="py-2 px-1 w-16 text-center bg-black">
-                  <div className="flex items-center justify-center gap-1">
-                    <span>CH</span>
-                    <span className="inline-flex items-center justify-center w-3.5 h-3.5 bg-white text-black rounded-[2px] shadow-2xs">
-                      <ChevronDown className="w-2.5 h-2.5" />
-                    </span>
-                  </div>
+                <th className="py-1.5 px-1 text-center bg-black whitespace-nowrap">
+                  <span>CH</span>
                 </th>
 
                 {/* TEMA */}
-                <th className="py-2 px-3 min-w-[210px] text-center bg-black">
-                  <div className="flex items-center justify-center gap-1">
-                    <span>TEMA</span>
-                    <span className="inline-flex items-center justify-center w-3.5 h-3.5 bg-white text-black rounded-[2px] shadow-2xs">
-                      <ChevronDown className="w-2.5 h-2.5" />
-                    </span>
-                  </div>
+                <th className="py-1.5 px-2 text-center bg-black">
+                  <span>TEMA</span>
                 </th>
 
                 {/* ÁREA */}
-                <th className="py-2 px-2 min-w-[170px] text-center bg-black">
-                  <div className="flex items-center justify-center gap-1">
-                    <span>ÁREA</span>
-                    <span className="inline-flex items-center justify-center w-3.5 h-3.5 bg-white text-black rounded-[2px] shadow-2xs">
-                      <ChevronDown className="w-2.5 h-2.5" />
-                    </span>
-                  </div>
+                <th className="py-1.5 px-1.5 text-center bg-black">
+                  <span>ÁREA</span>
                 </th>
 
                 {/* RESPONSÁVEL */}
-                <th className="py-2 px-2 min-w-[155px] text-center bg-black">
-                  <div className="flex items-center justify-center gap-1">
-                    <span>RESPONSÁVEL</span>
-                    <span className="inline-flex items-center justify-center w-3.5 h-3.5 bg-white text-black rounded-[2px] shadow-2xs">
-                      <ChevronDown className="w-2.5 h-2.5" />
-                    </span>
-                  </div>
+                <th className="py-1.5 px-1.5 text-center bg-black">
+                  <span>RESPONSÁVEL</span>
                 </th>
 
                 {/* PRN */}
-                <th className="py-2 px-1 min-w-[130px] text-center bg-black">
-                  <div className="flex items-center justify-center gap-1">
-                    <span>PRN</span>
-                    <span className="inline-flex items-center justify-center w-3.5 h-3.5 bg-white text-black rounded-[2px] shadow-2xs">
-                      <ChevronDown className="w-2.5 h-2.5" />
-                    </span>
-                  </div>
+                <th className="py-1.5 px-1 text-center bg-black">
+                  <span>PRN</span>
                 </th>
 
                 {/* LOCAL */}
-                <th className="py-2 px-2 min-w-[130px] text-center bg-black">
-                  <div className="flex items-center justify-center gap-1">
-                    <span>LOCAL</span>
-                    <span className="inline-flex items-center justify-center w-3.5 h-3.5 bg-white text-black rounded-[2px] shadow-2xs">
-                      <ChevronDown className="w-2.5 h-2.5" />
-                    </span>
-                  </div>
+                <th className="py-1.5 px-1.5 text-center bg-black">
+                  <span>LOCAL</span>
                 </th>
 
                 {/* CÓDIGO */}
-                <th className="py-2 px-1 min-w-[110px] text-center bg-black">
-                  <div className="flex items-center justify-center gap-1">
-                    <span>CÓDIGO</span>
-                    <span className="inline-flex items-center justify-center w-3.5 h-3.5 bg-white text-black rounded-[2px] shadow-2xs">
-                      <ChevronDown className="w-2.5 h-2.5" />
-                    </span>
-                  </div>
+                <th className="py-1.5 px-1 text-center bg-black">
+                  <span>CÓDIGO</span>
                 </th>
 
                 {/* ENTREGÁVEL */}
-                <th className="py-2 px-3 min-w-[200px] text-center bg-black">
-                  <div className="flex items-center justify-center gap-1">
-                    <span>ENTREGÁVEL</span>
-                    <span className="inline-flex items-center justify-center w-3.5 h-3.5 bg-white text-black rounded-[2px] shadow-2xs">
-                      <ChevronDown className="w-2.5 h-2.5" />
-                    </span>
-                  </div>
+                <th className="py-1.5 px-1.5 text-center bg-black">
+                  <span>ENTREGÁVEL</span>
                 </th>
 
                 {/* AÇÕES (no-print) */}
-                <th className="py-2 px-1 w-16 text-center bg-black no-print">
+                <th className="py-1.5 px-1 w-12 text-center bg-black no-print">
                   <span>AÇÕES</span>
                 </th>
               </tr>
@@ -570,47 +520,47 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                       </td>
 
                       {/* HORÁRIO */}
-                      <td className="py-2.5 px-2 text-center font-bold border-r border-slate-700 whitespace-nowrap">
+                      <td className="py-2 px-1.5 text-center font-bold border-r border-slate-700 whitespace-nowrap text-[11px]">
                         {s.horarioText || `${s.startTime} às ${s.endTime}`}
                       </td>
 
                       {/* CH */}
-                      <td className="py-2.5 px-1 text-center font-bold border-r border-slate-700">
+                      <td className="py-2 px-1 text-center font-bold border-r border-slate-700 text-[11px]">
                         {s.ch || '1h'}
                       </td>
 
                       {/* TEMA */}
-                      <td className="py-2.5 px-3 text-center tracking-widest font-black border-r border-slate-700">
+                      <td className="py-2 px-2 text-center tracking-widest font-black border-r border-slate-700 text-xs">
                         ALMOÇO
                       </td>
 
                       {/* ÁREA */}
-                      <td className="py-2.5 px-2 text-center font-bold border-r border-slate-700">
+                      <td className="py-2 px-1.5 text-center font-bold border-r border-slate-700 text-[11px]">
                         N/A
                       </td>
 
                       {/* RESPONSÁVEL */}
-                      <td className="py-2.5 px-2 text-center border-r border-slate-700">
+                      <td className="py-2 px-1.5 text-center border-r border-slate-700 text-[11px]">
                         N/A
                       </td>
 
                       {/* PRN */}
-                      <td className="py-2.5 px-1 text-center border-r border-slate-700">
+                      <td className="py-2 px-1 text-center border-r border-slate-700 text-[11px]">
                         N/A
                       </td>
 
                       {/* LOCAL */}
-                      <td className="py-2.5 px-2 text-center border-r border-slate-700">
+                      <td className="py-2 px-1.5 text-center border-r border-slate-700 text-[11px]">
                         Refeitório
                       </td>
 
                       {/* CÓDIGO */}
-                      <td className="py-2.5 px-1 text-center border-r border-slate-700">
+                      <td className="py-2 px-1 text-center border-r border-slate-700 text-[11px]">
                         N/A
                       </td>
 
                       {/* ENTREGÁVEL */}
-                      <td className="py-2.5 px-3 text-center border-r border-slate-700">
+                      <td className="py-2 px-1.5 text-center border-r border-slate-700 text-[11px]">
                         N/A
                       </td>
 
@@ -705,7 +655,7 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                     {/* HORÁRIO */}
                     <td 
                       onClick={() => handleStartInlineEdit(s, 'horarioText')}
-                      className="py-2 px-2 text-center font-normal text-slate-900 border-r border-black whitespace-nowrap cursor-pointer hover:bg-amber-50"
+                      className="py-1.5 px-1.5 text-center font-normal text-slate-900 border-r border-black whitespace-nowrap cursor-pointer hover:bg-amber-50 text-[11px]"
                       title="Clique duas vezes para editar horário"
                     >
                       {editingCell?.id === s.id && editingCell?.field === 'horarioText' ? (
@@ -726,7 +676,7 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                     {/* CH */}
                     <td 
                       onClick={() => handleStartInlineEdit(s, 'ch')}
-                      className="py-2 px-1 text-center text-slate-900 border-r border-black whitespace-nowrap cursor-pointer hover:bg-amber-50"
+                      className="py-1.5 px-1 text-center text-slate-900 border-r border-black whitespace-nowrap cursor-pointer hover:bg-amber-50 text-[11px]"
                       title="Clique para editar CH"
                     >
                       {editingCell?.id === s.id && editingCell?.field === 'ch' ? (
@@ -747,7 +697,7 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                     {/* TEMA */}
                     <td 
                       onClick={() => handleStartInlineEdit(s, 'tema')}
-                      className="py-2 px-3 text-center text-slate-900 border-r border-black font-normal cursor-pointer hover:bg-amber-50 leading-tight"
+                      className="py-1.5 px-2 text-center text-slate-900 border-r border-black font-normal cursor-pointer hover:bg-amber-50 leading-tight text-xs"
                       title="Clique para editar Tema"
                     >
                       {editingCell?.id === s.id && editingCell?.field === 'tema' ? (
@@ -767,7 +717,7 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
 
                     {/* ÁREA: Full-cell colored block */}
                     <td 
-                      className="py-2 px-2 text-center border-r border-black font-bold uppercase text-[11px] tracking-wider select-none"
+                      className="py-1.5 px-1.5 text-center border-r border-black font-bold uppercase text-[10.5px] tracking-wide select-none"
                       style={{
                         backgroundColor: areaBg,
                         color: areaColor,
@@ -779,7 +729,7 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                     {/* RESPONSÁVEL */}
                     <td 
                       onClick={() => handleStartInlineEdit(s, 'responsavel')}
-                      className="py-2 px-2 text-center text-slate-900 border-r border-black cursor-pointer hover:bg-amber-50"
+                      className="py-1.5 px-1.5 text-center text-slate-900 border-r border-black cursor-pointer hover:bg-amber-50 text-[11px] leading-tight"
                       title="Clique para editar Responsável"
                     >
                       {editingCell?.id === s.id && editingCell?.field === 'responsavel' ? (
@@ -800,7 +750,7 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                     {/* PRN */}
                     <td 
                       onClick={() => handleStartInlineEdit(s, 'prn')}
-                      className="py-2 px-1 text-center font-sans text-slate-900 border-r border-black cursor-pointer hover:bg-amber-50"
+                      className="py-1.5 px-1 text-center font-sans text-slate-900 border-r border-black cursor-pointer hover:bg-amber-50 text-[11px]"
                       title="Clique para editar PRN"
                     >
                       {editingCell?.id === s.id && editingCell?.field === 'prn' ? (
@@ -821,7 +771,7 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                     {/* LOCAL */}
                     <td 
                       onClick={() => handleStartInlineEdit(s, 'local')}
-                      className="py-2 px-2 text-center text-slate-900 border-r border-black cursor-pointer hover:bg-amber-50"
+                      className="py-1.5 px-1.5 text-center text-slate-900 border-r border-black cursor-pointer hover:bg-amber-50 text-[11px]"
                       title="Clique para editar Local"
                     >
                       {editingCell?.id === s.id && editingCell?.field === 'local' ? (
@@ -842,7 +792,7 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                     {/* CÓDIGO */}
                     <td 
                       onClick={() => handleStartInlineEdit(s, 'codigo')}
-                      className="py-2 px-1 text-center text-slate-900 border-r border-black cursor-pointer hover:bg-amber-50"
+                      className="py-1.5 px-1 text-center text-slate-900 border-r border-black cursor-pointer hover:bg-amber-50 text-[11px]"
                       title="Clique para editar Código"
                     >
                       {editingCell?.id === s.id && editingCell?.field === 'codigo' ? (
@@ -863,7 +813,7 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                     {/* ENTREGÁVEL */}
                     <td 
                       onClick={() => handleStartInlineEdit(s, 'entregavel')}
-                      className="py-2 px-3 text-center text-slate-900 border-r border-black cursor-pointer hover:bg-amber-50"
+                      className="py-1.5 px-1.5 text-center text-slate-900 border-r border-black cursor-pointer hover:bg-amber-50 text-[11px]"
                       title="Clique para editar Entregável"
                     >
                       {editingCell?.id === s.id && editingCell?.field === 'entregavel' ? (
