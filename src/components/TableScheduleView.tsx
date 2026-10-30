@@ -3,7 +3,7 @@ import {
   Edit2, Copy, Trash2, Search, Filter, 
   ChevronDown, Plus, Check, ArrowUpDown, 
   Trash, ArrowUp, ArrowDown, Scissors, ClipboardList,
-  GripVertical, Calendar
+  GripVertical, Calendar, Palette, X
 } from 'lucide-react';
 import { AreaDefinition, IntegrationSession } from '../types/schedule';
 import { 
@@ -44,6 +44,24 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
 
+  // Quick Area & Color Popover state
+  const [areaPopover, setAreaPopover] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    session: IntegrationSession | null;
+  }>({
+    visible: false,
+    x: 0,
+    y: 0,
+    session: null,
+  });
+
+  const [popoverCustomArea, setPopoverCustomArea] = useState('');
+  const [popoverCustomBg, setPopoverCustomBg] = useState('#6b21a8');
+  const [popoverCustomText, setPopoverCustomText] = useState('#ffffff');
+  const areaPopoverRef = useRef<HTMLDivElement | null>(null);
+
   // Selected row state (like selecting row 4 in Excel)
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
@@ -64,17 +82,21 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
 
   const contextMenuRef = useRef<HTMLDivElement | null>(null);
 
-  // Close context menu on click outside or escape
+  // Close context menu and area popover on click outside or escape
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
         setContextMenu((prev) => ({ ...prev, visible: false }));
+      }
+      if (areaPopoverRef.current && !areaPopoverRef.current.contains(e.target as Node)) {
+        setAreaPopover((prev) => ({ ...prev, visible: false }));
       }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setContextMenu((prev) => ({ ...prev, visible: false }));
+        setAreaPopover((prev) => ({ ...prev, visible: false }));
       }
       // If a row is selected and user presses Delete or Backspace
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedRowId && !editingCell) {
@@ -438,38 +460,40 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                 const areaDef = getAreaDef(s.area);
                 const isSelected = selectedRowId === s.id;
 
-                // Specific Area Colors matching the image exactly
-                let areaBg = '#ffffff';
-                let areaColor = '#000000';
+                // Specific Area Colors matching the image exactly or customColor override
+                let areaBg = s.customColor || '#ffffff';
+                let areaColor = '#ffffff';
 
-                const upperArea = (s.area || '').toUpperCase();
-                if (upperArea.includes('GENTE E GESTÃO')) {
-                  areaBg = '#6b21a8';
-                  areaColor = '#ffffff';
-                } else if (upperArea.includes('FACILITIES')) {
-                  areaBg = '#2563eb';
-                  areaColor = '#ffffff';
-                } else if (upperArea.includes('SAÚDE')) {
-                  areaBg = '#00c04b';
-                  areaColor = '#ffffff';
-                } else if (upperArea.includes('SEGURANÇA')) {
-                  areaBg = '#f59e0b';
-                  areaColor = '#000000';
-                } else if (upperArea.includes('SUPERAR')) {
-                  areaBg = '#384354';
-                  areaColor = '#ffffff';
-                } else if (upperArea.includes('PRODUÇÃO')) {
-                  areaBg = '#e45b17';
-                  areaColor = '#ffffff';
-                } else if (upperArea.includes('QUALIDADE')) {
-                  areaBg = '#c2410c';
-                  areaColor = '#ffffff';
-                } else if (upperArea.includes('TI')) {
-                  areaBg = '#ffffff';
-                  areaColor = '#000000';
-                } else if (areaDef) {
-                  areaBg = areaDef.bgColor;
-                  areaColor = areaDef.textColor;
+                if (!s.customColor) {
+                  const upperArea = (s.area || '').toUpperCase();
+                  if (upperArea.includes('GENTE E GESTÃO')) {
+                    areaBg = '#6b21a8';
+                    areaColor = '#ffffff';
+                  } else if (upperArea.includes('FACILITIES')) {
+                    areaBg = '#2563eb';
+                    areaColor = '#ffffff';
+                  } else if (upperArea.includes('SAÚDE')) {
+                    areaBg = '#00c04b';
+                    areaColor = '#ffffff';
+                  } else if (upperArea.includes('SEGURANÇA')) {
+                    areaBg = '#f59e0b';
+                    areaColor = '#000000';
+                  } else if (upperArea.includes('SUPERAR')) {
+                    areaBg = '#384354';
+                    areaColor = '#ffffff';
+                  } else if (upperArea.includes('PRODUÇÃO')) {
+                    areaBg = '#e45b17';
+                    areaColor = '#ffffff';
+                  } else if (upperArea.includes('QUALIDADE')) {
+                    areaBg = '#c2410c';
+                    areaColor = '#ffffff';
+                  } else if (upperArea.includes('TI')) {
+                    areaBg = '#ffffff';
+                    areaColor = '#000000';
+                  } else if (areaDef) {
+                    areaBg = areaDef.bgColor;
+                    areaColor = areaDef.textColor;
+                  }
                 }
 
                 // If lunch, the entire row is solid black with white text!
@@ -715,15 +739,32 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                       )}
                     </td>
 
-                    {/* ÁREA: Full-cell colored block */}
+                    {/* ÁREA: Full-cell colored block with interactive quick selector and color picker */}
                     <td 
-                      className="py-1.5 px-1.5 text-center border-r border-black font-bold uppercase text-[10.5px] tracking-wide select-none"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                        setAreaPopover({
+                          visible: true,
+                          x: rect.left,
+                          y: rect.bottom + window.scrollY,
+                          session: s,
+                        });
+                        setPopoverCustomArea(s.area);
+                        setPopoverCustomBg(areaBg || '#6b21a8');
+                        setPopoverCustomText(areaColor || '#ffffff');
+                      }}
+                      className="py-1.5 px-1.5 text-center border-r border-black font-bold uppercase text-[10.5px] tracking-wide select-none cursor-pointer hover:brightness-110 relative group shadow-2xs"
                       style={{
                         backgroundColor: areaBg,
                         color: areaColor,
                       }}
+                      title="Clique para trocar o nome da Área ou personalizar a cor desta linha"
                     >
-                      {s.area}
+                      <div className="flex items-center justify-center gap-1">
+                        <span className="truncate">{s.area}</span>
+                        <Palette className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                      </div>
                     </td>
 
                     {/* RESPONSÁVEL */}
@@ -1005,6 +1046,152 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
             <Edit2 className="w-3.5 h-3.5 text-indigo-600" />
             <span>Editar Linha Completa...</span>
           </button>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* QUICK AREA & COLOR PICKER POPOVER                                        */}
+      {/* ========================================================================= */}
+      {areaPopover.visible && areaPopover.session && (
+        <div
+          ref={areaPopoverRef}
+          className="fixed z-50 bg-white border border-slate-300 rounded-2xl shadow-2xl p-3.5 w-72 text-xs font-sans animate-in fade-in zoom-in-95"
+          style={{
+            top: `${Math.min(window.innerHeight - 340, Math.max(10, areaPopover.y - window.scrollY))}px`,
+            left: `${Math.min(window.innerWidth - 300, Math.max(10, areaPopover.x))}px`,
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200 mb-2.5">
+            <div className="flex items-center gap-1.5 font-bold text-slate-800">
+              <Palette className="w-4 h-4 text-indigo-600" />
+              <span>Editar Área e Cor da Linha</span>
+            </div>
+            <button
+              onClick={() => setAreaPopover((p) => ({ ...p, visible: false }))}
+              className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {/* Quick Preset Areas */}
+            <div>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                Escolher Área Existente:
+              </label>
+              <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto pr-1">
+                {[
+                  { name: 'GENTE E GESTÃO', bg: '#6b21a8', text: '#ffffff' },
+                  { name: 'FACILITIES', bg: '#2563eb', text: '#ffffff' },
+                  { name: 'SAÚDE', bg: '#00c04b', text: '#ffffff' },
+                  { name: 'SEGURANÇA', bg: '#f59e0b', text: '#000000' },
+                  { name: 'SUPERAR', bg: '#384354', text: '#ffffff' },
+                  { name: 'PRODUÇÃO', bg: '#e45b17', text: '#ffffff' },
+                  { name: 'QUALIDADE', bg: '#c2410c', text: '#ffffff' },
+                  { name: 'TI', bg: '#0284c7', text: '#ffffff' },
+                  ...areas.filter((a) => !['GENTE E GESTÃO', 'FACILITIES', 'SAÚDE', 'SEGURANÇA', 'SUPERAR', 'PRODUÇÃO', 'QUALIDADE', 'TI'].includes(a.name.toUpperCase())).map((a) => ({
+                    name: a.name,
+                    bg: a.bgColor,
+                    text: a.textColor,
+                  })),
+                ].map((item, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      if (areaPopover.session) {
+                        const updated: IntegrationSession = {
+                          ...areaPopover.session,
+                          area: item.name,
+                          customColor: item.bg,
+                        };
+                        onUpdateSession(updated);
+                        setAreaPopover((p) => ({ ...p, visible: false }));
+                      }
+                    }}
+                    className="px-2 py-1.5 rounded-lg text-[10px] font-bold text-left truncate transition-transform hover:scale-[1.02] shadow-2xs border border-black/10"
+                    style={{
+                      backgroundColor: item.bg,
+                      color: item.text,
+                    }}
+                    title={`Aplicar ${item.name}`}
+                  >
+                    {item.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Name & Custom Color */}
+            <div className="border-t border-slate-200 pt-2.5 space-y-2">
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Ou Digitar Novo Nome de Área:
+                </label>
+                <input
+                  type="text"
+                  value={popoverCustomArea}
+                  onChange={(e) => setPopoverCustomArea(e.target.value.toUpperCase())}
+                  placeholder="EX: LOGÍSTICA, MANUTENÇÃO..."
+                  className="w-full px-2 py-1 text-xs border border-slate-300 rounded-lg font-bold uppercase focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 focus:outline-hidden"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Personalizar Cor de Fundo:
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={popoverCustomBg}
+                    onChange={(e) => setPopoverCustomBg(e.target.value)}
+                    className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
+                    title="Selecione a cor de fundo"
+                  />
+                  <div
+                    className="flex-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-center truncate border border-black/10"
+                    style={{
+                      backgroundColor: popoverCustomBg,
+                      color: popoverCustomText,
+                    }}
+                  >
+                    {popoverCustomArea || 'Prévia da Área'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={() => setPopoverCustomText((prev) => (prev === '#ffffff' ? '#000000' : '#ffffff'))}
+                  className="text-[10px] font-semibold text-slate-500 hover:text-slate-800 underline"
+                >
+                  Texto: {popoverCustomText === '#ffffff' ? 'Branco' : 'Preto'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (areaPopover.session && popoverCustomArea.trim()) {
+                      const updated: IntegrationSession = {
+                        ...areaPopover.session,
+                        area: popoverCustomArea.trim(),
+                        customColor: popoverCustomBg,
+                      };
+                      onUpdateSession(updated);
+                      setAreaPopover((p) => ({ ...p, visible: false }));
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-xs transition-colors"
+                >
+                  Salvar Área & Cor
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
