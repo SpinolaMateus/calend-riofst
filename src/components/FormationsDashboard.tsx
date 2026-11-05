@@ -18,7 +18,7 @@ type FormationRow = Record<string, string> & {
 };
 
 type MatrixKind = 'conhecimento' | 'habilidade' | null;
-type FacetKey = 'nome' | 'prn' | 'uo' | 'cargo' | 'matriz' | 'estado';
+type FacetKey = 'codigo' | 'nome' | 'prn' | 'uo' | 'cargo' | 'matriz' | 'estado';
 type Facets = Record<FacetKey, string[]>;
 type ColumnId = 'A' | 'B';
 
@@ -68,6 +68,7 @@ interface WorkerResponse {
 }
 
 const FACET_DEFINITIONS: { key: FacetKey; label: string }[] = [
+  { key: 'codigo', label: 'Código do treinamento' },
   { key: 'nome', label: 'Colaborador' },
   { key: 'prn', label: 'PRN / Utilizador' },
   { key: 'uo', label: 'Unidade organizacional' },
@@ -76,7 +77,7 @@ const FACET_DEFINITIONS: { key: FacetKey; label: string }[] = [
   { key: 'estado', label: 'Estado / conclusão' },
 ];
 const EMPTY_FACETS: Facets = {
-  nome: [], prn: [], uo: [], cargo: [], matriz: [], estado: [],
+  codigo: [], nome: [], prn: [], uo: [], cargo: [], matriz: [], estado: [],
 };
 
 const EMPTY_COLUMN: ColumnState = {

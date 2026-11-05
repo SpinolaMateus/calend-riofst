@@ -4,13 +4,15 @@ type FormationRow = Record<string, string> & {
   _status: string;
   _prn: string;
   _uo: string;
+  _itemId: string;
+  _trainingTitle: string;
   _pending: 'pending' | 'done';
   _searchText: string;
 };
 
 type ColumnId = 'A' | 'B';
 type MatrixKind = 'conhecimento' | 'habilidade' | null;
-type FacetKey = 'nome' | 'prn' | 'uo' | 'cargo' | 'matriz' | 'estado';
+type FacetKey = 'codigo' | 'nome' | 'prn' | 'uo' | 'cargo' | 'matriz' | 'estado';
 type Facets = Record<FacetKey, string[]>;
 
 interface ColumnState {
@@ -65,7 +67,7 @@ interface FacetOptionsRequest {
 
 type WorkerRequest = LoadRequest | FilterRequest | ExportRequest | FacetOptionsRequest;
 
-const FACET_KEYS: FacetKey[] = ['nome', 'prn', 'uo', 'cargo', 'matriz', 'estado'];
+const FACET_KEYS: FacetKey[] = ['codigo', 'nome', 'prn', 'uo', 'cargo', 'matriz', 'estado'];
 const PAGE_SIZE = 100;
 const normalizeText = (value: unknown) => String(value ?? '')
   .normalize('NFD')
@@ -137,8 +139,16 @@ function parseCSV(text: string): FormationRow[] {
   const firstNameField = findHeader(['Nome', 'Primeiro Nome', 'First Name']);
   const lastNameField = findHeader(['Sobrenome', 'Último Nome', 'Last Name']);
   const fullNameField = findHeader(['Nome Completo', 'Nome do Colaborador', 'Full Name', 'Colaborador']);
-  const itemIdField = findHeader(['ID do Item', 'Item ID', 'ID Item']);
-  const itemTitleField = findHeader(['Título do Item', 'Titulo do Item', 'Título da Formação', 'Formação', 'Training Title']);
+  const itemIdField = findHeader([
+    'ID do Item', 'Item ID', 'ID Item', 'Código do Item', 'Codigo do Item',
+    'Código do Treinamento', 'Codigo do Treinamento', 'Código de Treinamento',
+    'Codigo de Treinamento', 'Código', 'Codigo',
+  ]);
+  const itemTitleField = findHeader([
+    'Título do Item', 'Titulo do Item', 'Título da Formação', 'Titulo da Formacao',
+    'Título do Treinamento', 'Titulo do Treinamento', 'Formação', 'Formacao',
+    'Training Title', 'Item Title',
+  ]);
   const matrixField = findHeader(['ID da Matriz', 'Matriz ID', 'Matrix ID']);
   const cargoField = findHeader([
     'Descrição do Cargo', 'Cargo', 'Descrição Cargo', 'Função', 'Cargo/Função',
@@ -192,16 +202,23 @@ function parseCSV(text: string): FormationRow[] {
       'incomplete', 'in progress', 'em andamento',
     ].includes(normalizedStatus);
 
+    const itemId = itemIdField ? (item[itemIdField] ?? '').trim() : '';
+    const itemTitle = itemTitleField ? (item[itemTitleField] ?? '').trim() : '';
+
     return {
       ...item,
+      'ID do Item': itemId || item['ID do Item'] || '',
+      'Título do Item': itemTitle || item['Título do Item'] || '',
       _fullname: fullName,
       _cargo: cargo,
       _status: status,
       _prn: userField ? item[userField] ?? '' : '',
       _uo: unit,
+      _itemId: itemId,
+      _trainingTitle: itemTitle,
       _pending: pending ? 'pending' : 'done',
       _searchText: normalizeText([
-        item[itemIdField], fullName, cargo, unit, item[itemTitleField], item[matrixField],
+        itemId, fullName, cargo, unit, itemTitle, item[matrixField],
       ].join(' ')),
     };
   }).filter((item): item is FormationRow => item !== null);
@@ -209,6 +226,12 @@ function parseCSV(text: string): FormationRow[] {
 
 function getFacetValue(row: FormationRow, key: FacetKey) {
   switch (key) {
+    case 'codigo': {
+      const code = row._itemId || row['ID do Item'] || '';
+      const title = row._trainingTitle || row['Título do Item'] || '';
+      if (!code) return title;
+      return title ? `${code} - ${title}` : code;
+    }
     case 'nome': return row._fullname;
     case 'prn': return row._prn;
     case 'uo': return row._uo;
@@ -232,7 +255,7 @@ function deriveColumn(columnId: ColumnId, state: ColumnState) {
     const values = FACET_KEYS.map((key) => getFacetValue(row, key));
     const matches = FACET_KEYS.map((key, index) => {
       const selected = state.facets[key];
-      return !selected.length || selected.includes(values[index]);
+      return !selected?.length || selected.includes(values[index]);
     });
     if (matches.every(Boolean)) filteredRows.push(row);
   }
@@ -285,7 +308,7 @@ function getFacetOptions(request: FacetOptionsRequest) {
 
       const matchesOtherFacets = FACET_KEYS.every((key) => (
         key === facetKey
-        || !column.facets[key].length
+        || !column.facets[key]?.length
         || column.facets[key].includes(getFacetValue(row, key))
       ));
       if (matchesOtherFacets) {
@@ -293,7 +316,7 @@ function getFacetOptions(request: FacetOptionsRequest) {
         if (value) available.add(value);
       }
     }
-    options = [...available].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    options = [...available].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
     facetOptionsCache.set(cacheKey, options);
   }
 
