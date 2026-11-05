@@ -3,10 +3,10 @@ import {
   Users, Building2, Briefcase, Clock, Calendar, BarChart3, 
   TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, 
   Search, Filter, X, Download, FileSpreadsheet, Plus, 
-  ArrowLeft, RefreshCw, Layers, ShieldCheck, ChevronRight,
+  ArrowLeft, RefreshCw, Layers, ShieldCheck, ChevronRight, ChevronLeft,
   Info, Sparkles, UserCheck, ShieldAlert, Check, HelpCircle,
   FolderTree, GitCommit, FileText, UploadCloud, Edit3, ArrowUpRight,
-  Factory, Sliders, Menu, Award
+  Factory, Sliders, Menu, Award, PanelLeftClose, PanelLeftOpen
 } from 'lucide-react';
 import { 
   Employee, PeopleAnalyticsKPI, PeopleAnalyticsFilter, 
@@ -190,6 +190,23 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [isCalculationRulesModalOpen, setIsCalculationRulesModalOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('kba1_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebarCollapse = () => {
+    setIsSidebarCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('kba1_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // Modais e Diálogos
   const [selectedKPI, setSelectedKPI] = useState<PeopleAnalyticsKPI | null>(null);
@@ -705,32 +722,48 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
         />
       )}
 
-      <aside className={`fixed top-14 bottom-0 left-0 z-30 w-72 bg-[#0a3641] text-white flex flex-col justify-between shadow-2xl transition-transform duration-200 lg:translate-x-0 ${
+      <aside className={`fixed top-14 bottom-0 left-0 z-30 bg-[#0a3641] text-white flex flex-col justify-between shadow-2xl transition-all duration-300 ${
+        isSidebarCollapsed ? 'w-20' : 'w-72'
+      } ${
         isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
-        <div className="flex flex-col flex-1 overflow-y-auto">
+        <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
           {/* Top Brand */}
-          <div className="p-5 border-b border-[#306576]/30">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-[#6ffbbe] shadow-sm">
-                <Factory className="w-6 h-6" />
+          <div className={`border-b border-[#306576]/30 transition-all ${isSidebarCollapsed ? 'p-3 flex flex-col items-center gap-2' : 'p-5'}`}>
+            <div className={`flex items-center ${isSidebarCollapsed ? 'justify-center w-full' : 'justify-between'} gap-2 mb-2`}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-[#6ffbbe] shadow-sm shrink-0">
+                  <Factory className="w-6 h-6" />
+                </div>
+                {!isSidebarCollapsed && (
+                  <div>
+                    <span className="text-base font-bold text-white tracking-tight block">KBA1 Analytics</span>
+                    <span className="text-[10px] text-[#799fac] uppercase tracking-wider font-semibold">Papelão Ondulado</span>
+                  </div>
+                )}
               </div>
-              <div>
-                <span className="text-base font-bold text-white tracking-tight block">KBA1 Analytics</span>
-                <span className="text-[10px] text-[#799fac] uppercase tracking-wider font-semibold">Papelão Ondulado</span>
-              </div>
+              <button
+                type="button"
+                onClick={toggleSidebarCollapse}
+                className="hidden lg:flex p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-[#a5cdda] hover:text-white transition-colors"
+                title={isSidebarCollapsed ? "Expandir Menu Lateral" : "Recolher Menu Lateral"}
+              >
+                {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+              </button>
             </div>
             
-            <div className="bg-[#002028] px-3 py-2 rounded-lg flex items-center justify-between border border-[#306576]/40">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-white">KBA1 • Feira de Santana (BA)</span>
+            {!isSidebarCollapsed && (
+              <div className="bg-[#002028] px-3 py-2 rounded-lg flex items-center justify-between border border-[#306576]/40 mt-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-white">KBA1 • Feira de Santana (BA)</span>
+                </div>
+                <span className="h-2 w-2 rounded-full bg-[#6ffbbe] animate-pulse" title="Sistema Conectado" />
               </div>
-              <span className="h-2 w-2 rounded-full bg-[#6ffbbe] animate-pulse" title="Sistema Conectado" />
-            </div>
+            )}
           </div>
 
           {/* Nav links */}
-          <nav className="flex-1 p-3 space-y-1">
+          <nav className="flex-1 p-2 space-y-1">
             {[
               { id: 'overview', label: 'Visão Executiva', icon: BarChart3 },
               { id: 'headcount', label: `Quadro de Pessoal (${filteredEmployees.length})`, icon: Users },
@@ -751,14 +784,17 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                     setActiveTab(item.id as TabType);
                     setIsMobileSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                  title={item.label}
+                  className={`w-full flex items-center rounded-xl text-xs font-semibold transition-all ${
+                    isSidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-3.5 py-2.5'
+                  } ${
                     isActive
                       ? 'bg-[#306576] text-white border-l-4 border-[#6ffbbe] shadow-sm'
                       : 'text-[#a5cdda] hover:bg-[#306576]/40 hover:text-white'
                   }`}
                 >
                   <Icon className="w-4 h-4 shrink-0 text-[#6ffbbe]" />
-                  <span className="truncate">{item.label}</span>
+                  {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
                 </button>
               );
             })}
@@ -766,17 +802,22 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
         </div>
 
         {/* Bottom Sidebar Footer */}
-        <div className="p-4 border-t border-[#306576]/30 bg-[#002028]/60 space-y-2.5">
-          <div className="flex items-center justify-between text-[11px] text-[#799fac]">
-            <span>Competência: <strong className="text-white">{filters.competence}</strong></span>
-            <span className="text-[#6ffbbe] font-semibold">LGPD Auditada</span>
-          </div>
+        <div className={`border-t border-[#306576]/30 bg-[#002028]/60 transition-all ${isSidebarCollapsed ? 'p-2 flex flex-col items-center gap-2' : 'p-4 space-y-2.5'}`}>
+          {!isSidebarCollapsed && (
+            <div className="flex items-center justify-between text-[11px] text-[#799fac]">
+              <span>Competência: <strong className="text-white">{filters.competence}</strong></span>
+              <span className="text-[#6ffbbe] font-semibold">LGPD Auditada</span>
+            </div>
+          )}
           <button
             onClick={onBackToHome}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-semibold border border-white/10 transition-colors"
+            title="Voltar ao Início"
+            className={`w-full flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-semibold border border-white/10 transition-colors ${
+              isSidebarCollapsed ? 'p-2.5' : 'gap-2 px-3 py-2'
+            }`}
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Voltar ao Início</span>
+            {!isSidebarCollapsed && <span>Voltar ao Início</span>}
           </button>
         </div>
       </aside>
@@ -784,7 +825,9 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
       {/* ========================================================================= */}
       {/* 2. ÁREA PRINCIPAL COM HEADER EXECUTIVO & CONTEÚDO DAS ABAS */}
       {/* ========================================================================= */}
-      <div className="flex-1 lg:ml-72 flex flex-col min-w-0 min-h-screen">
+      <div className={`flex-1 flex flex-col min-w-0 min-h-screen transition-all duration-300 ${
+        isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'
+      }`}>
         
         {/* Top Header Bar */}
         <header data-capture-ignore className="no-print bg-[#132F46] text-white border-b border-slate-700/80 sticky top-14 z-20 shadow-md">
@@ -797,6 +840,15 @@ export const PeopleAnalyticsView: React.FC<PeopleAnalyticsViewProps> = ({ onBack
                 title="Abrir Menu Lateral"
               >
                 <Menu className="w-5 h-5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={toggleSidebarCollapse}
+                className="hidden lg:flex p-2 rounded-xl bg-white/10 hover:bg-white/20 text-[#6ffbbe] transition-colors"
+                title={isSidebarCollapsed ? "Expandir barra lateral" : "Recolher barra lateral"}
+              >
+                {isSidebarCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
               </button>
               
               <div>

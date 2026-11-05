@@ -92,21 +92,21 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
   // Função para retornar a classe de cor da célula baseada na meta
   const getCellColorClass = (ind: SuperarMonthlyIndicator, val: number | null): string => {
     if (val === null || val === undefined) {
-      return 'bg-slate-50 text-slate-300';
+      return 'bg-slate-50/70 text-slate-300 font-normal';
     }
 
     if (ind.polarity === 'lower_is_better') {
       // Ex: Turnover ou Perdas (menor é melhor)
-      if (val <= ind.meta5) return 'bg-[#e9d5ff] text-[#581c87] font-black border border-purple-300'; // Superação Meta 5
-      if (val <= ind.meta3) return 'bg-[#bbf7d0] text-[#14532d] font-bold border border-emerald-300'; // Atingiu Meta 3
-      if (val <= ind.meta1) return 'bg-[#fef08a] text-[#713f12] font-semibold border border-amber-300'; // Próximo Meta 1
-      return 'bg-[#e11d48] text-white font-bold border border-rose-600'; // GAP crítico
+      if (val <= ind.meta5) return 'bg-[#EDE9FE] text-[#581C87] font-black border border-purple-200'; // Superação Meta 5
+      if (val <= ind.meta3) return 'bg-[#DCFCE7] text-[#14532D] font-bold border border-emerald-200'; // Atingiu Meta 3
+      if (val <= ind.meta1) return 'bg-[#FEF9C3] text-[#713F12] font-semibold border border-amber-200'; // Próximo Meta 1
+      return 'bg-[#FEE2E2] text-[#991B1B] font-bold border border-rose-300'; // GAP crítico
     } else {
       // Maior é melhor
-      if (val >= ind.meta5) return 'bg-[#e9d5ff] text-[#581c87] font-black border border-purple-300'; // Superação Meta 5 (Roxo da planilha)
-      if (val >= ind.meta3) return 'bg-[#86efac] text-[#064e3b] font-bold border border-emerald-300'; // Superou Meta 3 (Verde)
-      if (val >= ind.meta1) return 'bg-[#fef08a] text-[#713f12] font-semibold border border-amber-300'; // Atingiu Meta 1 (Amarelo)
-      return 'bg-[#e11d48] text-white font-bold border border-rose-600'; // GAP Crítico abaixo da Meta 1 (Vermelho da planilha)
+      if (val >= ind.meta5) return 'bg-[#EDE9FE] text-[#581C87] font-black border border-purple-200'; // Superação Meta 5 (Roxo da planilha)
+      if (val >= ind.meta3) return 'bg-[#DCFCE7] text-[#14532D] font-bold border border-emerald-200'; // Superou Meta 3 (Verde)
+      if (val >= ind.meta1) return 'bg-[#FEF9C3] text-[#713F12] font-semibold border border-amber-200'; // Atingiu Meta 1 (Amarelo)
+      return 'bg-[#FEE2E2] text-[#991B1B] font-bold border border-rose-300'; // GAP Crítico abaixo da Meta 1 (Vermelho da planilha)
     }
   };
 
@@ -458,97 +458,174 @@ export const SuperarTab: React.FC<SuperarTabProps> = ({
         </div>
 
         {/* Legenda de Formatação Condicional Idêntica à Planilha */}
-        <div className="px-4 py-2 bg-slate-50 border-y border-slate-100 flex items-center gap-4 text-[11px] flex-wrap">
-          <span className="font-bold text-slate-600">Legenda de Realização:</span>
-          <span className="inline-flex items-center gap-1.5 font-bold px-2 py-0.5 rounded bg-[#e9d5ff] text-[#581c87] border border-purple-300">
+        <div className="px-4 py-2.5 bg-slate-50/80 border-y border-slate-100 flex items-center gap-3 text-[11px] flex-wrap">
+          <span className="font-bold text-slate-700 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+            Legenda de Realização:
+          </span>
+          <span className="inline-flex items-center gap-1.5 font-bold px-2.5 py-1 rounded-lg bg-[#EDE9FE] text-[#581C87] border border-purple-200 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-[#9333ea]" /> Superou Meta 5 (Máxima)
           </span>
-          <span className="inline-flex items-center gap-1.5 font-bold px-2 py-0.5 rounded bg-[#86efac] text-[#064e3b] border border-emerald-300">
+          <span className="inline-flex items-center gap-1.5 font-bold px-2.5 py-1 rounded-lg bg-[#DCFCE7] text-[#14532D] border border-emerald-200 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-[#16a34a]" /> Atingiu Meta 3 (Planejado)
           </span>
-          <span className="inline-flex items-center gap-1.5 font-bold px-2 py-0.5 rounded bg-[#fef08a] text-[#713f12] border border-amber-300">
+          <span className="inline-flex items-center gap-1.5 font-bold px-2.5 py-1 rounded-lg bg-[#FEF9C3] text-[#713F12] border border-amber-200 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-[#ca8a04]" /> Atingiu Meta 1 (Atenção)
           </span>
-          <span className="inline-flex items-center gap-1.5 font-bold px-2 py-0.5 rounded bg-[#e11d48] text-white">
-            <span className="w-2 h-2 rounded-full bg-white" /> Abaixo de Meta 1 (GAP Crítico)
+          <span className="inline-flex items-center gap-1.5 font-bold px-2.5 py-1 rounded-lg bg-[#FEE2E2] text-[#991B1B] border border-rose-200 shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-[#dc2626]" /> Abaixo de Meta 1 (GAP Crítico)
           </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              {/* Linha de Cabeçalho Superior */}
+              {/* Linha de Cabeçalho Superior conforme Modelo Oficial (Imagem 3) */}
               <tr className="bg-[#132F46] text-white text-[11px] font-bold">
-                <th className="py-2.5 px-3 min-w-[240px]">Indicador</th>
-                <th className="py-2.5 px-2 text-center bg-[#fde047] text-[#713f12] font-black min-w-[50px]">Meta 1</th>
-                <th className="py-2.5 px-2 text-center bg-[#cbd5e1] text-[#0f172a] font-black min-w-[50px]">Meta 3</th>
-                <th className="py-2.5 px-2 text-center bg-[#d8b4fe] text-[#581c87] font-black min-w-[50px]">Meta 5</th>
+                <th className="py-2.5 px-2 text-center w-10 text-slate-300">#</th>
+                <th className="py-2.5 px-3 min-w-[260px]">Indicador</th>
+                <th className="py-2.5 px-2 text-center bg-[#FDE047] text-[#713F12] font-black min-w-[55px] border-r border-amber-200">Meta 1</th>
+                <th className="py-2.5 px-2 text-center bg-[#86EFAC] text-[#064E3B] font-black min-w-[55px] border-r border-emerald-200">Meta 3</th>
+                <th className="py-2.5 px-2 text-center bg-[#D8B4FE] text-[#581C87] font-black min-w-[55px]">Meta 5</th>
                 {MONTHS_LIST.map(m => (
-                  <th key={m} className="py-2.5 px-2 text-center min-w-[42px]">{m}</th>
+                  <th key={m} className="py-2.5 px-2 text-center min-w-[42px] font-semibold">{m}</th>
                 ))}
-                <th className="py-2.5 px-3 text-center bg-[#0a3641] text-[#6ffbbe] font-black min-w-[60px]">MÉDIA</th>
+                <th className="py-2.5 px-3 text-center bg-[#0a3641] text-[#6ffbbe] font-black min-w-[65px]">MÉDIA</th>
                 <th className="py-2.5 px-2 text-center bg-[#001f27] text-white font-bold min-w-[55px]">ACUM.</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {filteredIndicators.map(ind => (
-                <tr key={ind.id} className="hover:bg-slate-50/80 transition-colors">
-                  
-                  {/* Nome do Indicador & Link Alavanca */}
-                  <td className="py-2.5 px-3">
-                    <div className="flex items-center justify-between gap-1.5">
-                      <span className="font-bold text-[#0b1c30] block leading-tight">
-                        {ind.name}
-                      </span>
-                      {ind.notes && (
-                        <button
-                          onClick={() => setExpandedNotesId(expandedNotesId === ind.id ? null : ind.id)}
-                          title="Ver Diagnóstico Técnico"
-                          className="text-slate-400 hover:text-indigo-600 transition-colors shrink-0"
-                        >
-                          <HelpCircle className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                    <span className="text-[10px] text-slate-400 font-medium block mt-0.5">
-                      Alavanca {ind.alavanca} • Peso: {ind.peso}%
-                    </span>
-                  </td>
-
-                  {/* Metas */}
-                  <td className="py-2 px-1 text-center font-mono font-bold bg-[#fef9c3] text-[#713f12]">
-                    {ind.meta1}
-                  </td>
-                  <td className="py-2 px-1 text-center font-mono font-bold bg-[#f1f5f9] text-[#1e293b]">
-                    {ind.meta3}
-                  </td>
-                  <td className="py-2 px-1 text-center font-mono font-bold bg-[#f3e8ff] text-[#581c87]">
-                    {ind.meta5}
-                  </td>
-
-                  {/* Meses Realizados com Cores Idênticas à Planilha */}
-                  {MONTHS_LIST.map(m => {
-                    const val = ind.months[m];
-                    const cellColor = getCellColorClass(ind, val);
-                    return (
-                      <td key={m} className={`py-2 px-1 text-center font-mono text-[11px] ${cellColor}`}>
-                        {val !== null && val !== undefined ? val : '—'}
+              {filteredIndicators.map((ind, index) => {
+                const isTurnover = ind.id === 'turnover' || ind.name.toLowerCase().includes('turnover');
+                const isExpanded = expandedNotesId === ind.id;
+                return (
+                  <React.Fragment key={ind.id}>
+                    <tr className={`transition-colors ${
+                      isTurnover 
+                        ? 'bg-emerald-50/50 hover:bg-emerald-100/60' 
+                        : isExpanded 
+                          ? 'bg-slate-50' 
+                          : 'hover:bg-slate-50/80'
+                    }`}>
+                      
+                      {/* Número do Indicador */}
+                      <td className="py-2.5 px-2 text-center font-mono font-bold text-slate-400 text-xs">
+                        {index + 1}
                       </td>
-                    );
-                  })}
 
-                  {/* Média */}
-                  <td className="py-2 px-2 text-center font-mono font-black text-sm bg-slate-50 text-[#0b1c30]">
-                    {ind.media}
-                  </td>
+                      {/* Nome do Indicador & Link Alavanca */}
+                      <td className={`py-2.5 px-3 ${isTurnover ? 'border-l-4 border-emerald-500' : ''}`}>
+                        <div className="flex items-center justify-between gap-1.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`font-bold block leading-tight ${
+                              isTurnover ? 'text-emerald-900 font-black' : 'text-[#0b1c30]'
+                            }`}>
+                              {ind.name}
+                            </span>
+                            {ind.id === 'obrigatorios_portal_enk' && (
+                              <span 
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-sky-100 text-sky-800 border border-sky-200"
+                                title="Alinhado com a planilha oficial de registos de treinamento (18.952 registos)"
+                              >
+                                <BookOpen className="w-3 h-3" /> Registo de Treinamento
+                              </span>
+                            )}
+                          </div>
+                          {ind.notes && (
+                            <button
+                              onClick={() => setExpandedNotesId(isExpanded ? null : ind.id)}
+                              title={isExpanded ? "Ocultar Diagnóstico" : "Ver Diagnóstico Técnico e Observações"}
+                              className={`p-1 rounded-md transition-colors shrink-0 ${
+                                isExpanded 
+                                  ? 'bg-indigo-100 text-indigo-700' 
+                                  : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-100'
+                              }`}
+                            >
+                              <HelpCircle className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-medium block mt-0.5">
+                          Alavanca {ind.alavanca} • Peso: {ind.peso}%
+                        </span>
+                      </td>
 
-                  {/* Acumulado */}
-                  <td className="py-2 px-2 text-center font-mono text-xs text-slate-500">
-                    {ind.acumulado || 'N/A'}
-                  </td>
+                      {/* Metas - Formatadas conforme o modelo oficial da planilha (Imagem 3) */}
+                      <td className="py-2 px-1 text-center font-mono font-bold bg-[#FEF9C3] text-[#713F12] border-r border-amber-100">
+                        {ind.meta1}
+                      </td>
+                      {/* Meta 3 com células em tom grafite/cinza escuro com texto branco idêntico à planilha oficial (Imagem 3) */}
+                      <td className="py-2 px-1 text-center font-mono font-black bg-[#334155] text-white shadow-xs border-r border-slate-600">
+                        {ind.meta3}
+                      </td>
+                      <td className="py-2 px-1 text-center font-mono font-bold bg-[#F3E8FF] text-[#581C87]">
+                        {ind.meta5}
+                      </td>
 
-                </tr>
-              ))}
+                      {/* Meses Realizados com Cores Idênticas à Planilha */}
+                      {MONTHS_LIST.map(m => {
+                        const val = ind.months[m];
+                        const cellColor = getCellColorClass(ind, val);
+                        return (
+                          <td key={m} className={`py-2 px-1 text-center font-mono text-[11px] ${cellColor}`}>
+                            {val !== null && val !== undefined ? val : '—'}
+                          </td>
+                        );
+                      })}
+
+                      {/* Média */}
+                      <td className="py-2 px-2 text-center font-mono font-black text-sm bg-slate-50 text-[#0b1c30]">
+                        {ind.media}
+                      </td>
+
+                      {/* Acumulado */}
+                      <td className="py-2 px-2 text-center font-mono text-xs text-slate-500">
+                        {ind.acumulado || 'N/A'}
+                      </td>
+
+                    </tr>
+
+                    {/* Linha expansível com Diagnóstico & Observações Oficiais */}
+                    {isExpanded && (
+                      <tr className="bg-slate-50/90 border-b border-slate-200">
+                        <td colSpan={18} className="p-3.5">
+                          <div className="bg-white rounded-xl p-3.5 border border-slate-200/90 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0 mt-0.5">
+                                <HelpCircle className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-xs font-bold text-slate-800">
+                                    Diagnóstico & Observações Oficiais ({ind.name})
+                                  </span>
+                                  {ind.id === 'obrigatorios_portal_enk' && (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                      Reforçar o registro de treinamento
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                                  {ind.notes || 'Nenhuma observação registrada para este indicador.'}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setEditingNoteId(ind.id);
+                                setEditingNoteText(ind.notes || '');
+                              }}
+                              className="self-end md:self-auto px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors flex items-center gap-1.5 shrink-0"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" /> Editar Nota
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>
