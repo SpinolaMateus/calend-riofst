@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   BarChart3, Check, ChevronDown, CircleHelp, Cloud, Download, FileUp,
-  Search, Table2, Upload, UploadCloud, Users, X,
+  RotateCcw, Search, Table2, Upload, UploadCloud, Users, X,
 } from 'lucide-react';
 import { useAdminAuth } from '../services/AdminAuthContext';
 import { downloadSharedFormationsCsv, uploadSharedFormationsCsv } from '../services/supabaseClient';
@@ -542,6 +542,24 @@ export function FormationsDashboard({ embeddedInAnalytics = false }: FormationsD
     workerRef.current.postMessage({ type: 'load', requestId: loadVersion, file });
   };
 
+  const handleLoadDefaultFile = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const response = await fetch('/RELATORIO_DE_TREINAMENTOS.csv');
+      if (!response.ok) {
+        throw new Error(`Falha ao baixar planilha oficial (${response.status})`);
+      }
+      const blob = await response.blob();
+      const defaultFile = new File([blob], 'RELATORIO DE TREINAMENTOS.csv', { type: 'text/csv' });
+      loadFile(defaultFile, true, isAdmin);
+    } catch (err) {
+      console.error('Erro ao restaurar planilha oficial:', err);
+      setError('Não foi possível carregar a planilha oficial. Verifique a conexão.');
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
     const restoreVersion = loadVersionRef.current;
@@ -567,10 +585,24 @@ export function FormationsDashboard({ embeddedInAnalytics = false }: FormationsD
 
       // Fallback para cache local no navegador
       const saved = await readLastUpload();
-      if (cancelled || loadVersionRef.current !== restoreVersion || !saved) return;
-      setLastSavedAt(saved.savedAt);
-      setLastSavedName(saved.file.name);
-      loadFile(saved.file, false);
+      if (cancelled || loadVersionRef.current !== restoreVersion) return;
+      if (saved) {
+        setLastSavedAt(saved.savedAt);
+        setLastSavedName(saved.file.name);
+        loadFile(saved.file, false);
+        return;
+      }
+
+      // Fallback automático para a planilha oficial integrada no sistema
+      try {
+        const response = await fetch('/RELATORIO_DE_TREINAMENTOS.csv');
+        if (!response.ok || cancelled || loadVersionRef.current !== restoreVersion) return;
+        const blob = await response.blob();
+        const defaultFile = new File([blob], 'RELATORIO DE TREINAMENTOS.csv', { type: 'text/csv' });
+        loadFile(defaultFile, false);
+      } catch (err) {
+        console.warn('Could not auto-load default formations CSV', err);
+      }
     };
     void restoreLatestFile().catch((caught: unknown) => {
       if (cancelled) return;
@@ -845,6 +877,16 @@ export function FormationsDashboard({ embeddedInAnalytics = false }: FormationsD
           >
             {isCloudSaving ? <UploadCloud size={16} /> : <Upload size={16} />}
             {isLoading ? 'Processando CSV...' : isCloudSaving ? 'Salvando na nuvem...' : 'Carregar e salvar CSV'}
+          </button>
+          <button
+            type="button"
+            className="formation-upload-button formation-upload-button-secondary"
+            onClick={handleLoadDefaultFile}
+            disabled={isLoading || isCloudSaving || isAuthLoading}
+            title="Recarrega a planilha oficial de treinamentos com 18.952 registos"
+          >
+            <RotateCcw size={16} />
+            Restaurar Planilha Oficial (18.952 registos)
           </button>
           <input
             ref={fileInputRef}
