@@ -50,6 +50,7 @@ import {
 import { FormationsDashboard } from './components/FormationsDashboard';
 import { StatusTrackingView } from './components/StatusTrackingView';
 import { PeopleAnalyticsView } from './components/PeopleAnalyticsView';
+import { ImportantLinksView } from './components/ImportantLinksView';
 
 const STORAGE_KEY_SESSIONS = 'cronograma_integracao_sessions_v2';
 const STORAGE_KEY_AREAS = 'cronograma_integracao_areas_v2';
@@ -57,8 +58,8 @@ const STORAGE_KEY_UNIT = 'cronograma_integracao_unit_v2';
 
 export default function App() {
   const { user, isAdmin, hasAdminAccess, requestAdminAccess, signOutAdmin } = useAdminAuth();
-  // Navigation: 'home' | 'integration' | 'calendar' | 'formations' | 'action_plan' | 'people_analytics'
-  const [activeApp, setActiveApp] = useState<'home' | 'integration' | 'calendar' | 'formations' | 'action_plan' | 'people_analytics'>('home');
+  // Navigation: 'home' | 'integration' | 'calendar' | 'formations' | 'action_plan' | 'people_analytics' | 'links'
+  const [activeApp, setActiveApp] = useState<'home' | 'integration' | 'calendar' | 'formations' | 'action_plan' | 'people_analytics' | 'links'>('home');
   const [peopleAnalyticsInitialTab, setPeopleAnalyticsInitialTab] = useState<'overview' | 'trainings' | 'headcount'>('overview');
 
   // Load initial data from localStorage if available
@@ -928,6 +929,7 @@ export default function App() {
                 setPeopleAnalyticsInitialTab('overview');
                 setActiveApp('people_analytics');
               }}
+              onSelectLinks={() => setActiveApp('links')}
               integrationEventsCount={sessions.length}
               calendarEventsCount={calendarEventsCount}
               onOpenAdminAccess={() => requestAdminAccess()}
@@ -1106,6 +1108,17 @@ export default function App() {
               onBackToHome={() => setActiveApp('home')} 
               initialTab={peopleAnalyticsInitialTab}
             />
+          </ErrorBoundary>
+        </main>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SCREEN 6: LINKS IMPORTANTES & PORTAIS CORPORATIVOS */}
+      {/* ========================================================================= */}
+      {activeApp === 'links' && (
+        <main className="flex-1 w-full">
+          <ErrorBoundary moduleName="Links Importantes & Portais">
+            <ImportantLinksView onBackToHome={() => setActiveApp('home')} />
           </ErrorBoundary>
         </main>
       )}

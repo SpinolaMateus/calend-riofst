@@ -3,7 +3,7 @@ import {
   Calendar as CalendarIcon, Clock, Shield, Cloud, FileSpreadsheet, 
   Tv, FileDown, MapPin, ArrowRight, CheckCircle2, Lock, BarChart3,
   Layers, Users, Sparkles, Building2, Check, ArrowUpRight,
-  Kanban, CheckSquare, TrendingUp
+  Kanban, CheckSquare, TrendingUp, Globe, Bookmark, Edit3, ExternalLink
 } from 'lucide-react';
 import { UnitInfo } from '../types/schedule';
 
@@ -14,8 +14,10 @@ interface HomeScreenProps {
   onSelectFormations: () => void;
   onSelectActionPlan?: () => void;
   onSelectPeopleAnalytics?: () => void;
+  onSelectLinks?: () => void;
   integrationEventsCount: number;
   calendarEventsCount: number;
+  importantLinksCount?: number;
   onOpenAdminAccess?: () => void;
   isAdmin?: boolean;
 }
@@ -27,8 +29,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onSelectFormations,
   onSelectActionPlan,
   onSelectPeopleAnalytics,
+  onSelectLinks,
   integrationEventsCount,
   calendarEventsCount,
+  importantLinksCount = 8,
   onOpenAdminAccess,
   isAdmin,
 }) => {
@@ -159,11 +163,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </p>
           </div>
           <span className="text-xs font-semibold text-slate-400">
-            5 Módulos Integrados
+            6 Módulos Integrados
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           
           {/* ------------------------------------------------------------- */}
           {/* MÓDULO 1: CRONOGRAMA DE INTEGRAÇÃO */}
@@ -449,6 +453,64 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 Base KBA1 Oficial
               </span>
               <div className="inline-flex items-center gap-1 text-xs font-bold text-[#15877B] group-hover:text-teal-700">
+                <span>Acessar</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </div>
+
+          {/* ------------------------------------------------------------- */}
+          {/* MÓDULO 6: LINKS IMPORTANTES & PORTAIS */}
+          {/* ------------------------------------------------------------- */}
+          <div 
+            onClick={onSelectLinks}
+            className="group relative bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1 hover:border-amber-400"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
+                  <Globe className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200/60">
+                  Acesso Rápido
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-black text-slate-900 group-hover:text-amber-600 transition-colors tracking-tight flex items-center gap-1">
+                  Links Importantes & Portais
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-amber-600" />
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Central de links corporativos e portais úteis com categorização personalizada, inclusão, edição e fixação de favoritos.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-1.5 pt-1 text-xs">
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Globe className="w-3 h-3 text-amber-600 shrink-0" />
+                  <span className="truncate text-[11px]">Portais Fábrica</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Bookmark className="w-3 h-3 text-indigo-600 shrink-0" />
+                  <span className="truncate text-[11px]">Favoritos</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <Edit3 className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span className="truncate text-[11px]">Customizável</span>
+                </div>
+                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 font-medium">
+                  <ExternalLink className="w-3 h-3 text-sky-600 shrink-0" />
+                  <span className="truncate text-[11px]">Acesso 1-Clique</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-500">
+                {importantLinksCount} links cadastrados
+              </span>
+              <div className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 group-hover:text-amber-700">
                 <span>Acessar</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>

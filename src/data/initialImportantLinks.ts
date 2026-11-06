@@ -1,0 +1,133 @@
+import { ImportantLink, ImportantLinkCategory } from '../types/importantLinks';
+
+export const INITIAL_LINK_CATEGORIES: ImportantLinkCategory[] = [
+  {
+    id: 'cat_portais',
+    name: 'Portais & Treinamentos',
+    color: '#4f46e5', // indigo
+    description: 'Plataformas de aprendizagem, capacitações e comunicação interna',
+  },
+  {
+    id: 'cat_gg',
+    name: 'Gente & Gestão',
+    color: '#0d9488', // teal
+    description: 'Serviços de RH, contracheque, benefícios e saúde ocupacional',
+  },
+  {
+    id: 'cat_operacao',
+    name: 'Operação & Qualidade',
+    color: '#ea580c', // orange
+    description: 'Procedimentos de fábrica, NRs, segurança e gestão de processos',
+  },
+  {
+    id: 'cat_ti',
+    name: 'Tecnologia & Suporte',
+    color: '#0284c7', // sky
+    description: 'Chamados técnicos, reserva de salas e sistemas de apoio',
+  },
+  {
+    id: 'cat_geral',
+    name: 'Geral & Institucional',
+    color: '#64748b', // slate
+    description: 'Links diversos e referências gerais da unidade',
+  },
+];
+
+export const INITIAL_IMPORTANT_LINKS: ImportantLink[] = [
+  {
+    id: 'link_1',
+    title: 'Portal ENK — Escola de Negócios Klabin',
+    url: 'https://enk.klabin.com.br',
+    description: 'Plataforma oficial de treinamentos obrigatórios (integração, NRs e desenvolvimento contínuo).',
+    categoryId: 'cat_portais',
+    categoryName: 'Portais & Treinamentos',
+    color: '#4f46e5',
+    isPinned: true,
+    tags: ['Treinamentos', 'Obrigatório', 'ENK'],
+    createdAt: '2026-01-10T08:00:00.000Z',
+  },
+  {
+    id: 'link_2',
+    title: 'Workplace Klabin',
+    url: 'https://klabin.workplace.com',
+    description: 'Rede corporativa oficial para avisos, comunicados da diretoria e grupos de trabalho.',
+    categoryId: 'cat_portais',
+    categoryName: 'Portais & Treinamentos',
+    color: '#6366f1',
+    isPinned: true,
+    tags: ['Comunicação', 'Avisos', 'Workplace'],
+    createdAt: '2026-01-10T08:00:00.000Z',
+  },
+  {
+    id: 'link_3',
+    title: 'Portal do Colaborador (G&G)',
+    url: 'https://meuportalklabin.com.br',
+    description: 'Acesso seguro a contracheques mensais, informe de rendimentos, controle de ponto e marcação de férias.',
+    categoryId: 'cat_gg',
+    categoryName: 'Gente & Gestão',
+    color: '#0d9488',
+    isPinned: true,
+    tags: ['Holerite', 'Férias', 'Ponto'],
+    createdAt: '2026-01-10T08:00:00.000Z',
+  },
+  {
+    id: 'link_4',
+    title: 'Ficha de EPIs & Segurança (SSO)',
+    url: 'https://sso.klabin.com.br/epis',
+    description: 'Registro e controle digital de entrega de Equipamentos de Proteção Individual conforme NR-6.',
+    categoryId: 'cat_operacao',
+    categoryName: 'Operação & Qualidade',
+    color: '#ea580c',
+    isPinned: false,
+    tags: ['EPI', 'NR-6', 'Segurança'],
+    createdAt: '2026-01-11T09:00:00.000Z',
+  },
+  {
+    id: 'link_5',
+    title: 'Service Desk TI Klabin (Chamados)',
+    url: 'https://suporteti.klabin.com.br',
+    description: 'Canal para abertura de chamados técnicos, solicitações de computadores, impressoras e acessos.',
+    categoryId: 'cat_ti',
+    categoryName: 'Tecnologia & Suporte',
+    color: '#0284c7',
+    isPinned: false,
+    tags: ['TI', 'Suporte', 'Chamados'],
+    createdAt: '2026-01-12T10:00:00.000Z',
+  },
+  {
+    id: 'link_6',
+    title: 'Reserva de Salas & Espaços (KBA1)',
+    url: 'https://salas.klabin.com.br/kba1',
+    description: 'Agendamento da Sala de Integração, Auditório e salas de reuniões da fábrica Feira de Santana.',
+    categoryId: 'cat_ti',
+    categoryName: 'Tecnologia & Suporte',
+    color: '#0284c7',
+    isPinned: false,
+    tags: ['Salas', 'Reuniões', 'Auditório'],
+    createdAt: '2026-01-12T10:30:00.000Z',
+  },
+  {
+    id: 'link_7',
+    title: 'Manual e Diretrizes do Programa Superar',
+    url: 'https://superar.klabin.com.br/manual-et',
+    description: 'Critérios do Selo Bronze, alavancas estratégicas e rotinas do pilar Educação & Treinamento.',
+    categoryId: 'cat_operacao',
+    categoryName: 'Operação & Qualidade',
+    color: '#ea580c',
+    isPinned: false,
+    tags: ['Superar', 'Selo Bronze', 'Qualidade'],
+    createdAt: '2026-01-13T11:00:00.000Z',
+  },
+  {
+    id: 'link_8',
+    title: 'Fichas FDS & Gestão Ambiental (AIA)',
+    url: 'https://meioambiente.klabin.com.br/fds',
+    description: 'Consulta rápida a Fichas de Dados de Segurança (FDS) e mapa de impactos ambientais da unidade.',
+    categoryId: 'cat_operacao',
+    categoryName: 'Operação & Qualidade',
+    color: '#16a34a',
+    isPinned: false,
+    tags: ['Meio Ambiente', 'FDS', 'AIA'],
+    createdAt: '2026-01-13T11:30:00.000Z',
+  },
+];
