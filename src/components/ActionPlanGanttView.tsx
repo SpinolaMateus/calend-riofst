@@ -4,7 +4,8 @@ import {
   Plus, Search, Filter, Edit2, Trash2, Download, Copy,
   LayoutGrid, ListFilter, ArrowRight, User, Building2, 
   BarChart3, RefreshCw, X, Check, AlertCircle, FileText, ChevronRight,
-  Sparkles, Layers, Target, Bookmark, HelpCircle
+  Sparkles, Layers, Target, Bookmark, HelpCircle,
+  MessageSquare, MessageSquarePlus, Sliders, Eye, EyeOff
 } from 'lucide-react';
 import { 
   ActionPlanItem, 
@@ -94,6 +95,33 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
   const [formPriority, setFormPriority] = useState<ActionPlanPriority>('media');
   const [formDeliverable, setFormDeliverable] = useState('');
   const [formNotes, setFormNotes] = useState('');
+
+  // Gantt Customization State (Time scale & Inline Comments)
+  const [timeScale, setTimeScale] = useState<'day' | 'week' | 'month'>('week');
+  const [showCommentsBelowBar, setShowCommentsBelowBar] = useState(true);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [commentInput, setCommentInput] = useState('');
+
+  const handleSaveComment = async (itemId: string, newComment: string) => {
+    const target = items.find((i) => i.id === itemId);
+    if (!target) return;
+    const updatedItem: ActionPlanItem = {
+      ...target,
+      notes: newComment.trim() || undefined,
+      updatedAt: new Date().toISOString(),
+    };
+    const updatedList = items.map((i) => (i.id === itemId ? updatedItem : i));
+    setItems(updatedList);
+    setEditingCommentId(null);
+    setCommentInput('');
+
+    const { error } = await upsertActionPlanToSupabase(updatedItem);
+    if (error) {
+      showToast('Salvo localmente (erro ao sincronizar na nuvem)', 'info');
+    } else {
+      showToast('Comentário atualizado com sucesso!', 'success');
+    }
+  };
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToast({ message, type });
@@ -192,48 +220,188 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     return { total, completed, inProgress, delayed, avgProgress, metodosCount, resultadosCount };
   }, [items]);
 
-  // Timeline boundaries for Gantt calculation
-  const timelineDates = useMemo(() => {
+  // Timeline boundaries and divisions for Gantt calculation based on timeScale
+  const timelineData = useMemo(() => {
     let minDate = new Date();
     let maxDate = new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     if (items.length > 0) {
       const startTimes = items.map((i) => new Date(i.startDate).getTime()).filter((t) => !isNaN(t));
       const endTimes = items.map((i) => new Date(i.endDate).getTime()).filter((t) => !isNaN(t));
 
-      if (startTimes.length > 0) minDate = new Date(Math.min(...startTimes));
-      if (endTimes.length > 0) maxDate = new Date(Math.max(...endTimes));
+      if (startTimes.length > 0) minDate = new Date(Math.min(...startTimes, today.getTime()));
+      if (endTimes.length > 0) maxDate = new Date(Math.max(...endTimes, today.getTime()));
     }
 
-    // Add padding (4 days before and 7 days after)
-    const paddedStart = new Date(minDate);
-    paddedStart.setDate(paddedStart.getDate() - 4);
-    const paddedEnd = new Date(maxDate);
-    paddedEnd.setDate(paddedEnd.getDate() + 7);
+    minDate.setHours(0, 0, 0, 0);
+    maxDate.setHours(23, 59, 59, 999);
 
-    // Generate list of days
-    const days: Date[] = [];
-    const current = new Date(paddedStart);
-    while (current <= paddedEnd) {
-      days.push(new Date(current));
-      current.setDate(current.getDate() + 1);
+    let rangeStart = new Date(minDate);
+    let rangeEnd = new Date(maxDate);
+
+    interface TimelineDivision {
+      id: string;
+      label: string;
+      subLabel?: string;
+      start: Date;
+      end: Date;
+      leftPct: number;
+      widthPct: number;
+      isWeekend?: boolean;
+      isCurrent?: boolean;
+    }
+
+    const divisions: TimelineDivision[] = [];
+
+    if (timeScale === 'month') {
+      // Month scale: snap to 1st of start month to end of finish month (+1 padding month)
+      rangeStart = new Date(minDate.getFullYear(), minDate.getMonth(), 1, 0, 0, 0, 0);
+      rangeEnd = new Date(maxDate.getFullYear(), maxDate.getMonth() + 2, 0, 23, 59, 59, 999);
+
+      const totalDuration = rangeEnd.getTime() - rangeStart.getTime();
+
+      let curr = new Date(rangeStart);
+      while (curr < rangeEnd) {
+        const dStart = new Date(curr);
+        const dEnd = new Date(curr.getFullYear(), curr.getMonth() + 1, 0, 23, 59, 59, 999);
+        const cappedEnd = dEnd > rangeEnd ? rangeEnd : dEnd;
+
+        const leftPct = Math.max(0, ((dStart.getTime() - rangeStart.getTime()) / totalDuration) * 100);
+        const widthPct = Math.max(0, ((cappedEnd.getTime() - dStart.getTime()) / totalDuration) * 100);
+
+        const monthName = dStart.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase();
+        const year = dStart.getFullYear();
+        const isCurrent = today >= dStart && today <= cappedEnd;
+
+        divisions.push({
+          id: `m-${monthName}-${year}`,
+          label: `${monthName}/${year}`,
+          subLabel: `${dStart.getDate().toString().padStart(2, '0')} a ${cappedEnd.getDate().toString().padStart(2, '0')}`,
+          start: dStart,
+          end: cappedEnd,
+          leftPct,
+          widthPct,
+          isCurrent,
+        });
+
+        // Next month
+        curr = new Date(curr.getFullYear(), curr.getMonth() + 1, 1, 0, 0, 0, 0);
+      }
+    } else if (timeScale === 'week') {
+      // Week scale: snap to Monday before minDate and Sunday after maxDate
+      const dayOfWeek = (rangeStart.getDay() + 6) % 7; // 0 = Monday
+      rangeStart.setDate(rangeStart.getDate() - dayOfWeek - 7); // 1 extra week padding
+      rangeStart.setHours(0, 0, 0, 0);
+
+      const endDayOfWeek = (rangeEnd.getDay() + 6) % 7;
+      rangeEnd.setDate(rangeEnd.getDate() + (6 - endDayOfWeek) + 7); // 1 extra week padding
+      rangeEnd.setHours(23, 59, 59, 999);
+
+      const totalDuration = rangeEnd.getTime() - rangeStart.getTime();
+
+      let curr = new Date(rangeStart);
+      let weekIndex = 1;
+      while (curr < rangeEnd) {
+        const dStart = new Date(curr);
+        const dEnd = new Date(curr);
+        dEnd.setDate(dEnd.getDate() + 6);
+        dEnd.setHours(23, 59, 59, 999);
+        const cappedEnd = dEnd > rangeEnd ? rangeEnd : dEnd;
+
+        const leftPct = Math.max(0, ((dStart.getTime() - rangeStart.getTime()) / totalDuration) * 100);
+        const widthPct = Math.max(0, ((cappedEnd.getTime() - dStart.getTime()) / totalDuration) * 100);
+
+        const isCurrent = today >= dStart && today <= cappedEnd;
+        const fmtStart = `${dStart.getDate().toString().padStart(2, '0')}/${(dStart.getMonth() + 1).toString().padStart(2, '0')}`;
+        const fmtEnd = `${cappedEnd.getDate().toString().padStart(2, '0')}/${(cappedEnd.getMonth() + 1).toString().padStart(2, '0')}`;
+
+        divisions.push({
+          id: `w-${dStart.getTime()}`,
+          label: `Semana ${weekIndex}`,
+          subLabel: `${fmtStart} - ${fmtEnd}`,
+          start: dStart,
+          end: cappedEnd,
+          leftPct,
+          widthPct,
+          isCurrent,
+        });
+
+        weekIndex++;
+        curr.setDate(curr.getDate() + 7);
+      }
+    } else {
+      // Day scale: daily divisions with 2 days padding
+      rangeStart.setDate(rangeStart.getDate() - 2);
+      rangeStart.setHours(0, 0, 0, 0);
+      rangeEnd.setDate(rangeEnd.getDate() + 3);
+      rangeEnd.setHours(23, 59, 59, 999);
+
+      const totalDuration = rangeEnd.getTime() - rangeStart.getTime();
+
+      let curr = new Date(rangeStart);
+      const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+      while (curr < rangeEnd) {
+        const dStart = new Date(curr);
+        const dEnd = new Date(curr);
+        dEnd.setHours(23, 59, 59, 999);
+        const cappedEnd = dEnd > rangeEnd ? rangeEnd : dEnd;
+
+        const leftPct = Math.max(0, ((dStart.getTime() - rangeStart.getTime()) / totalDuration) * 100);
+        const widthPct = Math.max(0, ((cappedEnd.getTime() - dStart.getTime()) / totalDuration) * 100);
+
+        const dayNum = dStart.getDay();
+        const isWeekend = dayNum === 0 || dayNum === 6;
+        const isCurrent = today.getTime() === dStart.getTime();
+
+        divisions.push({
+          id: `d-${dStart.getTime()}`,
+          label: `${dStart.getDate().toString().padStart(2, '0')}/${(dStart.getMonth() + 1).toString().padStart(2, '0')}`,
+          subLabel: weekDays[dayNum],
+          start: dStart,
+          end: cappedEnd,
+          leftPct,
+          widthPct,
+          isWeekend,
+          isCurrent,
+        });
+
+        curr.setDate(curr.getDate() + 1);
+      }
+    }
+
+    const totalDuration = rangeEnd.getTime() - rangeStart.getTime();
+    let todayPosition: number | null = null;
+    const nowTime = Date.now();
+    if (nowTime >= rangeStart.getTime() && nowTime <= rangeEnd.getTime() && totalDuration > 0) {
+      todayPosition = ((nowTime - rangeStart.getTime()) / totalDuration) * 100;
     }
 
     return {
-      start: paddedStart,
-      end: paddedEnd,
-      days,
-      totalDays: days.length,
+      start: rangeStart,
+      end: rangeEnd,
+      totalDuration,
+      divisions,
+      todayPosition,
+      minWidthClass: timeScale === 'day' ? 'min-w-[1800px]' : timeScale === 'week' ? 'min-w-[1200px]' : 'min-w-[1000px]',
     };
-  }, [items]);
+  }, [items, timeScale]);
+
+  // Backward compatibility alias for any existing reference
+  const timelineDates = useMemo(() => ({
+    start: timelineData.start,
+    end: timelineData.end,
+    totalDays: Math.ceil(timelineData.totalDuration / 86400000),
+  }), [timelineData]);
 
   // Calculate Gantt item position (left% and width%)
   const calculateGanttPosition = (startDateStr: string, endDateStr: string) => {
     const start = new Date(startDateStr).getTime();
     const end = new Date(endDateStr).getTime();
-    const timelineStart = timelineDates.start.getTime();
-    const timelineEnd = timelineDates.end.getTime();
-    const totalDuration = timelineEnd - timelineStart;
+    const timelineStart = timelineData.start.getTime();
+    const totalDuration = timelineData.totalDuration;
 
     if (totalDuration <= 0) return { left: 0, width: 100 };
 
@@ -767,11 +935,73 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
         <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
           {/* Header of Gantt */}
           <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <span className="font-bold text-slate-900 text-sm">Cronograma Visual de Gantt</span>
               <span className="text-xs text-slate-500">
                 ({filteredItems.length} ações exibidas)
               </span>
+
+              {/* Recorte Temporal (Dia, Semana, Mês) */}
+              <div className="flex items-center bg-white border border-slate-200 rounded-xl p-0.5 shadow-2xs">
+                <span className="text-[11px] font-bold text-slate-400 px-2 flex items-center gap-1">
+                  <Sliders className="w-3 h-3 text-slate-400" />
+                  Escala:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setTimeScale('month')}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                    timeScale === 'month'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                  title="Recorte por Meses"
+                >
+                  Por Mês
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTimeScale('week')}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                    timeScale === 'week'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                  title="Recorte por Semanas"
+                >
+                  Por Semana
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTimeScale('day')}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                    timeScale === 'day'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                  title="Recorte por Dias individuais"
+                >
+                  Por Dia
+                </button>
+              </div>
+
+              {/* Toggle de Comentários abaixo da barra */}
+              <button
+                type="button"
+                onClick={() => setShowCommentsBelowBar(!showCommentsBelowBar)}
+                className={`px-2.5 py-1.5 text-xs font-bold rounded-xl border flex items-center gap-1.5 transition-all ${
+                  showCommentsBelowBar
+                    ? 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100'
+                    : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                }`}
+                title={showCommentsBelowBar ? 'Ocultar comentários abaixo das faixas' : 'Exibir comentários abaixo das faixas'}
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-sky-600" />
+                <span>Comentários</span>
+                <span className="text-[10px] opacity-75 font-normal">
+                  ({showCommentsBelowBar ? 'Visíveis' : 'Ocultos'})
+                </span>
+              </button>
             </div>
             
             <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-medium">
@@ -792,20 +1022,63 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
 
           {/* Interactive Gantt Table */}
           <div className="overflow-x-auto">
-            <div className="min-w-[1000px]">
+            <div className={timelineData.minWidthClass}>
               
               {/* Timeline Header (Months and Period) */}
-              <div className="grid grid-cols-12 bg-slate-100/80 border-b border-slate-200 text-xs font-bold text-slate-600">
+              <div className="grid grid-cols-12 bg-slate-100/90 border-b border-slate-200 text-xs font-bold text-slate-600">
                 <div className="col-span-4 p-3 border-r border-slate-200 flex items-center justify-between">
-                  <span>Estrutura / Ação / Responsável</span>
-                  <span className="text-[10px] text-slate-400 font-normal">Clique para editar</span>
+                  <span className="uppercase tracking-wider text-[11px] text-slate-700">Estrutura / Ação / Responsável</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Clique p/ editar</span>
                 </div>
-                <div className="col-span-8 p-3 flex items-center justify-between text-[11px] text-slate-500">
-                  <span>Início: {timelineDates.start.toLocaleDateString('pt-BR')}</span>
-                  <span className="font-extrabold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
-                    Hoje: {new Date().toLocaleDateString('pt-BR')}
-                  </span>
-                  <span>Término: {timelineDates.end.toLocaleDateString('pt-BR')}</span>
+                <div className="col-span-8 flex flex-col relative">
+                  {/* Header Sub-bar: Info e Hoje */}
+                  <div className="px-3 py-1 bg-slate-200/60 border-b border-slate-200 flex items-center justify-between text-[10px] text-slate-600 font-semibold">
+                    <span>Início: {timelineData.start.toLocaleDateString('pt-BR')}</span>
+                    <span className="font-extrabold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
+                      Hoje: {new Date().toLocaleDateString('pt-BR')}
+                    </span>
+                    <span>Término: {timelineData.end.toLocaleDateString('pt-BR')}</span>
+                  </div>
+
+                  {/* Header Divisions: Linhas Verticais e Rótulos */}
+                  <div className="relative h-9 flex items-stretch divide-x divide-slate-200/90 overflow-hidden">
+                    {timelineData.divisions.map((div) => (
+                      <div
+                        key={div.id}
+                        className={`flex flex-col items-center justify-center text-center px-1 border-r border-slate-300/80 transition-colors ${
+                          div.isCurrent
+                            ? 'bg-indigo-100/40 text-indigo-900 font-black'
+                            : div.isWeekend
+                            ? 'bg-slate-200/50 text-slate-400'
+                            : 'text-slate-700'
+                        }`}
+                        style={{ width: `${div.widthPct}%` }}
+                        title={`${div.label} ${div.subLabel ? `(${div.subLabel})` : ''}`}
+                      >
+                        <span className="text-[10px] font-black truncate max-w-full leading-tight">
+                          {div.label}
+                        </span>
+                        {div.subLabel && (
+                          <span className="text-[8px] font-medium opacity-75 truncate max-w-full leading-tight">
+                            {div.subLabel}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Linha vertical 'Hoje' no cabeçalho */}
+                    {timelineData.todayPosition !== null && (
+                      <div
+                        className="absolute top-0 bottom-0 pointer-events-none z-30 flex flex-col items-center"
+                        style={{ left: `${timelineData.todayPosition}%` }}
+                      >
+                        <span className="text-[8px] font-extrabold uppercase bg-indigo-600 text-white px-1 py-0.2 rounded shadow-xs -translate-x-1/2">
+                          Hoje
+                        </span>
+                        <div className="w-0.5 bg-indigo-600 h-full -translate-x-1/2" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -820,11 +1093,12 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                     const pos = calculateGanttPosition(item.startDate, item.endDate);
                     const isResultado = item.kind === 'resultado';
                     const priorityCfg = PRIORITY_CONFIG[item.priority] || PRIORITY_CONFIG.media;
+                    const isEditingThisComment = editingCommentId === item.id;
 
                     return (
                       <div 
                         key={item.id}
-                        className={`grid grid-cols-12 hover:bg-slate-50/90 transition-colors group cursor-pointer ${
+                        className={`grid grid-cols-12 hover:bg-slate-50/70 transition-colors group cursor-pointer ${
                           isResultado ? 'bg-emerald-50/20' : ''
                         }`}
                         onClick={() => handleOpenEditModal(item)}
@@ -876,46 +1150,140 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                           </div>
                         </div>
 
-                        {/* Right column: Gantt Bar Track */}
-                        <div className="col-span-8 p-3 flex items-center relative overflow-hidden">
-                          {/* Background Grid Lines */}
-                          <div className="absolute inset-0 grid grid-cols-6 divide-x divide-slate-100 pointer-events-none opacity-60">
-                            <div /><div /><div /><div /><div /><div />
+                        {/* Right column: Gantt Bar Track + Linhas Verticais + Linhas Horizontais de Comentário */}
+                        <div className="col-span-8 p-3 flex flex-col justify-center relative overflow-hidden min-h-[68px]">
+                          {/* Background Grid Lines (Divisões verticais reais baseadas no recorte temporal) */}
+                          <div className="absolute inset-0 flex items-stretch pointer-events-none">
+                            {timelineData.divisions.map((div) => (
+                              <div
+                                key={`bg-${div.id}`}
+                                className={`border-r border-slate-200/90 h-full ${
+                                  div.isCurrent
+                                    ? 'bg-indigo-50/20'
+                                    : div.isWeekend
+                                    ? 'bg-slate-100/40'
+                                    : ''
+                                }`}
+                                style={{ width: `${div.widthPct}%` }}
+                              />
+                            ))}
+
+                            {/* Linha vertical contínua de "Hoje" */}
+                            {timelineData.todayPosition !== null && (
+                              <div
+                                className="absolute top-0 bottom-0 w-0.5 bg-indigo-500/70 z-10 pointer-events-none -translate-x-1/2"
+                                style={{ left: `${timelineData.todayPosition}%` }}
+                              />
+                            )}
                           </div>
 
-                          {/* Gantt Bar */}
-                          <div
-                            className={`relative h-7 rounded-xl shadow-xs transition-all flex items-center px-2.5 overflow-hidden border ${
-                              isResultado ? 'ring-1 ring-emerald-400/50' : ''
-                            }`}
-                            style={{
-                              marginLeft: `${pos.left}%`,
-                              width: `${pos.width}%`,
-                              minWidth: '46px',
-                              backgroundColor: isResultado
-                                ? item.status === 'completed' ? '#d1fae5' : '#ecfdf5'
-                                : item.status === 'completed' ? '#ecfdf5' : item.status === 'delayed' ? '#fff1f2' : item.status === 'not_started' ? '#f8fafc' : '#eff6ff',
-                              borderColor: isResultado
-                                ? '#059669'
-                                : item.status === 'completed' ? '#10b981' : item.status === 'delayed' ? '#f43f5e' : item.status === 'not_started' ? '#cbd5e1' : '#3b82f6',
-                            }}
-                          >
-                            {/* Inner Progress Fill */}
+                          {/* Faixa da Programação (Barra do Gantt) */}
+                          <div className="relative z-10 mb-1">
                             <div
-                              className="absolute top-0 bottom-0 left-0 opacity-25"
+                              className={`relative h-7 rounded-xl shadow-xs transition-all flex items-center px-2.5 overflow-hidden border ${
+                                isResultado ? 'ring-1 ring-emerald-400/50' : ''
+                              }`}
                               style={{
-                                width: `${item.progress}%`,
+                                marginLeft: `${pos.left}%`,
+                                width: `${pos.width}%`,
+                                minWidth: '46px',
                                 backgroundColor: isResultado
-                                  ? '#047857'
-                                  : item.status === 'completed' ? '#059669' : item.status === 'delayed' ? '#e11d48' : item.status === 'not_started' ? '#94a3b8' : '#2563eb',
+                                  ? item.status === 'completed' ? '#d1fae5' : '#ecfdf5'
+                                  : item.status === 'completed' ? '#ecfdf5' : item.status === 'delayed' ? '#fff1f2' : item.status === 'not_started' ? '#f8fafc' : '#eff6ff',
+                                borderColor: isResultado
+                                  ? '#059669'
+                                  : item.status === 'completed' ? '#10b981' : item.status === 'delayed' ? '#f43f5e' : item.status === 'not_started' ? '#cbd5e1' : '#3b82f6',
                               }}
-                            />
+                            >
+                              {/* Inner Progress Fill */}
+                              <div
+                                className="absolute top-0 bottom-0 left-0 opacity-25"
+                                style={{
+                                  width: `${item.progress}%`,
+                                  backgroundColor: isResultado
+                                    ? '#047857'
+                                    : item.status === 'completed' ? '#059669' : item.status === 'delayed' ? '#e11d48' : item.status === 'not_started' ? '#94a3b8' : '#2563eb',
+                                }}
+                              />
 
-                            <span className="relative z-10 text-[10px] font-extrabold truncate text-slate-800 flex items-center gap-1">
-                              {isResultado && <Target className="w-3 h-3 text-emerald-700 shrink-0" />}
-                              {item.progress}% • {new Date(item.startDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} até {new Date(item.endDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                            </span>
+                              <span className="relative z-10 text-[10px] font-extrabold truncate text-slate-800 flex items-center gap-1">
+                                {isResultado && <Target className="w-3 h-3 text-emerald-700 shrink-0" />}
+                                {item.progress}% • {new Date(item.startDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} até {new Date(item.endDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                              </span>
+                            </div>
                           </div>
+
+                          {/* Linha Horizontal de Comentário / Acompanhamento Abaixo da Barra */}
+                          {showCommentsBelowBar && (
+                            <div
+                              className="relative z-20 mt-0.5"
+                              style={{ marginLeft: `${pos.left}%` }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {isEditingThisComment ? (
+                                <div className="flex items-center gap-1.5 bg-white border border-indigo-300 rounded-lg p-1 shadow-md w-full max-w-[420px]">
+                                  <input
+                                    type="text"
+                                    value={commentInput}
+                                    onChange={(e) => setCommentInput(e.target.value)}
+                                    placeholder="Escreva um comentário ou status de acompanhamento..."
+                                    className="text-[11px] text-slate-800 px-2 py-1 w-full bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        void handleSaveComment(item.id, commentInput);
+                                      } else if (e.key === 'Escape') {
+                                        setEditingCommentId(null);
+                                      }
+                                    }}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => void handleSaveComment(item.id, commentInput)}
+                                    className="p-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold transition-colors"
+                                    title="Salvar Comentário"
+                                  >
+                                    <Check className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingCommentId(null)}
+                                    className="p-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded transition-colors"
+                                    title="Cancelar"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ) : item.notes ? (
+                                <div
+                                  className="group/comment inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50/90 border border-amber-200/80 text-[10px] text-amber-950 font-medium hover:bg-amber-100 transition-colors shadow-2xs cursor-pointer max-w-[500px]"
+                                  onClick={() => {
+                                    setEditingCommentId(item.id);
+                                    setCommentInput(item.notes || '');
+                                  }}
+                                  title="Clique para editar este comentário"
+                                >
+                                  <MessageSquare className="w-2.5 h-2.5 text-amber-700 shrink-0" />
+                                  <span className="truncate">{item.notes}</span>
+                                  <Edit2 className="w-2.5 h-2.5 text-amber-600 opacity-0 group-hover/comment:opacity-100 transition-opacity shrink-0 ml-1" />
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingCommentId(item.id);
+                                    setCommentInput('');
+                                  }}
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-slate-300 text-[9px] text-slate-400 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50/40 transition-all font-semibold"
+                                  title="Adicionar comentário de acompanhamento"
+                                >
+                                  <MessageSquarePlus className="w-2.5 h-2.5" />
+                                  <span>+ Comentário</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+
                         </div>
                       </div>
                     );
