@@ -470,6 +470,9 @@ export async function fetchActionPlansFromSupabase(): Promise<{ data: ActionPlan
     const mapped: ActionPlanItem[] = (data || []).map((item: any) => {
       let step = item.step || '';
       let kind = (item.kind || item.type || '') as 'metodo' | 'resultado';
+      let scope = (item.scope || 'public') as 'public' | 'private';
+      let ownerId = item.owner_id || item.ownerId || '';
+      let ownerName = item.owner_name || item.ownerName || '';
       let notes = String(item.notes || '');
 
       // Parse metadata from notes fallback if columns were not present
@@ -480,6 +483,18 @@ export async function fetchActionPlansFromSupabase(): Promise<{ data: ActionPlan
       if (!kind && notes.includes('[TIPO:')) {
         const match = notes.match(/\[TIPO:\s*([^\]]+)\]/);
         if (match) kind = match[1].trim() as 'metodo' | 'resultado';
+      }
+      if (notes.includes('[ESCOPO:')) {
+        const match = notes.match(/\[ESCOPO:\s*(public|private)\]/);
+        if (match) scope = match[1] as 'public' | 'private';
+      }
+      if (!ownerId && notes.includes('[DONO_ID:')) {
+        const match = notes.match(/\[DONO_ID:\s*([^\]]+)\]/);
+        if (match) ownerId = match[1].trim();
+      }
+      if (!ownerName && notes.includes('[DONO_NOME:')) {
+        const match = notes.match(/\[DONO_NOME:\s*([^\]]+)\]/);
+        if (match) ownerName = match[1].trim();
       }
 
       return {
@@ -496,6 +511,9 @@ export async function fetchActionPlansFromSupabase(): Promise<{ data: ActionPlan
         notes,
         step: step || undefined,
         kind: kind || 'metodo',
+        scope: scope || 'public',
+        ownerId: ownerId || undefined,
+        ownerName: ownerName || undefined,
         createdAt: item.created_at,
         updatedAt: item.updated_at,
       };
@@ -511,7 +529,7 @@ export async function upsertActionPlanToSupabase(item: ActionPlanItem): Promise<
   const client = getSupabaseClient();
   if (!client) return { error: new Error('Cliente Supabase não inicializado') };
 
-  const fullPayload = {
+  const fullPayload: Record<string, any> = {
     id: String(item.id),
     title: String(item.title || ''),
     responsible: String(item.responsible || ''),
@@ -525,6 +543,9 @@ export async function upsertActionPlanToSupabase(item: ActionPlanItem): Promise<
     notes: String(item.notes || ''),
     step: item.step || null,
     kind: item.kind || 'metodo',
+    scope: item.scope || 'public',
+    owner_id: item.ownerId || null,
+    owner_name: item.ownerName || null,
     updated_at: new Date().toISOString(),
   };
 
@@ -532,9 +553,16 @@ export async function upsertActionPlanToSupabase(item: ActionPlanItem): Promise<
     const res = await client.from('action_plans').upsert(fullPayload);
     if (!res.error) return { error: null };
 
-    // Fallback if step or kind columns do not exist in the database yet:
-    if (res.error.message && (res.error.message.includes('step') || res.error.message.includes('kind') || res.error.message.includes('column'))) {
-      const fallbackNotes = `[ETAPA: ${item.step || ''}] [TIPO: ${item.kind || 'metodo'}]\n${item.notes || ''}`.trim();
+    // Fallback if step, kind, scope, owner_id or owner_name columns do not exist in the database yet:
+    if (res.error.message && (
+      res.error.message.includes('step') || 
+      res.error.message.includes('kind') || 
+      res.error.message.includes('scope') || 
+      res.error.message.includes('owner') || 
+      res.error.message.includes('column')
+    )) {
+      const scopeTag = item.scope === 'private' ? `[ESCOPO: private] [DONO_ID: ${item.ownerId || ''}] [DONO_NOME: ${item.ownerName || ''}]` : '[ESCOPO: public]';
+      const fallbackNotes = `[ETAPA: ${item.step || ''}] [TIPO: ${item.kind || 'metodo'}] ${scopeTag}\n${item.notes || ''}`.trim();
       const safePayload = {
         id: String(item.id),
         title: String(item.title || ''),

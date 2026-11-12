@@ -1,6 +1,7 @@
 export type ActionPlanStatus = 'not_started' | 'in_progress' | 'completed' | 'delayed' | 'cancelled';
 export type ActionPlanPriority = 'baixa' | 'media' | 'alta' | 'critica';
 export type ActionPlanType = 'metodo' | 'resultado';
+export type ActionPlanScope = 'public' | 'private';
 
 export interface ActionPlanItem {
   id: string;
@@ -16,6 +17,9 @@ export interface ActionPlanItem {
   notes?: string;
   step?: string;     // Ex: "0. ESTRUTURA", "PASSO 1. ESTABELECIMENTO DE POLITICAS E DIRETRIZES"
   kind?: ActionPlanType; // 'metodo' | 'resultado'
+  scope?: ActionPlanScope; // 'public' (Padrão Aberto) | 'private' (Pessoal)
+  ownerId?: string;        // ID do usuário criador (ex: 'user-mateus')
+  ownerName?: string;      // Nome do criador
   createdAt?: string;
   updatedAt?: string;
 }

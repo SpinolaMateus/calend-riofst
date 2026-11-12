@@ -5,18 +5,22 @@ import {
   LayoutGrid, ListFilter, ArrowRight, User, Building2, 
   BarChart3, RefreshCw, X, Check, AlertCircle, FileText, ChevronRight,
   Sparkles, Layers, Target, Bookmark, HelpCircle,
-  MessageSquare, MessageSquarePlus, Sliders, Eye, EyeOff
+  MessageSquare, MessageSquarePlus, Sliders, Eye, EyeOff,
+  Globe, Shield, ShieldCheck, Lock, Unlock, Users, UserCheck
 } from 'lucide-react';
 import { 
   ActionPlanItem, 
   ActionPlanStatus, 
   ActionPlanPriority, 
   ActionPlanType,
+  ActionPlanScope,
   INITIAL_ACTION_PLANS,
   PILAR_ET_TEMPLATE,
   PILAR_ET_STEPS
 } from '../types/actionPlan';
 import { useAdminAuth } from '../services/AdminAuthContext';
+import { useUserProfile } from '../services/UserProfileContext';
+import { UserManagerModal } from './UserManagerModal';
 import { 
   fetchActionPlansFromSupabase, 
   upsertActionPlanToSupabase, 
@@ -48,9 +52,17 @@ interface ActionPlanGanttViewProps {
 
 export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBackToHome }) => {
   const { isAdmin, hasAdminAccess, requestAdminAccess } = useAdminAuth();
+  const { currentUser, users, isEffectiveAdmin } = useUserProfile();
 
   // Active view: 'gantt' | 'table'
   const [activeTab, setActiveTab] = useState<'gantt' | 'table'>('gantt');
+
+  // User Management Modal State
+  const [isUserManagerOpen, setIsUserManagerOpen] = useState(false);
+
+  // Scope / Privacy Filter: 'all' | 'public' | 'private'
+  const [scopeView, setScopeView] = useState<'all' | 'public' | 'private'>('all');
+  const [adminUserFilter, setAdminUserFilter] = useState<string>('all');
 
   // State of action plan items
   const [items, setItems] = useState<ActionPlanItem[]>(() => {
@@ -86,6 +98,9 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
   const [formTitle, setFormTitle] = useState('');
   const [formStep, setFormStep] = useState<string>(PILAR_ET_STEPS[0]);
   const [formKind, setFormKind] = useState<ActionPlanType>('metodo');
+  const [formScope, setFormScope] = useState<ActionPlanScope>('public');
+  const [formOwnerId, setFormOwnerId] = useState<string>('');
+  const [formOwnerName, setFormOwnerName] = useState<string>('');
   const [formResponsible, setFormResponsible] = useState('');
   const [formDepartment, setFormDepartment] = useState('Pilar Educação e Treinamento');
   const [formStartDate, setFormStartDate] = useState(new Date().toISOString().split('T')[0]);
@@ -171,9 +186,39 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     };
   }, []);
 
-  // Filtered Items
+  // Filtered Items (Scoped by User & Privacy Rules)
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
+      const itemScope = item.scope || 'public';
+      const isOwner = Boolean(
+        (item.ownerId && item.ownerId === currentUser.id) ||
+        (item.ownerName && item.ownerName.toLowerCase().trim() === currentUser.name.toLowerCase().trim())
+      );
+
+      // Regras de Privacidade por Usuário
+      if (!isEffectiveAdmin) {
+        // Usuário Padrão: NUNCA enxerga ações privadas de terceiros!
+        if (itemScope === 'private' && !isOwner) {
+          return false;
+        }
+
+        // Filtro de Escopo do Usuário Comum
+        if (scopeView === 'public' && itemScope !== 'public') return false;
+        if (scopeView === 'private' && itemScope !== 'private') return false;
+      } else {
+        // Administrador: tem superpoder de enxergar tudo o que todos postam!
+        if (scopeView === 'public' && itemScope !== 'public') return false;
+        if (scopeView === 'private' && itemScope !== 'private') return false;
+
+        // Filtro opcional do Admin por usuário específico
+        if (adminUserFilter !== 'all') {
+          const selectedTargetUser = users.find((u) => u.id === adminUserFilter);
+          const matchesId = item.ownerId === adminUserFilter;
+          const matchesName = selectedTargetUser && item.ownerName && item.ownerName.toLowerCase().trim() === selectedTargetUser.name.toLowerCase().trim();
+          if (!matchesId && !matchesName) return false;
+        }
+      }
+
       if (statusFilter !== 'all' && item.status !== statusFilter) return false;
       if (stepFilter !== 'all' && item.step !== stepFilter) return false;
       if (kindFilter !== 'all' && (item.kind || 'metodo') !== kindFilter) return false;
@@ -186,11 +231,12 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
         item.title.toLowerCase().includes(q) ||
         item.responsible.toLowerCase().includes(q) ||
         item.department.toLowerCase().includes(q) ||
+        (item.ownerName && item.ownerName.toLowerCase().includes(q)) ||
         (item.step && item.step.toLowerCase().includes(q)) ||
         (item.deliverable && item.deliverable.toLowerCase().includes(q))
       );
     });
-  }, [items, searchQuery, statusFilter, stepFilter, kindFilter, deptFilter, priorityFilter]);
+  }, [items, searchQuery, statusFilter, stepFilter, kindFilter, deptFilter, priorityFilter, scopeView, adminUserFilter, currentUser, isEffectiveAdmin, users]);
 
   // Distinct Steps present in current items
   const distinctSteps = useMemo(() => {
@@ -414,18 +460,18 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
     return { left, width };
   };
 
-  // Open modal to create new action
+  // Open modal to create new action (Admin or User's Private Plan)
   const handleOpenCreateModal = () => {
-    if (!hasAdminAccess()) {
-      requestAdminAccess(() => handleOpenCreateModal());
-      return;
-    }
     setEditingItem(null);
     setFormTitle('');
     setFormStep(PILAR_ET_STEPS[0]);
     setFormKind('metodo');
-    setFormResponsible('');
-    setFormDepartment('Pilar Educação e Treinamento');
+    // Se for usuário comum, sugere como privado por padrão; se for admin, aberto
+    setFormScope(isEffectiveAdmin ? 'public' : 'private');
+    setFormOwnerId(currentUser.id);
+    setFormOwnerName(currentUser.name);
+    setFormResponsible(currentUser.name || '');
+    setFormDepartment(currentUser.department || 'Pilar Educação e Treinamento');
     const today = new Date().toISOString().split('T')[0];
     const twoWeeksLater = new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0];
     setFormStartDate(today);
@@ -440,14 +486,24 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
 
   // Open modal to edit existing action
   const handleOpenEditModal = (item: ActionPlanItem) => {
-    if (!hasAdminAccess()) {
+    const isOwner = Boolean(
+      (item.ownerId && item.ownerId === currentUser.id) ||
+      (item.ownerName && item.ownerName.toLowerCase().trim() === currentUser.name.toLowerCase().trim())
+    );
+
+    // Se não for admin e não for dono da ação, exige elevação admin
+    if (!isEffectiveAdmin && !isOwner && !hasAdminAccess()) {
       requestAdminAccess(() => handleOpenEditModal(item));
       return;
     }
+
     setEditingItem(item);
     setFormTitle(item.title);
     setFormStep(item.step || PILAR_ET_STEPS[0]);
     setFormKind(item.kind || 'metodo');
+    setFormScope(item.scope || 'public');
+    setFormOwnerId(item.ownerId || currentUser.id);
+    setFormOwnerName(item.ownerName || currentUser.name);
     setFormResponsible(item.responsible);
     setFormDepartment(item.department);
     setFormStartDate(item.startDate);
@@ -490,7 +546,10 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
       title: formTitle.trim(),
       step: formStep,
       kind: formKind,
-      responsible: formResponsible.trim() || 'Pilar Educação e Treinamento',
+      scope: formScope,
+      ownerId: formScope === 'private' ? (formOwnerId || currentUser.id) : undefined,
+      ownerName: formScope === 'private' ? (formOwnerName || currentUser.name) : undefined,
+      responsible: formResponsible.trim() || currentUser.name || 'Pilar Educação e Treinamento',
       department: formDepartment.trim() || 'GERAL',
       startDate: formStartDate,
       endDate: formEndDate,
@@ -508,7 +567,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
       showToast('Ação atualizada com sucesso!');
     } else {
       setItems((prev) => [...prev, updatedItem]);
-      showToast('Nova ação cadastrada no plano!');
+      showToast(formScope === 'private' ? 'Ação salva no seu Plano Pessoal!' : 'Nova ação cadastrada no Plano Aberto!');
     }
 
     setIsModalOpen(false);
@@ -523,7 +582,13 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
 
   // Delete Action
   const handleDeleteAction = async (id: string) => {
-    if (!hasAdminAccess()) {
+    const target = items.find((i) => i.id === id);
+    const isOwner = target && Boolean(
+      (target.ownerId && target.ownerId === currentUser.id) ||
+      (target.ownerName && target.ownerName.toLowerCase().trim() === currentUser.name.toLowerCase().trim())
+    );
+
+    if (!isEffectiveAdmin && !isOwner && !hasAdminAccess()) {
       requestAdminAccess(() => handleDeleteAction(id));
       return;
     }
@@ -756,6 +821,120 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
           >
             <Plus className="w-4 h-4" />
             <span>Nova Ação</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* BANNER DE IDENTIDADE & CONTROLE DE PRIVACIDADE (PADRÃO ABERTO VS PESSOAL) */}
+      {/* ========================================================================= */}
+      <div data-capture-ignore className="no-print bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-4 sm:p-5 text-white shadow-lg border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+        {/* User Identity Info */}
+        <div className="flex items-center gap-3">
+          <div className={`w-11 h-11 rounded-2xl bg-gradient-to-tr ${currentUser.avatarColor || 'from-indigo-600 to-violet-600'} text-white font-black text-sm flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0 border border-white/20`}>
+            {currentUser.name.slice(0, 2).toUpperCase()}
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Perfil Ativo:</span>
+              <span className="text-xs font-black text-white">{currentUser.name}</span>
+              <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${
+                isEffectiveAdmin
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30'
+                  : 'bg-white/10 text-slate-300 border-white/20'
+              }`}>
+                {isEffectiveAdmin ? '🛡️ Administrador Geral' : '👤 Usuário Padrão'}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {isEffectiveAdmin 
+                ? 'Visão Administrativa: você visualiza o que todos os usuários postam e gerencia permissões da unidade.' 
+                : 'Visão de Usuário: suas ações pessoais são privadas e você acessa o plano institucional padrão da unidade.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Scope View Switcher & UserManager Trigger */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Scope Filters */}
+          <div className="flex items-center bg-white/10 backdrop-blur-md p-1 rounded-2xl border border-white/15 text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => {
+                setScopeView('public');
+                setAdminUserFilter('all');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+                scopeView === 'public'
+                  ? 'bg-white text-slate-900 shadow-md font-black'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
+              title="Exibir o Plano Padrão Aberto (compartilhado por toda a unidade)"
+            >
+              <Globe className="w-3.5 h-3.5 text-sky-500" />
+              <span>Plano Aberto</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setScopeView('private');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+                scopeView === 'private'
+                  ? 'bg-white text-slate-900 shadow-md font-black'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
+              title={isEffectiveAdmin ? 'Exibir ações pessoais de usuários' : 'Exibir apenas o meu plano pessoal (privado)'}
+            >
+              <Lock className="w-3.5 h-3.5 text-amber-500" />
+              <span>{isEffectiveAdmin ? 'Ações Privadas' : 'Meu Plano Pessoal'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setScopeView('all');
+                setAdminUserFilter('all');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+                scopeView === 'all' && adminUserFilter === 'all'
+                  ? 'bg-white text-slate-900 shadow-md font-black'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
+              title={isEffectiveAdmin ? 'Visão total de administrador (Aberto + Todas as ações privadas)' : 'Visão combinada (Aberto + Meu Pessoal)'}
+            >
+              <Layers className="w-3.5 h-3.5 text-indigo-400" />
+              <span>{isEffectiveAdmin ? 'Visão Global (Admin)' : 'Todos os Meus'}</span>
+            </button>
+          </div>
+
+          {/* Admin User Picker (quando admin estiver filtrando) */}
+          {isEffectiveAdmin && scopeView === 'private' && (
+            <select
+              value={adminUserFilter}
+              onChange={(e) => setAdminUserFilter(e.target.value)}
+              className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              title="Filtrar ações privadas por colaborador específico"
+            >
+              <option value="all">👥 Todos os Colaboradores</option>
+              {users.map((u) => (
+                <option key={u.id} value={u.id}>
+                  🔒 {u.name} ({u.department})
+                </option>
+              ))}
+            </select>
+          )}
+
+          {/* Button to open User Management */}
+          <button
+            type="button"
+            onClick={() => setIsUserManagerOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold text-white transition-all shadow-xs"
+            title="Abrir gestão de administradores, usuários e trocar de perfil ativo"
+          >
+            <Users className="w-3.5 h-3.5 text-indigo-300" />
+            <span>Gerenciar Usuários</span>
           </button>
         </div>
       </div>
@@ -1123,6 +1302,20 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                               {isResultado && <Target className="w-2.5 h-2.5 text-emerald-600 shrink-0" />}
                               {isResultado ? 'RESULTADO' : 'MÉTODO'}
                             </span>
+
+                            {/* Badge de Escopo / Privacidade */}
+                            {item.scope === 'private' ? (
+                              <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-50 text-amber-900 border border-amber-300 flex items-center gap-0.5" title={`Ação Privada • Dono: ${item.ownerName || 'Colaborador'}`}>
+                                <Lock className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                                <span className="truncate max-w-[100px]">Pessoal ({item.ownerName || 'Privado'})</span>
+                              </span>
+                            ) : (
+                              <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-0.5" title="Plano Institucional Aberto da Unidade">
+                                <Globe className="w-2.5 h-2.5 text-sky-600 shrink-0" />
+                                <span>Aberto</span>
+                              </span>
+                            )}
+
                             <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ml-auto shrink-0 ${priorityCfg.badge}`}>
                               {priorityCfg.label}
                             </span>
@@ -1307,6 +1500,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
                   <th className="py-3 px-3">Etapa / Passo</th>
                   <th className="py-3 px-2">Tipo</th>
+                  <th className="py-3 px-3">Escopo</th>
                   <th className="py-3 px-4">Ação / Título</th>
                   <th className="py-3 px-3">Responsável</th>
                   <th className="py-3 px-3">Setor</th>
@@ -1321,7 +1515,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
               <tbody className="divide-y divide-slate-100">
                 {filteredItems.length === 0 ? (
                   <tr>
-                    <td colSpan={11} className="py-8 text-center text-slate-400">
+                    <td colSpan={12} className="py-8 text-center text-slate-400">
                       Nenhuma ação cadastrada no plano.
                     </td>
                   </tr>
@@ -1353,6 +1547,19 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                           >
                             {isResultado ? 'RESULTADO' : 'MÉTODO'}
                           </span>
+                        </td>
+                        <td className="py-3.5 px-3 whitespace-nowrap">
+                          {item.scope === 'private' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-300">
+                              <Lock className="w-2.5 h-2.5 text-amber-600" />
+                              <span>Pessoal ({item.ownerName || 'Privado'})</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                              <Globe className="w-2.5 h-2.5 text-sky-600" />
+                              <span>Aberto</span>
+                            </span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4 font-bold text-slate-900 max-w-xs">
                           <div className={`line-clamp-2 ${isResultado ? 'font-black text-emerald-950' : ''}`}>
@@ -1588,6 +1795,76 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
             {/* Form */}
             <form onSubmit={handleSaveAction} className="space-y-4 text-xs font-semibold">
               
+              {/* Escopo da Ação: Padrão Aberto vs Pessoal (Privado) */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <label className="block text-slate-800 font-bold">Privacidade & Escopo da Ação *</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormScope('public')}
+                    className={`p-2.5 rounded-xl border text-left flex items-start gap-2.5 transition-all ${
+                      formScope === 'public'
+                        ? 'bg-sky-50 text-sky-900 border-sky-300 ring-2 ring-sky-500/20 shadow-xs'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Globe className={`w-4 h-4 mt-0.5 shrink-0 ${formScope === 'public' ? 'text-sky-600' : 'text-slate-400'}`} />
+                    <div>
+                      <div className="font-bold text-xs">🌐 Padrão Aberto</div>
+                      <div className="text-[10px] text-slate-500 leading-tight">Visível para toda a equipe da unidade</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormScope('private');
+                      if (!formOwnerId) setFormOwnerId(currentUser.id);
+                      if (!formOwnerName) setFormOwnerName(currentUser.name);
+                    }}
+                    className={`p-2.5 rounded-xl border text-left flex items-start gap-2.5 transition-all ${
+                      formScope === 'private'
+                        ? 'bg-amber-50 text-amber-950 border-amber-300 ring-2 ring-amber-500/20 shadow-xs'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Lock className={`w-4 h-4 mt-0.5 shrink-0 ${formScope === 'private' ? 'text-amber-600' : 'text-slate-400'}`} />
+                    <div>
+                      <div className="font-bold text-xs">🔒 Meu Plano Pessoal (Privado)</div>
+                      <div className="text-[10px] text-slate-500 leading-tight">Privado para você e pelo Administrador</div>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Se for privado e o usuário for Administrador, pode vincular ao colaborador desejado */}
+                {formScope === 'private' && isEffectiveAdmin && (
+                  <div className="pt-2 border-t border-slate-200/60 flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-slate-600 shrink-0">Colaborador Dono:</span>
+                    <select
+                      value={formOwnerId || currentUser.id}
+                      onChange={(e) => {
+                        const targetUser = users.find((u) => u.id === e.target.value);
+                        setFormOwnerId(e.target.value);
+                        if (targetUser) {
+                          setFormOwnerName(targetUser.name);
+                          if (!editingItem) {
+                            setFormResponsible(targetUser.name);
+                            setFormDepartment(targetUser.department || 'Geral');
+                          }
+                        }
+                      }}
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                    >
+                      {users.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name} ({u.department})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
               {/* Etapa / Passo and Tipo (Método / Resultado) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
@@ -1788,6 +2065,13 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
           </div>
         </div>
       )}
+
+      {/* Modal de Gestão de Usuários & Administrador */}
+      <UserManagerModal
+        isOpen={isUserManagerOpen}
+        onClose={() => setIsUserManagerOpen(false)}
+        onOpenAdminAuth={() => requestAdminAccess()}
+      />
 
     </div>
   );

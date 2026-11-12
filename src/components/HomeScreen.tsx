@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Calendar as CalendarIcon, Clock, Shield, Cloud, FileSpreadsheet, 
   Tv, FileDown, MapPin, ArrowRight, CheckCircle2, Lock, BarChart3,
   Layers, Users, Sparkles, Building2, Check, ArrowUpRight,
-  Kanban, CheckSquare, TrendingUp, Globe, Bookmark, Edit3, ExternalLink
+  Kanban, CheckSquare, TrendingUp, Globe, Bookmark, Edit3, ExternalLink,
+  UserCheck
 } from 'lucide-react';
 import { UnitInfo } from '../types/schedule';
+import { useUserProfile } from '../services/UserProfileContext';
+import { UserManagerModal } from './UserManagerModal';
 
 interface HomeScreenProps {
   unitInfo: UnitInfo;
@@ -36,6 +39,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenAdminAccess,
   isAdmin,
 }) => {
+  const { currentUser, isEffectiveAdmin } = useUserProfile();
+  const [isUserManagerOpen, setIsUserManagerOpen] = useState(false);
+
   const todayFormatted = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long',
     day: 'numeric',
@@ -77,21 +83,39 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </span>
             </div>
 
-            {onOpenAdminAccess && (
+            <div className="flex items-center gap-2">
+              {/* Active User Profile Pill & Switcher */}
               <button
                 type="button"
-                onClick={onOpenAdminAccess}
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all ${
-                  isAdmin
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30'
-                    : 'bg-white/10 text-slate-300 hover:text-white hover:bg-white/15 border-white/20'
-                }`}
-                title={isAdmin ? 'Sessão administrativa autenticada' : 'Solicitar acesso administrativo'}
+                onClick={() => setIsUserManagerOpen(true)}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all shadow-xs"
+                title="Trocar usuário ou gerenciar permissões administrativas"
               >
-                <Shield className={`w-3.5 h-3.5 ${isAdmin ? 'text-emerald-400' : 'text-amber-400'}`} />
-                <span>{isAdmin ? 'Admin Conectado' : 'Acesso Admin'}</span>
+                <div className={`w-4 h-4 rounded-full bg-gradient-to-tr ${currentUser.avatarColor || 'from-indigo-600 to-violet-600'} text-[9px] font-black flex items-center justify-center`}>
+                  {currentUser.name.slice(0, 1).toUpperCase()}
+                </div>
+                <span>{currentUser.name}</span>
+                <span className="text-[10px] text-slate-300 font-normal">
+                  ({isEffectiveAdmin ? 'Admin' : 'Usuário'})
+                </span>
               </button>
-            )}
+
+              {onOpenAdminAccess && (
+                <button
+                  type="button"
+                  onClick={onOpenAdminAccess}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all ${
+                    isAdmin
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30'
+                      : 'bg-white/10 text-slate-300 hover:text-white hover:bg-white/15 border-white/20'
+                  }`}
+                  title={isAdmin ? 'Sessão administrativa autenticada' : 'Solicitar acesso administrativo'}
+                >
+                  <Shield className={`w-3.5 h-3.5 ${isAdmin ? 'text-emerald-400' : 'text-amber-400'}`} />
+                  <span>{isAdmin ? 'Admin Conectado' : 'Acesso Admin'}</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Main Title & Description */}
@@ -571,6 +595,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Modal de Gestão de Usuários & Administradores */}
+      <UserManagerModal
+        isOpen={isUserManagerOpen}
+        onClose={() => setIsUserManagerOpen(false)}
+        onOpenAdminAuth={onOpenAdminAccess}
+      />
 
     </div>
   );
