@@ -44,4 +44,4 @@ export interface UnitInfo {
   contactPerson: string;  // e.g. "Gente & Gestão: (41) 99999-0000"
 }
 
-export type ViewMode = 'table' | 'timeline' | 'status' | 'display';
+export type ViewMode = 'table' | 'timeline' | 'weekly-grid' | 'status' | 'display';

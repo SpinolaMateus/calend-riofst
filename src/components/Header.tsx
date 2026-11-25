@@ -3,7 +3,7 @@ import {
   FileDown, Printer, FileSpreadsheet, Upload, Copy,
   Palette, Settings, RotateCcw, Plus, Calendar, 
   Tv, Table as TableIcon, Clock, ChevronDown, ListChecks,
-  Cloud, Save, RefreshCw, CheckCircle2, Camera
+  Cloud, Save, RefreshCw, CheckCircle2, Camera, Columns3
 } from 'lucide-react';
 import { INTEGRATION_AUDIENCES, IntegrationAudience, UnitInfo, ViewMode } from '../types/schedule';
 
@@ -293,6 +293,19 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Clock className="w-3.5 h-3.5" />
               <span>Cronograma Visual (Colunas por Dia)</span>
+            </button>
+
+            <button
+              onClick={() => onChangeViewMode('weekly-grid')}
+              aria-pressed={viewMode === 'weekly-grid'}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                viewMode === 'weekly-grid'
+                  ? 'bg-black text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Columns3 className="w-3.5 h-3.5" />
+              <span>Grade Semanal por Área</span>
             </button>
 
             <button

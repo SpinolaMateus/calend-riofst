@@ -21,6 +21,7 @@ import { Header } from './components/Header';
 import { VisualTimelineView } from './components/VisualTimelineView';
 import { TableScheduleView } from './components/TableScheduleView';
 import { PresentationView } from './components/PresentationView';
+import { WeeklyAreaGridView } from './components/WeeklyAreaGridView';
 import { SessionModal } from './components/SessionModal';
 import { AreaManagerModal } from './components/AreaManagerModal';
 import { UnitSettingsModal } from './components/UnitSettingsModal';
@@ -415,7 +416,9 @@ export default function App() {
     const duplicated: IntegrationSession = {
       ...session,
       id: `session-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      tema: `${session.tema} (Cópia)`,
+      tema: session.tema.trim().toUpperCase() === 'ALMOÇO'
+        ? session.tema
+        : `${session.tema} (Cópia)`,
       isCompleted: false,
     };
     setSessions((prev) => [...prev, duplicated]);
@@ -1014,6 +1017,19 @@ export default function App() {
                     onUpdateSession={handleUpdateSession}
                     onDeleteSession={handleDeleteSession}
                     onDuplicateSession={handleDuplicateSession}
+                    onEditSession={handleEditSession}
+                    onAddNewSession={handleAddNewSession}
+                  />
+                )}
+
+                {viewMode === 'weekly-grid' && (
+                  <WeeklyAreaGridView
+                    sessions={audienceSessions}
+                    areas={areas}
+                    unitInfo={unitInfo}
+                    selectedAudience={selectedAudience}
+                    selectedDay={selectedDay}
+                    onUpdateSession={handleUpdateSession}
                     onEditSession={handleEditSession}
                     onAddNewSession={handleAddNewSession}
                   />
