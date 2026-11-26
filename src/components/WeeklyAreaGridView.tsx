@@ -649,13 +649,13 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                         </div>
                         <div className="grid grid-cols-10 text-[9px] sm:text-[10px] font-semibold text-slate-800 bg-white">
                           <div
-                            className="col-span-7 border-r border-slate-900 py-1 px-1 text-center truncate"
+                            className="col-span-7 min-w-0 border-r border-slate-900 py-1 px-1 text-center whitespace-normal break-words leading-tight"
                             title={`Local: ${defaultLoc}`}
                           >
                             Local: {defaultLoc}
                           </div>
-                          <div className="col-span-3 py-1 px-1 text-center truncate">
-                            Resp.
+                          <div className="col-span-3 min-w-0 py-1 px-1 text-center whitespace-normal break-words leading-tight">
+                            Responsável
                           </div>
                         </div>
                       </div>
@@ -809,7 +809,11 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                             primarySession.local !== 'N/A' &&
                             primarySession.local.trim().toUpperCase() !== defaultLoc.trim().toUpperCase();
 
-                          const isCompact = block.totalLanes > 1 || heightPx < 34;
+                          const isCompact = block.totalLanes > 1 || heightPx < 36 || (isGrouped && block.sessions.length >= 3);
+                          const themeLength = isGrouped
+                            ? block.sessions.reduce((acc, s) => acc + (s.tema || '').length, 0)
+                            : (primarySession.tema || '').length;
+                          const isDenseText = themeLength > 45 || (isGrouped && heightPx / block.sessions.length < 24);
 
                           // Responsáveis únicos no grupo
                           const uniqueResponsibles = Array.from(
@@ -824,7 +828,8 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                               }`}
                               style={{
                                 top: `${topPx}px`,
-                                height: `${heightPx}px`,
+                                minHeight: `${heightPx}px`,
+                                height: autoFit ? 'auto' : `${heightPx}px`,
                                 left: `${leftPct}%`,
                                 width: `${widthPct}%`,
                               }}
@@ -832,7 +837,7 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                               {/* Subcoluna Tema (colorida pela Área) */}
                               {isGrouped ? (
                                 <div
-                                  className="col-span-7 border border-slate-900 flex flex-col justify-center overflow-hidden relative"
+                                  className="col-span-7 min-w-0 border border-slate-900 flex flex-col justify-center relative"
                                   style={{ backgroundColor: bgColor, color: textColor }}
                                 >
                                   <div className="flex flex-col divide-y divide-black/15 w-full h-full justify-center">
@@ -841,10 +846,14 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                                         key={s.id}
                                         type="button"
                                         onClick={() => onEditSession(s)}
-                                        className="w-full px-1.5 py-0.5 text-center hover:bg-black/10 transition-colors flex-1 flex items-center justify-center"
+                                        className="w-full min-w-0 px-1.5 py-0.5 text-center hover:bg-black/10 transition-colors flex-1 flex items-center justify-center"
                                         title={`${s.tema}\nÁrea: ${s.area}\nHorário: ${s.startTime} às ${s.endTime}\nResponsável: ${s.responsavel || '—'}\nClique para editar`}
                                       >
-                                        <span className="text-[9px] sm:text-[10px] font-bold leading-tight break-words">
+                                        <span
+                                          className={`w-full whitespace-normal break-words [overflow-wrap:anywhere] font-bold ${
+                                            isDenseText ? 'text-[8px] leading-[1.1]' : 'text-[9px] sm:text-[10px] leading-tight'
+                                          }`}
+                                        >
                                           {s.tema}
                                         </span>
                                       </button>
@@ -854,19 +863,21 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                               ) : (
                                 <div
                                   onClick={() => onEditSession(primarySession)}
-                                  className="col-span-7 border border-slate-900 px-1 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden hover:brightness-95 transition-all"
+                                  className="col-span-7 min-w-0 border border-slate-900 px-1 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer relative hover:brightness-95 transition-all"
                                   style={{ backgroundColor: bgColor, color: textColor }}
                                   title={`${primarySession.tema}\nÁrea: ${primarySession.area}\nHorário: ${primarySession.startTime} às ${primarySession.endTime}\nLocal: ${primarySession.local}\nClique para editar`}
                                 >
                                   <span
-                                    className={`${
-                                      isCompact ? 'text-[9px] leading-[1.1]' : 'text-[10px] leading-tight'
-                                    } font-bold break-words`}
+                                    className={`w-full whitespace-normal break-words [overflow-wrap:anywhere] font-bold ${
+                                      isDenseText || isCompact
+                                        ? 'text-[8.5px] leading-[1.1]'
+                                        : 'text-[10px] leading-tight'
+                                    }`}
                                   >
                                     {primarySession.tema}
                                   </span>
                                   {showCustomLoc && heightPx >= 40 && block.totalLanes === 1 && (
-                                    <span className="text-[8px] opacity-85 font-medium truncate max-w-full mt-0.5">
+                                    <span className="w-full text-[8px] opacity-85 font-medium whitespace-normal break-words leading-tight mt-0.5">
                                       ({primarySession.local})
                                     </span>
                                   )}
@@ -892,7 +903,7 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                               {/* Subcoluna Responsável */}
                               <div
                                 onClick={() => onEditSession(primarySession)}
-                                className="col-span-3 border-y border-r border-slate-900 bg-white text-slate-900 px-0.5 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors overflow-hidden"
+                                className="col-span-3 min-w-0 border-y border-r border-slate-900 bg-white text-slate-900 px-1 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors"
                                 title={`Responsável: ${uniqueResponsibles.join(', ') || 'A definir'} — Clique para editar`}
                               >
                                 {isGrouped && uniqueResponsibles.length > 1 ? (
@@ -904,9 +915,9 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                                           e.stopPropagation();
                                           onEditSession(s);
                                         }}
-                                        className="flex-1 flex items-center justify-center px-0.5 hover:bg-slate-100"
+                                        className="flex-1 min-w-0 flex items-center justify-center px-0.5 py-0.5 hover:bg-slate-100"
                                       >
-                                        <span className="text-[8px] sm:text-[9px] font-semibold leading-tight break-words">
+                                        <span className="w-full whitespace-normal break-words [overflow-wrap:anywhere] text-[8px] sm:text-[9px] font-semibold leading-[1.1]">
                                           {s.responsavel || '—'}
                                         </span>
                                       </div>
@@ -914,9 +925,9 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                                   </div>
                                 ) : (
                                   <span
-                                    className={`${
-                                      isCompact ? 'text-[8px] leading-[1.1]' : 'text-[9px] leading-tight'
-                                    } font-semibold break-words`}
+                                    className={`w-full whitespace-normal break-words [overflow-wrap:anywhere] font-semibold ${
+                                      isCompact || isDenseText ? 'text-[8px] leading-[1.1]' : 'text-[9px] leading-tight'
+                                    }`}
                                   >
                                     {uniqueResponsibles[0] || '—'}
                                   </span>
@@ -989,7 +1000,7 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                         className="col-span-4 border-r border-slate-800 min-h-[20px]"
                         style={{ backgroundColor: area.bgColor }}
                       />
-                      <div className="col-span-8 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold text-slate-900 flex items-center truncate">
+                      <div className="col-span-8 min-w-0 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold text-slate-900 flex items-center whitespace-normal break-words leading-tight">
                         {area.name}
                       </div>
                     </button>
