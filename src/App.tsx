@@ -57,11 +57,68 @@ const STORAGE_KEY_SESSIONS = 'cronograma_integracao_sessions_v2';
 const STORAGE_KEY_AREAS = 'cronograma_integracao_areas_v2';
 const STORAGE_KEY_UNIT = 'cronograma_integracao_unit_v2';
 
+type AppRoute = 'home' | 'integration' | 'calendar' | 'formations' | 'action_plan' | 'people_analytics' | 'links';
+
+const APP_ROUTES: Record<AppRoute, string> = {
+  home: '/',
+  integration: '/integracao',
+  calendar: '/calendario',
+  formations: '/formacoes',
+  action_plan: '/plano-de-acao',
+  people_analytics: '/people-analytics',
+  links: '/links',
+};
+
+const APP_PAGE_TITLES: Record<AppRoute, string> = {
+  home: 'Início • Portal Operacional da Unidade',
+  integration: 'Cronograma de Integração • Portal da Unidade',
+  calendar: 'Calendário & Eventos • Portal da Unidade',
+  formations: 'Dashboard de Formações • Portal da Unidade',
+  action_plan: 'Plano de Ação (Gantt) • Portal da Unidade',
+  people_analytics: 'People Analytics • Portal da Unidade',
+  links: 'Links Importantes & Portais • Portal da Unidade',
+};
+
+function getAppFromPathname(pathname: string): AppRoute {
+  const normalized = pathname.toLowerCase().replace(/\/+$/, '') || '/';
+  if (normalized === '/integracao' || normalized === '/cronograma' || normalized === '/estagio') return 'integration';
+  if (normalized === '/calendario' || normalized === '/eventos') return 'calendar';
+  if (normalized === '/formacoes' || normalized === '/matrizes') return 'formations';
+  if (normalized === '/plano-de-acao' || normalized === '/gantt' || normalized === '/plano') return 'action_plan';
+  if (normalized === '/people-analytics' || normalized === '/analytics' || normalized === '/gente-e-gestao') return 'people_analytics';
+  if (normalized === '/links' || normalized === '/portais') return 'links';
+  return 'home';
+}
+
 export default function App() {
   const { user, isAdmin, hasAdminAccess, requestAdminAccess, signOutAdmin } = useAdminAuth();
-  // Navigation: 'home' | 'integration' | 'calendar' | 'formations' | 'action_plan' | 'people_analytics' | 'links'
-  const [activeApp, setActiveApp] = useState<'home' | 'integration' | 'calendar' | 'formations' | 'action_plan' | 'people_analytics' | 'links'>('home');
+  const [activeApp, setActiveAppState] = useState<AppRoute>(() =>
+    getAppFromPathname(typeof window !== 'undefined' ? window.location.pathname : '/')
+  );
   const [peopleAnalyticsInitialTab, setPeopleAnalyticsInitialTab] = useState<'overview' | 'trainings' | 'headcount'>('overview');
+
+  const setActiveApp = (nextApp: AppRoute) => {
+    setActiveAppState(nextApp);
+    if (typeof window !== 'undefined') {
+      const targetPath = APP_ROUTES[nextApp];
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState({ app: nextApp }, '', targetPath);
+      }
+      window.scrollTo({ top: 0 });
+    }
+  };
+
+  useEffect(() => {
+    document.title = APP_PAGE_TITLES[activeApp];
+  }, [activeApp]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveAppState(getAppFromPathname(window.location.pathname));
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Load initial data from localStorage if available
   const [sessions, setSessions] = useState<IntegrationSession[]>(() => {
@@ -95,6 +152,9 @@ export default function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [selectedDay, setSelectedDay] = useState<number | 'all'>('all');
   const [selectedAudience, setSelectedAudience] = useState<IntegrationAudience>(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.toLowerCase().replace(/\/+$/, '') === '/estagio') {
+      return 'estagiarios';
+    }
     const saved = localStorage.getItem('cronograma_integracao_audience_v1');
     return INTEGRATION_AUDIENCES.find((audience) => audience.id === saved)?.id || 'geral';
   });
