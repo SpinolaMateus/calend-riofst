@@ -704,7 +704,9 @@ export default function App() {
   const handleCopyScheduleAsImage = async () => {
     try {
       setIsCopyingImage(true);
-      const res = await copyElementAsImage('printable-content', 'cronograma_integracao');
+      const targetId = viewMode === 'weekly-grid' ? 'weekly-area-grid-capture' : 'printable-content';
+      const filePrefix = viewMode === 'weekly-grid' ? `grade_integracao_${selectedAudience}` : 'cronograma_integracao';
+      const res = await copyElementAsImage(targetId, filePrefix);
       if (res.method === 'clipboard') {
         showToast('Agenda copiada como imagem! Você já pode colar no Teams, WhatsApp ou e-mail.');
       } else {

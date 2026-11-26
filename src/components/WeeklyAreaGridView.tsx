@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Plus, Filter, Sparkles, Palette, ZoomIn, ZoomOut,
-  Calendar, Eye, Layers, RotateCcw, Edit2
+  Plus, Filter, Palette, ZoomIn, ZoomOut,
+  Eye, Layers, RotateCcw, Camera, Maximize2, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import {
   AreaDefinition,
@@ -11,6 +11,7 @@ import {
   UnitInfo,
 } from '../types/schedule';
 import { timeToMinutes } from '../utils/timeUtils';
+import { copyElementAsImage } from '../utils/exportUtils';
 
 interface WeeklyAreaGridViewProps {
   sessions: IntegrationSession[];
@@ -21,6 +22,14 @@ interface WeeklyAreaGridViewProps {
   onUpdateSession: (updated: IntegrationSession) => void;
   onEditSession: (session: IntegrationSession) => void;
   onAddNewSession: (dia: number, startStr?: string, endStr?: string) => void;
+}
+
+interface PositionedSession {
+  session: IntegrationSession;
+  startMin: number;
+  endMin: number;
+  lane: number;
+  totalLanes: number;
 }
 
 const WEEKDAY_NAMES: Record<number, string> = {
@@ -46,6 +55,74 @@ const isBreakSession = (session: IntegrationSession) => {
   );
 };
 
+/**
+ * Distribui sessões sobrepostas no mesmo dia em colunas (lanes) lado a lado,
+ * evitando que um card cubra ou corte o outro.
+ */
+function layoutOverlappingSessions(
+  daySessions: IntegrationSession[],
+  minBound: number,
+  maxBound: number
+): PositionedSession[] {
+  const valid = daySessions
+    .map((session) => ({
+      session,
+      startMin: Math.max(minBound, timeToMinutes(session.startTime)),
+      endMin: Math.min(maxBound, timeToMinutes(session.endTime)),
+    }))
+    .filter((item) => item.endMin > item.startMin)
+    .sort((a, b) => a.startMin - b.startMin || (b.endMin - b.startMin) - (a.endMin - a.startMin));
+
+  if (valid.length === 0) return [];
+
+  const clusters: typeof valid[] = [];
+  let currentCluster: typeof valid = [];
+  let clusterEnd = -1;
+
+  for (const item of valid) {
+    if (currentCluster.length === 0 || item.startMin < clusterEnd) {
+      currentCluster.push(item);
+      clusterEnd = Math.max(clusterEnd, item.endMin);
+    } else {
+      clusters.push(currentCluster);
+      currentCluster = [item];
+      clusterEnd = item.endMin;
+    }
+  }
+  if (currentCluster.length > 0) clusters.push(currentCluster);
+
+  const result: PositionedSession[] = [];
+
+  for (const cluster of clusters) {
+    const laneEnds: number[] = [];
+    const placed: { item: (typeof valid)[number]; lane: number }[] = [];
+
+    for (const item of cluster) {
+      let assignedLane = laneEnds.findIndex((end) => end <= item.startMin);
+      if (assignedLane === -1) {
+        assignedLane = laneEnds.length;
+        laneEnds.push(item.endMin);
+      } else {
+        laneEnds[assignedLane] = item.endMin;
+      }
+      placed.push({ item, lane: assignedLane });
+    }
+
+    const totalLanes = Math.max(1, laneEnds.length);
+    for (const p of placed) {
+      result.push({
+        session: p.item.session,
+        startMin: p.item.startMin,
+        endMin: p.item.endMin,
+        lane: p.lane,
+        totalLanes,
+      });
+    }
+  }
+
+  return result;
+}
+
 export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
   sessions,
   areas,
@@ -59,8 +136,12 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
   const [selectedAreaFilter, setSelectedAreaFilter] = useState<string>('all');
   const [areaFilterMode, setAreaFilterMode] = useState<'highlight' | 'filter'>('highlight');
   const [dayLabelMode, setDayLabelMode] = useState<'weekday' | 'day'>('weekday');
-  const [pixelsPerHour, setPixelsPerHour] = useState<number>(84);
+  const [autoFit, setAutoFit] = useState<boolean>(true);
+  const [hideEmptyDays, setHideEmptyDays] = useState<boolean>(false);
+  const [pixelsPerHour, setPixelsPerHour] = useState<number>(96);
   const [quickAreaSessionId, setQuickAreaSessionId] = useState<string | null>(null);
+  const [isPrintingGrid, setIsPrintingGrid] = useState<boolean>(false);
+  const [printToast, setPrintToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const audienceLabel =
     INTEGRATION_AUDIENCES.find((a) => a.id === selectedAudience)?.label || 'Geral';
@@ -69,20 +150,37 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
   const daysToRender = useMemo(() => {
     const existingDays = Array.from(new Set(sessions.map((s) => s.dia))).sort((a, b) => a - b);
     if (selectedDay !== 'all') return [Number(selectedDay)];
-    if (existingDays.length > 0) return existingDays;
+    if (hideEmptyDays && existingDays.length > 0) return existingDays;
+    if (existingDays.length > 0) {
+      const maxDay = Math.max(...existingDays, 5);
+      const fullRange: number[] = [];
+      for (let d = 1; d <= maxDay; d++) {
+        if (!hideEmptyDays || existingDays.includes(d)) fullRange.push(d);
+      }
+      return fullRange;
+    }
     return [1, 2, 3, 4, 5];
-  }, [sessions, selectedDay]);
+  }, [sessions, selectedDay, hideEmptyDays]);
 
-  // Limites de horário dinâmicos (mínimo 08:00 às 17:30)
-  const { startMinutes, endMinutes, hourMarks } = useMemo(() => {
-    let minM = 8 * 60; // 08:00
-    let maxM = 17 * 60 + 30; // 17:30
+  // Limites de horário dinâmicos
+  const { startMinutes, endMinutes, hourMarks, hasShortSessions } = useMemo(() => {
+    let minM = 8 * 60;
+    let maxM = 17 * 60 + 30;
+    let shortFound = false;
+
+    if (autoFit && sessions.length > 0) {
+      const validStarts = sessions.map((s) => timeToMinutes(s.startTime)).filter((m) => m > 0);
+      const validEnds = sessions.map((s) => timeToMinutes(s.endTime)).filter((m) => m > 0);
+      if (validStarts.length > 0) minM = Math.floor(Math.min(...validStarts) / 60) * 60;
+      if (validEnds.length > 0) maxM = Math.ceil(Math.max(...validEnds) / 30) * 30;
+    }
 
     sessions.forEach((s) => {
       const st = timeToMinutes(s.startTime);
       const en = timeToMinutes(s.endTime);
       if (st > 0 && st < minM) minM = Math.floor(st / 60) * 60;
       if (en > maxM) maxM = Math.ceil(en / 30) * 30;
+      if (en > st && en - st <= 20) shortFound = true;
     });
 
     const marks: number[] = [];
@@ -90,13 +188,13 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
       marks.push(m);
     }
 
-    return { startMinutes: minM, endMinutes: maxM, hourMarks: marks };
-  }, [sessions]);
+    return { startMinutes: minM, endMinutes: maxM, hourMarks: marks, hasShortSessions: shortFound };
+  }, [sessions, autoFit]);
 
+  const effectivePixelsPerHour = autoFit && hasShortSessions ? Math.max(pixelsPerHour, 112) : pixelsPerHour;
   const totalMinutes = Math.max(60, endMinutes - startMinutes);
-  const totalHeightPx = (totalMinutes / 60) * pixelsPerHour;
+  const totalHeightPx = (totalMinutes / 60) * effectivePixelsPerHour;
 
-  // Helpers de cor da área
   const getAreaDefinition = (areaName: string) => {
     const clean = (areaName || '').trim().toUpperCase();
     return areas.find((a) => a.name.trim().toUpperCase() === clean);
@@ -112,7 +210,6 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
     return found ? found.textColor : '#0f172a';
   };
 
-  // Áreas presentes nas sessões atuais + áreas cadastradas
   const legendAreas = useMemo(() => {
     const map = new Map<string, AreaDefinition>();
     areas.forEach((a) => {
@@ -134,7 +231,6 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
     return Array.from(map.values());
   }, [areas, sessions]);
 
-  // Local predominante de cada dia para o subcabeçalho "Local: ..."
   const getDefaultLocationForDay = (dia: number) => {
     const daySessions = sessions.filter((s) => s.dia === dia && !isBreakSession(s) && s.local && s.local !== 'N/A');
     if (daySessions.length === 0) return unitInfo.locationDefault || 'Sala Integração';
@@ -172,10 +268,51 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
     setQuickAreaSessionId(null);
   };
 
-  const gridMinWidth = Math.max(760, 72 + daysToRender.length * 230);
+  const handlePrintGridImage = async () => {
+    try {
+      setIsPrintingGrid(true);
+      const res = await copyElementAsImage(
+        'weekly-area-grid-capture',
+        `grade_integracao_${selectedAudience}`
+      );
+      setPrintToast({
+        message:
+          res.method === 'clipboard'
+            ? 'Tabela copiada como imagem! Cole no WhatsApp, Teams ou e-mail.'
+            : 'Imagem da tabela baixada com sucesso!',
+        type: 'success',
+      });
+    } catch (error) {
+      setPrintToast({
+        message: error instanceof Error ? error.message : 'Não foi possível gerar o print da tabela.',
+        type: 'error',
+      });
+    } finally {
+      setIsPrintingGrid(false);
+      setTimeout(() => setPrintToast(null), 3500);
+    }
+  };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-300">
+    <div className="space-y-4">
+      {printToast && (
+        <div
+          data-capture-ignore
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-lg text-xs font-semibold border ${
+            printToast.type === 'success'
+              ? 'bg-slate-900 text-white border-slate-700'
+              : 'bg-rose-600 text-white border-rose-700'
+          }`}
+        >
+          {printToast.type === 'success' ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          ) : (
+            <AlertCircle className="w-4 h-4 text-white shrink-0" />
+          )}
+          <span>{printToast.message}</span>
+        </div>
+      )}
+
       {/* Barra de Ajuste por Área e Controles (não aparece no print/imagem) */}
       <div
         data-capture-ignore
@@ -224,8 +361,35 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
             })}
           </div>
 
-          {/* Controles de Modo, Rótulo dos Dias e Zoom */}
+          {/* Controles de Auto-Ajuste, Modo, Rótulo dos Dias, Zoom e Print */}
           <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setAutoFit((v) => !v)}
+              className={`h-8 px-2.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-colors ${
+                autoFit
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              }`}
+              title="Ajusta automaticamente largura, altura e blocos sobrepostos para não cortar textos"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+              <span>Auto-Ajuste</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setHideEmptyDays((v) => !v)}
+              className={`h-8 px-2.5 rounded-lg text-xs font-semibold border transition-colors ${
+                hideEmptyDays
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              }`}
+              title="Ocultar ou exibir dias sem atividades"
+            >
+              {hideEmptyDays ? 'Só dias c/ aula' : 'Semana completa'}
+            </button>
+
             {selectedAreaFilter !== 'all' && (
               <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-medium">
                 <button
@@ -236,7 +400,6 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                       ? 'bg-white text-slate-900 shadow-2xs'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
-                  title="Mantém toda a grade e destaca a área selecionada"
                 >
                   <Eye className="w-3 h-3" />
                   <span>Destacar</span>
@@ -249,7 +412,6 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                       ? 'bg-white text-slate-900 shadow-2xs'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
-                  title="Exibe apenas os blocos da área selecionada"
                 >
                   <Layers className="w-3 h-3" />
                   <span>Só Área</span>
@@ -292,17 +454,28 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                 <ZoomOut className="w-3.5 h-3.5" />
               </button>
               <span className="text-[11px] font-medium text-slate-600 min-w-[34px] text-center tabular-nums">
-                {Math.round((pixelsPerHour / 84) * 100)}%
+                {Math.round((effectivePixelsPerHour / 96) * 100)}%
               </span>
               <button
                 type="button"
-                onClick={() => setPixelsPerHour((p) => Math.min(132, p + 12))}
+                onClick={() => setPixelsPerHour((p) => Math.min(144, p + 12))}
                 className="p-0.5 text-slate-500 hover:text-slate-900"
                 title="Aumentar altura"
               >
                 <ZoomIn className="w-3.5 h-3.5" />
               </button>
             </div>
+
+            <button
+              type="button"
+              onClick={handlePrintGridImage}
+              disabled={isPrintingGrid}
+              className="h-8 px-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors disabled:opacity-50"
+              title="Tirar print completo desta tabela (copia e baixa PNG)"
+            >
+              <Camera className="w-3.5 h-3.5 text-slate-500" />
+              <span>{isPrintingGrid ? 'Gerando Print...' : 'Print da Tabela'}</span>
+            </button>
 
             <button
               type="button"
@@ -317,7 +490,7 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
 
         <div className="text-[11px] text-slate-500 flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
           <span className="flex items-center gap-1">
-            Clique em um bloco para editar ou use o ícone <Palette className="w-3 h-3 text-slate-600" /> no canto do bloco para ajustar a área.
+            Clique em um bloco para editar ou use o ícone <Palette className="w-3 h-3 text-slate-600" /> para trocar a área. Atividades no mesmo horário são separadas automaticamente.
           </span>
           {selectedAreaFilter !== 'all' && (
             <button
@@ -331,293 +504,333 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
         </div>
       </div>
 
-      {/* Área Principal da Grade (Modelo Planilha Semanal + Legenda Lateral) */}
-      <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-5 overflow-x-auto">
-        <div className="flex items-start gap-5 min-w-max">
-          {/* TABELA / GRADE SEMANAL */}
-          <div style={{ minWidth: `${gridMinWidth}px` }} className="flex-1">
-            {/* Título Principal estilo planilha */}
-            <div className="border-2 border-slate-900 bg-slate-200 px-4 py-2 text-center">
-              <h2 className="text-sm sm:text-base font-black text-slate-950 uppercase tracking-wide">
-                CRONOGRAMA {selectedAudience === 'geral' ? 'INTEGRAÇÃO' : audienceLabel.toUpperCase()} — {unitInfo.unitName.toUpperCase()}
-              </h2>
-              {selectedAreaFilter !== 'all' && (
-                <div className="text-[11px] font-bold text-slate-700 mt-0.5">
-                  Filtro por Área: {selectedAreaFilter}
-                </div>
-              )}
-            </div>
-
-            {/* Cabeçalho dos Dias + Subcolunas (Local / Responsável) */}
-            <div className="flex border-x-2 border-b-2 border-slate-900 bg-white">
-              {/* Coluna Horário Header */}
-              <div className="w-[62px] shrink-0 border-r-2 border-slate-900 flex items-center justify-center p-1.5 bg-slate-50">
-                <span className="text-[11px] font-bold italic text-slate-800">Horário</span>
-              </div>
-
-              {/* Cabeçalhos por Dia */}
-              <div
-                className="flex-1 grid divide-x-2 divide-slate-900"
-                style={{ gridTemplateColumns: `repeat(${daysToRender.length}, minmax(0, 1fr))` }}
-              >
-                {daysToRender.map((dia) => {
-                  const dayTitle =
-                    dayLabelMode === 'weekday'
-                      ? WEEKDAY_NAMES[dia] || `Dia ${dia}`
-                      : `Dia ${dia}`;
-                  const defaultLoc = getDefaultLocationForDay(dia);
-
-                  return (
-                    <div key={`hdr-${dia}`} className="flex flex-col">
-                      <div className="bg-slate-100 border-b border-slate-900 py-1 px-2 text-center font-black text-xs text-slate-950">
-                        {dayTitle}
-                      </div>
-                      <div className="grid grid-cols-10 text-[10px] font-semibold text-slate-800 bg-white">
-                        <div className="col-span-7 border-r border-slate-900 py-1 px-1.5 text-center truncate" title={`Local: ${defaultLoc}`}>
-                          Local: {defaultLoc}
-                        </div>
-                        <div className="col-span-3 py-1 px-1 text-center truncate">
-                          Responsável
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Corpo da Grade Horária */}
+      {/* Área Principal da Grade (Alvo do Print da Tabela) */}
+      <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
+        <div
+          id="weekly-area-grid-capture"
+          className={`bg-white p-3 sm:p-4 ${autoFit ? 'w-full' : 'min-w-max'}`}
+        >
+          <div className={`flex items-start gap-4 ${autoFit ? 'w-full' : ''}`}>
+            {/* TABELA / GRADE SEMANAL */}
             <div
-              className="flex border-x-2 border-b-2 border-slate-900 relative bg-white"
-              style={{ height: `${totalHeightPx}px` }}
+              style={autoFit ? undefined : { minWidth: `${Math.max(760, 62 + daysToRender.length * 220)}px` }}
+              className="flex-1 min-w-0"
             >
-              {/* Coluna de Horários (Esquerda) */}
-              <div className="w-[62px] shrink-0 border-r-2 border-slate-900 relative bg-slate-50/70">
-                {hourMarks.map((mins) => {
-                  const topPx = ((mins - startMinutes) / 60) * pixelsPerHour;
-                  return (
-                    <div
-                      key={`t-${mins}`}
-                      className="absolute left-0 right-0 flex items-start justify-end pr-1.5 -translate-y-2"
-                      style={{ top: `${topPx}px` }}
-                    >
-                      <span className="text-[10px] font-bold text-slate-700 tabular-nums bg-slate-50/90 px-0.5">
-                        {formatMinuteLabel(mins)}
-                      </span>
-                    </div>
-                  );
-                })}
+              {/* Título Principal estilo planilha */}
+              <div className="border-2 border-slate-900 bg-slate-200 px-3 py-1.5 text-center">
+                <h2 className="text-xs sm:text-sm font-black text-slate-950 uppercase tracking-wide">
+                  CRONOGRAMA {selectedAudience === 'geral' ? 'INTEGRAÇÃO' : audienceLabel.toUpperCase()} — {unitInfo.unitName.toUpperCase()}
+                </h2>
+                {selectedAreaFilter !== 'all' && (
+                  <div className="text-[10px] font-bold text-slate-700 mt-0.5">
+                    Área em destaque: {selectedAreaFilter}
+                  </div>
+                )}
               </div>
 
-              {/* Colunas dos Dias */}
-              <div
-                className="flex-1 grid divide-x-2 divide-slate-900 relative"
-                style={{ gridTemplateColumns: `repeat(${daysToRender.length}, minmax(0, 1fr))` }}
-              >
-                {/* Linhas horizontais de grade a cada 30 min / 1h */}
-                <div className="absolute inset-0 pointer-events-none z-0">
-                  {hourMarks.map((mins) => {
-                    const topPx = ((mins - startMinutes) / 60) * pixelsPerHour;
-                    const halfTopPx = ((mins + 30 - startMinutes) / 60) * pixelsPerHour;
+              {/* Cabeçalho dos Dias + Subcolunas (Local / Responsável) */}
+              <div className="flex border-x-2 border-b-2 border-slate-900 bg-white">
+                {/* Coluna Horário Header */}
+                <div className="w-[54px] shrink-0 border-r-2 border-slate-900 flex items-center justify-center p-1 bg-slate-50">
+                  <span className="text-[10px] font-bold italic text-slate-800">Horário</span>
+                </div>
+
+                {/* Cabeçalhos por Dia */}
+                <div
+                  className="flex-1 grid divide-x-2 divide-slate-900 min-w-0"
+                  style={{ gridTemplateColumns: `repeat(${daysToRender.length}, minmax(0, 1fr))` }}
+                >
+                  {daysToRender.map((dia) => {
+                    const dayTitle =
+                      dayLabelMode === 'weekday'
+                        ? WEEKDAY_NAMES[dia] || `Dia ${dia}`
+                        : `Dia ${dia}`;
+                    const defaultLoc = getDefaultLocationForDay(dia);
+
                     return (
-                      <React.Fragment key={`grid-${mins}`}>
-                        <div
-                          className="absolute left-0 right-0 border-t border-slate-200"
-                          style={{ top: `${topPx}px` }}
-                        />
-                        {mins + 30 < endMinutes && (
+                      <div key={`hdr-${dia}`} className="flex flex-col min-w-0">
+                        <div className="bg-slate-100 border-b border-slate-900 py-1 px-1.5 text-center font-black text-[11px] text-slate-950 truncate">
+                          {dayTitle}
+                        </div>
+                        <div className="grid grid-cols-10 text-[9px] sm:text-[10px] font-semibold text-slate-800 bg-white">
                           <div
-                            className="absolute left-0 right-0 border-t border-dashed border-slate-100"
-                            style={{ top: `${halfTopPx}px` }}
-                          />
-                        )}
-                      </React.Fragment>
+                            className="col-span-7 border-r border-slate-900 py-1 px-1 text-center truncate"
+                            title={`Local: ${defaultLoc}`}
+                          >
+                            Local: {defaultLoc}
+                          </div>
+                          <div className="col-span-3 py-1 px-1 text-center truncate">
+                            Resp.
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Corpo da Grade Horária */}
+              <div
+                className="flex border-x-2 border-b-2 border-slate-900 relative bg-white"
+                style={{ height: `${totalHeightPx}px` }}
+              >
+                {/* Coluna de Horários (Esquerda) */}
+                <div className="w-[54px] shrink-0 border-r-2 border-slate-900 relative bg-slate-50/70">
+                  {hourMarks.map((mins) => {
+                    const topPx = ((mins - startMinutes) / 60) * effectivePixelsPerHour;
+                    return (
+                      <div
+                        key={`t-${mins}`}
+                        className="absolute left-0 right-0 flex items-start justify-end pr-1 -translate-y-2"
+                        style={{ top: `${topPx}px` }}
+                      >
+                        <span className="text-[10px] font-bold text-slate-700 tabular-nums bg-slate-50/90 px-0.5">
+                          {formatMinuteLabel(mins)}
+                        </span>
+                      </div>
                     );
                   })}
                 </div>
 
-                {daysToRender.map((dia) => {
-                  const daySessions = sessions
-                    .filter((s) => s.dia === dia)
-                    .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+                {/* Colunas dos Dias */}
+                <div
+                  className="flex-1 grid divide-x-2 divide-slate-900 relative min-w-0"
+                  style={{ gridTemplateColumns: `repeat(${daysToRender.length}, minmax(0, 1fr))` }}
+                >
+                  {/* Linhas horizontais de grade a cada 30 min / 1h */}
+                  <div className="absolute inset-0 pointer-events-none z-0">
+                    {hourMarks.map((mins) => {
+                      const topPx = ((mins - startMinutes) / 60) * effectivePixelsPerHour;
+                      const halfTopPx = ((mins + 30 - startMinutes) / 60) * effectivePixelsPerHour;
+                      return (
+                        <React.Fragment key={`grid-${mins}`}>
+                          <div
+                            className="absolute left-0 right-0 border-t border-slate-200"
+                            style={{ top: `${topPx}px` }}
+                          />
+                          {mins + 30 < endMinutes && (
+                            <div
+                              className="absolute left-0 right-0 border-t border-dashed border-slate-100"
+                              style={{ top: `${halfTopPx}px` }}
+                            />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
 
-                  const defaultLoc = getDefaultLocationForDay(dia);
+                  {daysToRender.map((dia) => {
+                    const allDaySessions = sessions.filter((s) => s.dia === dia);
+                    const breakSessions = allDaySessions.filter(isBreakSession);
+                    const regularSessions = allDaySessions.filter((s) => {
+                      if (isBreakSession(s)) return false;
+                      if (areaFilterMode === 'filter' && selectedAreaFilter !== 'all') {
+                        return (s.area || '').trim().toUpperCase() === selectedAreaFilter;
+                      }
+                      return true;
+                    });
 
-                  return (
-                    <div key={`col-${dia}`} className="relative h-full">
-                      {/* Divisor vertical sutil entre Tema/Local (70%) e Responsável (30%) */}
-                      <div className="absolute top-0 bottom-0 left-[70%] border-l border-slate-200 pointer-events-none z-0" />
+                    const positionedRegular = layoutOverlappingSessions(
+                      regularSessions,
+                      startMinutes,
+                      endMinutes
+                    );
+                    const defaultLoc = getDefaultLocationForDay(dia);
 
-                      {daySessions.map((session) => {
-                        const sStart = Math.max(startMinutes, timeToMinutes(session.startTime));
-                        const sEnd = Math.min(endMinutes, timeToMinutes(session.endTime));
-                        if (sEnd <= sStart) return null;
+                    return (
+                      <div key={`col-${dia}`} className="relative h-full min-w-0">
+                        {/* Divisor vertical sutil entre Tema (70%) e Responsável (30%) */}
+                        <div className="absolute top-0 bottom-0 left-[70%] border-l border-slate-200/70 pointer-events-none z-0" />
 
-                        const isBreak = isBreakSession(session);
-                        const areaClean = (session.area || '').trim().toUpperCase();
-                        const matchesArea =
-                          selectedAreaFilter === 'all' || areaClean === selectedAreaFilter;
+                        {/* Intervalos e Almoço (faixa preta ocupando 100% da largura do dia) */}
+                        {breakSessions.map((session) => {
+                          const sStart = Math.max(startMinutes, timeToMinutes(session.startTime));
+                          const sEnd = Math.min(endMinutes, timeToMinutes(session.endTime));
+                          if (sEnd <= sStart) return null;
 
-                        if (!isBreak && areaFilterMode === 'filter' && !matchesArea) {
-                          return null;
-                        }
+                          const topPx = ((sStart - startMinutes) / 60) * effectivePixelsPerHour;
+                          const heightPx = Math.max(18, ((sEnd - sStart) / 60) * effectivePixelsPerHour);
 
-                        const topPx = ((sStart - startMinutes) / 60) * pixelsPerHour;
-                        const heightPx = Math.max(20, ((sEnd - sStart) / 60) * pixelsPerHour);
-
-                        const bgColor = getAreaColor(session.area, session.customColor);
-                        const textColor = getAreaTextColor(session.area);
-                        const isDimmed =
-                          !isBreak &&
-                          areaFilterMode === 'highlight' &&
-                          selectedAreaFilter !== 'all' &&
-                          !matchesArea;
-
-                        if (isBreak) {
                           return (
                             <div
                               key={session.id}
                               onClick={() => onEditSession(session)}
-                              className="absolute left-0 right-0 z-20 bg-slate-950 text-white border-y border-slate-900 flex items-center justify-center px-2 cursor-pointer hover:bg-slate-800 transition-colors"
+                              className="absolute left-0 right-0 z-20 bg-slate-950 text-white border-y border-slate-900 flex items-center justify-center px-1 cursor-pointer hover:bg-slate-800 transition-colors"
                               style={{ top: `${topPx}px`, height: `${heightPx}px` }}
                               title={`${session.tema} (${session.startTime} às ${session.endTime}) — Clique para editar`}
                             >
-                              <span className="text-[11px] font-bold italic tracking-wide truncate">
+                              <span className="text-[10px] font-bold italic tracking-wide truncate">
                                 {session.tema}
                               </span>
                             </div>
                           );
-                        }
+                        })}
 
-                        const showCustomLoc =
-                          session.local &&
-                          session.local !== 'N/A' &&
-                          session.local.trim().toUpperCase() !== defaultLoc.trim().toUpperCase();
+                        {/* Atividades Normais com Auto-Ajuste de Sobreposição (Lanes) */}
+                        {positionedRegular.map(({ session, startMin, endMin, lane, totalLanes }) => {
+                          const areaClean = (session.area || '').trim().toUpperCase();
+                          const matchesArea =
+                            selectedAreaFilter === 'all' || areaClean === selectedAreaFilter;
 
-                        return (
-                          <div
-                            key={session.id}
-                            className={`absolute left-0 right-0 z-10 grid grid-cols-10 group transition-opacity ${
-                              isDimmed ? 'opacity-20' : 'opacity-100'
-                            }`}
-                            style={{ top: `${topPx}px`, height: `${heightPx}px` }}
-                          >
-                            {/* Subcoluna Tema (colorida pela Área) */}
+                          const topPx = ((startMin - startMinutes) / 60) * effectivePixelsPerHour;
+                          const rawHeightPx = ((endMin - startMin) / 60) * effectivePixelsPerHour;
+                          const heightPx = Math.max(22, rawHeightPx);
+
+                          const widthPct = 100 / totalLanes;
+                          const leftPct = lane * widthPct;
+
+                          const bgColor = getAreaColor(session.area, session.customColor);
+                          const textColor = getAreaTextColor(session.area);
+                          const isDimmed =
+                            areaFilterMode === 'highlight' &&
+                            selectedAreaFilter !== 'all' &&
+                            !matchesArea;
+
+                          const showCustomLoc =
+                            session.local &&
+                            session.local !== 'N/A' &&
+                            session.local.trim().toUpperCase() !== defaultLoc.trim().toUpperCase();
+
+                          const isCompact = totalLanes > 1 || heightPx < 34;
+
+                          return (
                             <div
-                              onClick={() => onEditSession(session)}
-                              className="col-span-7 border border-slate-900 px-1.5 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden hover:brightness-95 transition-all"
-                              style={{ backgroundColor: bgColor, color: textColor }}
-                              title={`${session.tema}\nÁrea: ${session.area}\nHorário: ${session.startTime} às ${session.endTime}\nLocal: ${session.local}\nClique para editar`}
+                              key={session.id}
+                              className={`absolute z-10 grid grid-cols-10 group transition-opacity ${
+                                isDimmed ? 'opacity-20' : 'opacity-100'
+                              }`}
+                              style={{
+                                top: `${topPx}px`,
+                                height: `${heightPx}px`,
+                                left: `${leftPct}%`,
+                                width: `${widthPct}%`,
+                              }}
                             >
-                              <span className="text-[10px] sm:text-[11px] font-bold leading-tight line-clamp-3">
-                                {session.tema}
-                              </span>
-                              {showCustomLoc && heightPx >= 36 && (
-                                <span className="text-[9px] opacity-85 font-medium truncate max-w-full mt-0.5">
-                                  ({session.local})
-                                </span>
-                              )}
-
-                              {/* Botão rápido de troca de Área */}
-                              <button
-                                type="button"
-                                data-capture-ignore
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setQuickAreaSessionId(
-                                    quickAreaSessionId === session.id ? null : session.id
-                                  );
-                                }}
-                                className="no-print absolute top-0.5 right-0.5 p-1 rounded bg-black/25 hover:bg-black/45 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                                title="Ajustar Área rapidamente"
-                              >
-                                <Palette className="w-2.5 h-2.5" />
-                              </button>
-                            </div>
-
-                            {/* Subcoluna Responsável */}
-                            <div
-                              onClick={() => onEditSession(session)}
-                              className="col-span-3 border-y border-r border-slate-900 bg-white text-slate-900 px-1 py-0.5 flex items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors overflow-hidden"
-                              title={`Responsável: ${session.responsavel || 'A definir'} — Clique para editar`}
-                            >
-                              <span className="text-[10px] font-semibold leading-tight line-clamp-3 break-words">
-                                {session.responsavel || '—'}
-                              </span>
-                            </div>
-
-                            {/* Popover rápido para trocar a Área */}
-                            {quickAreaSessionId === session.id && (
+                              {/* Subcoluna Tema (colorida pela Área) */}
                               <div
-                                data-capture-ignore
-                                onClick={(e) => e.stopPropagation()}
-                                className="no-print absolute left-1 top-full mt-1 z-50 bg-white border border-slate-300 rounded-xl shadow-xl p-1.5 w-48 space-y-0.5 max-h-56 overflow-y-auto"
+                                onClick={() => onEditSession(session)}
+                                className="col-span-7 border border-slate-900 px-1 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden hover:brightness-95 transition-all"
+                                style={{ backgroundColor: bgColor, color: textColor }}
+                                title={`${session.tema}\nÁrea: ${session.area}\nHorário: ${session.startTime} às ${session.endTime}\nLocal: ${session.local}\nClique para editar`}
                               >
-                                <div className="text-[10px] font-black text-slate-500 uppercase px-2 py-1 border-b border-slate-100 flex items-center justify-between">
-                                  <span>Trocar Área</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => setQuickAreaSessionId(null)}
-                                    className="text-slate-400 hover:text-slate-700"
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                                {legendAreas.map((a) => (
-                                  <button
-                                    key={a.id}
-                                    type="button"
-                                    onClick={() => handleQuickAreaChange(session, a.name)}
-                                    className="w-full text-left px-2 py-1 rounded-lg hover:bg-slate-100 flex items-center gap-2 text-[11px] font-bold text-slate-800"
-                                  >
-                                    <span
-                                      className="w-3 h-3 rounded-xs border border-slate-400 shrink-0"
-                                      style={{ backgroundColor: a.bgColor }}
-                                    />
-                                    <span className="truncate">{a.name}</span>
-                                  </button>
-                                ))}
+                                <span
+                                  className={`${
+                                    isCompact ? 'text-[9px] leading-[1.1]' : 'text-[10px] leading-tight'
+                                  } font-bold break-words`}
+                                >
+                                  {session.tema}
+                                </span>
+                                {showCustomLoc && heightPx >= 40 && totalLanes === 1 && (
+                                  <span className="text-[8px] opacity-85 font-medium truncate max-w-full mt-0.5">
+                                    ({session.local})
+                                  </span>
+                                )}
+
+                                {/* Botão rápido de troca de Área */}
+                                <button
+                                  type="button"
+                                  data-capture-ignore
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setQuickAreaSessionId(
+                                      quickAreaSessionId === session.id ? null : session.id
+                                    );
+                                  }}
+                                  className="no-print absolute top-0.5 right-0.5 p-0.5 rounded bg-black/25 hover:bg-black/45 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                  title="Ajustar Área rapidamente"
+                                >
+                                  <Palette className="w-2.5 h-2.5" />
+                                </button>
                               </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
+
+                              {/* Subcoluna Responsável */}
+                              <div
+                                onClick={() => onEditSession(session)}
+                                className="col-span-3 border-y border-r border-slate-900 bg-white text-slate-900 px-0.5 py-0.5 flex items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors overflow-hidden"
+                                title={`Responsável: ${session.responsavel || 'A definir'} — Clique para editar`}
+                              >
+                                <span
+                                  className={`${
+                                    isCompact ? 'text-[8px] leading-[1.1]' : 'text-[9px] leading-tight'
+                                  } font-semibold break-words`}
+                                >
+                                  {session.responsavel || '—'}
+                                </span>
+                              </div>
+
+                              {/* Popover rápido para trocar a Área */}
+                              {quickAreaSessionId === session.id && (
+                                <div
+                                  data-capture-ignore
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="no-print absolute left-1 top-full mt-1 z-50 bg-white border border-slate-300 rounded-xl shadow-xl p-1.5 w-48 space-y-0.5 max-h-56 overflow-y-auto"
+                                >
+                                  <div className="text-[10px] font-black text-slate-500 uppercase px-2 py-1 border-b border-slate-100 flex items-center justify-between">
+                                    <span>Trocar Área</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => setQuickAreaSessionId(null)}
+                                      className="text-slate-400 hover:text-slate-700"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                  {legendAreas.map((a) => (
+                                    <button
+                                      key={a.id}
+                                      type="button"
+                                      onClick={() => handleQuickAreaChange(session, a.name)}
+                                      className="w-full text-left px-2 py-1 rounded-lg hover:bg-slate-100 flex items-center gap-2 text-[11px] font-bold text-slate-800"
+                                    >
+                                      <span
+                                        className="w-3 h-3 rounded-xs border border-slate-400 shrink-0"
+                                        style={{ backgroundColor: a.bgColor }}
+                                      />
+                                      <span className="truncate">{a.name}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* LEGENDA LATERAL (Modelo idêntico à imagem) */}
+            <div className="w-36 sm:w-40 shrink-0 pt-1">
+              <div className="text-[11px] font-bold italic text-slate-800 mb-1.5 pl-0.5">
+                Legenda
+              </div>
+              <div className="border border-slate-900 divide-y divide-slate-800 bg-white">
+                {legendAreas.map((area) => {
+                  const clean = area.name.trim().toUpperCase();
+                  const isSelected = selectedAreaFilter === clean;
+                  return (
+                    <button
+                      key={`leg-${area.id}`}
+                      type="button"
+                      onClick={() => handleToggleAreaFilter(area.name)}
+                      className={`w-full grid grid-cols-12 text-left transition-colors hover:bg-slate-50 ${
+                        isSelected ? 'ring-2 ring-inset ring-slate-900 bg-slate-100' : ''
+                      }`}
+                      title="Clique para filtrar/destacar esta área na grade"
+                    >
+                      <div
+                        className="col-span-4 border-r border-slate-800 min-h-[20px]"
+                        style={{ backgroundColor: area.bgColor }}
+                      />
+                      <div className="col-span-8 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold text-slate-900 flex items-center truncate">
+                        {area.name}
+                      </div>
+                    </button>
                   );
                 })}
               </div>
-            </div>
-          </div>
-
-          {/* LEGENDA LATERAL (Modelo idêntico à imagem) */}
-          <div className="w-44 shrink-0 pt-2">
-            <div className="text-xs font-bold italic text-slate-800 mb-2 pl-1">
-              Legenda
-            </div>
-            <div className="border border-slate-900 divide-y divide-slate-800 bg-white shadow-2xs">
-              {legendAreas.map((area) => {
-                const clean = area.name.trim().toUpperCase();
-                const isSelected = selectedAreaFilter === clean;
-                return (
-                  <button
-                    key={`leg-${area.id}`}
-                    type="button"
-                    onClick={() => handleToggleAreaFilter(area.name)}
-                    className={`w-full grid grid-cols-12 text-left transition-all hover:bg-slate-50 ${
-                      isSelected ? 'ring-2 ring-inset ring-slate-900 bg-slate-100' : ''
-                    }`}
-                    title="Clique para filtrar/destacar esta área na grade"
-                  >
-                    <div
-                      className="col-span-4 border-r border-slate-800 min-h-[22px]"
-                      style={{ backgroundColor: area.bgColor }}
-                    />
-                    <div className="col-span-8 px-2 py-1 text-[10px] font-bold text-slate-900 flex items-center truncate">
-                      {area.name}
-                    </div>
-                  </button>
-                );
-              })}
             </div>
           </div>
         </div>
