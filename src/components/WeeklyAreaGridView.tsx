@@ -138,7 +138,8 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
   const [dayLabelMode, setDayLabelMode] = useState<'weekday' | 'day'>('weekday');
   const [autoFit, setAutoFit] = useState<boolean>(true);
   const [hideEmptyDays, setHideEmptyDays] = useState<boolean>(false);
-  const [pixelsPerHour, setPixelsPerHour] = useState<number>(96);
+  const [timeStepMinutes, setTimeStepMinutes] = useState<15 | 30 | 60>(15);
+  const [pixelsPerHour, setPixelsPerHour] = useState<number>(112);
   const [quickAreaSessionId, setQuickAreaSessionId] = useState<string | null>(null);
   const [isPrintingGrid, setIsPrintingGrid] = useState<boolean>(false);
   const [printToast, setPrintToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -184,14 +185,19 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
     });
 
     const marks: number[] = [];
-    for (let m = minM; m <= maxM; m += 60) {
+    for (let m = minM; m <= maxM; m += timeStepMinutes) {
       marks.push(m);
     }
 
     return { startMinutes: minM, endMinutes: maxM, hourMarks: marks, hasShortSessions: shortFound };
-  }, [sessions, autoFit]);
+  }, [sessions, autoFit, timeStepMinutes]);
 
-  const effectivePixelsPerHour = autoFit && hasShortSessions ? Math.max(pixelsPerHour, 112) : pixelsPerHour;
+  const effectivePixelsPerHour =
+    timeStepMinutes === 15
+      ? Math.max(pixelsPerHour, 108)
+      : autoFit && hasShortSessions
+      ? Math.max(pixelsPerHour, 108)
+      : pixelsPerHour;
   const totalMinutes = Math.max(60, endMinutes - startMinutes);
   const totalHeightPx = (totalMinutes / 60) * effectivePixelsPerHour;
 
@@ -444,21 +450,38 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
               </button>
             </div>
 
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-medium" title="Intervalo da régua de horários">
+              {([15, 30, 60] as const).map((step) => (
+                <button
+                  key={step}
+                  type="button"
+                  onClick={() => setTimeStepMinutes(step)}
+                  className={`px-2 py-1 rounded-md transition-colors ${
+                    timeStepMinutes === step
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  {step === 60 ? '1h' : `${step}m`}
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-1 bg-white px-2 h-8 rounded-lg border border-slate-200">
               <button
                 type="button"
-                onClick={() => setPixelsPerHour((p) => Math.max(60, p - 12))}
+                onClick={() => setPixelsPerHour((p) => Math.max(72, p - 12))}
                 className="p-0.5 text-slate-500 hover:text-slate-900"
                 title="Diminuir altura"
               >
                 <ZoomOut className="w-3.5 h-3.5" />
               </button>
               <span className="text-[11px] font-medium text-slate-600 min-w-[34px] text-center tabular-nums">
-                {Math.round((effectivePixelsPerHour / 96) * 100)}%
+                {Math.round((effectivePixelsPerHour / 112) * 100)}%
               </span>
               <button
                 type="button"
-                onClick={() => setPixelsPerHour((p) => Math.min(144, p + 12))}
+                onClick={() => setPixelsPerHour((p) => Math.min(180, p + 12))}
                 className="p-0.5 text-slate-500 hover:text-slate-900"
                 title="Aumentar altura"
               >
@@ -578,13 +601,31 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                 <div className="w-[54px] shrink-0 border-r-2 border-slate-900 relative bg-slate-50/70">
                   {hourMarks.map((mins) => {
                     const topPx = ((mins - startMinutes) / 60) * effectivePixelsPerHour;
+                    const isHour = mins % 60 === 0;
+                    const isHalf = mins % 60 === 30;
+                    const isFirst = mins === startMinutes;
+                    const isLast = mins >= endMinutes;
+                    const alignClass = isFirst
+                      ? 'translate-y-0 pt-0.5'
+                      : isLast
+                      ? '-translate-y-full pb-0.5'
+                      : '-translate-y-1/2';
+
                     return (
                       <div
                         key={`t-${mins}`}
-                        className="absolute left-0 right-0 flex items-start justify-end pr-1 -translate-y-2"
+                        className={`absolute left-0 right-0 flex items-center justify-end pr-1 ${alignClass}`}
                         style={{ top: `${topPx}px` }}
                       >
-                        <span className="text-[10px] font-bold text-slate-700 tabular-nums bg-slate-50/90 px-0.5">
+                        <span
+                          className={`tabular-nums px-0.5 ${
+                            isHour
+                              ? 'text-[10px] font-bold text-slate-800'
+                              : isHalf
+                              ? 'text-[9px] font-semibold text-slate-600'
+                              : 'text-[8px] font-medium text-slate-400'
+                          }`}
+                        >
                           {formatMinuteLabel(mins)}
                         </span>
                       </div>
@@ -597,24 +638,25 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                   className="flex-1 grid divide-x-2 divide-slate-900 relative min-w-0"
                   style={{ gridTemplateColumns: `repeat(${daysToRender.length}, minmax(0, 1fr))` }}
                 >
-                  {/* Linhas horizontais de grade a cada 30 min / 1h */}
+                  {/* Linhas horizontais de grade conforme intervalo escolhido (15m / 30m / 1h) */}
                   <div className="absolute inset-0 pointer-events-none z-0">
                     {hourMarks.map((mins) => {
+                      if (mins === startMinutes || mins >= endMinutes) return null;
                       const topPx = ((mins - startMinutes) / 60) * effectivePixelsPerHour;
-                      const halfTopPx = ((mins + 30 - startMinutes) / 60) * effectivePixelsPerHour;
+                      const isHour = mins % 60 === 0;
+                      const isHalf = mins % 60 === 30;
                       return (
-                        <React.Fragment key={`grid-${mins}`}>
-                          <div
-                            className="absolute left-0 right-0 border-t border-slate-200"
-                            style={{ top: `${topPx}px` }}
-                          />
-                          {mins + 30 < endMinutes && (
-                            <div
-                              className="absolute left-0 right-0 border-t border-dashed border-slate-100"
-                              style={{ top: `${halfTopPx}px` }}
-                            />
-                          )}
-                        </React.Fragment>
+                        <div
+                          key={`grid-${mins}`}
+                          className={`absolute left-0 right-0 border-t ${
+                            isHour
+                              ? 'border-slate-300'
+                              : isHalf
+                              ? 'border-slate-200'
+                              : 'border-dashed border-slate-100'
+                          }`}
+                          style={{ top: `${topPx}px` }}
+                        />
                       );
                     })}
                   </div>
