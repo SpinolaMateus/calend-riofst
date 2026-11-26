@@ -828,28 +828,27 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
       {/* ========================================================================= */}
       {/* BANNER DE IDENTIDADE & CONTROLE DE PRIVACIDADE (PADRÃO ABERTO VS PESSOAL) */}
       {/* ========================================================================= */}
-      <div data-capture-ignore className="no-print bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-4 sm:p-5 text-white shadow-lg border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+      <div data-capture-ignore className="no-print bg-white rounded-xl p-4 border border-slate-200 flex flex-wrap items-center justify-between gap-4">
         {/* User Identity Info */}
         <div className="flex items-center gap-3">
-          <div className={`w-11 h-11 rounded-2xl bg-gradient-to-tr ${currentUser.avatarColor || 'from-indigo-600 to-violet-600'} text-white font-black text-sm flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0 border border-white/20`}>
+          <div className="w-9 h-9 rounded-lg bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0">
             {currentUser.name.slice(0, 2).toUpperCase()}
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Perfil Ativo:</span>
-              <span className="text-xs font-black text-white">{currentUser.name}</span>
-              <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${
+              <span className="text-xs font-bold text-slate-900">{currentUser.name}</span>
+              <span className={`text-[11px] font-medium px-2 py-0.5 rounded border ${
                 isEffectiveAdmin
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30'
-                  : 'bg-white/10 text-slate-300 border-white/20'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-slate-100 text-slate-600 border-slate-200'
               }`}>
-                {isEffectiveAdmin ? '🛡️ Administrador Geral' : '👤 Usuário Padrão'}
+                {isEffectiveAdmin ? 'Administrador' : 'Usuário Padrão'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-500 mt-0.5">
               {isEffectiveAdmin 
-                ? 'Visão Administrativa: você visualiza o que todos os usuários postam e gerencia permissões da unidade.' 
-                : 'Visão de Usuário: suas ações pessoais são privadas e você acessa o plano institucional padrão da unidade.'}
+                ? 'Visualização completa de todos os planos abertos e pessoais.' 
+                : 'Acesso ao plano institucional aberto e às suas ações privadas.'}
             </p>
           </div>
         </div>
@@ -857,21 +856,21 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
         {/* Scope View Switcher & UserManager Trigger */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Scope Filters */}
-          <div className="flex items-center bg-white/10 backdrop-blur-md p-1 rounded-2xl border border-white/15 text-xs font-bold">
+          <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold">
             <button
               type="button"
               onClick={() => {
                 setScopeView('public');
                 setAdminUserFilter('all');
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-colors ${
                 scopeView === 'public'
-                  ? 'bg-white text-slate-900 shadow-md font-black'
-                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
               title="Exibir o Plano Padrão Aberto (compartilhado por toda a unidade)"
             >
-              <Globe className="w-3.5 h-3.5 text-sky-500" />
+              <Globe className="w-3.5 h-3.5 text-slate-500" />
               <span>Plano Aberto</span>
             </button>
 
@@ -880,14 +879,14 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
               onClick={() => {
                 setScopeView('private');
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-colors ${
                 scopeView === 'private'
-                  ? 'bg-white text-slate-900 shadow-md font-black'
-                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
               title={isEffectiveAdmin ? 'Exibir ações pessoais de usuários' : 'Exibir apenas o meu plano pessoal (privado)'}
             >
-              <Lock className="w-3.5 h-3.5 text-amber-500" />
+              <Lock className="w-3.5 h-3.5 text-slate-500" />
               <span>{isEffectiveAdmin ? 'Ações Privadas' : 'Meu Plano Pessoal'}</span>
             </button>
 
@@ -897,15 +896,15 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                 setScopeView('all');
                 setAdminUserFilter('all');
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-colors ${
                 scopeView === 'all' && adminUserFilter === 'all'
-                  ? 'bg-white text-slate-900 shadow-md font-black'
-                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
               title={isEffectiveAdmin ? 'Visão total de administrador (Aberto + Todas as ações privadas)' : 'Visão combinada (Aberto + Meu Pessoal)'}
             >
-              <Layers className="w-3.5 h-3.5 text-indigo-400" />
-              <span>{isEffectiveAdmin ? 'Visão Global (Admin)' : 'Todos os Meus'}</span>
+              <Layers className="w-3.5 h-3.5 text-slate-500" />
+              <span>{isEffectiveAdmin ? 'Visão Global' : 'Todos os Meus'}</span>
             </button>
           </div>
 
@@ -914,13 +913,13 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
             <select
               value={adminUserFilter}
               onChange={(e) => setAdminUserFilter(e.target.value)}
-              className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="h-8 px-2.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
               title="Filtrar ações privadas por colaborador específico"
             >
-              <option value="all">👥 Todos os Colaboradores</option>
+              <option value="all">Todos os Colaboradores</option>
               {users.map((u) => (
                 <option key={u.id} value={u.id}>
-                  🔒 {u.name} ({u.department})
+                  {u.name} ({u.department})
                 </option>
               ))}
             </select>
@@ -930,7 +929,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
           <button
             type="button"
             onClick={() => setIsUserManagerOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold text-white transition-all shadow-xs"
+            className="h-8 flex items-center gap-1.5 px-3 rounded-lg bg-white hover:bg-slate-50 border border-slate-300 text-xs font-semibold text-slate-700 transition-colors"
             title="Abrir gestão de administradores, usuários e trocar de perfil ativo"
           >
             <Users className="w-3.5 h-3.5 text-indigo-300" />
@@ -1810,7 +1809,7 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                   >
                     <Globe className={`w-4 h-4 mt-0.5 shrink-0 ${formScope === 'public' ? 'text-sky-600' : 'text-slate-400'}`} />
                     <div>
-                      <div className="font-bold text-xs">🌐 Padrão Aberto</div>
+                      <div className="font-bold text-xs">Padrão Aberto</div>
                       <div className="text-[10px] text-slate-500 leading-tight">Visível para toda a equipe da unidade</div>
                     </div>
                   </button>
@@ -1830,8 +1829,8 @@ export const ActionPlanGanttView: React.FC<ActionPlanGanttViewProps> = ({ onBack
                   >
                     <Lock className={`w-4 h-4 mt-0.5 shrink-0 ${formScope === 'private' ? 'text-amber-600' : 'text-slate-400'}`} />
                     <div>
-                      <div className="font-bold text-xs">🔒 Meu Plano Pessoal (Privado)</div>
-                      <div className="text-[10px] text-slate-500 leading-tight">Privado para você e pelo Administrador</div>
+                      <div className="font-bold text-xs">Meu Plano Pessoal (Privado)</div>
+                      <div className="text-[10px] text-slate-500 leading-tight">Privado para você e para o Administrador</div>
                     </div>
                   </button>
                 </div>

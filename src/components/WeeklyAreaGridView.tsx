@@ -179,25 +179,25 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
       {/* Barra de Ajuste por Área e Controles (não aparece no print/imagem) */}
       <div
         data-capture-ignore
-        className="no-print bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3"
+        className="no-print bg-white rounded-xl border border-slate-200 p-3.5 space-y-2.5"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 text-xs font-black text-slate-800">
-              <Filter className="w-3.5 h-3.5 text-indigo-600" />
-              Ajustar por Área:
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 mr-1">
+              <Filter className="w-3.5 h-3.5 text-slate-500" />
+              Área:
             </span>
 
             <button
               type="button"
               onClick={() => setSelectedAreaFilter('all')}
-              className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
+              className={`h-7 px-2.5 rounded-md text-xs font-semibold border transition-colors ${
                 selectedAreaFilter === 'all'
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
               }`}
             >
-              Todas as Áreas
+              Todas
             </button>
 
             {legendAreas.map((area) => {
@@ -208,17 +208,16 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                   key={area.id}
                   type="button"
                   onClick={() => handleToggleAreaFilter(area.name)}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold border flex items-center gap-1.5 transition-all ${
+                  className={`h-7 px-2.5 rounded-md text-xs font-medium border flex items-center gap-1.5 transition-colors ${
                     isActive
-                      ? 'ring-2 ring-offset-1 ring-slate-900 shadow-xs scale-[1.02]'
-                      : 'opacity-90 hover:opacity-100'
+                      ? 'bg-slate-900 text-white border-slate-900'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                   }`}
-                  style={{
-                    backgroundColor: area.bgColor,
-                    color: area.textColor,
-                    borderColor: isActive ? '#0f172a' : 'rgba(15,23,42,0.2)',
-                  }}
                 >
+                  <span
+                    className="w-2.5 h-2.5 rounded-xs shrink-0 border border-black/15"
+                    style={{ backgroundColor: area.bgColor }}
+                  />
                   <span className="truncate max-w-[140px]">{area.name}</span>
                 </button>
               );
@@ -226,16 +225,16 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
           </div>
 
           {/* Controles de Modo, Rótulo dos Dias e Zoom */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             {selectedAreaFilter !== 'all' && (
-              <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-[11px] font-bold">
+              <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-medium">
                 <button
                   type="button"
                   onClick={() => setAreaFilterMode('highlight')}
-                  className={`px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all ${
+                  className={`px-2 py-1 rounded-md flex items-center gap-1 transition-colors ${
                     areaFilterMode === 'highlight'
                       ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-500 hover:text-slate-800'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                   title="Mantém toda a grade e destaca a área selecionada"
                 >
@@ -245,27 +244,27 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setAreaFilterMode('filter')}
-                  className={`px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all ${
+                  className={`px-2 py-1 rounded-md flex items-center gap-1 transition-colors ${
                     areaFilterMode === 'filter'
                       ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-500 hover:text-slate-800'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                   title="Exibe apenas os blocos da área selecionada"
                 >
                   <Layers className="w-3 h-3" />
-                  <span>Filtrar Só Área</span>
+                  <span>Só Área</span>
                 </button>
               </div>
             )}
 
-            <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-[11px] font-bold">
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-medium">
               <button
                 type="button"
                 onClick={() => setDayLabelMode('weekday')}
-                className={`px-2.5 py-1 rounded-lg transition-all ${
+                className={`px-2 py-1 rounded-md transition-colors ${
                   dayLabelMode === 'weekday'
                     ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Seg–Sex
@@ -273,32 +272,32 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
               <button
                 type="button"
                 onClick={() => setDayLabelMode('day')}
-                className={`px-2.5 py-1 rounded-lg transition-all ${
+                className={`px-2 py-1 rounded-md transition-colors ${
                   dayLabelMode === 'day'
                     ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Dia 1..N
               </button>
             </div>
 
-            <div className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-1 bg-white px-2 h-8 rounded-lg border border-slate-200">
               <button
                 type="button"
                 onClick={() => setPixelsPerHour((p) => Math.max(60, p - 12))}
-                className="p-0.5 text-slate-600 hover:text-slate-900"
+                className="p-0.5 text-slate-500 hover:text-slate-900"
                 title="Diminuir altura"
               >
                 <ZoomOut className="w-3.5 h-3.5" />
               </button>
-              <span className="text-[10px] font-bold text-slate-600 min-w-[34px] text-center">
+              <span className="text-[11px] font-medium text-slate-600 min-w-[34px] text-center tabular-nums">
                 {Math.round((pixelsPerHour / 84) * 100)}%
               </span>
               <button
                 type="button"
                 onClick={() => setPixelsPerHour((p) => Math.min(132, p + 12))}
-                className="p-0.5 text-slate-600 hover:text-slate-900"
+                className="p-0.5 text-slate-500 hover:text-slate-900"
                 title="Aumentar altura"
               >
                 <ZoomIn className="w-3.5 h-3.5" />
@@ -308,7 +307,7 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
             <button
               type="button"
               onClick={() => onAddNewSession(daysToRender[0] || 1, '08:30', '09:30')}
-              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center gap-1 shadow-xs transition-colors"
+              className="h-8 px-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Nova Atividade</span>
@@ -316,25 +315,24 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
           </div>
         </div>
 
-        <div className="text-[11px] text-slate-500 flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
-          <span>
-            💡 Clique em qualquer bloco para editar, ou passe o mouse e clique no ícone{' '}
-            <Palette className="w-3 h-3 inline text-indigo-600" /> para ajustar a <strong>Área</strong> diretamente na grade.
+        <div className="text-[11px] text-slate-500 flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+          <span className="flex items-center gap-1">
+            Clique em um bloco para editar ou use o ícone <Palette className="w-3 h-3 text-slate-600" /> no canto do bloco para ajustar a área.
           </span>
           {selectedAreaFilter !== 'all' && (
             <button
               type="button"
               onClick={() => setSelectedAreaFilter('all')}
-              className="text-rose-600 hover:underline font-bold flex items-center gap-1"
+              className="text-slate-700 hover:text-slate-900 underline font-medium flex items-center gap-1"
             >
-              <RotateCcw className="w-3 h-3" /> Limpar filtro de área
+              <RotateCcw className="w-3 h-3" /> Limpar filtro
             </button>
           )}
         </div>
       </div>
 
       {/* Área Principal da Grade (Modelo Planilha Semanal + Legenda Lateral) */}
-      <div className="bg-white rounded-2xl border border-slate-300 shadow-sm p-3 sm:p-5 overflow-x-auto">
+      <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-5 overflow-x-auto">
         <div className="flex items-start gap-5 min-w-max">
           {/* TABELA / GRADE SEMANAL */}
           <div style={{ minWidth: `${gridMinWidth}px` }} className="flex-1">
