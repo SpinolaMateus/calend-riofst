@@ -24,8 +24,10 @@ interface WeeklyAreaGridViewProps {
   onAddNewSession: (dia: number, startStr?: string, endStr?: string) => void;
 }
 
-interface PositionedSession {
-  session: IntegrationSession;
+interface PositionedBlock {
+  id: string;
+  sessions: IntegrationSession[];
+  area: string;
   startMin: number;
   endMin: number;
   lane: number;
@@ -56,17 +58,19 @@ const isBreakSession = (session: IntegrationSession) => {
 };
 
 /**
- * Distribui sessões sobrepostas no mesmo dia em colunas (lanes) lado a lado,
- * evitando que um card cubra ou corte o outro.
+ * Agrupa sessões sobrepostas da mesma Área (quando groupByArea=true) e distribui
+ * blocos ainda conflitantes em colunas (lanes) lado a lado.
  */
 function layoutOverlappingSessions(
   daySessions: IntegrationSession[],
   minBound: number,
-  maxBound: number
-): PositionedSession[] {
+  maxBound: number,
+  groupByArea: boolean
+): PositionedBlock[] {
   const valid = daySessions
     .map((session) => ({
       session,
+      areaKey: (session.area || '').trim().toUpperCase(),
       startMin: Math.max(minBound, timeToMinutes(session.startTime)),
       endMin: Math.min(maxBound, timeToMinutes(session.endTime)),
     }))
@@ -75,45 +79,98 @@ function layoutOverlappingSessions(
 
   if (valid.length === 0) return [];
 
-  const clusters: typeof valid[] = [];
-  let currentCluster: typeof valid = [];
+  // 1. Agrupar por mesma Área + sobreposição de horário
+  interface RawBlock {
+    id: string;
+    sessions: IntegrationSession[];
+    area: string;
+    areaKey: string;
+    startMin: number;
+    endMin: number;
+  }
+
+  const blocks: RawBlock[] = [];
+
+  if (groupByArea) {
+    for (const item of valid) {
+      const existing = blocks.find(
+        (b) =>
+          b.areaKey === item.areaKey &&
+          item.startMin < b.endMin &&
+          item.endMin > b.startMin
+      );
+      if (existing) {
+        existing.sessions.push(item.session);
+        existing.startMin = Math.min(existing.startMin, item.startMin);
+        existing.endMin = Math.max(existing.endMin, item.endMin);
+      } else {
+        blocks.push({
+          id: item.session.id,
+          sessions: [item.session],
+          area: item.session.area,
+          areaKey: item.areaKey,
+          startMin: item.startMin,
+          endMin: item.endMin,
+        });
+      }
+    }
+  } else {
+    for (const item of valid) {
+      blocks.push({
+        id: item.session.id,
+        sessions: [item.session],
+        area: item.session.area,
+        areaKey: item.areaKey,
+        startMin: item.startMin,
+        endMin: item.endMin,
+      });
+    }
+  }
+
+  blocks.sort((a, b) => a.startMin - b.startMin || (b.endMin - b.startMin) - (a.endMin - a.startMin));
+
+  // 2. Agrupar blocos restantes em clusters de sobreposição
+  const clusters: RawBlock[][] = [];
+  let currentCluster: RawBlock[] = [];
   let clusterEnd = -1;
 
-  for (const item of valid) {
-    if (currentCluster.length === 0 || item.startMin < clusterEnd) {
-      currentCluster.push(item);
-      clusterEnd = Math.max(clusterEnd, item.endMin);
+  for (const block of blocks) {
+    if (currentCluster.length === 0 || block.startMin < clusterEnd) {
+      currentCluster.push(block);
+      clusterEnd = Math.max(clusterEnd, block.endMin);
     } else {
       clusters.push(currentCluster);
-      currentCluster = [item];
-      clusterEnd = item.endMin;
+      currentCluster = [block];
+      clusterEnd = block.endMin;
     }
   }
   if (currentCluster.length > 0) clusters.push(currentCluster);
 
-  const result: PositionedSession[] = [];
+  const result: PositionedBlock[] = [];
 
   for (const cluster of clusters) {
     const laneEnds: number[] = [];
-    const placed: { item: (typeof valid)[number]; lane: number }[] = [];
+    const placed: { block: RawBlock; lane: number }[] = [];
 
-    for (const item of cluster) {
-      let assignedLane = laneEnds.findIndex((end) => end <= item.startMin);
+    for (const block of cluster) {
+      let assignedLane = laneEnds.findIndex((end) => end <= block.startMin);
       if (assignedLane === -1) {
         assignedLane = laneEnds.length;
-        laneEnds.push(item.endMin);
+        laneEnds.push(block.endMin);
       } else {
-        laneEnds[assignedLane] = item.endMin;
+        laneEnds[assignedLane] = block.endMin;
       }
-      placed.push({ item, lane: assignedLane });
+      placed.push({ block, lane: assignedLane });
     }
 
     const totalLanes = Math.max(1, laneEnds.length);
     for (const p of placed) {
       result.push({
-        session: p.item.session,
-        startMin: p.item.startMin,
-        endMin: p.item.endMin,
+        id: p.block.id,
+        sessions: p.block.sessions,
+        area: p.block.area,
+        startMin: p.block.startMin,
+        endMin: p.block.endMin,
         lane: p.lane,
         totalLanes,
       });
@@ -137,6 +194,7 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
   const [areaFilterMode, setAreaFilterMode] = useState<'highlight' | 'filter'>('highlight');
   const [dayLabelMode, setDayLabelMode] = useState<'weekday' | 'day'>('weekday');
   const [autoFit, setAutoFit] = useState<boolean>(true);
+  const [groupByArea, setGroupByArea] = useState<boolean>(true);
   const [hideEmptyDays, setHideEmptyDays] = useState<boolean>(false);
   const [timeStepMinutes, setTimeStepMinutes] = useState<15 | 30 | 60>(15);
   const [pixelsPerHour, setPixelsPerHour] = useState<number>(112);
@@ -381,6 +439,20 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
             >
               <Maximize2 className="w-3.5 h-3.5" />
               <span>Auto-Ajuste</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setGroupByArea((v) => !v)}
+              className={`h-8 px-2.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-colors ${
+                groupByArea
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              }`}
+              title="Agrupa atividades da mesma área que acontecem no mesmo horário dentro de um único bloco"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Agrupar</span>
             </button>
 
             <button
@@ -675,7 +747,8 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                     const positionedRegular = layoutOverlappingSessions(
                       regularSessions,
                       startMinutes,
-                      endMinutes
+                      endMinutes,
+                      groupByArea
                     );
                     const defaultLoc = getDefaultLocationForDay(dia);
 
@@ -708,36 +781,44 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                           );
                         })}
 
-                        {/* Atividades Normais com Auto-Ajuste de Sobreposição (Lanes) */}
-                        {positionedRegular.map(({ session, startMin, endMin, lane, totalLanes }) => {
-                          const areaClean = (session.area || '').trim().toUpperCase();
+                        {/* Atividades Normais (Agrupadas por Área/Horário quando ativo + Lanes) */}
+                        {positionedRegular.map((block) => {
+                          const primarySession = block.sessions[0];
+                          const isGrouped = block.sessions.length > 1;
+                          const areaClean = (block.area || '').trim().toUpperCase();
                           const matchesArea =
                             selectedAreaFilter === 'all' || areaClean === selectedAreaFilter;
 
-                          const topPx = ((startMin - startMinutes) / 60) * effectivePixelsPerHour;
-                          const rawHeightPx = ((endMin - startMin) / 60) * effectivePixelsPerHour;
+                          const topPx = ((block.startMin - startMinutes) / 60) * effectivePixelsPerHour;
+                          const rawHeightPx = ((block.endMin - block.startMin) / 60) * effectivePixelsPerHour;
                           const heightPx = Math.max(22, rawHeightPx);
 
-                          const widthPct = 100 / totalLanes;
-                          const leftPct = lane * widthPct;
+                          const widthPct = 100 / block.totalLanes;
+                          const leftPct = block.lane * widthPct;
 
-                          const bgColor = getAreaColor(session.area, session.customColor);
-                          const textColor = getAreaTextColor(session.area);
+                          const bgColor = getAreaColor(block.area, primarySession.customColor);
+                          const textColor = getAreaTextColor(block.area);
                           const isDimmed =
                             areaFilterMode === 'highlight' &&
                             selectedAreaFilter !== 'all' &&
                             !matchesArea;
 
                           const showCustomLoc =
-                            session.local &&
-                            session.local !== 'N/A' &&
-                            session.local.trim().toUpperCase() !== defaultLoc.trim().toUpperCase();
+                            !isGrouped &&
+                            primarySession.local &&
+                            primarySession.local !== 'N/A' &&
+                            primarySession.local.trim().toUpperCase() !== defaultLoc.trim().toUpperCase();
 
-                          const isCompact = totalLanes > 1 || heightPx < 34;
+                          const isCompact = block.totalLanes > 1 || heightPx < 34;
+
+                          // Responsáveis únicos no grupo
+                          const uniqueResponsibles = Array.from(
+                            new Set(block.sessions.map((s) => (s.responsavel || '').trim()).filter(Boolean))
+                          );
 
                           return (
                             <div
-                              key={session.id}
+                              key={block.id}
                               className={`absolute z-10 grid grid-cols-10 group transition-opacity ${
                                 isDimmed ? 'opacity-20' : 'opacity-100'
                               }`}
@@ -749,59 +830,101 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                               }}
                             >
                               {/* Subcoluna Tema (colorida pela Área) */}
-                              <div
-                                onClick={() => onEditSession(session)}
-                                className="col-span-7 border border-slate-900 px-1 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden hover:brightness-95 transition-all"
-                                style={{ backgroundColor: bgColor, color: textColor }}
-                                title={`${session.tema}\nÁrea: ${session.area}\nHorário: ${session.startTime} às ${session.endTime}\nLocal: ${session.local}\nClique para editar`}
-                              >
-                                <span
-                                  className={`${
-                                    isCompact ? 'text-[9px] leading-[1.1]' : 'text-[10px] leading-tight'
-                                  } font-bold break-words`}
+                              {isGrouped ? (
+                                <div
+                                  className="col-span-7 border border-slate-900 flex flex-col justify-center overflow-hidden relative"
+                                  style={{ backgroundColor: bgColor, color: textColor }}
                                 >
-                                  {session.tema}
-                                </span>
-                                {showCustomLoc && heightPx >= 40 && totalLanes === 1 && (
-                                  <span className="text-[8px] opacity-85 font-medium truncate max-w-full mt-0.5">
-                                    ({session.local})
+                                  <div className="flex flex-col divide-y divide-black/15 w-full h-full justify-center">
+                                    {block.sessions.map((s) => (
+                                      <button
+                                        key={s.id}
+                                        type="button"
+                                        onClick={() => onEditSession(s)}
+                                        className="w-full px-1.5 py-0.5 text-center hover:bg-black/10 transition-colors flex-1 flex items-center justify-center"
+                                        title={`${s.tema}\nÁrea: ${s.area}\nHorário: ${s.startTime} às ${s.endTime}\nResponsável: ${s.responsavel || '—'}\nClique para editar`}
+                                      >
+                                        <span className="text-[9px] sm:text-[10px] font-bold leading-tight break-words">
+                                          {s.tema}
+                                        </span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  onClick={() => onEditSession(primarySession)}
+                                  className="col-span-7 border border-slate-900 px-1 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden hover:brightness-95 transition-all"
+                                  style={{ backgroundColor: bgColor, color: textColor }}
+                                  title={`${primarySession.tema}\nÁrea: ${primarySession.area}\nHorário: ${primarySession.startTime} às ${primarySession.endTime}\nLocal: ${primarySession.local}\nClique para editar`}
+                                >
+                                  <span
+                                    className={`${
+                                      isCompact ? 'text-[9px] leading-[1.1]' : 'text-[10px] leading-tight'
+                                    } font-bold break-words`}
+                                  >
+                                    {primarySession.tema}
                                   </span>
-                                )}
+                                  {showCustomLoc && heightPx >= 40 && block.totalLanes === 1 && (
+                                    <span className="text-[8px] opacity-85 font-medium truncate max-w-full mt-0.5">
+                                      ({primarySession.local})
+                                    </span>
+                                  )}
 
-                                {/* Botão rápido de troca de Área */}
-                                <button
-                                  type="button"
-                                  data-capture-ignore
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setQuickAreaSessionId(
-                                      quickAreaSessionId === session.id ? null : session.id
-                                    );
-                                  }}
-                                  className="no-print absolute top-0.5 right-0.5 p-0.5 rounded bg-black/25 hover:bg-black/45 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                                  title="Ajustar Área rapidamente"
-                                >
-                                  <Palette className="w-2.5 h-2.5" />
-                                </button>
-                              </div>
+                                  {/* Botão rápido de troca de Área */}
+                                  <button
+                                    type="button"
+                                    data-capture-ignore
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setQuickAreaSessionId(
+                                        quickAreaSessionId === primarySession.id ? null : primarySession.id
+                                      );
+                                    }}
+                                    className="no-print absolute top-0.5 right-0.5 p-0.5 rounded bg-black/25 hover:bg-black/45 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="Ajustar Área rapidamente"
+                                  >
+                                    <Palette className="w-2.5 h-2.5" />
+                                  </button>
+                                </div>
+                              )}
 
                               {/* Subcoluna Responsável */}
                               <div
-                                onClick={() => onEditSession(session)}
-                                className="col-span-3 border-y border-r border-slate-900 bg-white text-slate-900 px-0.5 py-0.5 flex items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors overflow-hidden"
-                                title={`Responsável: ${session.responsavel || 'A definir'} — Clique para editar`}
+                                onClick={() => onEditSession(primarySession)}
+                                className="col-span-3 border-y border-r border-slate-900 bg-white text-slate-900 px-0.5 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors overflow-hidden"
+                                title={`Responsável: ${uniqueResponsibles.join(', ') || 'A definir'} — Clique para editar`}
                               >
-                                <span
-                                  className={`${
-                                    isCompact ? 'text-[8px] leading-[1.1]' : 'text-[9px] leading-tight'
-                                  } font-semibold break-words`}
-                                >
-                                  {session.responsavel || '—'}
-                                </span>
+                                {isGrouped && uniqueResponsibles.length > 1 ? (
+                                  <div className="flex flex-col divide-y divide-slate-200 w-full h-full justify-center">
+                                    {block.sessions.map((s) => (
+                                      <div
+                                        key={`resp-${s.id}`}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onEditSession(s);
+                                        }}
+                                        className="flex-1 flex items-center justify-center px-0.5 hover:bg-slate-100"
+                                      >
+                                        <span className="text-[8px] sm:text-[9px] font-semibold leading-tight break-words">
+                                          {s.responsavel || '—'}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span
+                                    className={`${
+                                      isCompact ? 'text-[8px] leading-[1.1]' : 'text-[9px] leading-tight'
+                                    } font-semibold break-words`}
+                                  >
+                                    {uniqueResponsibles[0] || '—'}
+                                  </span>
+                                )}
                               </div>
 
                               {/* Popover rápido para trocar a Área */}
-                              {quickAreaSessionId === session.id && (
+                              {!isGrouped && quickAreaSessionId === primarySession.id && (
                                 <div
                                   data-capture-ignore
                                   onClick={(e) => e.stopPropagation()}
@@ -821,7 +944,7 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                                     <button
                                       key={a.id}
                                       type="button"
-                                      onClick={() => handleQuickAreaChange(session, a.name)}
+                                      onClick={() => handleQuickAreaChange(primarySession, a.name)}
                                       className="w-full text-left px-2 py-1 rounded-lg hover:bg-slate-100 flex items-center gap-2 text-[11px] font-bold text-slate-800"
                                     >
                                       <span
