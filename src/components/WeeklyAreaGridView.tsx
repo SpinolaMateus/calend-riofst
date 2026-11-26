@@ -195,6 +195,7 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
   const [dayLabelMode, setDayLabelMode] = useState<'weekday' | 'day'>('weekday');
   const [autoFit, setAutoFit] = useState<boolean>(true);
   const [groupByArea, setGroupByArea] = useState<boolean>(true);
+  const [showThemeInBlock, setShowThemeInBlock] = useState<boolean>(false);
   const [hideEmptyDays, setHideEmptyDays] = useState<boolean>(false);
   const [timeStepMinutes, setTimeStepMinutes] = useState<15 | 30 | 60>(15);
   const [pixelsPerHour, setPixelsPerHour] = useState<number>(112);
@@ -453,6 +454,19 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
             >
               <Layers className="w-3.5 h-3.5" />
               <span>Agrupar</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowThemeInBlock((v) => !v)}
+              className={`h-8 px-2.5 rounded-lg text-xs font-semibold border transition-colors ${
+                showThemeInBlock
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              }`}
+              title="Exibir apenas a Área ou Área + Tema dentro dos blocos"
+            >
+              {showThemeInBlock ? 'Área + Tema' : 'Só Área'}
             </button>
 
             <button
@@ -809,16 +823,18 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                             primarySession.local !== 'N/A' &&
                             primarySession.local.trim().toUpperCase() !== defaultLoc.trim().toUpperCase();
 
-                          const isCompact = block.totalLanes > 1 || heightPx < 36 || (isGrouped && block.sessions.length >= 3);
-                          const themeLength = isGrouped
-                            ? block.sessions.reduce((acc, s) => acc + (s.tema || '').length, 0)
-                            : (primarySession.tema || '').length;
-                          const isDenseText = themeLength > 45 || (isGrouped && heightPx / block.sessions.length < 24);
+                          const isCompact = block.totalLanes > 1 || heightPx < 36;
+                          const mainText = showThemeInBlock ? primarySession.tema : (block.area || primarySession.area);
+                          const isDenseText = mainText.length > 26 || (showThemeInBlock && isGrouped && block.sessions.length >= 2);
 
                           // Responsáveis únicos no grupo
                           const uniqueResponsibles = Array.from(
                             new Set(block.sessions.map((s) => (s.responsavel || '').trim()).filter(Boolean))
                           );
+
+                          const groupTooltip = block.sessions
+                            .map((s) => `• ${s.area} — ${s.tema} (${s.startTime} às ${s.endTime}) | Resp.: ${s.responsavel || '—'}`)
+                            .join('\n');
 
                           return (
                             <div
@@ -834,10 +850,10 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                                 width: `${widthPct}%`,
                               }}
                             >
-                              {/* Subcoluna Tema (colorida pela Área) */}
-                              {isGrouped ? (
+                              {/* Subcoluna Área (colorida pela Área) */}
+                              {isGrouped && showThemeInBlock ? (
                                 <div
-                                  className="col-span-7 min-w-0 border border-slate-900 flex flex-col justify-center relative"
+                                  className="col-span-7 min-w-0 border border-slate-900 flex flex-col justify-center relative overflow-hidden"
                                   style={{ backgroundColor: bgColor, color: textColor }}
                                 >
                                   <div className="flex flex-col divide-y divide-black/15 w-full h-full justify-center">
@@ -847,14 +863,13 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                                         type="button"
                                         onClick={() => onEditSession(s)}
                                         className="w-full min-w-0 px-1.5 py-0.5 text-center hover:bg-black/10 transition-colors flex-1 flex items-center justify-center"
-                                        title={`${s.tema}\nÁrea: ${s.area}\nHorário: ${s.startTime} às ${s.endTime}\nResponsável: ${s.responsavel || '—'}\nClique para editar`}
+                                        title={`${s.area} — ${s.tema}\nHorário: ${s.startTime} às ${s.endTime}\nResponsável: ${s.responsavel || '—'}\nClique para editar`}
                                       >
                                         <span
-                                          className={`w-full whitespace-normal break-words [overflow-wrap:anywhere] font-bold ${
-                                            isDenseText ? 'text-[8px] leading-[1.1]' : 'text-[9px] sm:text-[10px] leading-tight'
-                                          }`}
+                                          className="w-full whitespace-normal font-bold text-[8.5px] sm:text-[9.5px] leading-tight"
+                                          style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
                                         >
-                                          {s.tema}
+                                          {s.area}: {s.tema}
                                         </span>
                                       </button>
                                     ))}
@@ -863,21 +878,25 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                               ) : (
                                 <div
                                   onClick={() => onEditSession(primarySession)}
-                                  className="col-span-7 min-w-0 border border-slate-900 px-1 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer relative hover:brightness-95 transition-all"
+                                  className="col-span-7 min-w-0 border border-slate-900 px-1.5 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden hover:brightness-95 transition-all"
                                   style={{ backgroundColor: bgColor, color: textColor }}
-                                  title={`${primarySession.tema}\nÁrea: ${primarySession.area}\nHorário: ${primarySession.startTime} às ${primarySession.endTime}\nLocal: ${primarySession.local}\nClique para editar`}
+                                  title={`${groupTooltip}\nClique para editar`}
                                 >
                                   <span
-                                    className={`w-full whitespace-normal break-words [overflow-wrap:anywhere] font-bold ${
+                                    className={`w-full whitespace-normal font-bold uppercase tracking-tight ${
                                       isDenseText || isCompact
-                                        ? 'text-[8.5px] leading-[1.1]'
-                                        : 'text-[10px] leading-tight'
+                                        ? 'text-[9px] leading-[1.15]'
+                                        : 'text-[10px] sm:text-[11px] leading-tight'
                                     }`}
+                                    style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
                                   >
-                                    {primarySession.tema}
+                                    {showThemeInBlock ? primarySession.tema : (block.area || primarySession.area)}
                                   </span>
                                   {showCustomLoc && heightPx >= 40 && block.totalLanes === 1 && (
-                                    <span className="w-full text-[8px] opacity-85 font-medium whitespace-normal break-words leading-tight mt-0.5">
+                                    <span
+                                      className="w-full text-[8px] opacity-85 font-medium whitespace-normal leading-tight mt-0.5"
+                                      style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+                                    >
                                       ({primarySession.local})
                                     </span>
                                   )}
@@ -903,31 +922,31 @@ export const WeeklyAreaGridView: React.FC<WeeklyAreaGridViewProps> = ({
                               {/* Subcoluna Responsável */}
                               <div
                                 onClick={() => onEditSession(primarySession)}
-                                className="col-span-3 min-w-0 border-y border-r border-slate-900 bg-white text-slate-900 px-1 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors"
+                                className="col-span-3 min-w-0 border-y border-r border-slate-900 bg-white text-slate-900 px-1 py-0.5 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors overflow-hidden"
                                 title={`Responsável: ${uniqueResponsibles.join(', ') || 'A definir'} — Clique para editar`}
                               >
                                 {isGrouped && uniqueResponsibles.length > 1 ? (
                                   <div className="flex flex-col divide-y divide-slate-200 w-full h-full justify-center">
-                                    {block.sessions.map((s) => (
+                                    {uniqueResponsibles.map((resp, idx) => (
                                       <div
-                                        key={`resp-${s.id}`}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          onEditSession(s);
-                                        }}
-                                        className="flex-1 min-w-0 flex items-center justify-center px-0.5 py-0.5 hover:bg-slate-100"
+                                        key={`resp-${idx}`}
+                                        className="flex-1 min-w-0 flex items-center justify-center px-0.5 py-0.5"
                                       >
-                                        <span className="w-full whitespace-normal break-words [overflow-wrap:anywhere] text-[8px] sm:text-[9px] font-semibold leading-[1.1]">
-                                          {s.responsavel || '—'}
+                                        <span
+                                          className="w-full whitespace-normal text-[8px] sm:text-[9px] font-semibold leading-[1.15]"
+                                          style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+                                        >
+                                          {resp}
                                         </span>
                                       </div>
                                     ))}
                                   </div>
                                 ) : (
                                   <span
-                                    className={`w-full whitespace-normal break-words [overflow-wrap:anywhere] font-semibold ${
-                                      isCompact || isDenseText ? 'text-[8px] leading-[1.1]' : 'text-[9px] leading-tight'
+                                    className={`w-full whitespace-normal font-semibold ${
+                                      isCompact || isDenseText ? 'text-[8px] leading-[1.15]' : 'text-[9px] leading-tight'
                                     }`}
+                                    style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
                                   >
                                     {uniqueResponsibles[0] || '—'}
                                   </span>
