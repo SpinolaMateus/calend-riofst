@@ -122,13 +122,15 @@ export default function App() {
 
   // Load initial data from localStorage if available
   const [sessions, setSessions] = useState<IntegrationSession[]>(() => {
-    const enkFullTema = 'Treinamentos ENK/Leitura Pops\nAnticorrupção\nAssédio Sexual - Aspectos Culturais\nAssédio Moral - Geral\nSegurança Cibernética\nPolítica de sustentabilidade\nSegurança Psicológica\nDiálogo Diário de Segurança';
+    const enkPrevTema = 'Treinamentos ENK/Leitura Pops\nAnticorrupção\nAssédio Sexual - Aspectos Culturais\nAssédio Moral - Geral\nSegurança Cibernética\nPolítica de sustentabilidade\nSegurança Psicológica\nDiálogo Diário de Segurança';
+    const enkFullTema = `${enkPrevTema}\nNR 12\nNR 26`;
     try {
       const saved = localStorage.getItem(STORAGE_KEY_SESSIONS);
       const initial = saved ? JSON.parse(saved) as IntegrationSession[] : INITIAL_SESSIONS;
       return initial.map((session) => {
+        const trimmedTema = session.tema.trim();
         const normalizedTema =
-          session.id === 'd1-6' && session.tema.trim() === 'Treinamentos ENK/Leitura Pops'
+          session.id === 'd1-6' && (trimmedTema === 'Treinamentos ENK/Leitura Pops' || trimmedTema === enkPrevTema)
             ? enkFullTema
             : session.tema;
         return syncSessionTimeAndCH({ ...session, tema: normalizedTema, audience: session.audience || 'geral' });
