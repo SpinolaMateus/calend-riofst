@@ -711,18 +711,23 @@ export const TableScheduleView: React.FC<TableScheduleViewProps> = ({
                     {/* TEMA */}
                     <td 
                       onClick={() => handleStartInlineEdit(s, 'tema')}
-                      className="py-1.5 px-2 text-center text-slate-900 border-r border-black font-normal cursor-pointer hover:bg-amber-50 leading-tight text-xs"
+                      className="py-1.5 px-2 text-center text-slate-900 border-r border-black font-normal cursor-pointer hover:bg-amber-50 leading-snug text-xs whitespace-pre-line"
                       title="Clique para editar Tema"
                     >
                       {editingCell?.id === s.id && editingCell?.field === 'tema' ? (
-                        <input
-                          type="text"
+                        <textarea
                           autoFocus
+                          rows={Math.max(2, editValue.split('\n').length)}
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
                           onBlur={() => handleSaveInlineEdit(s)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleSaveInlineEdit(s)}
-                          className="w-full text-left px-1 py-0.5 border border-indigo-600 rounded text-xs font-semibold"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSaveInlineEdit(s);
+                            }
+                          }}
+                          className="w-full text-left px-1 py-0.5 border border-indigo-600 rounded text-xs font-semibold resize-y"
                         />
                       ) : (
                         s.tema

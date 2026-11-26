@@ -109,7 +109,7 @@ export const INITIAL_SESSIONS: IntegrationSession[] = [
     endTime: '17:00',
     horarioText: '13:40 às 17:00',
     ch: '3h20',
-    tema: 'Treinamentos ENK/Leitura Pops',
+    tema: 'Treinamentos ENK/Leitura Pops\nAnticorrupção\nAssédio Sexual - Aspectos Culturais\nAssédio Moral - Geral\nSegurança Cibernética\nPolítica de sustentabilidade\nSegurança Psicológica\nDiálogo Diário de Segurança',
     area: 'GENTE E GESTÃO/ÁREA',
     responsavel: 'Gente & Gestão',
     prn: 'N/A',
